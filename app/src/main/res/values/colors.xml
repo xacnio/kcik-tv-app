@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- KcikTV Brand Colors -->
+    <color name="kick_green">#53FC18</color>
+    <color name="kick_green_dark">#3BC710</color>
+    <color name="kick_green_light">#7BFF4D</color>
+    <color name="electric_cyan">#00F2FF</color>
+    <color name="midnight_indigo">#0A0E17</color>
+    
+    <!-- Premium Theme Colors -->
+    <color name="premium_emerald">#10B981</color>
+    <color name="premium_sapphire">#3B82F6</color>
+    <color name="premium_ruby">#EF4444</color>
+    <color name="premium_gold">#F59E0B</color>
+    <color name="premium_violet">#8B5CF6</color>
+    <color name="premium_teal">#14B8A6</color>
+    <color name="premium_rose">#F43F5E</color>
+    
+    <!-- Background Colors -->
+    <color name="background_dark">#0A0E17</color>
+    <color name="background_card">#141A26</color>
+    <color name="background_overlay">#E60A0E17</color>
+    <color name="surface_dark">#141A26</color>
+    
+    <!-- Text Colors -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B3B3B3</color>
+    <color name="text_tertiary">#666666</color>
+    
+    <!-- Status Colors -->
+    <color name="live_red">#FF0000</color>
+    <color name="online_green">#00FF00</color>
+    
+    <!-- Standard Colors -->
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+</resources>

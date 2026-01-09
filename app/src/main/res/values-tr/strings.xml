@@ -1,0 +1,173 @@
+<resources>
+    <string name="app_name">KcikTV</string>
+    <string name="loading">Yükleniyor...</string>
+    <string name="loading_channels">Kanallar yükleniyor...</string>
+    <string name="no_channels">Şu anda canlı yayın yok</string>
+    <string name="error_loading">Kanallar yüklenemedi</string>
+    <string name="retry">Tekrar Dene</string>
+    <string name="live">CANLI</string>
+    <string name="viewers">izleyici</string>
+    <string name="channel">Kanal</string>
+    <string name="channels">Kanallar</string>
+    <string name="press_ok_to_watch">İzlemek için OK tuşuna basın</string>
+    <string name="press_left_right">◀ / ▶ ile kanal değiştirin</string>
+    <string name="press_back">Geri dönmek için BACK tuşuna basın</string>
+    <string name="featured_channels">Öne Çıkan Kanallar</string>
+    <string name="all_channels">Tüm Kanallar</string>
+    <string name="category_gaming">Oyun</string>
+    <string name="category_irl">IRL</string>
+    <string name="category_music">Müzik</string>
+    <string name="category_creative">Yaratıcı</string>
+    
+    <!-- Player UI -->
+    <string name="resolution">ÇÖZÜNÜRLÜK</string>
+    <string name="refresh">YENİLE</string>
+    <string name="stats">İSTATİSTİK</string>
+    <string name="settings">AYARLAR</string>
+    <string name="press_back_to_close">GERİ ile kapat</string>
+    <string name="guest">Misafir</string>
+    <string name="not_logged_in">Giriş yapılmadı</string>
+    <string name="list_sorting">LİSTE SIRALAMA</string>
+    <string name="stream_language">Dil Seçenekleri</string>
+    <string name="language_selected_format">%1$s (%2$d seçili)</string>
+    <string name="viewers_high_to_low">İzleyici (Çoktan Aza)</string>
+    <string name="viewers_low_to_high">İzleyici (Azdan Çoğa)</string>
+    <string name="recommended_streams">Önerilenler</string>
+    <string name="my_list">KİŞİSEL</string>
+    <string name="my_channel">Kendi Kanalım</string>
+    <string name="search">Arama</string>
+    <string name="following">Takip Edilenler</string>
+    <string name="app_settings">Uygulama Ayarları</string>
+    <string name="login">Giriş Yap</string>
+    <string name="logout">Çıkış Yap</string>
+    <string name="logged_in">Giriş yapıldı</string>
+    <string name="logged_out">Çıkış yapıldı</string>
+    <string name="login_success">Hoş geldin, %s</string>
+    <string name="login_required_following">Takip edilenleri görmek için giriş yapmalısınız</string>
+    
+    <!-- Login -->
+    <string name="manual_login">Manuel Giriş</string>
+    <string name="username_or_email">Kullanıcı Adı veya E-posta</string>
+    <string name="email_hint">örn: kullanici@mail.com</string>
+    <string name="password">Şifre</string>
+    <string name="show_password">Şifreyi Göster</string>
+    <string name="otp_code">OTP Doğrulama Kodu</string>
+    <string name="otp_hint">6 haneli kod</string>
+    <string name="login_action">GİRİŞ YAP</string>
+    <string name="cancel">İptal</string>
+    <string name="qr_login_title">QR Kod ile Giriş</string>
+    <string name="qr_login_subtitle">Telefonunuzla taratarak hızlıca giriş yapın</string>
+    <string name="ip_not_found">IP adresi bulunamadı. Lütfen ağ bağlantınızı kontrol edin.</string>
+    <string name="server_error">Sunucu başlatılamadı: %s</string>
+    <string name="login_fields_required">E-posta ve şifre gereklidir</string>
+    <string name="two_fa_required">2FA kodu gerekli</string>
+    
+    <!-- Settings Items -->
+    <string name="setting_option">Ayar Seçeneği</string>
+    <string name="channel_name">Kanal Adı</string>
+    <string name="stream_title">Yayın Başlığı</string>
+    <string name="category">Kategori</string>
+
+    <!-- Stats -->
+    <string name="stat_resolution">Çözünürlük</string>
+    <string name="stat_fps">FPS</string>
+    <string name="stat_bitrate">Bit hızı</string>
+    <string name="stat_codec">Kodek</string>
+    <string name="stat_dropped_frames">Kare Kaybı</string>
+    <string name="stat_decoded_frames">Çözülen Kareler</string>
+    <string name="stat_rendered_frames">Çizilen Kareler</string>
+    <string name="stat_buffer_health">Tampon Sağlığı</string>
+    <string name="stat_latency">Gecikme</string>
+    <string name="stat_playback_rate">Oynatma Hızı</string>
+    <string name="stat_ready_state">Hazır Durumu</string>
+    <string name="stat_volume">Ses</string>
+    <string name="stat_muted">Sessiz</string>
+    <string name="yes">Evet</string>
+    <string name="no">Hayır</string>
+    <string name="setting_language">Dil Seçimi</string>
+    <string name="setting_info_delay">Bilgi Ekranı Süresi</string>
+    <string name="setting_transparency">Saydamlık Ayarı</string>
+    <string name="setting_filter">Kategori Filtrele</string>
+    <string name="setting_theme">Tema Rengi</string>
+    <string name="setting_zap_delay">Kanal Geçiş Hızı</string>
+    <string name="setting_animations">Animasyonlar</string>
+    <string name="setting_refresh_interval">Güncelleme Sıklığı</string>
+    <string name="setting_update_channel">Güncelleme Kanalı</string>
+    <string name="setting_about">Hakkında</string>
+    <string name="visit_github">GitHub\'ı Ziyaret Et</string>
+    <string name="sidebar_title_language">DİL SEÇİMİ</string>
+    <string name="sidebar_title_delay">BİLGİ SÜRESİ</string>
+    <string name="sidebar_title_transparency">SAYDAMLIK</string>
+    <string name="sidebar_title_filter">KATEGORİ FİLTRELE</string>
+    <string name="sidebar_title_theme">TEMA RENGİ</string>
+    <string name="sidebar_title_zap">ZAP HIZI</string>
+    <string name="sidebar_title_refresh">GÜNCELLEME SIKLIĞI</string>
+    <string name="sidebar_title_update_channel">GÜNCELLEME KANALI</string>
+    <string name="only_manual">Sadece Manuel</string>
+    <string name="x_minutes">%1$d Dakika</string>
+    <string name="x_seconds">%1$d Saniye</string>
+    <string name="instant_ms">Anında (0ms)</string>
+    <string name="fast_ms">Hızlı (300ms)</string>
+    <string name="normal_ms">Normal (700ms)</string>
+    <string name="slow_ms">Yavaş (1200ms)</string>
+    <string name="neon_green">Neon Yeşil</string>
+    <string name="premium_emerald">Zümrüt Yeşili</string>
+    <string name="premium_sapphire">Safir Mavisi</string>
+    <string name="premium_ruby">Yakup Kırmızısı</string>
+    <string name="premium_gold">Kehribar Altın</string>
+    <string name="premium_violet">Ametist Moru</string>
+    <string name="premium_teal">Derin Camgöbeği</string>
+    <string name="premium_rose">Gül Pembesi</string>
+    <string name="kciktv_cyan">Elektrik Mavisi</string>
+    <string name="sidebar_title_filter_hide">KATEGORİ GİZLEME</string>
+    <string name="stream_ended">Yayın sonlandı</string>
+    <string name="live_stream">Canlı Yayın</string>
+    <string name="load_more">DAHA FAZLA YÜKLE...</string>
+    <string name="auto">OTOMATİK</string>
+    <string name="connection_failed">Yayın bağlantısı kurulamadı</string>
+    <string name="stream_error_retrying">Yayın hatası, tekrar deneniyor %1$d/%2$d</string>
+    <string name="system_default">Sistem Varsayılanı</string>
+    <string name="search_channel_hint">Kanal adı girin (örn: xqc)</string>
+    <string name="search_no_result">Kanal bulunamadı</string>
+    <string name="channels_load_failed">Kanallar yüklenemedi</string>
+    <string name="sidebar_channels">KANALLAR</string>
+    <string name="stream_offline">Yayın Offline</string>
+    <string name="list_empty">Liste boş</string>
+    <string name="press_again_to_exit">Çıkmak için tekrar basın</string>
+    <string name="stable">Kararlı (Stable)</string>
+    <string name="beta">Beta</string>
+    <string name="update_available">Yeni güncelleme mevcut: %s</string>
+    <string name="update_now">Şimdi Güncelle</string>
+    <string name="up_to_date">Uygulama güncel</string>
+    <string name="checking_updates">Güncellemeler kontrol ediliyor...</string>
+    <string name="check_update">Güncellemeleri Denetle</string>
+    <string name="downloading">Güncelleme indiriliyor...</string>
+    <string name="download_failed">İndirme başarısız oldu</string>
+
+    <string-array name="stream_language_codes">
+        <item>tr</item><item>en</item><item>af</item><item>de</item><item>ar</item><item>sq</item><item>az</item><item>be</item>
+        <item>bn</item><item>bs</item><item>bg</item><item>cs</item><item>zh</item><item>da</item><item>id</item><item>eo</item>
+        <item>et</item><item>fo</item><item>fa</item><item>nl</item><item>fil</item><item>fi</item><item>fr</item><item>ka</item>
+        <item>haw</item><item>hr</item><item>hi</item><item>he</item><item>ia</item><item>es</item><item>sv</item><item>it</item>
+        <item>ja</item><item>ca</item><item>ko</item><item>la</item><item>pl</item><item>lv</item><item>lt</item><item>hu</item>
+        <item>mk</item><item>ml</item><item>ms</item><item>mn</item><item>no</item><item>nb</item><item>pt</item><item>ro</item>
+        <item>mo</item><item>ru</item><item>sr</item><item>sk</item><item>sl</item><item>so</item><item>su</item><item>tt</item>
+        <item>th</item><item>uk</item><item>ur</item><item>vi</item><item>el</item><item>zu</item>
+    </string-array>
+
+    <string-array name="stream_language_names">
+        <item>Türkçe</item><item>İngilizce</item><item>Afrikaanca</item><item>Almanca</item><item>Arapça</item><item>Arnavutça</item>
+        <item>Azerbaycan dili</item><item>Belarusça</item><item>Bengalce</item><item>Boşnakça</item><item>Bulgarca</item><item>Çekçe</item>
+        <item>Çince</item><item>Danca</item><item>Endonezce</item><item>Esperanto</item><item>Estonca</item><item>Faroe dili</item>
+        <item>Farsça</item><item>Felemenkçe</item><item>Filipince</item><item>Fince</item><item>Fransızca</item><item>Gürcüce</item>
+        <item>Hawaii dili</item><item>Hırvatça</item><item>Hintçe</item><item>İbranice</item><item>İnterlingua</item><item>İspanyolca</item>
+        <item>İsveççe</item><item>İtalyanca</item><item>Japonca</item><item>Katalanca</item><item>Korece</item><item>Latince</item>
+        <item>Lehçe</item><item>Letonca</item><item>Litvanca</item><item>Macarca</item><item>Makedonca</item><item>Malayalam dili</item>
+        <item>Malayca</item><item>Moğolca</item><item>Norveççe</item><item>Norveççe bokmål</item><item>Portekizce</item><item>Rumence</item>
+        <item>Moldovca</item><item>Rusça</item><item>Sırpça</item><item>Slovakça</item><item>Slovence</item><item>Somalice</item>
+        <item>Sunda dili</item><item>Tatarca</item><item>Tayca</item><item>Ukraynaca</item><item>Urduca</item><item>Vietnamca</item>
+        <item>Yunanca</item><item>Zuluca</item>
+    </string-array>
+    <string name="app_version_label">Sürüm: %s</string>
+
+</resources>

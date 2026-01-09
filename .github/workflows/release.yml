@@ -1,0 +1,93 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+            gradle-version: 8.5
+
+      - name: Build with Gradle
+        run: gradle assembleRelease
+
+      - name: Fix Android Build Tools Path
+        run: |
+          # Find the actual path where build-tools are
+          SDK_PATH=$ANDROID_HOME
+          # Get the latest version folder name
+          LATEST_VERSION=$(ls $SDK_PATH/build-tools | sort -V | tail -n 1)
+          echo "Found latest build tools version: $LATEST_VERSION"
+          
+          # Create the path that the action expects
+          sudo mkdir -p /usr/local/lib/android/sdk/build-tools/29.0.3
+          
+          # Symlink all files from the latest version to the 29.0.3 folder
+          sudo ln -s $SDK_PATH/build-tools/$LATEST_VERSION/* /usr/local/lib/android/sdk/build-tools/29.0.3/
+
+      - name: Sign APK
+        id: sign_app
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Rename APK
+        run: mv ${{ steps.sign_app.outputs.signedReleaseFile }} app/build/outputs/apk/release/kciktv-release.apk
+
+      - name: Extract Version Name
+        id: version
+        run: |
+          VERSION=$(grep "versionName =" app/build.gradle.kts | head -n 1 | awk -F '"' '{print $2}')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+          if [[ $VERSION == *"beta"* ]]; then
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+          fi
+        
+      - name: Rename file to version
+        run: mv app/build/outputs/apk/release/kciktv-release.apk app/build/outputs/apk/release/kciktv-${{ env.VERSION }}.apk
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ env.VERSION }}
+          name: KcikTV v${{ env.VERSION }}
+          draft: false
+          prerelease: ${{ steps.version.outputs.is_prerelease }}
+          files: app/build/outputs/apk/release/kciktv-${{ env.VERSION }}.apk
+          generate_release_notes: true
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: KcikTV-v${{ env.VERSION }}
+          path: app/build/outputs/apk/release/kciktv-${{ env.VERSION }}.apk
