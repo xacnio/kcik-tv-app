@@ -12,6 +12,9 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import dev.xacnio.kciktv.R
 import dev.xacnio.kciktv.data.model.ChannelItem
+import com.bumptech.glide.request.RequestOptions
+import jp.wasabeef.glide.transformations.BlurTransformation
+import com.bumptech.glide.load.MultiTransformation
 
 /**
  * RecyclerView adapter for the channel list
@@ -57,6 +60,7 @@ class ChannelAdapter(
         private val viewerCount: TextView = itemView.findViewById(R.id.viewerCount)
         private val categoryName: TextView = itemView.findViewById(R.id.categoryName)
         private val liveBadge: View = itemView.findViewById(R.id.liveBadge)
+        private val matureBadge: View = itemView.findViewById(R.id.matureBadge)
         private val selectionIndicator: View = itemView.findViewById(R.id.selectionIndicator)
         
         fun bind(channel: ChannelItem, isSelected: Boolean) {
@@ -67,15 +71,24 @@ class ChannelAdapter(
             categoryName.text = channel.categoryName ?: itemView.context.getString(R.string.live_stream)
             
             liveBadge.visibility = if (channel.isLive) View.VISIBLE else View.GONE
+            matureBadge.visibility = if (channel.isMature) View.VISIBLE else View.GONE
             selectionIndicator.visibility = if (isSelected) View.VISIBLE else View.GONE
             
             // Load Thumbnail
             channel.thumbnailUrl?.let { url ->
-                Glide.with(itemView.context)
-                    .load(url)
-                    .transform(RoundedCorners(8))
-                    .placeholder(R.drawable.placeholder_thumbnail)
-                    .into(thumbnailImage)
+                if (channel.isMature) {
+                    Glide.with(itemView.context)
+                        .load(url)
+                        .transform(com.bumptech.glide.load.resource.bitmap.CenterCrop(), BlurTransformation(25, 4), RoundedCorners(8))
+                        .placeholder(R.drawable.placeholder_thumbnail)
+                        .into(thumbnailImage)
+                } else {
+                    Glide.with(itemView.context)
+                        .load(url)
+                        .transform(com.bumptech.glide.load.resource.bitmap.CenterCrop(), RoundedCorners(8))
+                        .placeholder(R.drawable.placeholder_thumbnail)
+                        .into(thumbnailImage)
+                }
             } ?: run {
                 thumbnailImage.setImageResource(R.drawable.placeholder_thumbnail)
             }

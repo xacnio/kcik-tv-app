@@ -20,10 +20,13 @@ data class ChannelItem(
     val profilePicUrl: String?,
     val playbackUrl: String?,
     val categoryName: String?,
+    val categorySlug: String?,
     val language: String?,
     val isLive: Boolean = true,
+    val isMature: Boolean = false,
     val offlineBannerUrl: String? = null,
-    val startTimeMillis: Long? = null
+    val startTimeMillis: Long? = null,
+    val tags: List<String>? = null
 ) : Parcelable {
     companion object {
         fun fromLiveStreamItem(item: LiveStreamItem): ChannelItem {
@@ -31,6 +34,7 @@ data class ChannelItem(
             val profilePicUrl = item.channel?.profilePic ?: item.channel?.user?.profilePic
             val title = item.title ?: item.sessionTitle ?: "Live Stream"
             val categoryName = item.category?.name ?: item.categories?.firstOrNull()?.name
+            val categorySlug = item.category?.slug ?: item.categories?.firstOrNull()?.slug
             val viewerCount = if (item.viewerCount > 0) item.viewerCount else (item.viewers ?: 0)
             
             // Try to parse startTime if available
@@ -52,10 +56,13 @@ data class ChannelItem(
                 profilePicUrl = profilePicUrl,
                 playbackUrl = null, // Will be fetched separately from API
                 categoryName = categoryName,
+                categorySlug = categorySlug,
                 language = item.language,
                 isLive = true,
+                isMature = item.isMature ?: false,
                 offlineBannerUrl = null,
-                startTimeMillis = startTime
+                startTimeMillis = startTime,
+                tags = item.tags
             )
         }
 
@@ -70,9 +77,12 @@ data class ChannelItem(
                 profilePicUrl = item.profilePicture,
                 playbackUrl = null,
                 categoryName = item.categoryName,
+                categorySlug = null, // Not available in followed API directly yet
                 language = "tr",
                 isLive = item.isLive,
-                offlineBannerUrl = item.bannerPicture
+                isMature = false, // Not available in followed-page API at the moment
+                offlineBannerUrl = item.bannerPicture,
+                tags = null
             )
         }
     }

@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.KeyEvent
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
@@ -32,7 +33,12 @@ import com.amazonaws.ivs.player.PlayerException
 import com.amazonaws.ivs.player.Quality
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import jp.wasabeef.glide.transformations.BlurTransformation
+import dev.xacnio.kciktv.util.CategoryUtils
+import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import dev.xacnio.kciktv.data.chat.KcikChatWebSocket
 import dev.xacnio.kciktv.data.model.ChannelItem
 import dev.xacnio.kciktv.data.model.ChatMessage
@@ -69,6 +75,31 @@ import java.nio.ByteBuffer
 import java.text.SimpleDateFormat
 import java.util.TimeZone
 import java.util.Locale
+import android.view.GestureDetector
+import android.view.MotionEvent
+import android.view.ScaleGestureDetector
+import kotlin.math.abs
+import android.app.PendingIntent
+import android.app.RemoteAction
+import android.app.PictureInPictureParams
+import android.util.Rational
+import android.content.res.Configuration
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.IntentFilter
+import android.graphics.drawable.Icon
+import android.app.Service
+import android.os.IBinder
+import android.os.PowerManager
+import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
+import android.support.v4.media.MediaMetadataCompat
+import androidx.media.session.MediaButtonReceiver
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import androidx.core.app.NotificationCompat
+import androidx.media.app.NotificationCompat as MediaNotificationCompat
+import android.app.Notification
 
 class PlayerActivity : FragmentActivity() {
     
@@ -79,6 +110,7 @@ class PlayerActivity : FragmentActivity() {
     private lateinit var binding: ActivityPlayerBinding
     private lateinit var prefs: AppPreferences
     private var ivsPlayer: Player? = null
+    private var mediaSession: MediaSessionCompat? = null
     
     private var streamCreatedAtMillis: Long? = null
     private var serverClockOffset: Long = 0L // Offset to sync local clock with server
@@ -105,14 +137,18 @@ class PlayerActivity : FragmentActivity() {
     private val hideRunnable = Runnable { hideAllOverlays() }
     private val statsHandler = Handler(Looper.getMainLooper())
     
-    private enum class MenuState { NONE, INFO, QUICK_MENU, SIDEBAR, DRAWER, LOGIN, QUALITY, SEARCH }
+    private enum class MenuState { NONE, INFO, QUICK_MENU, SIDEBAR, DRAWER, LOGIN, QUALITY, SEARCH, MATURE_WARNING }
     private var currentState = MenuState.NONE
+    private var isChannelMenu = false
     
     private enum class ListMode { GLOBAL, FOLLOWING, SEARCH }
     private var currentListMode = ListMode.GLOBAL
     
     private var sidebarContext: String = ""
     private var channelSidebarAdapter: ChannelSidebarAdapter? = null
+    private var isMatureAcceptedForSession = false
+    private var tagScrollAnimator: ValueAnimator? = null
+    private var currentProfileBitmap: Bitmap? = null
 
     private val refreshHandler = Handler(Looper.getMainLooper())
     
@@ -185,6 +221,223 @@ class PlayerActivity : FragmentActivity() {
     private var chatWebSocket: KcikChatWebSocket? = null
     private val chatHandler = Handler(Looper.getMainLooper())
     private val pendingChatMessages = mutableListOf<ChatMessage>()
+    
+    // Touch Gesture Support
+    private lateinit var gestureDetector: GestureDetector
+    private lateinit var scaleGestureDetector: ScaleGestureDetector
+    private var isFitToScreen = false // false = 16:9 (FIT), true = Fill screen (FILL)
+    
+    // Video Pan Support (for FILL mode)
+    private var videoPanX = 0f
+    private var videoPanY = 0f
+    private var isPanning = false
+    private var lastTouchX = 0f
+    private var lastTouchY = 0f
+    
+    // PIP & Background Support
+    private var isBackgroundAudioEnabled = false
+    private val PIP_CONTROL_ACTION = "dev.xacnio.kciktv.PIP_CONTROL"
+    private val EXTRA_CONTROL_TYPE = "type"
+    private val CONTROL_TYPE_PLAY_PAUSE = 1
+    private val CONTROL_TYPE_LIVE = 2
+    private val CONTROL_TYPE_AUDIO_ONLY = 3
+    
+    private val CHANNEL_ID = "kciktv_playback"
+    private val NOTIFICATION_ID = 42
+    
+    private val pipReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent == null || intent.action != PIP_CONTROL_ACTION) return
+            
+            when (intent.getIntExtra(EXTRA_CONTROL_TYPE, 0)) {
+                CONTROL_TYPE_PLAY_PAUSE -> {
+                    if (ivsPlayer?.state == com.amazonaws.ivs.player.Player.State.PLAYING) {
+                        ivsPlayer?.pause()
+                    } else {
+                        // For Live streams, duration is usually the live edge
+                        ivsPlayer?.seekTo(ivsPlayer?.duration ?: 0L)
+                        ivsPlayer?.play()
+                    }
+                    updatePictureInPictureParams()
+                    updateMediaSessionState()
+                }
+                CONTROL_TYPE_LIVE -> {
+                    ivsPlayer?.seekTo(ivsPlayer?.duration ?: 0L)
+                    ivsPlayer?.play()
+                    updateMediaSessionState()
+                }
+                CONTROL_TYPE_AUDIO_ONLY -> {
+                    isBackgroundAudioEnabled = true
+                    setPowerSavingPlayback(true)
+                    // Move to back to exit PIP and hide app
+                    moveTaskToBack(true)
+                    Toast.makeText(this@PlayerActivity, "Arka Plan Ses Modu Aktif", Toast.LENGTH_SHORT).show()
+                    updateMediaSessionState()
+                }
+            }
+        }
+    }
+
+    private val screenStateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == Intent.ACTION_SCREEN_OFF) {
+                // Screen turned off
+                if (ivsPlayer?.state == com.amazonaws.ivs.player.Player.State.PLAYING) {
+                    android.util.Log.d("PlayerActivity", "Screen turned off via BroadcastReceiver")
+                    isBackgroundAudioEnabled = true
+                    setPowerSavingPlayback(true)
+                    updateMediaSessionState() // Start service and notification
+                }
+            }
+        }
+    }
+
+    private fun setPowerSavingPlayback(enabled: Boolean) {
+        val player = ivsPlayer ?: return
+        if (enabled) {
+            // Find lowest quality for background audio saving
+            val lowestQuality = player.qualities.minByOrNull { it.height }
+            if (lowestQuality != null) {
+                player.setAutoQualityMode(false)
+                player.setQuality(lowestQuality)
+                Log.d("PlayerActivity", "Background mode: Lowering quality to ${lowestQuality.name} to save bandwidth")
+            }
+        } else {
+            // Restore auto quality in foreground
+            player.setAutoQualityMode(true)
+            Log.d("PlayerActivity", "Foreground mode: Restoring auto quality")
+        }
+    }
+
+    private fun setupMediaSession() {
+        mediaSession = MediaSessionCompat(this, "KcikTV").apply {
+            setCallback(object : MediaSessionCompat.Callback() {
+                override fun onPlay() {
+                    ivsPlayer?.play()
+                    updateMediaSessionState()
+                    updatePictureInPictureParams()
+                }
+                override fun onPause() {
+                    ivsPlayer?.pause()
+                    updateMediaSessionState()
+                    updatePictureInPictureParams()
+                }
+            })
+            isActive = true
+        }
+    }
+
+    private fun updateMediaSessionState() {
+        val isPlaying = ivsPlayer?.state == com.amazonaws.ivs.player.Player.State.PLAYING
+        val state = if (isPlaying) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED
+        
+        // Update Metadata (Channel & Title)
+        if (allChannels.isNotEmpty() && currentChannelIndex < allChannels.size) {
+            val channel = allChannels[currentChannelIndex]
+            val metadataBuilder = MediaMetadataCompat.Builder()
+                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, channel.username)
+                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, channel.title)
+            
+            currentProfileBitmap?.let {
+                metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, it)
+                metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, it)
+            }
+            
+            mediaSession?.setMetadata(metadataBuilder.build())
+        }
+
+        val stateBuilder = PlaybackStateCompat.Builder()
+            .setActions(
+                PlaybackStateCompat.ACTION_PLAY or
+                PlaybackStateCompat.ACTION_PAUSE or
+                PlaybackStateCompat.ACTION_STOP or
+                PlaybackStateCompat.ACTION_PLAY_PAUSE or
+                PlaybackStateCompat.ACTION_SEEK_TO
+            )
+            .setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1.0f)
+        
+        mediaSession?.setPlaybackState(stateBuilder.build())
+        
+        // Push notification if in Background or PIP
+        if (isBackgroundAudioEnabled || isInPictureInPictureMode) {
+            showNotification()
+        } else {
+            // Dismiss notification when in foreground
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.cancel(NOTIFICATION_ID)
+            // Also stop the service
+            stopService(Intent(this, PlaybackService::class.java))
+        }
+    }
+
+    private fun showNotification() {
+        val isPlaying = ivsPlayer?.state == com.amazonaws.ivs.player.Player.State.PLAYING
+        val channel = if (allChannels.isNotEmpty() && currentChannelIndex < allChannels.size) allChannels[currentChannelIndex] else null
+        
+        val notificationIntent = Intent(this, PlayerActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
+
+        val playPauseAction = if (isPlaying) {
+            NotificationCompat.Action(android.R.drawable.ic_media_pause, "Duraklat", 
+                PendingIntent.getBroadcast(this, CONTROL_TYPE_PLAY_PAUSE, 
+                Intent(PIP_CONTROL_ACTION).apply { setPackage(packageName); putExtra(EXTRA_CONTROL_TYPE, CONTROL_TYPE_PLAY_PAUSE) }, 
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))
+        } else {
+            NotificationCompat.Action(android.R.drawable.ic_media_play, "Oynat", 
+                PendingIntent.getBroadcast(this, CONTROL_TYPE_PLAY_PAUSE, 
+                Intent(PIP_CONTROL_ACTION).apply { setPackage(packageName); putExtra(EXTRA_CONTROL_TYPE, CONTROL_TYPE_PLAY_PAUSE) }, 
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))
+        }
+
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentTitle(channel?.username ?: "KcikTV")
+            .setContentText(channel?.title ?: "Canlı Yayın")
+            .setContentIntent(pendingIntent)
+            .setOngoing(isPlaying)
+            .setPriority(NotificationCompat.PRIORITY_LOW) // Required for background media
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setLargeIcon(currentProfileBitmap)
+            .addAction(playPauseAction)
+            .setStyle(MediaNotificationCompat.MediaStyle()
+                .setMediaSession(mediaSession?.sessionToken)
+                .setShowActionsInCompactView(0))
+            .build()
+
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(NOTIFICATION_ID, notification)
+        
+        // Start Foreground Service to prevent background kill
+        if (isBackgroundAudioEnabled && isPlaying) {
+            val serviceIntent = Intent(this, PlaybackService::class.java).apply {
+                putExtra("notification", notification)
+                putExtra("notificationId", NOTIFICATION_ID)
+            }
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                startForegroundService(serviceIntent)
+            } else {
+                startService(serviceIntent)
+            }
+        }
+    }
+
+    private fun createNotificationChannel() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            val name = "KcikTV Playback"
+            val descriptionText = "Media controls for background playback"
+            val importance = NotificationManager.IMPORTANCE_LOW
+            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+                description = descriptionText
+                setShowBadge(false)
+            }
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         prefs = AppPreferences(this)
         applyLocale()
@@ -192,9 +445,12 @@ class PlayerActivity : FragmentActivity() {
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
         
+        // Enable immersive fullscreen mode
+        enableImmersiveMode()
+        
         // Restore last list mode
         try {
-            currentListMode = ListMode.valueOf(prefs.lastListMode)
+            currentListMode = ListMode.valueOf(prefs.lastListMode ?: "GLOBAL")
             // If Following but not logged in, fallback to Global
             if (currentListMode == ListMode.FOLLOWING && !prefs.isLoggedIn) {
                 currentListMode = ListMode.GLOBAL
@@ -203,8 +459,22 @@ class PlayerActivity : FragmentActivity() {
             currentListMode = ListMode.GLOBAL
         }
 
+        // Register PIP receiver early
+        val filter = IntentFilter(PIP_CONTROL_ACTION)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(pipReceiver, filter, Context.RECEIVER_EXPORTED) // Exported for system broadcast
+        } else {
+            registerReceiver(pipReceiver, filter)
+        }
+        
+        // Register Screen State Receiver
+        registerReceiver(screenStateReceiver, IntentFilter(Intent.ACTION_SCREEN_OFF))
+
+        createNotificationChannel()
+        setupMediaSession()
         audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
         
+        setupGestureDetectors()
         setupQuickMenu()
         setupRecyclerView()
         setupChat()
@@ -212,10 +482,172 @@ class PlayerActivity : FragmentActivity() {
         applySettings() // Call after setup
         setupDrawer()
         setupSearch()
+        setupMatureWarning()
         updateLanguageFilterButtonText()
+        
+        // Setup startup loading screen version info
+        try {
+            val versionName = packageManager.getPackageInfo(packageName, 0).versionName
+            binding.startupVersionText.text = getString(R.string.app_version_label, versionName)
+        } catch (e: Exception) {
+            binding.startupVersionText.text = getString(R.string.app_name)
+        }
+        
         loadInitialChannels()
         
         checkForUpdates()
+    }
+
+    private fun enableImmersiveMode() {
+        @Suppress("DEPRECATION")
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            window.setDecorFitsSystemWindows(false)
+            window.insetsController?.let {
+                it.hide(android.view.WindowInsets.Type.statusBars() or android.view.WindowInsets.Type.navigationBars())
+                it.systemBarsBehavior = android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            }
+        } else {
+            window.decorView.systemUiVisibility = (
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_FULLSCREEN
+            )
+        }
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus && !isInPictureInPictureMode) {
+            enableImmersiveMode()
+        }
+    }
+
+    // ==================== Picture-in-Picture (PIP) Support ====================
+    
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        // Enter PIP when user presses home button (only on Android 8.0+)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            val isPlaying = ivsPlayer?.state == Player.State.PLAYING
+            if (isPlaying) {
+                enterPipMode()
+            }
+        }
+    }
+
+    private fun enterPipMode() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            try {
+                // Receiver is now registered in onCreate
+                val params = getPipParams()
+                enterPictureInPictureMode(params)
+            } catch (e: Exception) {
+                Log.e("PlayerActivity", "Failed to enter PIP mode: ${e.message}")
+            }
+        }
+    }
+
+    private fun getPipParams(): PictureInPictureParams {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            val aspectRatio = Rational(16, 9)
+            val actions = mutableListOf<RemoteAction>()
+            
+            // 1. Live Action (Left)
+            val liveIntent = Intent(PIP_CONTROL_ACTION).apply {
+                setPackage(packageName)
+                putExtra(EXTRA_CONTROL_TYPE, CONTROL_TYPE_LIVE)
+            }
+            val livePendingIntent = PendingIntent.getBroadcast(this, CONTROL_TYPE_LIVE, liveIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            
+            actions.add(RemoteAction(
+                Icon.createWithResource(this, R.drawable.ic_pip_live),
+                "Canlı",
+                "Canlı Yayına Git",
+                livePendingIntent
+            ))
+
+            // 2. Play/Pause Action (Middle)
+            val isPlaying = ivsPlayer?.state == com.amazonaws.ivs.player.Player.State.PLAYING
+            val iconRes = if (isPlaying) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play
+            val title = if (isPlaying) "Duraklat" else "Oynat"
+            
+            val intent = Intent(PIP_CONTROL_ACTION).apply {
+                setPackage(packageName)
+                putExtra(EXTRA_CONTROL_TYPE, CONTROL_TYPE_PLAY_PAUSE)
+            }
+            val pendingIntent = PendingIntent.getBroadcast(this, CONTROL_TYPE_PLAY_PAUSE, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            
+            actions.add(RemoteAction(
+                Icon.createWithResource(this, iconRes),
+                title,
+                title,
+                pendingIntent
+            ))
+            
+            // 3. Audio Only Action (Right)
+            val audioIntent = Intent(PIP_CONTROL_ACTION).apply {
+                setPackage(packageName)
+                putExtra(EXTRA_CONTROL_TYPE, CONTROL_TYPE_AUDIO_ONLY)
+            }
+            val audioPendingIntent = PendingIntent.getBroadcast(this, CONTROL_TYPE_AUDIO_ONLY, audioIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            
+            actions.add(RemoteAction(
+                Icon.createWithResource(this, R.drawable.ic_pip_headset),
+                "Ses",
+                "Arka Plan Ses Modu",
+                audioPendingIntent
+            ))
+
+            return PictureInPictureParams.Builder()
+                .setAspectRatio(aspectRatio)
+                .setActions(actions)
+                .build()
+        }
+        return PictureInPictureParams.Builder().build()
+    }
+
+    private fun updatePictureInPictureParams() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O && isInPictureInPictureMode) {
+            setPictureInPictureParams(getPipParams())
+        }
+    }
+
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        
+        if (isInPictureInPictureMode) {
+            // Hide UI elements in PIP mode without affecting player state
+            binding.channelInfoOverlay.visibility = View.GONE
+            binding.quickMenuOverlay.visibility = View.GONE
+            binding.sidebarMenu.visibility = View.GONE
+            binding.menuScrim.visibility = View.GONE
+            binding.drawerPanel.visibility = View.GONE
+            binding.loginPanel.visibility = View.GONE
+            binding.qualityPopup.visibility = View.GONE
+            binding.chatPanel.visibility = View.GONE
+            binding.statsOverlay.visibility = View.GONE
+            binding.searchPanel.visibility = View.GONE
+            binding.startupLoadingOverlay.visibility = View.GONE
+            isChatVisible = false
+            isStatsVisible = false
+            currentState = MenuState.NONE
+            
+            // Ensure player keeps playing in PIP mode
+            if (ivsPlayer?.state != Player.State.PLAYING) {
+                ivsPlayer?.play()
+            }
+        } else {
+            // Restore immersive mode when exiting PIP
+            enableImmersiveMode()
+            
+            // Resume player if it was paused
+            if (ivsPlayer?.state == Player.State.READY) {
+                ivsPlayer?.play()
+            }
+        }
     }
 
     private fun setupSearch() {
@@ -227,9 +659,250 @@ class PlayerActivity : FragmentActivity() {
         }
     }
 
+    private fun setupGestureDetectors() {
+        // Swipe gesture detector
+        gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
+            private val SWIPE_THRESHOLD = 100
+            private val SWIPE_VELOCITY_THRESHOLD = 100
+            private val EDGE_DEADZONE_DP = 24 // Reduced from 48 for better mobile responsiveness
+
+
+
+            private fun isInDeadzone(x: Float): Boolean {
+                val deadzonePx = EDGE_DEADZONE_DP * resources.displayMetrics.density
+                val screenWidth = resources.displayMetrics.widthPixels
+                return x < deadzonePx || x > screenWidth - deadzonePx
+            }
+
+            override fun onFling(
+                e1: MotionEvent?,
+                e2: MotionEvent,
+                velocityX: Float,
+                velocityY: Float
+            ): Boolean {
+                if (scaleGestureDetector.isInProgress || isPanning) return false
+                if (e1 == null) return false
+                
+                // If touch starts inside an active menu area, ignore it (let the menu itself handle it)
+                val insideMenu = isInsideMenu(e1.x)
+                val inDeadzone = isInDeadzone(e1.x)
+                
+                if (insideMenu || inDeadzone) {
+                    return false
+                }
+                
+                val diffX = e2.x - e1.x
+                val diffY = e2.y - e1.y
+                
+                // Determine if it's a horizontal or vertical swipe
+                if (kotlin.math.abs(diffX) > kotlin.math.abs(diffY)) {
+                    // Horizontal swipe
+                    if (kotlin.math.abs(diffX) > SWIPE_THRESHOLD && kotlin.math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                        if (diffX > 0) {
+                            // Swipe right -> Chat (in NONE) or BACK (if menu open)
+                            if (currentState == MenuState.NONE) {
+                                onKeyDown(KeyEvent.KEYCODE_DPAD_RIGHT, null)
+                            } else {
+                                onKeyDown(KeyEvent.KEYCODE_BACK, null)
+                            }
+                        } else {
+                            // Swipe left -> Progression logic and not settings
+                            if (currentState == MenuState.SIDEBAR && isChannelMenu) {
+                                showDrawer()
+                            } else if (currentState == MenuState.NONE || currentState == MenuState.INFO) {
+                                showChannelSidebar()
+                            } else {
+                                onKeyDown(KeyEvent.KEYCODE_DPAD_LEFT, null)
+                            }
+                        }
+                        return true
+                    }
+                } else {
+                    // Vertical swipe (Context-aware: Channel change if NONE, Navigation if Menu open)
+                    if (kotlin.math.abs(diffY) > SWIPE_THRESHOLD && kotlin.math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
+                        if (diffY > 0) {
+                            onKeyDown(KeyEvent.KEYCODE_DPAD_DOWN, null)
+                        } else {
+                            onKeyDown(KeyEvent.KEYCODE_DPAD_UP, null)
+                        }
+                        return true
+                    }
+                }
+                return false
+            }
+
+            override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+                if (scaleGestureDetector.isInProgress) return false
+                val insideMenu = isInsideMenu(e.x)
+                
+                if (insideMenu) return false
+                
+                // If a menu is open, a click in empty area acts as "Select/OK" for that menu's focused item
+                if (currentState == MenuState.SIDEBAR || currentState == MenuState.DRAWER || currentState == MenuState.QUICK_MENU || currentState == MenuState.QUALITY ||
+                    currentState == MenuState.LOGIN) {
+                    onKeyDown(KeyEvent.KEYCODE_DPAD_CENTER, null)
+                    return true
+                }
+                
+                // Otherwise (NONE or INFO), handle the Remote OK logic (Info -> Quick Menu)
+                if (binding.channelInfoOverlay.visibility == View.VISIBLE) {
+                    showQuickMenu()
+                } else {
+                    showInfoOverlay()
+                }
+                return true
+            }
+
+            override fun onDoubleTap(e: MotionEvent): Boolean {
+                if (scaleGestureDetector.isInProgress) return false
+                // Double tap -> Toggle video format
+                toggleVideoFormat()
+                return true
+            }
+        })
+
+        // Pinch zoom gesture detector for video format toggle
+        scaleGestureDetector = ScaleGestureDetector(this, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            private var scaleFactor = 1f
+
+            override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
+                scaleFactor = 1f
+                return true
+            }
+
+            override fun onScale(detector: ScaleGestureDetector): Boolean {
+                scaleFactor *= detector.scaleFactor
+                return true
+            }
+
+            override fun onScaleEnd(detector: ScaleGestureDetector) {
+                // If significant scale change occurred, toggle format
+                if (scaleFactor > 1.3f || scaleFactor < 0.7f) {
+                    toggleVideoFormat()
+                }
+            }
+        })
+    }
+
+    private fun toggleVideoFormat() {
+        isFitToScreen = !isFitToScreen
+        // Reset pan when changing format
+        resetVideoPan()
+        
+        if (isFitToScreen) {
+            // Fit to screen (default) - video fills screen, may crop edges
+            binding.playerView.resizeMode = com.amazonaws.ivs.player.ResizeMode.FILL
+            Toast.makeText(this, getString(R.string.format_fit), Toast.LENGTH_SHORT).show()
+        } else {
+            // 16:9 format (may have black bars, no cropping)
+            binding.playerView.resizeMode = com.amazonaws.ivs.player.ResizeMode.FIT
+            Toast.makeText(this, "16:9", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun resetVideoPan() {
+        videoPanX = 0f
+        videoPanY = 0f
+        binding.playerView.translationX = 0f
+        binding.playerView.translationY = 0f
+    }
+
+    private fun isInsideMenu(x: Float): Boolean {
+        val density = resources.displayMetrics.density
+        var maxRight = 0f
+        
+        // Check Drawer boundary
+        if (binding.drawerPanel.visibility == View.VISIBLE) {
+            maxRight = kotlin.math.max(maxRight, binding.drawerPanel.x + 200f * density)
+        }
+        
+        // Check Sidebar boundary
+        if (binding.sidebarMenu.visibility == View.VISIBLE) {
+            maxRight = kotlin.math.max(maxRight, binding.sidebarMenu.x + 350f * density)
+        }
+        
+        val result = x < maxRight
+        return result
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        // Feed both gesture detectors
+        scaleGestureDetector.onTouchEvent(ev)
+        val handledByGesture = gestureDetector.onTouchEvent(ev)
+        
+        val insideMenu = isInsideMenu(ev.x)
+        
+        // If it's a gesture in the empty area, consume it here to prevent 
+        // underlying views (like RecyclerView or Player) from reacting.
+        if (!insideMenu && handledByGesture && currentState == MenuState.NONE) {
+            handlePanning(ev)
+            return true 
+        }
+
+        handlePanning(ev)
+        
+        if (ev.actionMasked == MotionEvent.ACTION_UP || ev.actionMasked == MotionEvent.ACTION_CANCEL) {
+            isPanning = false
+        }
+        
+        return super.dispatchTouchEvent(ev)
+    }
+
+    private fun handlePanning(ev: MotionEvent) {
+        if (isFitToScreen && ev.pointerCount == 2) {
+            when (ev.actionMasked) {
+                MotionEvent.ACTION_POINTER_DOWN -> {
+                    isPanning = true
+                    lastTouchX = (ev.getX(0) + ev.getX(1)) / 2
+                    lastTouchY = (ev.getY(0) + ev.getY(1)) / 2
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    if (isPanning && ev.pointerCount >= 2) {
+                        val currentX = (ev.getX(0) + ev.getX(1)) / 2
+                        val currentY = (ev.getY(0) + ev.getY(1)) / 2
+                        
+                        val deltaX = currentX - lastTouchX
+                        val deltaY = currentY - lastTouchY
+                        
+                        val screenWidth = binding.playerContainer.width.toFloat()
+                        val screenHeight = binding.playerContainer.height.toFloat()
+                        
+                        val quality = ivsPlayer?.quality
+                        val videoAspect = (quality?.width?.toFloat() ?: 1920f) / (quality?.height?.toFloat() ?: 1080f)
+                        val screenAspect = screenWidth / screenHeight
+                        
+                        var maxPanX = 0f
+                        var maxPanY = 0f
+                        
+                        if (videoAspect > screenAspect) {
+                            val scaledVideoWidth = screenHeight * videoAspect
+                            maxPanX = (scaledVideoWidth - screenWidth) / 2
+                        } else {
+                            val scaledVideoHeight = screenWidth / videoAspect
+                            maxPanY = (scaledVideoHeight - screenHeight) / 2
+                        }
+                        
+                        videoPanX = (videoPanX + deltaX).coerceIn(-maxPanX, maxPanX)
+                        videoPanY = (videoPanY + deltaY).coerceIn(-maxPanY, maxPanY)
+                        
+                        binding.playerView.translationX = videoPanX
+                        binding.playerView.translationY = videoPanY
+                        
+                        lastTouchX = currentX
+                        lastTouchY = currentY
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        return super.onTouchEvent(event)
+    }
+
     private fun setupRecyclerView() {
         binding.sidebarRecyclerView.layoutManager = LinearLayoutManager(this)
-        channelSidebarAdapter = ChannelSidebarAdapter(mutableListOf(), 0, prefs.themeColor, { pos ->
+        channelSidebarAdapter = ChannelSidebarAdapter(mutableListOf(), 0, prefs.themeColor, prefs.language, { pos ->
             currentChannelIndex = pos
             playCurrentChannelInternal()
         }, { loadMoreChannels() })
@@ -266,7 +939,7 @@ class PlayerActivity : FragmentActivity() {
             showSettingsSidebar() 
         }
         
-        binding.drawerLoginBtn.setOnClickListener {
+        binding.drawerUserContainer.setOnClickListener {
             if (prefs.isLoggedIn) {
                 // Logout logic
                 prefs.clearAuth()
@@ -286,6 +959,10 @@ class PlayerActivity : FragmentActivity() {
         binding.loginCancelBtn.setOnClickListener { hideLoginPanel() }
         
         updateDrawerUserInfo()
+
+        // Mobile Touch Optimization: Panel click acts as OK, Scrim click acts as BACK
+        binding.drawerPanel.setOnClickListener { onKeyDown(KeyEvent.KEYCODE_DPAD_CENTER, null) }
+        //binding.menuScrim.setOnClickListener { onKeyDown(KeyEvent.KEYCODE_BACK, null) }
     }
 
     private fun switchListMode(mode: ListMode) {
@@ -336,11 +1013,8 @@ class PlayerActivity : FragmentActivity() {
 
         if (isLoggedIn) {
             binding.drawerUsername.text = prefs.username ?: getString(R.string.guest)
-            binding.drawerStatus.text = getString(R.string.logged_in)
-            binding.drawerStatus.setTextColor(themeColor)
-            binding.drawerLoginText.text = getString(R.string.logout)
-            binding.drawerLoginIcon.setImageResource(R.drawable.ic_logout)
-            binding.drawerLoginIcon.setColorFilter(Color.RED)
+            binding.btnDrawerLogin.text = getString(R.string.logout)
+            binding.btnDrawerLogin.setTextColor(Color.parseColor("#FF4444")) // Soft Red for Logout
             
             Glide.with(this)
                 .load(prefs.profilePic)
@@ -371,11 +1045,9 @@ class PlayerActivity : FragmentActivity() {
             binding.btnListFollowing.visibility = View.VISIBLE
         } else {
             binding.drawerUsername.text = getString(R.string.guest)
-            binding.drawerStatus.text = getString(R.string.not_logged_in)
-            binding.drawerStatus.setTextColor(Color.GRAY)
-            binding.drawerLoginText.text = getString(R.string.login)
-            binding.drawerLoginIcon.setImageResource(R.drawable.ic_login)
-            binding.drawerLoginIcon.setColorFilter(themeColor)
+            binding.btnDrawerLogin.text = getString(R.string.login)
+            binding.btnDrawerLogin.setTextColor(themeColor) // Theme color for Login
+            
             binding.drawerProfileImage.setImageResource(R.drawable.ic_user)
             binding.drawerProfileImage.strokeColor = android.content.res.ColorStateList.valueOf(themeColor)
             
@@ -398,7 +1070,7 @@ class PlayerActivity : FragmentActivity() {
         applyThemeToDynamicButton(binding.btnDrawerSearch, themeColor, currentListMode == ListMode.SEARCH)
         applyThemeToDynamicButton(binding.btnDrawerLanguageFilter, themeColor, sidebarContext == "LANGUAGE_FILTER")
         applyThemeToDynamicButton(binding.btnDrawerSettings, themeColor, false)
-        applyThemeToDynamicButton(binding.drawerLoginBtn, themeColor, false)
+        applyThemeToDynamicButton(binding.drawerUserContainer, themeColor, false)
     }
 
     private fun applyThemeToDynamicButton(view: View, color: Int, isActive: Boolean = false) {
@@ -486,19 +1158,28 @@ class PlayerActivity : FragmentActivity() {
             }
         }
         
-        binding.drawerPanel.post {
-            when (focusType) {
-                "settings" -> binding.btnDrawerSettings.requestFocus()
-                "login" -> binding.drawerLoginBtn.requestFocus()
+        binding.drawerPanel.postDelayed({
+            val target = when (focusType) {
+                "settings" -> binding.btnDrawerSettings
+                "login" -> binding.drawerUserContainer
                 else -> {
                     when (currentListMode) {
-                        ListMode.GLOBAL -> binding.btnSortViewersDesc.requestFocus()
-                        ListMode.FOLLOWING -> binding.btnListFollowing.requestFocus()
-                        ListMode.SEARCH -> binding.btnDrawerSearch.requestFocus()
+                        ListMode.GLOBAL -> binding.btnSortViewersDesc
+                        ListMode.FOLLOWING -> binding.btnListFollowing
+                        ListMode.SEARCH -> binding.btnDrawerSearch
                     }
                 }
             }
-        }
+            
+            // Force focus on target to enable UP/DOWN navigation within drawer
+            target.isFocusableInTouchMode = true
+            target.requestFocus()
+            
+            // Secondary check: if still not focused, try harder
+            if (!target.isFocused) {
+                 target.requestFocusFromTouch()
+            }
+        }, 100)
     }
 
     private fun hideDrawer(immediate: Boolean = false, animateSidebar: Boolean = true) {
@@ -532,6 +1213,7 @@ class PlayerActivity : FragmentActivity() {
         
         if (sidebarVisible) {
             currentState = MenuState.SIDEBAR
+            isChannelMenu = true
             binding.sidebarRecyclerView.requestFocus()
         } else {
             currentState = MenuState.NONE
@@ -880,6 +1562,14 @@ class PlayerActivity : FragmentActivity() {
     
     private fun initializeIVSPlayer() {
         binding.playerView.setControlsEnabled(false)
+        // Set initial video format to match isFitToScreen variable
+        binding.playerView.resizeMode = if (isFitToScreen) {
+            com.amazonaws.ivs.player.ResizeMode.FILL
+        } else {
+            com.amazonaws.ivs.player.ResizeMode.FIT
+        }
+        // Disable auto-pause when surface visibility changes (for PIP support)
+        binding.playerView.player?.setAutoQualityMode(true)
         ivsPlayer = binding.playerView.player
         
         ivsPlayer?.addListener(object : Player.Listener() {
@@ -908,6 +1598,9 @@ class PlayerActivity : FragmentActivity() {
                 } else {
                     stopStabilityWatchdog()
                 }
+                // Update PIP and Notification controls when state changes
+                updatePictureInPictureParams()
+                updateMediaSessionState()
             }
             override fun onError(exception: PlayerException) {
                 scheduleRetry()
@@ -977,6 +1670,22 @@ class PlayerActivity : FragmentActivity() {
             override fun onAnalyticsEvent(name: String, properties: String) {}
         })
     }
+
+    private fun hideStartupLoading() {
+        if (binding.startupLoadingOverlay.visibility == View.VISIBLE) {
+            if (prefs.animationsEnabled) {
+                binding.startupLoadingOverlay.animate()
+                    .alpha(0f)
+                    .setDuration(300)
+                    .withEndAction {
+                        binding.startupLoadingOverlay.visibility = View.GONE
+                    }
+                    .start()
+            } else {
+                binding.startupLoadingOverlay.visibility = View.GONE
+            }
+        }
+    }
     
     private fun loadInitialChannels() {
         nextCursor = null
@@ -985,7 +1694,9 @@ class PlayerActivity : FragmentActivity() {
             val result = if (currentListMode == ListMode.FOLLOWING && prefs.authToken != null) {
                 repository.getFollowingLiveStreams(prefs.authToken!!)
             } else if (prefs.globalSortMode == "featured") {
-                repository.getFeaturedStreams(languages)
+                // Featured API specifically requires a language to work correctly
+                val featuredLanguages = languages ?: listOf(prefs.language)
+                repository.getFeaturedStreams(featuredLanguages)
             } else {
                 repository.getFilteredLiveStreams(languages, nextCursor, prefs.globalSortMode)
             }
@@ -996,17 +1707,29 @@ class PlayerActivity : FragmentActivity() {
                 if (filtered.isNotEmpty()) {
                     allChannels.clear()
                     allChannels.addAll(filtered)
-                    currentChannelIndex = 0 // Always start from first channel on initial load
-                    channelSidebarAdapter?.replaceChannels(allChannels, 0)
+                    
+                    // On initial load, try to find the first non-mature channel if mature warning is not accepted
+                    currentChannelIndex = 0
+                    if (!isMatureAcceptedForSession) {
+                        val firstNonMature = allChannels.indexOfFirst { !it.isMature }
+                        if (firstNonMature != -1) {
+                            currentChannelIndex = firstNonMature
+                        }
+                    }
+                    
+                    channelSidebarAdapter?.replaceChannels(allChannels, currentChannelIndex)
                     playCurrentChannel(useZapDelay = false)
                     showInfoOverlay() // Show info for the first channel automatically
+                    hideStartupLoading()
                 } else if (nextCursor != null && currentListMode == ListMode.GLOBAL) {
                     loadInitialChannels()
                 } else if (filtered.isEmpty()) {
                     showError(getString(R.string.list_empty))
+                    hideStartupLoading()
                 }
             }.onFailure {
                 showError(getString(R.string.channels_load_failed))
+                hideStartupLoading()
             }
         }
     }
@@ -1068,6 +1791,12 @@ class PlayerActivity : FragmentActivity() {
         
         if (allChannels.isEmpty()) return
         val channel = allChannels[currentChannelIndex]
+
+        // Mature Content Check
+        if (channel.isMature && !isMatureAcceptedForSession) {
+            showMatureWarning(channel)
+            return
+        }
         
         ivsPlayer?.pause()
         // RESET VIDEO VIEW IMMEDIATELY (Prevent frozen frame)
@@ -1131,8 +1860,31 @@ class PlayerActivity : FragmentActivity() {
         binding.streamTitle.text = channel.title
         binding.channelNumber.text = String.format("%02d", currentChannelIndex + 1)
         binding.viewerCount.text = formatViewerCount(channel.viewerCount)
-        binding.categoryName.text = channel.categoryName ?: getString(R.string.live_stream)
-        Glide.with(this).load(channel.profilePicUrl).circleCrop().into(binding.profileImage)
+        
+        // Localized Category Name
+        val rawCategory = channel.categoryName ?: getString(R.string.live_stream)
+        binding.categoryName.text = CategoryUtils.getLocalizedCategoryName(this, rawCategory, channel.categorySlug, prefs.language)
+        
+        // Load Profile Image as Bitmap for Notifications & UI
+        currentProfileBitmap = null
+        Glide.with(this)
+            .asBitmap()
+            .load(channel.profilePicUrl)
+            .circleCrop()
+            .into(object : CustomTarget<Bitmap>() {
+                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                    currentProfileBitmap = resource
+                    binding.profileImage.setImageBitmap(resource)
+                    // Refresh notification if needed
+                    if (isInPictureInPictureMode || isBackgroundAudioEnabled) {
+                        updateMediaSessionState()
+                    }
+                }
+                override fun onLoadCleared(placeholder: Drawable?) {
+                    currentProfileBitmap = null
+                    binding.profileImage.setImageDrawable(placeholder)
+                }
+            })
         
         // Restore visibility after offline state
         binding.viewerCount.visibility = View.VISIBLE
@@ -1140,6 +1892,7 @@ class PlayerActivity : FragmentActivity() {
         binding.qualityBadge.visibility = View.VISIBLE
         binding.offlineBannerView.visibility = View.GONE
         binding.viewerIcon.visibility = View.VISIBLE
+        binding.tagContainer.visibility = View.VISIBLE
         
         // Initialize Quality/FPS badges from current player state
         ivsPlayer?.quality?.let { quality ->
@@ -1152,6 +1905,28 @@ class PlayerActivity : FragmentActivity() {
             binding.qualityBadge.text = "AUTO"
             binding.fpsBadge.visibility = View.GONE
         }
+
+        // Update tags
+        binding.tagContainer.removeAllViews()
+        val tagsToShow = mutableListOf<String>()
+        
+        // Add language as first tag
+        channel.language?.let { code ->
+            val langName = getStreamLanguages().find { it.first == code }?.second ?: code.uppercase()
+            tagsToShow.add(langName)
+        }
+        
+        // Add other tags
+        channel.tags?.let { tagsToShow.addAll(it) }
+        
+        tagsToShow.forEach { tag ->
+            val tagView = LayoutInflater.from(this).inflate(R.layout.item_tag, binding.tagContainer, false) as TextView
+            tagView.text = tag
+            binding.tagContainer.addView(tagView)
+        }
+
+        // Start tag scroll marquee if needed
+        startTagMarquee()
         
         // Enable Marquee
         binding.channelName.isSelected = true
@@ -1164,6 +1939,58 @@ class PlayerActivity : FragmentActivity() {
             updateUptimeDisplay()
         } ?: run {
             binding.streamTimeBadge.visibility = View.GONE
+        }
+    }
+
+    // ... formatViewerCount ...
+
+    // ... showInfoOverlay ...
+
+    // ... showQuickMenu ...
+
+    // ... showChannelSidebar ...
+
+    // ... playCurrentChannelInternal ...
+
+    // ... showSidebar ...
+    
+    // ... setupMatureWarning ...
+    
+    // ... showMatureWarning ...
+    
+    // ... hideAllOverlays ...
+    
+    // ... resetHideTimer ...
+
+    // ... toggleQualityMenu ...
+    
+    // ... showSettingsSidebar ... (lines 2342-2490)
+    
+    // Update showFilterSidebar
+    private fun showFilterSidebar() {
+        // List of categories (slugs or common names)
+        val categories = listOf(
+            "Just Chatting", "Knight Online", "Pools, Hot Tubs & Bikinis", "Counter-Strike 2", 
+            "League of Legends", "Grand Theft Auto V", "Slots & Casino", 
+            "Art", "Music", "Sports"
+        )
+        
+        val items = categories.map { cat -> 
+            // Display localized name, but save/check using the original English name/Slug
+            val displayName = CategoryUtils.getLocalizedCategoryName(this, cat, null, prefs.language)
+            SelectionItem(cat, displayName, prefs.isCategoryBlocked(cat), cat, showCheckbox = true) 
+        }
+        
+        // Pass animate = false if already in settings_sub context to prevent flicker
+        val shouldAnimate = sidebarContext != "settings_sub"
+        
+        showSidebar(getString(R.string.sidebar_title_filter_hide), items, "settings_sub", shouldAnimate, initialFocusId = lastSubSettingsFocusId ?: items.firstOrNull()?.id) { item ->
+            lastSubSettingsFocusId = item.id
+            // Toggle blocking
+            val isBlocked = prefs.isCategoryBlocked(item.id)
+            if (isBlocked) prefs.removeBlockedCategory(item.id) else prefs.addBlockedCategory(item.id)
+            
+            (binding.sidebarRecyclerView.adapter as? GenericSelectionAdapter)?.toggleItemSelection(item.id)
         }
     }
 
@@ -1225,15 +2052,6 @@ class PlayerActivity : FragmentActivity() {
         binding.quickMenuOverlay.visibility = View.VISIBLE
         // No bringToFront, rely on XML elevation (10dp)
         
-        if (prefs.animationsEnabled) {
-            binding.quickMenuOverlay.translationY = 50f
-            binding.quickMenuOverlay.alpha = 0f
-            binding.quickMenuOverlay.animate().translationY(0f).alpha(1f).setDuration(300).start()
-        } else {
-            binding.quickMenuOverlay.translationY = 0f
-            binding.quickMenuOverlay.alpha = 1f
-        }
-        
         currentState = MenuState.QUICK_MENU
         
         // Quality available only for live streams
@@ -1244,21 +2062,45 @@ class PlayerActivity : FragmentActivity() {
         binding.btnStatsQuick.visibility = if (isLive) View.VISIBLE else View.GONE
         binding.btnRefreshQuick.visibility = View.VISIBLE
         
-        if (isLive) {
-            binding.btnQualityQuick.requestFocus()
+        val targetButton = if (isLive) binding.btnQualityQuick else binding.btnRefreshQuick
+        
+        if (prefs.animationsEnabled) {
+            binding.quickMenuOverlay.translationY = 50f
+            binding.quickMenuOverlay.alpha = 0f
+            binding.quickMenuOverlay.animate()
+                .translationY(0f)
+                .alpha(1f)
+                .setDuration(300)
+                .withEndAction {
+                    targetButton.requestFocus()
+                }
+                .start()
         } else {
-            binding.btnRefreshQuick.requestFocus()
+            binding.quickMenuOverlay.translationY = 0f
+            binding.quickMenuOverlay.alpha = 1f
+            targetButton.requestFocus()
         }
+
+        // Mobile Touch Optimization: Overlay click acts as OK
+        binding.quickMenuOverlay.setOnClickListener { onKeyDown(KeyEvent.KEYCODE_DPAD_CENTER, null) }
     }
 
     private fun showChannelSidebar(requestFocus: Boolean = true) {
         hideHandler.removeCallbacks(hideRunnable)
+        
+        // Auto-hide chat when sidebar is opened (for mobile usability)
+        if (isChatVisible) {
+            hideChat()
+        }
         
         // Hide only non-menu overlays
         binding.quickMenuOverlay.visibility = View.GONE
         binding.channelInfoOverlay.visibility = View.GONE
         binding.qualityPopup.visibility = View.GONE
         binding.searchPanel.visibility = View.GONE
+        
+        // Mobile Touch Optimization: Sidebar click acts as OK
+        binding.sidebarMenu.setOnClickListener { onKeyDown(KeyEvent.KEYCODE_DPAD_CENTER, null) }
         
         sidebarContext = "channels"
         binding.sidebarTitle.text = getString(R.string.sidebar_channels)
@@ -1282,6 +2124,7 @@ class PlayerActivity : FragmentActivity() {
         binding.sidebarMenu.visibility = View.VISIBLE
         binding.menuScrim.visibility = View.VISIBLE
         currentState = MenuState.SIDEBAR
+        isChannelMenu = true
         
         if (prefs.animationsEnabled) {
             binding.sidebarMenu.animate().translationX(targetX).alpha(1f).setDuration(200).start()
@@ -1289,12 +2132,21 @@ class PlayerActivity : FragmentActivity() {
         }
 
         binding.sidebarRecyclerView.apply {
-            adapter = channelSidebarAdapter
-            post {
-                val lm = layoutManager as? LinearLayoutManager
-                lm?.scrollToPositionWithOffset(currentChannelIndex, 200)
-                if (requestFocus) {
-                    findViewHolderForAdapterPosition(currentChannelIndex)?.itemView?.requestFocus()
+            if (adapter != channelSidebarAdapter) adapter = channelSidebarAdapter
+            
+            val lm = layoutManager as? LinearLayoutManager
+            lm?.scrollToPositionWithOffset(currentChannelIndex, 200)
+            
+            if (requestFocus) {
+                post {
+                    val vh = findViewHolderForAdapterPosition(currentChannelIndex)
+                    if (vh != null) {
+                        vh.itemView.requestFocus()
+                    } else {
+                        postDelayed({
+                            findViewHolderForAdapterPosition(currentChannelIndex)?.itemView?.requestFocus()
+                        }, 50)
+                    }
                 }
             }
         }
@@ -1336,6 +2188,7 @@ class PlayerActivity : FragmentActivity() {
         binding.menuScrim.visibility = View.VISIBLE
         
         currentState = MenuState.SIDEBAR
+        isChannelMenu = false
         binding.sidebarRecyclerView.apply {
             val currentAdapter = this.adapter as? GenericSelectionAdapter
             val isRefresh = !animate && sidebarContext == context && currentAdapter != null
@@ -1345,6 +2198,9 @@ class PlayerActivity : FragmentActivity() {
                 this.adapter = GenericSelectionAdapter(items, prefs.themeColor, onFocused) { onSelected(it) }
             } else {
                 currentAdapter?.updateItems(items)
+                // Critical: Update listeners because we might be in a different sub-menu sharing the same context ID
+                currentAdapter?.setOnItemSelectListener { onSelected(it) }
+                currentAdapter?.setOnItemFocusListener(onFocused)
             }
             
             if (savedState != null) {
@@ -1355,16 +2211,16 @@ class PlayerActivity : FragmentActivity() {
                 val index = items.indexOfFirst { it.id == initialFocusId }
                 if (index != -1) {
                     val lm = this.layoutManager as LinearLayoutManager
-                    if (isRefresh) {
-                        // For refreshes, do it immediately to prevent focus jumping back to index 0
-                        lm.scrollToPositionWithOffset(index, 200)
-                        post { // View might need a frame to bind
-                            findViewHolderForAdapterPosition(index)?.itemView?.requestFocus()
-                        }
-                    } else {
-                        post {
-                            lm.scrollToPositionWithOffset(index, 200)
-                            findViewHolderForAdapterPosition(index)?.itemView?.requestFocus()
+                    lm.scrollToPositionWithOffset(index, 200)
+                    
+                    post {
+                        val holder = findViewHolderForAdapterPosition(index)
+                        if (holder != null) {
+                            holder.itemView.requestFocus()
+                        } else {
+                            postDelayed({
+                                findViewHolderForAdapterPosition(index)?.itemView?.requestFocus()
+                            }, 50)
                         }
                     }
                 } else {
@@ -1376,11 +2232,48 @@ class PlayerActivity : FragmentActivity() {
         }
     }
 
+    private fun setupMatureWarning() {
+        binding.btnMatureAccept.setOnClickListener {
+            val channel = allChannels.getOrNull(currentChannelIndex)
+            if (channel != null) {
+                isMatureAcceptedForSession = true
+                hideAllOverlays()
+                playCurrentChannel()
+            }
+        }
+        
+        binding.btnMatureExit.setOnClickListener {
+            hideAllOverlays()
+            // Optionally: go to previous channel or just stay on black screen
+            // Staying on black screen is safer.
+        }
+    }
+
+    private fun showMatureWarning(channel: ChannelItem) {
+        hideAllOverlays()
+        binding.matureWarningOverlay.visibility = View.VISIBLE
+        currentState = MenuState.MATURE_WARNING
+        
+        if (prefs.animationsEnabled) {
+            binding.matureWarningOverlay.alpha = 0f
+            binding.matureWarningOverlay.animate().alpha(1f).setDuration(400).start()
+        } else {
+            binding.matureWarningOverlay.alpha = 1f
+        }
+        
+        binding.btnMatureAccept.requestFocus()
+    }
+
     internal fun hideAllOverlays() {
         if (currentState == MenuState.NONE) {
             sidebarContext = ""
+            tagScrollAnimator?.cancel()
+            binding.tagScrollView.scrollTo(0, 0)
             return
         }
+        
+        tagScrollAnimator?.cancel()
+        binding.tagScrollView.scrollTo(0, 0)
         
         val animDuration = 250L
         if (prefs.animationsEnabled) {
@@ -1403,6 +2296,9 @@ class PlayerActivity : FragmentActivity() {
                 
             if (binding.qualityPopup.visibility == View.VISIBLE)
                 binding.qualityPopup.animate().alpha(0f).translationY(20f).setDuration(animDuration).withEndAction { binding.qualityPopup.visibility = View.GONE }.start()
+            
+            if (binding.matureWarningOverlay.visibility == View.VISIBLE)
+                binding.matureWarningOverlay.animate().alpha(0f).setDuration(animDuration).withEndAction { binding.matureWarningOverlay.visibility = View.GONE }.start()
         } else {
             binding.channelInfoOverlay.visibility = View.GONE
             binding.quickMenuOverlay.visibility = View.GONE
@@ -1411,12 +2307,14 @@ class PlayerActivity : FragmentActivity() {
             binding.drawerPanel.visibility = View.GONE
             binding.loginPanel.visibility = View.GONE
             binding.qualityPopup.visibility = View.GONE
+            binding.matureWarningOverlay.visibility = View.GONE
             binding.sidebarMenu.translationX = 0f
         }
         
         uptimeHandler.removeCallbacks(uptimeRunnable)
         currentState = MenuState.NONE
         sidebarContext = ""
+        binding.focusSink.requestFocus()
     }
     
     private fun resetHideTimer() {
@@ -1468,40 +2366,86 @@ class PlayerActivity : FragmentActivity() {
         binding.qualityRecyclerView.post {
             val lm = binding.qualityRecyclerView.layoutManager as? LinearLayoutManager
             lm?.scrollToPositionWithOffset(0, 0)
-            binding.qualityRecyclerView.findViewHolderForAdapterPosition(0)?.itemView?.requestFocus()
+            binding.qualityRecyclerView.post {
+                val vh = binding.qualityRecyclerView.findViewHolderForAdapterPosition(0)
+                if (vh != null) {
+                    vh.itemView.requestFocus()
+                } else {
+                    binding.qualityRecyclerView.postDelayed({
+                        binding.qualityRecyclerView.findViewHolderForAdapterPosition(0)?.itemView?.requestFocus()
+                    }, 50)
+                }
+            }
         }
     }
 
     private fun showSettingsSidebar() {
         val items = listOf(
-            SelectionItem("lang", getString(R.string.setting_language)),
-            SelectionItem("delay", getString(R.string.setting_info_delay)),
-            SelectionItem("trans", getString(R.string.setting_transparency)),
-            SelectionItem("filter", getString(R.string.setting_filter)),
-            SelectionItem("theme", getString(R.string.setting_theme)),
-            SelectionItem("zap", getString(R.string.setting_zap_delay)),
-            SelectionItem("anim", getString(R.string.setting_animations), prefs.animationsEnabled),
-            SelectionItem("refresh", getString(R.string.setting_refresh_interval)),
+            SelectionItem("cat_general", getString(R.string.settings_category_general)),
+            SelectionItem("cat_player", getString(R.string.settings_category_player)),
+            SelectionItem("cat_appearance", getString(R.string.settings_category_appearance)),
+            // Direct items for faster access
             SelectionItem("update_channel", getString(R.string.setting_update_channel)),
             SelectionItem("about", getString(R.string.setting_about))
         )
-        // Pass false to animate to keep same context without flicker
-        showSidebar(getString(R.string.settings), items, "settings", animate = sidebarContext != "settings", initialFocusId = lastSettingsFocusId) { item ->
+        
+        showSidebar(getString(R.string.settings), items, "settings", animate = true, initialFocusId = lastSettingsFocusId) { item ->
             lastSettingsFocusId = item.id
             when (item.id) {
+                "cat_general" -> showGeneralSettings()
+                "cat_player" -> showPlayerSettings()
+                "cat_appearance" -> showAppearanceSettings()
+                "update_channel" -> { lastSubSettingsFocusId = null; showUpdateChannelSidebar() }
+                "about" -> { lastSubSettingsFocusId = null; showAboutSidebar() }
+            }
+        }
+    }
+
+    private fun showGeneralSettings() {
+        val items = listOf(
+            SelectionItem("lang", getString(R.string.setting_language)),
+            SelectionItem("filter", getString(R.string.setting_filter)),
+            SelectionItem("refresh", getString(R.string.setting_refresh_interval))
+        )
+        
+        showSidebar(getString(R.string.settings_category_general), items, "settings_sub") { item ->
+            when (item.id) {
                 "lang" -> { lastSubSettingsFocusId = null; showLanguageSidebar() }
-                "delay" -> { lastSubSettingsFocusId = null; showDelaySidebar() }
-                "zap" -> { lastSubSettingsFocusId = null; showZapDelaySidebar() }
-                "trans" -> { lastSubSettingsFocusId = null; showTransparencySidebar() }
                 "filter" -> { lastSubSettingsFocusId = null; showFilterSidebar() }
+                "refresh" -> { lastSubSettingsFocusId = null; showRefreshSidebar() }
+            }
+        }
+    }
+
+    private fun showPlayerSettings() {
+        val items = listOf(
+            SelectionItem("zap", getString(R.string.setting_zap_delay))
+        )
+        
+        showSidebar(getString(R.string.settings_category_player), items, "settings_sub") { item ->
+            when (item.id) {
+                "zap" -> { lastSubSettingsFocusId = null; showZapDelaySidebar() }
+            }
+        }
+    }
+
+    private fun showAppearanceSettings() {
+        val items = listOf(
+            SelectionItem("theme", getString(R.string.setting_theme)),
+            SelectionItem("trans", getString(R.string.setting_transparency)),
+            SelectionItem("delay", getString(R.string.setting_info_delay)),
+            SelectionItem("anim", getString(R.string.setting_animations), prefs.animationsEnabled, showCheckbox = true)
+        )
+        
+        showSidebar(getString(R.string.settings_category_appearance), items, "settings_sub") { item ->
+            when (item.id) {
                 "theme" -> { lastSubSettingsFocusId = null; showThemeSidebar() }
+                "trans" -> { lastSubSettingsFocusId = null; showTransparencySidebar() }
+                "delay" -> { lastSubSettingsFocusId = null; showDelaySidebar() }
                 "anim" -> {
                     prefs.animationsEnabled = !prefs.animationsEnabled
                     (binding.sidebarRecyclerView.adapter as? GenericSelectionAdapter)?.toggleItemSelection(item.id)
                 }
-                "refresh" -> { lastSubSettingsFocusId = null; showRefreshSidebar() }
-                "update_channel" -> { lastSubSettingsFocusId = null; showUpdateChannelSidebar() }
-                "about" -> { lastSubSettingsFocusId = null; showAboutSidebar() }
             }
         }
     }
@@ -1543,7 +2487,7 @@ class PlayerActivity : FragmentActivity() {
         val items = options.map { (min, label) -> 
             SelectionItem(min.toString(), label, prefs.autoRefreshInterval == min, min) 
         }
-        showSidebar(getString(R.string.sidebar_title_refresh), items, "settings_sub", animate = sidebarContext != "settings_sub", initialFocusId = lastSubSettingsFocusId) { item ->
+        showSidebar(getString(R.string.sidebar_title_refresh), items, "settings_sub", animate = sidebarContext != "settings_sub", initialFocusId = lastSubSettingsFocusId ?: items.find { it.isSelected }?.id) { item ->
             lastSubSettingsFocusId = item.id
             prefs.autoRefreshInterval = item.payload as Int
             startRefreshTimer()
@@ -1571,7 +2515,7 @@ class PlayerActivity : FragmentActivity() {
             items, 
             "settings_theme", 
             animate = sidebarContext != "settings_theme", 
-            initialFocusId = keepFocusId ?: lastSubSettingsFocusId,
+            initialFocusId = keepFocusId ?: lastSubSettingsFocusId ?: items.find { it.isSelected }?.id,
             onFocused = { item ->
                 val newColor = item.payload as Int
                 prefs.themeColor = newColor
@@ -1587,29 +2531,14 @@ class PlayerActivity : FragmentActivity() {
         }
     }
 
-    private fun showFilterSidebar() {
-        val categories = listOf("Knight Online", "Just Chatting", "Pools, Hot Tubs & Beaches", "Counter-Strike 2", "League of Legends", "Grand Theft Auto V")
-        val items = categories.map { cat -> SelectionItem(cat, cat, prefs.isCategoryBlocked(cat), cat, showCheckbox = true) }
-        
-        // Pass animate = false if already in settings_sub context to prevent flicker
-        val shouldAnimate = sidebarContext != "settings_sub"
-        
-        showSidebar(getString(R.string.sidebar_title_filter_hide), items, "settings_sub", shouldAnimate, initialFocusId = lastSubSettingsFocusId) { item ->
-            lastSubSettingsFocusId = item.id
-            // Toggle blocking
-            val isBlocked = prefs.isCategoryBlocked(item.id)
-            if (isBlocked) prefs.removeBlockedCategory(item.id) else prefs.addBlockedCategory(item.id)
-            
-            (binding.sidebarRecyclerView.adapter as? GenericSelectionAdapter)?.toggleItemSelection(item.id)
-        }
-    }
+
     private fun showLanguageSidebar() {
         val items = listOf(
             SelectionItem("system", getString(R.string.system_default), prefs.languageRaw == "system"),
             SelectionItem("tr", "Türkçe", prefs.languageRaw == "tr"),
             SelectionItem("en", "English", prefs.languageRaw == "en")
         )
-        showSidebar(getString(R.string.sidebar_title_language), items, "settings_sub", animate = sidebarContext != "settings_sub", initialFocusId = lastSubSettingsFocusId) { item -> 
+        showSidebar(getString(R.string.sidebar_title_language), items, "settings_sub", animate = sidebarContext != "settings_sub", initialFocusId = lastSubSettingsFocusId ?: items.find { it.isSelected }?.id) { item -> 
             lastSubSettingsFocusId = item.id
             setLanguage(item.id)
         }
@@ -1617,7 +2546,7 @@ class PlayerActivity : FragmentActivity() {
     private fun showDelaySidebar() {
         val delays = listOf(3, 5, 10, 20, 0)
         val items = delays.map { SelectionItem(it.toString(), if (it == 0) getString(R.string.only_manual) else getString(R.string.x_seconds, it), prefs.infoDelay == it, it) }
-        showSidebar(getString(R.string.sidebar_title_delay), items, "settings_sub", animate = sidebarContext != "settings_sub", initialFocusId = lastSubSettingsFocusId) { item -> 
+        showSidebar(getString(R.string.sidebar_title_delay), items, "settings_sub", animate = sidebarContext != "settings_sub", initialFocusId = lastSubSettingsFocusId ?: items.find { it.isSelected }?.id) { item -> 
             lastSubSettingsFocusId = item.id
             prefs.infoDelay = item.payload as Int
             (binding.sidebarRecyclerView.adapter as? GenericSelectionAdapter)?.updateSingleSelection(item.id)
@@ -1626,7 +2555,7 @@ class PlayerActivity : FragmentActivity() {
     private fun showTransparencySidebar() {
         val levels = listOf(50, 60, 70, 80, 90, 100)
         val items = levels.map { SelectionItem(it.toString(), "%$it", prefs.infoTransparency == it, it) }
-        showSidebar(getString(R.string.sidebar_title_transparency), items, "settings_sub", animate = sidebarContext != "settings_sub", initialFocusId = lastSubSettingsFocusId) { item -> 
+        showSidebar(getString(R.string.sidebar_title_transparency), items, "settings_sub", animate = sidebarContext != "settings_sub", initialFocusId = lastSubSettingsFocusId ?: items.find { it.isSelected }?.id) { item -> 
             lastSubSettingsFocusId = item.id
             prefs.infoTransparency = item.payload as Int
             applySettings()
@@ -1641,7 +2570,7 @@ class PlayerActivity : FragmentActivity() {
             SelectionItem("700", getString(R.string.normal_ms), current == 700),
             SelectionItem("1200", getString(R.string.slow_ms), current == 1200)
         )
-        showSidebar(getString(R.string.sidebar_title_zap), items, "settings_sub", animate = sidebarContext != "settings_sub", initialFocusId = lastSubSettingsFocusId) { item ->
+        showSidebar(getString(R.string.sidebar_title_zap), items, "settings_sub", animate = sidebarContext != "settings_sub", initialFocusId = lastSubSettingsFocusId ?: items.find { it.isSelected }?.id) { item ->
             lastSubSettingsFocusId = item.id
             prefs.zapDelay = item.id.toInt()
             (binding.sidebarRecyclerView.adapter as? GenericSelectionAdapter)?.updateSingleSelection(item.id)
@@ -1653,7 +2582,7 @@ class PlayerActivity : FragmentActivity() {
             SelectionItem("stable", getString(R.string.stable), prefs.updateChannel == "stable"),
             SelectionItem("beta", getString(R.string.beta), prefs.updateChannel == "beta")
         )
-        showSidebar(getString(R.string.sidebar_title_update_channel), items, "settings_sub", animate = sidebarContext != "settings_sub", initialFocusId = lastSubSettingsFocusId) { item ->
+        showSidebar(getString(R.string.sidebar_title_update_channel), items, "settings_sub", animate = sidebarContext != "settings_sub", initialFocusId = lastSubSettingsFocusId ?: items.find { it.isSelected }?.id) { item ->
             lastSubSettingsFocusId = item.id
             prefs.updateChannel = item.id
             (binding.sidebarRecyclerView.adapter as? GenericSelectionAdapter)?.updateSingleSelection(item.id)
@@ -1764,7 +2693,7 @@ class PlayerActivity : FragmentActivity() {
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         // Isolate Drawer, Login, and Quality states from global interactions
-        if (currentState == MenuState.DRAWER || currentState == MenuState.LOGIN || currentState == MenuState.QUALITY || currentState == MenuState.SEARCH) {
+        if (currentState == MenuState.DRAWER || currentState == MenuState.LOGIN || currentState == MenuState.QUALITY || currentState == MenuState.SEARCH || currentState == MenuState.MATURE_WARNING) {
             when (keyCode) {
                 KeyEvent.KEYCODE_DPAD_LEFT -> {
                     if (currentState == MenuState.DRAWER || currentState == MenuState.QUALITY) return true // Trap/Ignore
@@ -1789,6 +2718,7 @@ class PlayerActivity : FragmentActivity() {
                         MenuState.LOGIN -> binding.loginPanel
                         MenuState.QUALITY -> binding.qualityPopup
                         MenuState.SEARCH -> binding.searchPanel
+                        MenuState.MATURE_WARNING -> binding.matureWarningOverlay
                         else -> binding.root
                     }
                     val focused = root.findFocus()
@@ -1807,15 +2737,16 @@ class PlayerActivity : FragmentActivity() {
                     return super.onKeyDown(keyCode, event)
                 }
                 KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER -> {
-                    return super.onKeyDown(keyCode, event)
+                    super.onKeyDown(keyCode, event)
                 }
-                KeyEvent.KEYCODE_BACK -> {
+                KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_ESCAPE -> {
                     if (binding.drawerLanguageContent.visibility == View.VISIBLE) {
                         hideLanguageFilter()
                     }
                     else if (currentState == MenuState.DRAWER) hideDrawer()
                     else if (currentState == MenuState.LOGIN) hideLoginPanel()
                     else if (currentState == MenuState.SEARCH) hideSearchPanel()
+                    else if (currentState == MenuState.MATURE_WARNING) hideAllOverlays()
                     else if (currentState == MenuState.QUALITY) {
                         // Close quality popup and return to quick menu state
                         if (prefs.animationsEnabled) {
@@ -1845,13 +2776,24 @@ class PlayerActivity : FragmentActivity() {
                 val repeatCount = event?.repeatCount ?: 0
                 
                 when (keyCode) {
+                    KeyEvent.KEYCODE_DPAD_LEFT -> {
+                        if (!isChannelMenu)
+                            return true
+                    }
                     KeyEvent.KEYCODE_DPAD_UP -> {
                         if (position == 0) {
                             // At the beginning: only wrap-around on first press
                             if (repeatCount == 0) {
                                 binding.sidebarRecyclerView.scrollToPosition(totalCount - 1)
                                 binding.sidebarRecyclerView.post { 
-                                    binding.sidebarRecyclerView.findViewHolderForAdapterPosition(totalCount - 1)?.itemView?.requestFocus() 
+                                    val vh = binding.sidebarRecyclerView.findViewHolderForAdapterPosition(totalCount - 1)
+                                    if (vh != null) {
+                                        vh.itemView.requestFocus()
+                                    } else {
+                                        binding.sidebarRecyclerView.postDelayed({
+                                            binding.sidebarRecyclerView.findViewHolderForAdapterPosition(totalCount - 1)?.itemView?.requestFocus()
+                                        }, 50)
+                                    }
                                 }
                             }
                             // Even if held down, consume event (prevent sticking)
@@ -1861,7 +2803,14 @@ class PlayerActivity : FragmentActivity() {
                             val newPos = position - 1
                             binding.sidebarRecyclerView.scrollToPosition(newPos)
                             binding.sidebarRecyclerView.post { 
-                                binding.sidebarRecyclerView.findViewHolderForAdapterPosition(newPos)?.itemView?.requestFocus() 
+                                val vh = binding.sidebarRecyclerView.findViewHolderForAdapterPosition(newPos)
+                                if (vh != null) {
+                                    vh.itemView.requestFocus()
+                                } else {
+                                    binding.sidebarRecyclerView.postDelayed({
+                                        binding.sidebarRecyclerView.findViewHolderForAdapterPosition(newPos)?.itemView?.requestFocus()
+                                    }, 50)
+                                }
                             }
                             return true
                         }
@@ -1872,7 +2821,14 @@ class PlayerActivity : FragmentActivity() {
                             if (repeatCount == 0) {
                                 binding.sidebarRecyclerView.scrollToPosition(0)
                                 binding.sidebarRecyclerView.post { 
-                                    binding.sidebarRecyclerView.findViewHolderForAdapterPosition(0)?.itemView?.requestFocus() 
+                                    val vh = binding.sidebarRecyclerView.findViewHolderForAdapterPosition(0)
+                                    if (vh != null) {
+                                        vh.itemView.requestFocus()
+                                    } else {
+                                        binding.sidebarRecyclerView.postDelayed({
+                                            binding.sidebarRecyclerView.findViewHolderForAdapterPosition(0)?.itemView?.requestFocus()
+                                        }, 50)
+                                    }
                                 }
                             }
                             // Even if held down, consume event (prevent sticking)
@@ -1882,17 +2838,25 @@ class PlayerActivity : FragmentActivity() {
                             val newPos = position + 1
                             binding.sidebarRecyclerView.scrollToPosition(newPos)
                             binding.sidebarRecyclerView.post { 
-                                binding.sidebarRecyclerView.findViewHolderForAdapterPosition(newPos)?.itemView?.requestFocus() 
+                                val vh = binding.sidebarRecyclerView.findViewHolderForAdapterPosition(newPos)
+                                if (vh != null) {
+                                    vh.itemView.requestFocus()
+                                } else {
+                                    binding.sidebarRecyclerView.postDelayed({
+                                        binding.sidebarRecyclerView.findViewHolderForAdapterPosition(newPos)?.itemView?.requestFocus()
+                                    }, 50)
+                                }
                             }
                             return true
                         }
                     }
-                    KeyEvent.KEYCODE_DPAD_LEFT -> {
-                        if (sidebarContext.startsWith("settings")) return true // Trap Left in settings to prevent closing
-                        showDrawer()
-                        return true
-                    }
                 }
+            }
+            if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
+                if (sidebarContext == "channels") {
+                    showDrawer()
+                }
+                return true
             }
         }
         when (keyCode) {
@@ -1905,6 +2869,10 @@ class PlayerActivity : FragmentActivity() {
                     nextChannel()
                     return true
                 }
+                // Trap up in Quick Menu to prevent focus escaping
+                if (currentState == MenuState.QUICK_MENU) {
+                    return true
+                }
             }
             KeyEvent.KEYCODE_DPAD_DOWN -> {
                 if (currentState == MenuState.INFO) {
@@ -1915,17 +2883,37 @@ class PlayerActivity : FragmentActivity() {
                     previousChannel()
                     return true
                 }
+                // Trap down in Quick Menu to prevent focus escaping
+                if (currentState == MenuState.QUICK_MENU) {
+                    return true
+                }
             }
             KeyEvent.KEYCODE_DPAD_RIGHT -> {
                 if (currentState == MenuState.NONE || currentState == MenuState.INFO) {
                     if (!isChatVisible) showChat() else hideChat()
                     return true
                 }
+                // In Quick Menu: allow right navigation between buttons, trap only at last button
+                if (currentState == MenuState.QUICK_MENU) {
+                    val focused = currentFocus
+                    if (focused == binding.btnStatsQuick) {
+                        return true // At last button, trap
+                    }
+                    // Otherwise let default focus handling move to next button
+                }
             }
             KeyEvent.KEYCODE_DPAD_LEFT -> {
                 if (currentState == MenuState.NONE || currentState == MenuState.INFO) {
                     showChannelSidebar()
                     return true
+                }
+                // In Quick Menu: allow left navigation between buttons, trap only at first button
+                if (currentState == MenuState.QUICK_MENU) {
+                    val focused = currentFocus
+                    if (focused == binding.btnQualityQuick) {
+                        return true // At first button, trap
+                    }
+                    // Otherwise let default focus handling move to previous button
                 }
             }
             KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER -> {
@@ -1935,6 +2923,13 @@ class PlayerActivity : FragmentActivity() {
                 } else if (currentState == MenuState.INFO) {
                     showQuickMenu() // OK while info is visible opens Quick Menu
                     return true
+                } else {
+                    // In menus, simulate click on focused item (useful for mobile touch)
+                    val focused = currentFocus
+                    if (focused != null && focused.isFocusable) {
+                        focused.performClick()
+                        return true
+                    }
                 }
             }
             // CH+ / CH- buttons
@@ -1960,28 +2955,13 @@ class PlayerActivity : FragmentActivity() {
                 handleChannelNumberInput(digit)
                 return true
             }
-            // Vol+ / Vol-
-            KeyEvent.KEYCODE_VOLUME_UP -> {
-                audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_RAISE, 0)
-                showVolumeOverlay()
-                return true
-            }
-            KeyEvent.KEYCODE_VOLUME_DOWN -> {
-                audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, 0)
-                showVolumeOverlay()
-                return true
-            }
-            KeyEvent.KEYCODE_VOLUME_MUTE -> {
-                audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_TOGGLE_MUTE, 0)
-                showVolumeOverlay()
-                return true
-            }
+
             // Info / Guide / Menu buttons (toggle)
             KeyEvent.KEYCODE_INFO, KeyEvent.KEYCODE_GUIDE, KeyEvent.KEYCODE_MENU, KeyEvent.KEYCODE_PROG_RED -> {
                 if (currentState == MenuState.INFO) hideAllOverlays() else showInfoOverlay()
                 return true
             }
-            KeyEvent.KEYCODE_BACK -> {
+            KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_ESCAPE -> {
                 if (isChatVisible) {
                     hideChat()
                     return true
@@ -2030,6 +3010,16 @@ class PlayerActivity : FragmentActivity() {
             }
         }
         return super.onKeyDown(keyCode, event)
+    }
+
+    override fun onGenericMotionEvent(event: android.view.MotionEvent): Boolean {
+        // Handle right click as BACK (ESC)
+        if (event.action == android.view.MotionEvent.ACTION_BUTTON_PRESS &&
+            event.buttonState == android.view.MotionEvent.BUTTON_SECONDARY) {
+            // Manually trigger onKeyDown for BACK state
+            return onKeyDown(KeyEvent.KEYCODE_BACK, null)
+        }
+        return super.onGenericMotionEvent(event)
     }
 
     private fun nextChannel() { 
@@ -2125,8 +3115,10 @@ class PlayerActivity : FragmentActivity() {
                         binding.categoryName.text = currentChannel.categoryName ?: getString(R.string.live_stream)
                         binding.channelNumber.text = String.format("%02d", currentChannelIndex + 1)
                     } else {
-                        // If the channel really doesn't exist and we are already near the beginning, go back to top
-                        currentChannelIndex = 0.coerceAtMost(allChannels.size - 1)
+                        // Find first safe channel (non-mature)
+                        val safeIndex = allChannels.indexOfFirst { !it.isMature }
+                        currentChannelIndex = if (safeIndex != -1) safeIndex else 0
+                        
                         if (allChannels.isNotEmpty()) {
                             playCurrentChannel()
                         }
@@ -2134,6 +3126,26 @@ class PlayerActivity : FragmentActivity() {
                     
                     // Update adapter
                     channelSidebarAdapter?.replaceChannels(allChannels, currentChannelIndex)
+
+                    // If sidebar is visible (e.g. user just switched list mode), shift focus to the new channel
+                    if (binding.sidebarMenu.visibility == View.VISIBLE && allChannels.isNotEmpty()) {
+                        binding.sidebarRecyclerView.post {
+                            val lm = binding.sidebarRecyclerView.layoutManager as? androidx.recyclerview.widget.LinearLayoutManager
+                            lm?.scrollToPositionWithOffset(currentChannelIndex, 200)
+                            
+                            binding.sidebarRecyclerView.post {
+                                val vh = binding.sidebarRecyclerView.findViewHolderForAdapterPosition(currentChannelIndex)
+                                if (vh != null) {
+                                    vh.itemView.requestFocus()
+                                } else {
+                                    // Retry if viewholder not ready
+                                    binding.sidebarRecyclerView.postDelayed({
+                                        binding.sidebarRecyclerView.findViewHolderForAdapterPosition(currentChannelIndex)?.itemView?.requestFocus()
+                                    }, 100)
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -2279,6 +3291,7 @@ class PlayerActivity : FragmentActivity() {
         binding.categoryName.visibility = View.GONE
         binding.qualityBadge.visibility = View.GONE
         binding.fpsBadge.visibility = View.GONE
+        binding.tagContainer.visibility = View.GONE
         
         binding.sidebarLoadingBar.visibility = View.GONE
         binding.loadingThumbnailView.visibility = View.GONE 
@@ -2620,17 +3633,18 @@ class PlayerActivity : FragmentActivity() {
         }
     }
     
-    override fun onPause() { 
-        super.onPause()
-        ivsPlayer?.pause()
-        refreshHandler.removeCallbacks(activeChannelRefreshRunnable)
-        refreshHandler.removeCallbacks(globalListRefreshRunnable)
-        retryHandler.removeCallbacksAndMessages(null) // Cancel retries
-        chatWebSocket?.disconnect()
-    }
-    
     override fun onResume() { 
         super.onResume()
+        if (isBackgroundAudioEnabled) {
+            Toast.makeText(this, getString(R.string.background_mode_disabled), Toast.LENGTH_SHORT).show()
+            updateMediaSessionState()
+        }
+        isBackgroundAudioEnabled = false // Reset when returning to foreground
+        setPowerSavingPlayback(false) // Restore quality
+        // Don't handle resume if in PIP mode (handled in onPictureInPictureModeChanged)
+        if (isInPictureInPictureMode) {
+            return
+        }
         ivsPlayer?.play()
         startRefreshTimer()
         // Reconnect chat if it was visible
@@ -2641,6 +3655,12 @@ class PlayerActivity : FragmentActivity() {
     }
     override fun onDestroy() { 
         super.onDestroy()
+        try {
+            unregisterReceiver(pipReceiver)
+            unregisterReceiver(screenStateReceiver)
+        } catch (e: Exception) {}
+        mediaSession?.release()
+        mediaSession = null
         hideHandler.removeCallbacks(hideRunnable)
         channelInputHandler.removeCallbacks(channelInputRunnable)
         volumeHandler.removeCallbacks(hideVolumeRunnable)
@@ -2798,6 +3818,7 @@ class PlayerActivity : FragmentActivity() {
                     profilePicUrl = detail.user?.profilePic,
                     playbackUrl = detail.playbackUrl,
                     categoryName = detail.livestream?.categories?.firstOrNull()?.name,
+                    categorySlug = detail.livestream?.categories?.firstOrNull()?.slug,
                     language = "tr",
                     isLive = detail.livestream != null,
                     startTimeMillis = detail.livestream?.createdAt?.let { parseIsoDate(it) }
@@ -2830,4 +3851,84 @@ class PlayerActivity : FragmentActivity() {
             Toast.makeText(this, getString(R.string.not_logged_in), Toast.LENGTH_SHORT).show()
         }
     }
+
+    private fun startTagMarquee() {
+        tagScrollAnimator?.cancel()
+        binding.tagScrollView.scrollTo(0, 0)
+        
+        binding.tagScrollView.post {
+            val contentWidth = binding.tagContainer.width
+            val viewWidth = binding.tagScrollView.width
+            
+            if (contentWidth > viewWidth) {
+                val scrollRange = contentWidth - viewWidth
+                tagScrollAnimator = ValueAnimator.ofInt(0, scrollRange).apply {
+                    duration = (scrollRange * 35L).coerceAtLeast(3000L)
+                    startDelay = 2000L
+                    interpolator = android.view.animation.LinearInterpolator()
+                    
+                    addUpdateListener { animator ->
+                        binding.tagScrollView.scrollTo(animator.animatedValue as Int, 0)
+                    }
+                    
+                    addListener(object : android.animation.AnimatorListenerAdapter() {
+                        private var isCancelled = false
+                        override fun onAnimationCancel(animation: android.animation.Animator) {
+                            isCancelled = true
+                        }
+                        
+                        override fun onAnimationEnd(animation: android.animation.Animator) {
+                            if (!isCancelled) {
+                                binding.tagScrollView.postDelayed({
+                                    if (!isCancelled && currentState == MenuState.INFO) {
+                                        startTagMarquee()
+                                    }
+                                }, 2000L)
+                            }
+                        }
+                    })
+                    
+                    start()
+                }
+            }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        
+        // 1. Check for Background Audio condition (Screen Lock or App Switch)
+        if (!isInPictureInPictureMode && !isFinishing) {
+             if (ivsPlayer?.state == com.amazonaws.ivs.player.Player.State.PLAYING) {
+                 android.util.Log.d("PlayerActivity", "onPause: Entering Background Audio Mode")
+                 isBackgroundAudioEnabled = true
+                 setPowerSavingPlayback(true)
+                 updateMediaSessionState() 
+                 return 
+             }
+        }
+        
+        // 2. If already in Background Mode or PIP, let it run
+        if (isInPictureInPictureMode || isBackgroundAudioEnabled) {
+            return
+        }
+        
+        // 3. Normal Pause -> Stop Everything
+        ivsPlayer?.pause()
+        refreshHandler.removeCallbacks(activeChannelRefreshRunnable)
+        refreshHandler.removeCallbacks(globalListRefreshRunnable)
+        retryHandler.removeCallbacksAndMessages(null)
+        chatWebSocket?.disconnect()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        
+        // Pause ONLY if not in background mode AND not in PIP
+        if (!isBackgroundAudioEnabled && !isInPictureInPictureMode) {
+             ivsPlayer?.pause()
+        }
+    }
+
+
 }

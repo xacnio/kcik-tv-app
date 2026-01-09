@@ -13,11 +13,15 @@ import com.bumptech.glide.Glide
 import dev.xacnio.kciktv.R
 import dev.xacnio.kciktv.PlayerActivity
 import dev.xacnio.kciktv.data.model.ChannelItem
+import com.bumptech.glide.request.RequestOptions
+import jp.wasabeef.glide.transformations.BlurTransformation
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 
 class ChannelSidebarAdapter(
     private var channels: MutableList<ChannelItem>,
     private var currentIndex: Int,
     private var themeColor: Int = 0xFF53FC18.toInt(),
+    private var languageCode: String = "en",
     private val onChannelSelected: (Int) -> Unit,
     private val onLoadMore: () -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -36,6 +40,7 @@ class ChannelSidebarAdapter(
         val viewerCount: TextView = view.findViewById(R.id.viewerCount)
         val categoryName: TextView = view.findViewById(R.id.categoryName)
         val liveBadge: View = view.findViewById(R.id.liveBadge)
+        val matureBadge: View = view.findViewById(R.id.matureBadge)
         val selectionIndicator: View = view.findViewById(R.id.selectionIndicator)
     }
 
@@ -77,7 +82,11 @@ class ChannelSidebarAdapter(
                 holder.streamTitle.text = channel.title
                 holder.viewerCount.text = formatViewerCount(channel.viewerCount)
                 holder.viewerCount.visibility = View.VISIBLE
-                holder.categoryName.text = channel.categoryName ?: holder.itemView.context.getString(R.string.live_stream)
+                
+                val rawCat = channel.categoryName
+                val localizedCat = dev.xacnio.kciktv.util.CategoryUtils.getLocalizedCategoryName(holder.itemView.context, rawCat, channel.categorySlug, languageCode)
+                holder.categoryName.text = localizedCat.ifEmpty { holder.itemView.context.getString(R.string.live_stream) }
+                
                 holder.categoryName.visibility = View.VISIBLE
                 holder.liveBadge.visibility = View.VISIBLE
                 holder.itemView.alpha = 1f
@@ -96,11 +105,22 @@ class ChannelSidebarAdapter(
                 holder.viewerCount.setCompoundDrawables(it, null, null, null)
             }
 
-            Glide.with(holder.itemView.context)
-                .load(channel.thumbnailUrl)
-                .placeholder(R.color.surface_dark)
-                .centerCrop()
-                .into(holder.thumbnailImage)
+            holder.liveBadge.visibility = if (channel.isLive) View.VISIBLE else View.GONE
+            holder.matureBadge.visibility = if (channel.isMature) View.VISIBLE else View.GONE
+
+            if (channel.isMature) {
+                Glide.with(holder.itemView.context)
+                    .load(channel.thumbnailUrl)
+                    .transform(com.bumptech.glide.load.resource.bitmap.CenterCrop(), BlurTransformation(25, 4), RoundedCorners(8))
+                    .placeholder(R.color.surface_dark)
+                    .into(holder.thumbnailImage)
+            } else {
+                Glide.with(holder.itemView.context)
+                    .load(channel.thumbnailUrl)
+                    .transform(com.bumptech.glide.load.resource.bitmap.CenterCrop(), RoundedCorners(8))
+                    .placeholder(R.color.surface_dark)
+                    .into(holder.thumbnailImage)
+            }
 
             Glide.with(holder.itemView.context)
                 .load(channel.profilePicUrl)
@@ -201,6 +221,11 @@ class ChannelSidebarAdapter(
     fun updateThemeColor(color: Int) {
         themeColor = color
         notifyDataSetChanged()
+    }
+    
+    fun updateLanguage(lang: String) { 
+        languageCode = lang 
+        notifyDataSetChanged() 
     }
 
     private fun formatViewerCount(count: Int): String = when {

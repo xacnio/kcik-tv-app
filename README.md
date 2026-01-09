@@ -28,6 +28,15 @@ An Android TV client for the Kick.com streaming platform. Designed for TV screen
     - **Dynamic Sorting**: Featured, Viewers (High/Low).
 - **Stream Stats & Diagnostics**: Real-time technical info (Resolution, FPS, Bitrate, Latency, Buffer).
 - **Fast Channel Switching**: Navigate through channels using CH+/CH- or numerical input.
+- **Picture-in-Picture (PIP) Support (Mobile)**: Continue watching your favorite streams while using other apps. Includes playback and "Live Edge" controls.
+- **Background Audio Mode (Mobile)**: 
+    - Full background playback support with system media notification.
+    - **Automatic Data Saving**: Dynamically lowers video quality (to 360p or lower) in background mode.
+    - Integrated with Android Media Session for music player-like controls.
+- **Advanced Gesture Engine (Mobile)**:
+    - **Edge Deadzones**: 48dp deadzones to prevent conflicts with system navigation gestures.
+    - **Two-Finger Pan**: Drag and move video content in FILL mode.
+    - **Auto-Hide Chat**: Chat panel hides automatically when opening the channel sidebar for better usability.
 
 ## 🎮 Navigation & Controls
 
@@ -42,6 +51,21 @@ An Android TV client for the Kick.com streaming platform. Designed for TV screen
 | **Back** | Close current menu / Search panel / Exit app |
 | **Numeric (0-9)** | Jump to specific channel index |
 | **CH+ / CH-** | Next / Previous channel |
+
+### 📱 Mobile Touch Controls
+
+| Gesture | Action |
+|---------|--------|
+| **Swipe Up** | Next channel |
+| **Swipe Down** | Previous channel |
+| **Swipe Left** | Open Channel List / Menu |
+| **Swipe Right** | Toggle Chat (only when watching) |
+| **Swipe Right** | Back (when menu is open) |
+| **Single Tap** | Show Info Overlay |
+| **Double Tap** | Toggle video format (Fit/FILL) |
+| **Pinch Zoom** | Toggle video format (Fit/FILL) |
+| **Two-Finger Pan** | Move video (only in FILL mode) |
+| **Home Button** | Enter PIP mode (if playing) |
 
 ## 🛠️ Tech Stack
 

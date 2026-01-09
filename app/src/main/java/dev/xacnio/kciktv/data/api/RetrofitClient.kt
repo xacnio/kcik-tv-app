@@ -24,7 +24,27 @@ object RetrofitClient {
         level = HttpLoggingInterceptor.Level.BODY
     }
     
-    private val okHttpClient = OkHttpClient.Builder()
+    private fun getUnsafeOkHttpClientBuilder(): OkHttpClient.Builder {
+        try {
+            val trustAllCerts = arrayOf<javax.net.ssl.TrustManager>(object : javax.net.ssl.X509TrustManager {
+                override fun checkClientTrusted(chain: Array<java.security.cert.X509Certificate>, authType: String) {}
+                override fun checkServerTrusted(chain: Array<java.security.cert.X509Certificate>, authType: String) {}
+                override fun getAcceptedIssuers(): Array<java.security.cert.X509Certificate> = arrayOf()
+            })
+
+            val sslContext = javax.net.ssl.SSLContext.getInstance("SSL")
+            sslContext.init(null, trustAllCerts, java.security.SecureRandom())
+            val sslSocketFactory = sslContext.socketFactory
+
+            return OkHttpClient.Builder()
+                .sslSocketFactory(sslSocketFactory, trustAllCerts[0] as javax.net.ssl.X509TrustManager)
+                .hostnameVerifier { _, _ -> true }
+        } catch (e: Exception) {
+            return OkHttpClient.Builder()
+        }
+    }
+
+    private val okHttpClient = getUnsafeOkHttpClientBuilder()
         .addInterceptor { chain ->
             val request = chain.request().newBuilder()
                 .header("User-Agent", "KcikTV-Android/1.0")

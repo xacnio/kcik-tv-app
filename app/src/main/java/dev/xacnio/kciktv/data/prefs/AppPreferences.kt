@@ -3,7 +3,7 @@ package dev.xacnio.kciktv.data.prefs
 import android.content.Context
 import android.content.SharedPreferences
 
-class AppPreferences(context: Context) {
+class AppPreferences(private val context: Context) {
     private val prefs: SharedPreferences = context.getSharedPreferences("kick_tv_prefs", Context.MODE_PRIVATE)
 
     var infoDelay: Int
@@ -15,7 +15,18 @@ class AppPreferences(context: Context) {
         set(value) = prefs.edit().putInt("info_transparency", value).apply()
 
     var updateChannel: String
-        get() = prefs.getString("update_channel", "stable") ?: "stable"
+        get() {
+            val saved = prefs.getString("update_channel", null)
+            if (saved != null) return saved
+            
+            // Auto-detect based on version name
+            return try {
+                val pInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+                if (pInfo.versionName.contains("beta", ignoreCase = true)) "beta" else "stable"
+            } catch (e: Exception) {
+                "stable"
+            }
+        }
         set(value) = prefs.edit().putString("update_channel", value).apply()
 
     var language: String
@@ -43,7 +54,7 @@ class AppPreferences(context: Context) {
         set(value) = prefs.edit().putInt("theme_color", value).apply()
 
     var blockedCategories: Set<String>
-        get() = prefs.getStringSet("blocked_categories", emptySet()) ?: emptySet()
+        get() = prefs.getStringSet("blocked_categories", setOf("Pools, Hot Tubs & Beaches")) ?: setOf("Pools, Hot Tubs & Beaches")
         set(value) = prefs.edit().putStringSet("blocked_categories", value).apply()
 
     var streamLanguages: Set<String>

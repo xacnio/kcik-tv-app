@@ -28,6 +28,15 @@ Kick.com platformu için geliştirilmiş Android TV istemcisi. D-Pad navigasyonu
     - **Dinamik Sıralama**: Öne Çıkanlar, İzleyici Sayısı (Çok/Az).
 - **Yayın İstatistikleri**: Gerçek zamanlı teknik bilgiler (Çözünürlük, FPS, Bit hızı, Gecikme, Tampon durumu).
 - **Hızlı Kanal Navigasyonu**: CH+/CH- tuşları veya doğrudan numara tuşlayarak kanallar arası geçiş.
+- **Resim içinde Resim (PIP) Desteği (Mobil)**: Diğer uygulamaları kullanırken yayını izlemeye devam edin. Oynat/Duraklat ve "Canlı" kontrol butonlarını içerir.
+- **Arka Plan Ses Modu (Mobil)**: 
+    - Sistem medya bildirimi ile tam arka plan oynatma desteği.
+    - **Otomatik Veri Tasarrufu**: Arka plan modunda video kalitesini dinamik olarak düşürür (360p veya altı).
+    - Android Media Session ile müzik çalar benzeri kontroller.
+- **Gelişmiş Hareket Motoru (Mobil)**:
+    - **Kenar Ölü Bölgeleri**: Sistem navigasyon hareketleriyle çakışmayı önlemek için 48dp kenar koruması.
+    - **İki Parmakla Pan**: Ekranı kapla (FILL) modunda videoyu sürükleyip taşıyabilme.
+    - **Otomatik Sohbet Gizleme**: Sol menü açıldığında sohbet paneli kullanım kolaylığı için otomatik olarak kapanır.
 
 ## 🎮 Navigasyon ve Kontroller
 
@@ -42,6 +51,21 @@ Kick.com platformu için geliştirilmiş Android TV istemcisi. D-Pad navigasyonu
 | **Back (Geri)** | Açık menüyü / Arama panelini kapatır / Uygulamadan çıkar |
 | **Numerik (0-9)** | Doğrudan o sıradaki kanala atlar |
 | **CH+ / CH-** | Sonraki / Önceki kanal |
+
+### 📱 Mobil Dokunmatik Kontroller
+
+| Hareket | İşlem |
+|---------|-------|
+| **Yukarı Kaydır** | Sonraki kanal |
+| **Aşağı Kaydır** | Önceki kanal |
+| **Sola Kaydır** | Kanal Listesi / Menü açar |
+| **Sağa Kaydır** | Chat aç/kapat (sadece izlerken) |
+| **Sağa Kaydır** | Geri (menü açıkken) |
+| **Tek Dokunuş** | Bilgi Ekranını göster |
+| **Çift Dokunuş** | Video formatı değiştir (Sığdır/DOLDUR) |
+| **Pinch Zoom** | Video formatı değiştir (Sığdır/DOLDUR) |
+| **İki Parmakla Kaydır**| Videoyu taşı (sadece DOLDUR modunda) |
+| **Ana Ekran Tuşu** | PIP moduna girer (yayın açıkken) |
 
 ## 🛠️ Teknolojiler
 

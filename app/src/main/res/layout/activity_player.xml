@@ -16,6 +16,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <!-- Focus Sink: A non-visible view to catch stray focus -->
+        <View
+            android:id="@+id/focusSink"
+            android:layout_width="1dp"
+            android:layout_height="1dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:background="@null"
+            android:defaultFocusHighlightEnabled="false"
+            android:stateListAnimator="@null"
+            android:alpha="0" />
+
         <!-- Amazon IVS Player View -->
         <com.amazonaws.ivs.player.PlayerView
             android:id="@+id/playerView"
@@ -199,6 +211,9 @@
         android:paddingEnd="64dp"
         android:paddingBottom="36dp"
         android:elevation="5dp"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:descendantFocusability="blocksDescendants"
         android:visibility="gone">
 
         <!-- Profile Image (Slightly Smaller) -->
@@ -260,7 +275,7 @@
                 android:scrollHorizontally="true" />
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_marginTop="6dp"
@@ -291,6 +306,36 @@
                     android:textColor="@color/text_secondary"
                     android:textSize="13sp"
                     android:layout_marginStart="16dp" />
+
+                <!-- Tag Container -->
+                <!-- Tag Scroll Panel (Marquee-like behavior for tags) -->
+                <HorizontalScrollView
+                    android:id="@+id/tagScrollView"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="14dp"
+                    android:scrollbars="none"
+                    android:background="@null"
+                    android:overScrollMode="never"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:clickable="false"
+                    android:longClickable="false"
+                    android:stateListAnimator="@null"
+                    android:descendantFocusability="blocksDescendants">
+                    
+                    <LinearLayout
+                        android:id="@+id/tagContainer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:background="@null"
+                        android:gravity="center_vertical"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:clickable="false" />
+                </HorizontalScrollView>
             </LinearLayout>
         </LinearLayout>
 
@@ -389,8 +434,10 @@
             android:gravity="center"
             android:paddingHorizontal="16dp"
             android:focusable="true"
+            android:focusableInTouchMode="true"
             android:clickable="true"
-            android:background="@android:color/transparent">
+            android:background="@android:color/transparent"
+            android:defaultFocusHighlightEnabled="false">
 
             <FrameLayout
                 android:layout_width="56dp"
@@ -426,8 +473,10 @@
             android:gravity="center"
             android:paddingHorizontal="16dp"
             android:focusable="true"
+            android:focusableInTouchMode="true"
             android:clickable="true"
-            android:background="@android:color/transparent">
+            android:background="@android:color/transparent"
+            android:defaultFocusHighlightEnabled="false">
 
             <FrameLayout
                 android:layout_width="56dp"
@@ -463,8 +512,10 @@
             android:gravity="center"
             android:paddingHorizontal="16dp"
             android:focusable="true"
+            android:focusableInTouchMode="true"
             android:clickable="true"
-            android:background="@android:color/transparent">
+            android:background="@android:color/transparent"
+            android:defaultFocusHighlightEnabled="false">
 
             <FrameLayout
                 android:layout_width="56dp"
@@ -599,11 +650,17 @@
                     app:strokeWidth="2dp" />
 
                 <LinearLayout
+                    android:id="@+id/drawerUserContainer"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    android:layout_marginStart="12dp">
+                    android:layout_marginStart="12dp"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:clickable="true"
+                    android:background="@drawable/selectable_item_background"
+                    android:padding="4dp">
 
                     <TextView
                         android:id="@+id/drawerUsername"
@@ -617,13 +674,14 @@
                         android:ellipsize="end" />
 
                     <TextView
-                        android:id="@+id/drawerStatus"
+                        android:id="@+id/btnDrawerLogin"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/not_logged_in"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="10sp"
-                        android:layout_marginTop="1dp" />
+                        android:text="@string/login"
+                        android:textColor="@color/kick_green"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="2dp" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
@@ -672,6 +730,7 @@
                     android:layout_marginVertical="3dp"
                     android:background="@drawable/selectable_item_background"
                     android:focusable="true"
+                    android:focusableInTouchMode="true"
                     android:clickable="true">
                     
                     <ImageView
@@ -723,6 +782,7 @@
                     android:layout_marginVertical="3dp"
                     android:background="@drawable/selectable_item_background"
                     android:focusable="true"
+                    android:focusableInTouchMode="true"
                     android:clickable="true">
                     
                     <ImageView
@@ -754,6 +814,7 @@
                     android:layout_marginVertical="3dp"
                     android:background="@drawable/selectable_item_background"
                     android:focusable="true"
+                    android:focusableInTouchMode="true"
                     android:clickable="true">
                     
                     <ImageView
@@ -786,6 +847,7 @@
                     android:layout_marginVertical="3dp"
                     android:background="@drawable/selectable_item_background"
                     android:focusable="true"
+                    android:focusableInTouchMode="true"
                     android:clickable="true">
 
                     <ImageView
@@ -817,6 +879,7 @@
                     android:layout_marginVertical="3dp"
                     android:background="@drawable/selectable_item_background"
                     android:focusable="true"
+                    android:focusableInTouchMode="true"
                     android:clickable="true">
 
                     <ImageView
@@ -868,6 +931,7 @@
                     android:layout_marginVertical="3dp"
                     android:background="@drawable/selectable_item_background"
                     android:focusable="true"
+                    android:focusableInTouchMode="true"
                     android:clickable="true">
                     
                     <ImageView
@@ -897,6 +961,7 @@
                     android:layout_marginVertical="3dp"
                     android:background="@drawable/selectable_item_background"
                     android:focusable="true"
+                    android:focusableInTouchMode="true"
                     android:clickable="true">
                     
                     <ImageView
@@ -933,6 +998,7 @@
                     android:layout_marginVertical="3dp"
                     android:background="@drawable/selectable_item_background"
                     android:focusable="true"
+                    android:focusableInTouchMode="true"
                     android:clickable="true">
  
                     <ImageView
@@ -949,43 +1015,7 @@
                         android:layout_marginStart="16dp" />
                 </LinearLayout>
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#15FFFFFF"
-                    android:layout_marginVertical="8dp"
-                    android:layout_marginHorizontal="20dp" />
 
-                <!-- AUTH -->
-                <LinearLayout
-                    android:id="@+id/drawerLoginBtn"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="32dp"
-                    android:paddingVertical="16dp"
-                    android:layout_marginHorizontal="12dp"
-                    android:layout_marginVertical="3dp"
-                    android:background="@drawable/selectable_item_background"
-                    android:focusable="true"
-                    android:clickable="true">
- 
-                    <ImageView
-                        android:id="@+id/drawerLoginIcon"
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:src="@drawable/ic_login" />
-                    
-                    <TextView
-                        android:id="@+id/drawerLoginText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/login"
-                        android:textColor="@color/text_primary"
-                        android:textSize="12sp"
-                        android:layout_marginStart="16dp" />
-                </LinearLayout>
 
             </LinearLayout>
         </ScrollView>
@@ -1420,6 +1450,134 @@
                 android:visibility="gone" />
 
         </LinearLayout>
+    </FrameLayout>
+
+    <!-- 10. Mature Content Warning Overlay -->
+    <LinearLayout
+        android:id="@+id/matureWarningOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#F2000000"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:elevation="30dp"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true">
+
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@drawable/ic_error"
+            app:tint="@color/live_red"
+            android:layout_marginBottom="32dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/mature_content_warning"
+            android:textColor="@color/white"
+            android:textSize="36sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:layout_width="500dp"
+            android:layout_height="wrap_content"
+            android:text="@string/mature_content_description"
+            android:textColor="@color/text_secondary"
+            android:textSize="20sp"
+            android:gravity="center"
+            android:layout_marginBottom="48dp"
+            android:lineSpacingExtra="4dp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnMatureAccept"
+                android:layout_width="220dp"
+                android:layout_height="64dp"
+                android:text="@string/im_plus_18"
+                android:textAllCaps="false"
+                android:background="@drawable/bg_button_mature_accept"
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginEnd="20dp"
+                android:focusable="true"
+                android:clickable="true" />
+
+            <Button
+                android:id="@+id/btnMatureExit"
+                android:layout_width="180dp"
+                android:layout_height="64dp"
+                android:text="@string/exit"
+                android:textAllCaps="false"
+                android:background="@drawable/bg_button_mature_exit"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:focusable="true"
+                android:clickable="true" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Startup Loading Screen -->
+    <FrameLayout
+        android:id="@+id/startupLoadingOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/midnight_indigo"
+        android:elevation="50dp"
+        android:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <!-- App Logo -->
+            <ImageView
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:src="@mipmap/ic_launcher"
+                android:layout_marginBottom="32dp" />
+
+            <!-- Loading Spinner -->
+            <ProgressBar
+                android:id="@+id/startupSpinner"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:indeterminate="true"
+                android:indeterminateTint="@color/kick_green" />
+
+            <!-- Loading Text -->
+            <TextView
+                android:id="@+id/startupLoadingText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/loading_channels"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp"
+                android:layout_marginTop="16dp" />
+
+        </LinearLayout>
+
+        <!-- Version Info (Bottom) -->
+        <TextView
+            android:id="@+id/startupVersionText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="24dp"
+            android:text="@string/app_name"
+            android:textColor="@color/text_tertiary"
+            android:textSize="12sp" />
+
     </FrameLayout>
 
 </FrameLayout>

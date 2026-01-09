@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-parcelize")
+    id("kotlin-kapt")
 }
 
 android {
@@ -13,7 +14,7 @@ android {
         minSdk = 21
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0.0-beta"
+        versionName = "1.1.0-beta"
     }
 
     buildTypes {
@@ -68,7 +69,9 @@ dependencies {
     
     // Glide for image loading
     implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation("com.github.bumptech.glide:okhttp3-integration:4.16.0")
     implementation("jp.wasabeef:glide-transformations:4.3.0")
+    kapt("com.github.bumptech.glide:compiler:4.16.0")
     
     // Amazon IVS Player for ultra-low latency
     implementation("com.amazonaws:ivs-player:1.24.0")

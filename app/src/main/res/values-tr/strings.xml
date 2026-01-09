@@ -61,6 +61,10 @@
     <string name="server_error">Sunucu başlatılamadı: %s</string>
     <string name="login_fields_required">E-posta ve şifre gereklidir</string>
     <string name="two_fa_required">2FA kodu gerekli</string>
+    <string name="mature_content_warning">Yetişkin İçerik Uyarısı</string>
+    <string name="mature_content_description">Bu yayın yetişkin izleyiciler için tasarlanmış içerikler barındırmaktadır.</string>
+    <string name="im_plus_18">+18 Yaşındayım</string>
+    <string name="exit">Çıkış</string>
     
     <!-- Settings Items -->
     <string name="setting_option">Ayar Seçeneği</string>
@@ -143,6 +147,7 @@
     <string name="check_update">Güncellemeleri Denetle</string>
     <string name="downloading">Güncelleme indiriliyor...</string>
     <string name="download_failed">İndirme başarısız oldu</string>
+    <string name="format_fit">Ekrana Sığdır</string>
 
     <string-array name="stream_language_codes">
         <item>tr</item><item>en</item><item>af</item><item>de</item><item>ar</item><item>sq</item><item>az</item><item>be</item>
@@ -169,5 +174,24 @@
         <item>Yunanca</item><item>Zuluca</item>
     </string-array>
     <string name="app_version_label">Sürüm: %s</string>
+    <string name="settings_category_general">Genel</string>
+    <string name="settings_category_player">Oynatıcı Ayarları</string>
+    <string name="settings_category_appearance">Görünüm</string>
+    <string name="settings_category_app">Uygulama</string>
 
+    <!-- Categories -->
+    <string name="cat_art">Sanat</string>
+    <string name="cat_chess">Satranç</string>
+    <string name="cat_slots">Slotlar &amp; Kumarhane</string>
+    <string name="background_mode_disabled">Ön Plan Moduna Geçildi</string>
+    <string name="cat_food_drink">Yeme içme</string>
+    <string name="cat_games_demos">Oyunlar ve Demo Sürümleri</string>
+    <string name="cat_just_chatting">Sadece Sohbet</string>
+    <string name="cat_just_sleeping">Sadece Uyku</string>
+    <string name="cat_music">Müzik</string>
+    <string name="cat_music_production">Müzik Yapımcılığı</string>
+    <string name="cat_pools_hot_tubs">Havuz, Küvet ve Plaj</string>
+    <string name="cat_special_events">Özel Etkinlikler</string>
+    <string name="cat_sports">Spor</string>
+    <string name="cat_video_production">Video Yapımcılığı</string>
 </resources>

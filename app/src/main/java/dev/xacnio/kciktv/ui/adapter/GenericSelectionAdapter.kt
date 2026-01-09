@@ -16,17 +16,23 @@ data class SelectionItem(
     val title: String,
     val isSelected: Boolean = false,
     val payload: Any? = null,
-    val showCheckbox: Boolean = false
+    val showCheckbox: Boolean = false,
+    val isHeader: Boolean = false
 )
 
 class GenericSelectionAdapter(
     private var items: List<SelectionItem>,
     private var themeColor: Int = 0xFF53FC18.toInt(),
-    private val onItemFocused: ((SelectionItem) -> Unit)? = null,
-    private val onItemSelected: (SelectionItem) -> Unit
+    private var onItemFocused: ((SelectionItem) -> Unit)? = null,
+    private var onItemSelected: (SelectionItem) -> Unit
 ) : RecyclerView.Adapter<GenericSelectionAdapter.ViewHolder>() {
 
     private val activeHolders = mutableSetOf<ViewHolder>()
+
+    companion object {
+        private const val TYPE_ITEM = 0
+        private const val TYPE_HEADER = 1
+    }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val txtName: TextView = view.findViewById(R.id.txtSettingItem)
@@ -34,11 +40,45 @@ class GenericSelectionAdapter(
         var currentItem: SelectionItem? = null
 
         fun updateVisuals(item: SelectionItem, hasFocus: Boolean, themeColor: Int) {
+            if (item.isHeader) {
+                // Header Styling
+                itemView.background = null
+                itemView.isFocusable = false
+                itemView.isClickable = false
+                
+                txtName.setTextColor(Color.parseColor("#80FFFFFF")) // Semi-transparent white
+                txtName.typeface = android.graphics.Typeface.DEFAULT_BOLD
+                txtName.textSize = 12f
+                txtName.isSelected = false
+                
+                imgIndicator.visibility = View.GONE
+                
+                // Adjust padding for header
+                itemView.setPadding(
+                    itemView.paddingLeft,
+                    (24 * itemView.resources.displayMetrics.density).toInt(),
+                    itemView.paddingRight,
+                    (8 * itemView.resources.displayMetrics.density).toInt()
+                )
+                return
+            }
+
+            // Normal Item Styling
+            itemView.isFocusable = true
+            itemView.isClickable = true
+            itemView.setPadding(
+                (32 * itemView.resources.displayMetrics.density).toInt(),
+                (18 * itemView.resources.displayMetrics.density).toInt(),
+                (32 * itemView.resources.displayMetrics.density).toInt(),
+                (18 * itemView.resources.displayMetrics.density).toInt()
+            )
+
             val bg = GradientDrawable()
             val density = itemView.resources.displayMetrics.density
             bg.cornerRadius = 12f * density 
             
             txtName.isSelected = hasFocus
+            txtName.textSize = 14f
 
             if (hasFocus) {
                 val alphaColor = (themeColor and 0x00FFFFFF) or 0x4D000000 
@@ -99,6 +139,10 @@ class GenericSelectionAdapter(
         }
     }
 
+    override fun getItemViewType(position: Int): Int {
+        return if (items[position].isHeader) TYPE_HEADER else TYPE_ITEM
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_setting, parent, false)
         return ViewHolder(view)
@@ -109,15 +153,22 @@ class GenericSelectionAdapter(
         holder.currentItem = item
         holder.txtName.text = item.title
         
-        holder.itemView.setOnFocusChangeListener { _, hasFocus -> 
-            holder.updateVisuals(item, hasFocus, themeColor)
-            if (hasFocus) onItemFocused?.invoke(item)
+        if (!item.isHeader) {
+            holder.itemView.setOnFocusChangeListener { _, hasFocus -> 
+                holder.updateVisuals(item, hasFocus, themeColor)
+                if (hasFocus) onItemFocused?.invoke(item)
+            }
+            holder.itemView.setOnClickListener { onItemSelected(item) }
+            holder.itemView.isFocusable = true
+            holder.itemView.isFocusableInTouchMode = true
+        } else {
+            holder.itemView.setOnFocusChangeListener(null)
+            holder.itemView.setOnClickListener(null)
+            holder.itemView.isFocusable = false
+            holder.itemView.isFocusableInTouchMode = false
         }
+        
         holder.updateVisuals(item, holder.itemView.hasFocus(), themeColor)
-
-        holder.itemView.setOnClickListener { onItemSelected(item) }
-        holder.itemView.isFocusable = true
-        holder.itemView.isFocusableInTouchMode = true
     }
 
     override fun onViewAttachedToWindow(holder: ViewHolder) {
@@ -138,15 +189,23 @@ class GenericSelectionAdapter(
     }
 
     fun updateSingleSelection(selectedId: String) {
+        val oldSelectedIndex = items.indexOfFirst { it.isSelected }
+        val newSelectedIndex = items.indexOfFirst { it.id == selectedId }
+        
         items = items.map { it.copy(isSelected = it.id == selectedId) }
-        refreshHolders()
+        
+        if (oldSelectedIndex != -1) notifyItemChanged(oldSelectedIndex, "selection_update")
+        if (newSelectedIndex != -1 && newSelectedIndex != oldSelectedIndex) notifyItemChanged(newSelectedIndex, "selection_update")
     }
 
     fun toggleItemSelection(id: String) {
-        items = items.map { 
-            if (it.id == id) it.copy(isSelected = !it.isSelected) else it 
+        val index = items.indexOfFirst { it.id == id }
+        if (index != -1) {
+            items = items.mapIndexed { i, item -> 
+                if (i == index) item.copy(isSelected = !item.isSelected) else item 
+            }
+            notifyItemChanged(index, "payload_toggle")
         }
-        refreshHolders()
     }
 
     private fun refreshHolders() {
@@ -164,5 +223,13 @@ class GenericSelectionAdapter(
     fun updateThemeColor(color: Int) {
         themeColor = color
         refreshHolders()
+    }
+
+    fun setOnItemSelectListener(listener: (SelectionItem) -> Unit) {
+        this.onItemSelected = listener
+    }
+
+    fun setOnItemFocusListener(listener: ((SelectionItem) -> Unit)?) {
+        this.onItemFocused = listener
     }
 }
