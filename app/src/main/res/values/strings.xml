@@ -42,6 +42,8 @@
     <string name="logout">Logout</string>
     <string name="logged_in">Logged in</string>
     <string name="logged_out">Logged out</string>
+    <string name="logout_confirm_title">Confirm Logout</string>
+    <string name="logout_confirm_message">Are you sure you want to logout?</string>
     <string name="login_success">Welcome, %s</string>
     <string name="login_required_following">You must be logged in to see following list</string>
     

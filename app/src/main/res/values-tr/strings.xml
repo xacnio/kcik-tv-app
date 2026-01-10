@@ -42,6 +42,8 @@
     <string name="logout">Çıkış Yap</string>
     <string name="logged_in">Giriş yapıldı</string>
     <string name="logged_out">Çıkış yapıldı</string>
+    <string name="logout_confirm_title">Çıkış Onayı</string>
+    <string name="logout_confirm_message">Çıkış yapmak istediğinizden emin misiniz?</string>
     <string name="login_success">Hoş geldin, %s</string>
     <string name="login_required_following">Takip edilenleri görmek için giriş yapmalısınız</string>
     

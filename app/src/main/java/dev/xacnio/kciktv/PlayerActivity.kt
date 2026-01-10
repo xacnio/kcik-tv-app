@@ -1232,13 +1232,21 @@ class PlayerActivity : FragmentActivity() {
         
         binding.drawerUserContainer.setOnClickListener {
             if (prefs.isLoggedIn) {
-                // Logout logic
-                prefs.clearAuth()
-                updateDrawerUserInfo()
-                Toast.makeText(this, getString(R.string.logged_out), Toast.LENGTH_SHORT).show()
-                if (currentListMode == ListMode.FOLLOWING) {
-                    switchListMode(ListMode.GLOBAL)
-                }
+                // Show logout confirmation dialog
+                android.app.AlertDialog.Builder(this)
+                    .setTitle(getString(R.string.logout_confirm_title))
+                    .setMessage(getString(R.string.logout_confirm_message))
+                    .setPositiveButton(getString(R.string.yes)) { _, _ ->
+                        // Logout logic
+                        prefs.clearAuth()
+                        updateDrawerUserInfo()
+                        Toast.makeText(this, getString(R.string.logged_out), Toast.LENGTH_SHORT).show()
+                        if (currentListMode == ListMode.FOLLOWING) {
+                            switchListMode(ListMode.GLOBAL)
+                        }
+                    }
+                    .setNegativeButton(getString(R.string.no), null)
+                    .show()
             } else {
                 hideDrawer(immediate = true)
                 showLoginPanel()
