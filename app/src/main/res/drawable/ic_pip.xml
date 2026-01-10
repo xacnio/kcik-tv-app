@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Outer rectangle (main window) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M19,7H5v10h14V7zM21,5v14H3V5h18zM19,17H5V7h14v10z"/>
+    <!-- Inner rectangle (PIP window) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M13,11h5v4h-5z"/>
+</vector>

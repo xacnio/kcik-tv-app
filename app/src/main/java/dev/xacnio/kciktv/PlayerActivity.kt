@@ -51,6 +51,15 @@ import dev.xacnio.kciktv.data.repository.UpdateRepository
 import dev.xacnio.kciktv.data.repository.LoginResult
 import dev.xacnio.kciktv.data.model.GithubRelease
 import dev.xacnio.kciktv.databinding.ActivityPlayerBinding
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player as ExoPlayerBase
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.common.VideoSize
+import androidx.media3.exoplayer.hls.HlsMediaSource
+import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.common.util.UnstableApi
+import androidx.annotation.OptIn
+import androidx.media3.exoplayer.DefaultLoadControl
 
 import android.content.Intent
 import androidx.core.content.FileProvider
@@ -110,6 +119,7 @@ class PlayerActivity : FragmentActivity() {
     private lateinit var binding: ActivityPlayerBinding
     private lateinit var prefs: AppPreferences
     private var ivsPlayer: Player? = null
+    private var exoPlayer: ExoPlayer? = null
     private var mediaSession: MediaSessionCompat? = null
     
     private var streamCreatedAtMillis: Long? = null
@@ -164,7 +174,7 @@ class PlayerActivity : FragmentActivity() {
     
     // Retry mechanism
     private var retryCount = 0
-    private val maxRetryCount = 5
+    private val maxRetryCount = 10
     private val retryDelayMs = 3000L
     private val retryHandler = Handler(Looper.getMainLooper())
     
@@ -173,22 +183,65 @@ class PlayerActivity : FragmentActivity() {
     private var zeroBitrateCount = 0
     private val stabilityRunnable = object : Runnable {
         override fun run() {
-            val player = ivsPlayer
-            if (player != null && player.state == Player.State.PLAYING) {
-                val statsStr = player.statistics.toString()
-                val bitrate = Regex("bitRate=([\\d.]+)").find(statsStr)?.groupValues?.get(1)?.toLongOrNull() ?: 0L
-                if (bitrate <= 0) {
-                    zeroBitrateCount++
-                    if (zeroBitrateCount >= 10) { // 10 seconds of 0 bitrate while playing
-                        Log.w("PlayerActivity", "Stability watchdog triggered: 0 bitrate for 10s. Retrying...")
+            val mode = prefs.catchUpMode
+            val engine = prefs.playerEngine
+            
+            if (engine == "exo") {
+                val player = exoPlayer
+                if (player != null && player.playbackState == androidx.media3.common.Player.STATE_READY && player.playWhenReady) {
+                    // Bitrate Watchdog for Exo
+                    val bitRate = player.videoFormat?.bitrate ?: 1
+                    if (bitRate <= 0) {
+                        zeroBitrateCount++
+                        if (zeroBitrateCount >= 10) {
+                            zeroBitrateCount = 0
+                            scheduleRetry()
+                            return
+                        }
+                    } else {
                         zeroBitrateCount = 0
-                        scheduleRetry()
-                        return
                     }
-                } else {
-                    zeroBitrateCount = 0
+                    stabilityHandler.postDelayed(this, 1000L)
                 }
-                stabilityHandler.postDelayed(this, 1000L)
+            } else {
+                val player = ivsPlayer
+                if (player != null && player.state == Player.State.PLAYING) {
+                    // IVS Catch-up
+                    if (mode != "off") {
+                        val latency = player.liveLatency
+                        val startThreshold = if (mode == "high") 2500L else 5000L
+                        val stopThreshold = if (mode == "high") 1500L else 2500L
+
+                        if (latency > startThreshold) {
+                            if (player.playbackRate != 1.1f) {
+                                Log.d("PlayerActivity", "IVS Catch-up ($mode): High Latency ($latency ms). Speeding up.")
+                                player.playbackRate = 1.1f
+                            }
+                        } else if (latency < stopThreshold && latency > 0) {
+                            if (player.playbackRate != 1.0f) {
+                                Log.d("PlayerActivity", "IVS Catch-up ($mode): Latency OK ($latency ms). Normal speed.")
+                                player.playbackRate = 1.0f
+                            }
+                        }
+                    } else if (player.playbackRate != 1.0f) {
+                        player.playbackRate = 1.0f
+                    }
+
+                    val statsStr = player.statistics.toString()
+                    val bitrate = Regex("bitRate=([\\d.]+)").find(statsStr)?.groupValues?.get(1)?.toLongOrNull() ?: 0L
+                    if (bitrate <= 0) {
+                        zeroBitrateCount++
+                        if (zeroBitrateCount >= 10) {
+                            Log.w("PlayerActivity", "IVS Stability watchdog triggered: 0 bitrate for 10s. Retrying...")
+                            zeroBitrateCount = 0
+                            scheduleRetry()
+                            return
+                        }
+                    } else {
+                        zeroBitrateCount = 0
+                    }
+                    stabilityHandler.postDelayed(this, 1000L)
+                }
             }
         }
     }
@@ -221,6 +274,56 @@ class PlayerActivity : FragmentActivity() {
     private var chatWebSocket: KcikChatWebSocket? = null
     private val chatHandler = Handler(Looper.getMainLooper())
     private val pendingChatMessages = mutableListOf<ChatMessage>()
+    private var chatConnectJob: Job? = null
+    private var lastSubscribedSlug: String? = null
+    
+    // Quick Recovery Polling (For short disconnects)
+    private val recoveryHandler = Handler(Looper.getMainLooper())
+    private var recoveryAttempts = 0
+    private val maxRecoveryAttempts = 12 // 12 * 5s = 60s
+    private val recoveryRunnable: Runnable = object : Runnable {
+        override fun run() {
+            val self = this
+            if (recoveryAttempts >= maxRecoveryAttempts) {
+                Log.d("PlayerActivity", "Recovery polling timed out after 1 minute.")
+                stopRecoveryPolling()
+                return
+            }
+            
+            recoveryAttempts++
+            if (allChannels.isEmpty()) return
+            val channel = allChannels[currentChannelIndex]
+            
+            Log.d("PlayerActivity", "Recovery attempt $recoveryAttempts/12 for: ${channel.slug}")
+            
+            lifecycleScope.launch {
+                repository.getChannelDetails(channel.slug).onSuccess { details ->
+                    if (details.livestream != null) {
+                        // Stream is BACK!
+                        Log.d("PlayerActivity", "Recovery successful! Stream is back online.")
+                        stopRecoveryPolling()
+                        chatHandler.post {
+                            // Update local state and play
+                            val updatedChannel = channel.copy(isLive = true)
+                            allChannels[currentChannelIndex] = updatedChannel
+                            playCurrentChannel(useZapDelay = false, showInfo = true, keepBanner = true)
+                        }
+                    } else {
+                        // Still offline, check if we should keep polling
+                        // The user said: "If livestream is null, stop immediately"
+                        // But wait, if it's brief disconnect, it might be null for 2 seconds.
+                        // Actually, 'livestream' being null in API usually means it's officially over.
+                        // I'll follow user's strict rule: stop immediately if null.
+                        Log.d("PlayerActivity", "Recovery: Channel is officially offline (livestream null). Stopping polling.")
+                        stopRecoveryPolling()
+                    }
+                }.onFailure {
+                    // Network error or something, keep trying
+                    recoveryHandler.postDelayed(self, 5000L)
+                }
+            }
+        }
+    }
     
     // Touch Gesture Support
     private lateinit var gestureDetector: GestureDetector
@@ -241,6 +344,8 @@ class PlayerActivity : FragmentActivity() {
     private val CONTROL_TYPE_PLAY_PAUSE = 1
     private val CONTROL_TYPE_LIVE = 2
     private val CONTROL_TYPE_AUDIO_ONLY = 3
+    private val CONTROL_TYPE_NEXT = 4
+    private val CONTROL_TYPE_PREVIOUS = 5
     
     private val CHANNEL_ID = "kciktv_playback"
     private val NOTIFICATION_ID = 42
@@ -251,19 +356,27 @@ class PlayerActivity : FragmentActivity() {
             
             when (intent.getIntExtra(EXTRA_CONTROL_TYPE, 0)) {
                 CONTROL_TYPE_PLAY_PAUSE -> {
-                    if (ivsPlayer?.state == com.amazonaws.ivs.player.Player.State.PLAYING) {
-                        ivsPlayer?.pause()
+                    if (prefs.playerEngine == "exo") {
+                        if (exoPlayer?.isPlaying == true) exoPlayer?.pause() else exoPlayer?.play()
                     } else {
-                        // For Live streams, duration is usually the live edge
-                        ivsPlayer?.seekTo(ivsPlayer?.duration ?: 0L)
-                        ivsPlayer?.play()
+                        if (ivsPlayer?.state == com.amazonaws.ivs.player.Player.State.PLAYING) {
+                            ivsPlayer?.pause()
+                        } else {
+                            ivsPlayer?.seekTo(ivsPlayer?.duration ?: 0L)
+                            ivsPlayer?.play()
+                        }
                     }
                     updatePictureInPictureParams()
                     updateMediaSessionState()
                 }
                 CONTROL_TYPE_LIVE -> {
-                    ivsPlayer?.seekTo(ivsPlayer?.duration ?: 0L)
-                    ivsPlayer?.play()
+                    if (prefs.playerEngine == "exo") {
+                        exoPlayer?.seekToDefaultPosition()
+                        exoPlayer?.play()
+                    } else {
+                        ivsPlayer?.seekTo(ivsPlayer?.duration ?: 0L)
+                        ivsPlayer?.play()
+                    }
                     updateMediaSessionState()
                 }
                 CONTROL_TYPE_AUDIO_ONLY -> {
@@ -274,6 +387,14 @@ class PlayerActivity : FragmentActivity() {
                     Toast.makeText(this@PlayerActivity, "Arka Plan Ses Modu Aktif", Toast.LENGTH_SHORT).show()
                     updateMediaSessionState()
                 }
+                CONTROL_TYPE_NEXT -> {
+                    nextChannel()
+                    updateMediaSessionState()
+                }
+                CONTROL_TYPE_PREVIOUS -> {
+                    previousChannel()
+                    updateMediaSessionState()
+                }
             }
         }
     }
@@ -281,31 +402,39 @@ class PlayerActivity : FragmentActivity() {
     private val screenStateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == Intent.ACTION_SCREEN_OFF) {
-                // Screen turned off
+                // Screen turned off - service is already running, just ensure power saving mode
                 if (ivsPlayer?.state == com.amazonaws.ivs.player.Player.State.PLAYING) {
-                    android.util.Log.d("PlayerActivity", "Screen turned off via BroadcastReceiver")
-                    isBackgroundAudioEnabled = true
+                    Log.d("PlayerActivity", "Screen turned off - ensuring power saving mode")
                     setPowerSavingPlayback(true)
-                    updateMediaSessionState() // Start service and notification
                 }
             }
         }
     }
 
-    private fun setPowerSavingPlayback(enabled: Boolean) {
-        val player = ivsPlayer ?: return
-        if (enabled) {
-            // Find lowest quality for background audio saving
-            val lowestQuality = player.qualities.minByOrNull { it.height }
-            if (lowestQuality != null) {
-                player.setAutoQualityMode(false)
-                player.setQuality(lowestQuality)
-                Log.d("PlayerActivity", "Background mode: Lowering quality to ${lowestQuality.name} to save bandwidth")
+    private val stopPlaybackReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == PlaybackService.ACTION_STOP_PLAYBACK) {
+                Log.d("PlayerActivity", "Received stop playback broadcast - stopping player")
+                ivsPlayer?.pause()
+                isBackgroundAudioEnabled = false
             }
+        }
+    }
+
+    private val powerSavingHandler = Handler(Looper.getMainLooper())
+    private var powerSavingRunnable: Runnable? = null
+
+    private fun setPowerSavingPlayback(enabled: Boolean) {
+        // Cancel any pending power saving change
+        powerSavingRunnable?.let { powerSavingHandler.removeCallbacks(it) }
+        
+        // Don't change quality - this causes audio interruption
+        // Just log the state change. Audio will continue at current quality.
+        // This uses more data but provides seamless background playback.
+        if (enabled) {
+            Log.d("PlayerActivity", "Background mode: Keeping current quality for seamless audio")
         } else {
-            // Restore auto quality in foreground
-            player.setAutoQualityMode(true)
-            Log.d("PlayerActivity", "Foreground mode: Restoring auto quality")
+            Log.d("PlayerActivity", "Foreground mode: Resuming normal playback")
         }
     }
 
@@ -313,14 +442,20 @@ class PlayerActivity : FragmentActivity() {
         mediaSession = MediaSessionCompat(this, "KcikTV").apply {
             setCallback(object : MediaSessionCompat.Callback() {
                 override fun onPlay() {
-                    ivsPlayer?.play()
+                    if (prefs.playerEngine == "exo") exoPlayer?.play() else ivsPlayer?.play()
                     updateMediaSessionState()
                     updatePictureInPictureParams()
                 }
                 override fun onPause() {
-                    ivsPlayer?.pause()
+                    if (prefs.playerEngine == "exo") exoPlayer?.pause() else ivsPlayer?.pause()
                     updateMediaSessionState()
                     updatePictureInPictureParams()
+                }
+                override fun onSkipToNext() {
+                    nextChannel()
+                }
+                override fun onSkipToPrevious() {
+                    previousChannel()
                 }
             })
             isActive = true
@@ -328,7 +463,11 @@ class PlayerActivity : FragmentActivity() {
     }
 
     private fun updateMediaSessionState() {
-        val isPlaying = ivsPlayer?.state == com.amazonaws.ivs.player.Player.State.PLAYING
+        val isPlaying = if (prefs.playerEngine == "exo") {
+            exoPlayer?.isPlaying ?: false
+        } else {
+            ivsPlayer?.state == com.amazonaws.ivs.player.Player.State.PLAYING
+        }
         val state = if (isPlaying) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED
         
         // Update Metadata (Channel & Title)
@@ -352,7 +491,9 @@ class PlayerActivity : FragmentActivity() {
                 PlaybackStateCompat.ACTION_PAUSE or
                 PlaybackStateCompat.ACTION_STOP or
                 PlaybackStateCompat.ACTION_PLAY_PAUSE or
-                PlaybackStateCompat.ACTION_SEEK_TO
+                PlaybackStateCompat.ACTION_SEEK_TO or
+                PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
+                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
             )
             .setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1.0f)
         
@@ -379,6 +520,12 @@ class PlayerActivity : FragmentActivity() {
         }
         val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
 
+        // Previous channel action
+        val previousAction = NotificationCompat.Action(android.R.drawable.ic_media_previous, "Önceki",
+            PendingIntent.getBroadcast(this, CONTROL_TYPE_PREVIOUS,
+            Intent(PIP_CONTROL_ACTION).apply { setPackage(packageName); putExtra(EXTRA_CONTROL_TYPE, CONTROL_TYPE_PREVIOUS) },
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))
+
         val playPauseAction = if (isPlaying) {
             NotificationCompat.Action(android.R.drawable.ic_media_pause, "Duraklat", 
                 PendingIntent.getBroadcast(this, CONTROL_TYPE_PLAY_PAUSE, 
@@ -391,20 +538,35 @@ class PlayerActivity : FragmentActivity() {
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))
         }
 
+        // Next channel action
+        val nextAction = NotificationCompat.Action(android.R.drawable.ic_media_next, "Sonraki",
+            PendingIntent.getBroadcast(this, CONTROL_TYPE_NEXT,
+            Intent(PIP_CONTROL_ACTION).apply { setPackage(packageName); putExtra(EXTRA_CONTROL_TYPE, CONTROL_TYPE_NEXT) },
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))
+
+        // Delete intent - when notification is dismissed, stop playback
+        val deleteIntent = Intent(this, PlaybackService::class.java).apply {
+            action = "STOP"
+        }
+        val deletePendingIntent = PendingIntent.getService(this, 100, deleteIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(channel?.username ?: "KcikTV")
             .setContentText(channel?.title ?: "Canlı Yayın")
             .setContentIntent(pendingIntent)
+            .setDeleteIntent(deletePendingIntent)
             .setOngoing(isPlaying)
             .setPriority(NotificationCompat.PRIORITY_LOW) // Required for background media
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setLargeIcon(currentProfileBitmap)
+            .addAction(previousAction)
             .addAction(playPauseAction)
+            .addAction(nextAction)
             .setStyle(MediaNotificationCompat.MediaStyle()
                 .setMediaSession(mediaSession?.sessionToken)
-                .setShowActionsInCompactView(0))
+                .setShowActionsInCompactView(0, 1, 2)) // Show all 3 buttons in compact view
             .build()
 
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -436,6 +598,78 @@ class PlayerActivity : FragmentActivity() {
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
+    }
+
+    /**
+     * Start foreground service immediately when playback begins.
+     * This ensures seamless audio when screen is locked (no interruption).
+     * The notification will show, but this is necessary for uninterrupted background playback.
+     */
+    private fun startBackgroundPlayback() {
+        val isPlaying = ivsPlayer?.state == com.amazonaws.ivs.player.Player.State.PLAYING
+        if (!isPlaying) return
+        
+        val channel = if (allChannels.isNotEmpty() && currentChannelIndex < allChannels.size) allChannels[currentChannelIndex] else null
+        
+        val notificationIntent = Intent(this, PlayerActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
+
+        // Previous channel action
+        val previousAction = NotificationCompat.Action(android.R.drawable.ic_media_previous, "Önceki",
+            PendingIntent.getBroadcast(this, CONTROL_TYPE_PREVIOUS,
+            Intent(PIP_CONTROL_ACTION).apply { setPackage(packageName); putExtra(EXTRA_CONTROL_TYPE, CONTROL_TYPE_PREVIOUS) },
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))
+
+        val playPauseAction = NotificationCompat.Action(android.R.drawable.ic_media_pause, "Duraklat", 
+            PendingIntent.getBroadcast(this, CONTROL_TYPE_PLAY_PAUSE, 
+            Intent(PIP_CONTROL_ACTION).apply { setPackage(packageName); putExtra(EXTRA_CONTROL_TYPE, CONTROL_TYPE_PLAY_PAUSE) }, 
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))
+
+        // Next channel action
+        val nextAction = NotificationCompat.Action(android.R.drawable.ic_media_next, "Sonraki",
+            PendingIntent.getBroadcast(this, CONTROL_TYPE_NEXT,
+            Intent(PIP_CONTROL_ACTION).apply { setPackage(packageName); putExtra(EXTRA_CONTROL_TYPE, CONTROL_TYPE_NEXT) },
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))
+
+        // Delete intent - when notification is dismissed, stop playback
+        val deleteIntent = Intent(this, PlaybackService::class.java).apply {
+            action = "STOP"
+        }
+        val deletePendingIntent = PendingIntent.getService(this, 100, deleteIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentTitle(channel?.username ?: "KcikTV")
+            .setContentText(channel?.title ?: "Canlı Yayın")
+            .setContentIntent(pendingIntent)
+            .setDeleteIntent(deletePendingIntent)
+            .setOngoing(true)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setLargeIcon(currentProfileBitmap)
+            .addAction(previousAction)
+            .addAction(playPauseAction)
+            .addAction(nextAction)
+            .setStyle(MediaNotificationCompat.MediaStyle()
+                .setMediaSession(mediaSession?.sessionToken)
+                .setShowActionsInCompactView(0, 1, 2))
+            .build()
+
+        // Start Foreground Service immediately
+        val serviceIntent = Intent(this, PlaybackService::class.java).apply {
+            putExtra("notification", notification)
+            putExtra("notificationId", NOTIFICATION_ID)
+        }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
+        
+        Log.d("PlayerActivity", "Background playback service started immediately")
     }
     
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -469,6 +703,14 @@ class PlayerActivity : FragmentActivity() {
         
         // Register Screen State Receiver
         registerReceiver(screenStateReceiver, IntentFilter(Intent.ACTION_SCREEN_OFF))
+        
+        // Register Stop Playback Receiver (when notification is dismissed)
+        val stopFilter = IntentFilter(PlaybackService.ACTION_STOP_PLAYBACK)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(stopPlaybackReceiver, stopFilter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(stopPlaybackReceiver, stopFilter)
+        }
 
         createNotificationChannel()
         setupMediaSession()
@@ -478,7 +720,15 @@ class PlayerActivity : FragmentActivity() {
         setupQuickMenu()
         setupRecyclerView()
         setupChat()
-        initializeIVSPlayer()
+        if (prefs.playerEngine == "exo") {
+            binding.playerView.visibility = View.GONE
+            binding.exoPlayerView.visibility = View.VISIBLE
+            initializeExoPlayer()
+        } else {
+            binding.exoPlayerView.visibility = View.GONE
+            binding.playerView.visibility = View.VISIBLE
+            initializeIVSPlayer()
+        }
         applySettings() // Call after setup
         setupDrawer()
         setupSearch()
@@ -525,13 +775,21 @@ class PlayerActivity : FragmentActivity() {
         }
     }
 
+    /**
+     * Check if running on Android TV
+     */
+    private fun isTvDevice(): Boolean {
+        val uiModeManager = getSystemService(Context.UI_MODE_SERVICE) as android.app.UiModeManager
+        return uiModeManager.currentModeType == android.content.res.Configuration.UI_MODE_TYPE_TELEVISION
+    }
+
     // ==================== Picture-in-Picture (PIP) Support ====================
     
     override fun onUserLeaveHint() {
         super.onUserLeaveHint()
-        // Enter PIP when user presses home button (only on Android 8.0+)
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            val isPlaying = ivsPlayer?.state == Player.State.PLAYING
+        // On mobile: Enter PIP when user presses home button IF auto-pip is enabled
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O && !isTvDevice() && prefs.autoPipEnabled) {
+            val isPlaying = if (prefs.playerEngine == "exo") exoPlayer?.isPlaying == true else ivsPlayer?.state == Player.State.PLAYING
             if (isPlaying) {
                 enterPipMode()
             }
@@ -570,7 +828,7 @@ class PlayerActivity : FragmentActivity() {
             ))
 
             // 2. Play/Pause Action (Middle)
-            val isPlaying = ivsPlayer?.state == com.amazonaws.ivs.player.Player.State.PLAYING
+            val isPlaying = if (prefs.playerEngine == "exo") exoPlayer?.isPlaying == true else ivsPlayer?.state == com.amazonaws.ivs.player.Player.State.PLAYING
             val iconRes = if (isPlaying) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play
             val title = if (isPlaying) "Duraklat" else "Oynat"
             
@@ -635,17 +893,21 @@ class PlayerActivity : FragmentActivity() {
             isStatsVisible = false
             currentState = MenuState.NONE
             
-            // Ensure player keeps playing in PIP mode
-            if (ivsPlayer?.state != Player.State.PLAYING) {
+            if (ivsPlayer?.state != Player.State.PLAYING && prefs.playerEngine != "exo") {
                 ivsPlayer?.play()
+            } else if (exoPlayer?.isPlaying != true && prefs.playerEngine == "exo") {
+                exoPlayer?.play()
             }
         } else {
             // Restore immersive mode when exiting PIP
             enableImmersiveMode()
             
-            // Resume player if it was paused
-            if (ivsPlayer?.state == Player.State.READY) {
-                ivsPlayer?.play()
+            // User requirement: If background audio is OFF, stop playback when PIP ends
+            if (!prefs.backgroundAudioEnabled && !isTvDevice()) {
+                ivsPlayer?.pause()
+                exoPlayer?.pause()
+                isBackgroundAudioEnabled = false
+                stopService(Intent(this, PlaybackService::class.java))
             }
         }
     }
@@ -665,6 +927,7 @@ class PlayerActivity : FragmentActivity() {
             private val SWIPE_THRESHOLD = 100
             private val SWIPE_VELOCITY_THRESHOLD = 100
             private val EDGE_DEADZONE_DP = 24 // Reduced from 48 for better mobile responsiveness
+            private val TOP_DEADZONE_DP = 80 // Top edge deadzone for notification panel
 
 
 
@@ -672,6 +935,11 @@ class PlayerActivity : FragmentActivity() {
                 val deadzonePx = EDGE_DEADZONE_DP * resources.displayMetrics.density
                 val screenWidth = resources.displayMetrics.widthPixels
                 return x < deadzonePx || x > screenWidth - deadzonePx
+            }
+            
+            private fun isInTopDeadzone(y: Float): Boolean {
+                val deadzonePx = TOP_DEADZONE_DP * resources.displayMetrics.density
+                return y < deadzonePx
             }
 
             override fun onFling(
@@ -686,8 +954,9 @@ class PlayerActivity : FragmentActivity() {
                 // If touch starts inside an active menu area, ignore it (let the menu itself handle it)
                 val insideMenu = isInsideMenu(e1.x)
                 val inDeadzone = isInDeadzone(e1.x)
+                val inTopDeadzone = isInTopDeadzone(e1.y)
                 
-                if (insideMenu || inDeadzone) {
+                if (insideMenu || inDeadzone || inTopDeadzone) {
                     return false
                 }
                 
@@ -755,6 +1024,7 @@ class PlayerActivity : FragmentActivity() {
 
             override fun onDoubleTap(e: MotionEvent): Boolean {
                 if (scaleGestureDetector.isInProgress) return false
+                if (currentState != MenuState.NONE) return false
                 // Double tap -> Toggle video format
                 toggleVideoFormat()
                 return true
@@ -1382,6 +1652,48 @@ class PlayerActivity : FragmentActivity() {
         // Initialize chat panel as hidden (translated off screen)
         binding.chatPanel.translationX = 280f * resources.displayMetrics.density
         binding.chatPanel.visibility = View.GONE
+        
+        // Initialize WebSocket early to listen for channel events (even if chat is closed)
+        setupWebSocket()
+    }
+
+    private fun setupWebSocket() {
+        chatWebSocket = KcikChatWebSocket(
+            onMessageReceived = { message ->
+                chatHandler.post {
+                    addChatMessage(message)
+                }
+            },
+            onEventReceived = { event, data ->
+                chatHandler.post {
+                    handleChannelEvent(event, data)
+                }
+            },
+            onConnectionStateChanged = { _ ->
+                chatHandler.post {
+                    updateChatConnectionIndicator()
+                }
+            }
+        )
+        chatWebSocket?.connect()
+    }
+
+    private fun handleChannelEvent(event: String, data: String) {
+        if (event.contains("StreamerIsLive")) {
+            Log.d("PlayerActivity", "Received StreamerIsLive event! Refreshing channel to start playback...")
+            stopRecoveryPolling() // Event is better than polling
+            // Small delay to ensure HLS playlist is fully ready on server after event
+            hideHandler.postDelayed({
+                if (allChannels.isNotEmpty() && currentChannelIndex in allChannels.indices) {
+                    val channel = allChannels[currentChannelIndex]
+                    // Update local state so playCurrentChannel doesn't return early
+                    val updatedChannel = channel.copy(isLive = true)
+                    allChannels[currentChannelIndex] = updatedChannel
+                    
+                    playCurrentChannel(useZapDelay = false, showInfo = true)
+                }
+            }, 2500L)
+        }
     }
 
     private fun applySettings() {
@@ -1410,6 +1722,7 @@ class PlayerActivity : FragmentActivity() {
         applyThemeToQuickButton(binding.btnQualityQuick, themeColor)
         applyThemeToQuickButton(binding.btnRefreshQuick, themeColor)
         applyThemeToQuickButton(binding.btnStatsQuick, themeColor)
+        applyThemeToQuickButton(binding.btnPipQuick, themeColor, Color.parseColor("#1976D2")) // Distinct Blue for PIP
         
         // Update Adapter Themes
         // Update Sidebar themes
@@ -1426,9 +1739,10 @@ class PlayerActivity : FragmentActivity() {
         }
     }
 
-    private fun applyThemeToQuickButton(view: View, color: Int) {
+    private fun applyThemeToQuickButton(view: View, themeColor: Int, focusColor: Int? = null) {
         view.background = null // Remove any legacy rectangle background
         val greyColor = Color.parseColor("#BBBBBB")
+        val finalFocusColor = focusColor ?: themeColor
         
         view.setOnFocusChangeListener { v, hasFocus ->
             // Find the FrameLayout (selection background) which is the first child in our new XML
@@ -1437,7 +1751,7 @@ class PlayerActivity : FragmentActivity() {
                 val bg = GradientDrawable()
                 bg.shape = GradientDrawable.OVAL
                 if (hasFocus) {
-                    bg.setColor(color)
+                    bg.setColor(finalFocusColor)
                     v.setAllChildrenColor(Color.WHITE)
                 } else {
                     bg.setColor(Color.TRANSPARENT)
@@ -1508,11 +1822,49 @@ class PlayerActivity : FragmentActivity() {
     }
     
     private fun updateStats() {
+        if (prefs.playerEngine == "exo") {
+            val player = exoPlayer ?: return
+            val videoFormat = player.videoFormat
+            val resolution = if (videoFormat != null) "${videoFormat.width}x${videoFormat.height}" else "Unknown"
+            val bitRateMbps = if (videoFormat != null && videoFormat.bitrate > 0) String.format("%.2f Mbps", videoFormat.bitrate / 1000000.0) else "Unknown"
+            
+            // Latency
+            val latencyMs = player.currentLiveOffset
+            val latencyStr = if (latencyMs != -1L) String.format("%.2fs", latencyMs / 1000.0) else "N/A"
+            
+            // Buffer
+            val bufferMs = Math.max(0L, player.bufferedPosition - player.currentPosition)
+            val bufferStr = String.format("%.2fs", bufferMs / 1000.0)
+            
+            // Dropped Frames
+            val counters = player.videoDecoderCounters
+            val dropped = counters?.droppedBufferCount ?: 0
+            val rendered = counters?.renderedOutputBufferCount ?: 0
+            val decoded = (counters?.skippedInputBufferCount ?: 0) + (counters?.skippedOutputBufferCount ?: 0) + rendered
+            val dropPercent = if (decoded > 0) String.format("%.2f%%", (dropped.toDouble() / (decoded + dropped).toDouble()) * 100.0) else "0.00%"
+            
+            val yesStr = getString(R.string.yes)
+            val noStr = getString(R.string.no)
+
+            val content = """
+                ${getString(R.string.stat_resolution)}:      $resolution
+                ${getString(R.string.stat_bitrate)}:         $bitRateMbps
+                ${getString(R.string.stat_codec)}:           ${videoFormat?.sampleMimeType ?: "AVC/H.264"} (Exo)
+                
+                ${getString(R.string.stat_dropped_frames)}:  $dropped / $decoded ($dropPercent)
+                ${getString(R.string.stat_buffer_health)}:   $bufferStr
+                ${getString(R.string.stat_latency)}:         $latencyStr
+                ${getString(R.string.stat_playback_rate)}:   ${String.format("%.2f", player.playbackParameters.speed)}x
+                
+                ${getString(R.string.stat_volume)}:          ${(player.volume * 100).toInt()}%
+            """.trimIndent()
+            binding.statsContent.text = content
+            return
+        }
+
         val player = ivsPlayer ?: return
-        val quality = player.quality
+        val quality = player.quality ?: return
         val stats = player.statistics
-        // log stats
-        Log.d("Stats", "Stats: $stats")
         
         val statsStr = stats.toString()
         val resolution = "${quality.width}x${quality.height}"
@@ -1569,8 +1921,10 @@ class PlayerActivity : FragmentActivity() {
             com.amazonaws.ivs.player.ResizeMode.FIT
         }
         // Disable auto-pause when surface visibility changes (for PIP support)
-        binding.playerView.player?.setAutoQualityMode(true)
         ivsPlayer = binding.playerView.player
+        ivsPlayer?.setAutoQualityMode(true)
+        ivsPlayer?.setRebufferToLive(true) // Crucial for low-latency stability: jumps to live edge instead of buffering
+        ivsPlayer?.playbackRate = 1.0f    // Ensure normal speed by default (IVS auto-adjusts to catch up)
         
         ivsPlayer?.addListener(object : Player.Listener() {
             override fun onStateChanged(state: Player.State) {
@@ -1580,6 +1934,14 @@ class PlayerActivity : FragmentActivity() {
                     binding.sidebarLoadingBar.visibility = View.VISIBLE
                     stopStabilityWatchdog()
                 } else if (state == Player.State.PLAYING) {
+                    // Start background audio service immediately when playback starts (like a music player)
+                    // This prevents audio interruption when screen is locked
+                    // Start background audio service if enabled
+                    if (!isBackgroundAudioEnabled && prefs.backgroundAudioEnabled && !isTvDevice()) {
+                        isBackgroundAudioEnabled = true
+                        startBackgroundPlayback()
+                    }
+                    
                     // Give the player a tiny bit of time (150ms) to swap the first frame into the surface
                     // This prevents seeing the last frame of the previous channel
                     binding.playerView.postDelayed({
@@ -1587,6 +1949,7 @@ class PlayerActivity : FragmentActivity() {
                             binding.playerView.visibility = View.VISIBLE
                             binding.loadingThumbnailView.visibility = View.GONE
                             binding.sidebarLoadingBar.visibility = View.GONE
+                            binding.offlineBannerView.visibility = View.GONE
                             hideError()
                             resetRetryCount()
                             startStabilityWatchdog()
@@ -1595,6 +1958,10 @@ class PlayerActivity : FragmentActivity() {
                 } else if (state == Player.State.READY) {
                     binding.sidebarLoadingBar.visibility = View.GONE
                     stopStabilityWatchdog()
+                } else if (state == Player.State.ENDED) {
+                    stopStabilityWatchdog()
+                    allChannels.getOrNull(currentChannelIndex)?.let { updateChannelUIForOffline(it) }
+                    startRecoveryPolling()
                 } else {
                     stopStabilityWatchdog()
                 }
@@ -1618,56 +1985,122 @@ class PlayerActivity : FragmentActivity() {
             override fun onCue(cue: Cue) {}
             override fun onDurationChanged(duration: Long) {}
             override fun onMetadata(type: String, data: ByteBuffer) {
-                try {
-                    val metadataString = java.nio.charset.StandardCharsets.UTF_8.decode(data).toString()
-                    Log.d("PlayerActivity", "Metadata content: $metadataString")
-                    
-                    if (metadataString.trim().startsWith("{")) {
-                        val json = org.json.JSONObject(metadataString)
-                        
-                        // 1. Sync System Clock with Server Time (Primary source for sync)
-                        val serverTimeSec = when {
-                            json.has("X-SERVER-TIME") -> json.optDouble("X-SERVER-TIME", 0.0)
-                            json.has("X-TIMESTAMP") -> json.optDouble("X-TIMESTAMP", 0.0)
-                            else -> 0.0
-                        }
-                        
-                        // Also try to parse START-DATE which is ISO string
-                        var serverTimeFromDate = 0L
-                        if (json.has("START-DATE")) {
-                            parseIsoDate(json.getString("START-DATE"))?.let { serverTimeFromDate = it }
-                        }
-                        
-                        val finalServerTimeMillis = if (serverTimeSec > 0) (serverTimeSec * 1000).toLong() else serverTimeFromDate
-                        
-                        if (finalServerTimeMillis > 0) {
-                            // Calculate how much our system clock is off/behind
-                            serverClockOffset = finalServerTimeMillis - System.currentTimeMillis()
-                            Log.d("PlayerActivity", "Synced offset: ${serverClockOffset}ms (Server: $finalServerTimeMillis, Sys: ${System.currentTimeMillis()})")
-                        }
-                        
-                        // 2. Direct Uptime (if available in segments)
-                        val streamTime = when {
-                            json.has("STREAM-TIME") -> json.optDouble("STREAM-TIME", -1.0)
-                            json.has("X-STREAM-TIME") -> json.optDouble("X-STREAM-TIME", -1.0)
-                            else -> -1.0
-                        }
-                        
-                        if (streamTime >= 0) {
-                            lifecycleScope.launch(Dispatchers.Main) {
-                                binding.streamTimeBadge.text = formatStreamTime(streamTime.toLong())
-                                binding.streamTimeBadge.visibility = View.VISIBLE
+                // Optimization: Parse metadata on a background thread to avoid UI jank
+                val dataCopy = data.duplicate()
+                lifecycleScope.launch(Dispatchers.Default) {
+                    try {
+                        val metadataString = java.nio.charset.StandardCharsets.UTF_8.decode(dataCopy).toString()
+                        if (metadataString.trim().startsWith("{")) {
+                            val json = org.json.JSONObject(metadataString)
+                            
+                            // 1. Sync System Clock with Server Time
+                            val serverTimeSec = when {
+                                json.has("X-SERVER-TIME") -> json.optDouble("X-SERVER-TIME", 0.0)
+                                json.has("X-TIMESTAMP") -> json.optDouble("X-TIMESTAMP", 0.0)
+                                else -> 0.0
+                            }
+                            
+                            var serverTimeFromDate = 0L
+                            if (json.has("START-DATE")) {
+                                parseIsoDate(json.getString("START-DATE"))?.let { serverTimeFromDate = it }
+                            }
+                            
+                            val finalServerTimeMillis = if (serverTimeSec > 0) (serverTimeSec * 1000).toLong() else serverTimeFromDate
+                            
+                            if (finalServerTimeMillis > 0) {
+                                serverClockOffset = finalServerTimeMillis - System.currentTimeMillis()
+                            }
+                            
+                            // 2. Direct Uptime Update
+                            val streamTime = when {
+                                json.has("STREAM-TIME") -> json.optDouble("STREAM-TIME", -1.0)
+                                json.has("X-STREAM-TIME") -> json.optDouble("X-STREAM-TIME", -1.0)
+                                else -> -1.0
+                            }
+                            
+                            if (streamTime >= 0) {
+                                withContext(Dispatchers.Main) {
+                                    binding.streamTimeBadge.text = formatStreamTime(streamTime.toLong())
+                                    binding.streamTimeBadge.visibility = View.VISIBLE
+                                }
                             }
                         }
+                    } catch (e: Exception) {
+                        Log.e("PlayerActivity", "Metadata parse error", e)
                     }
-                } catch (e: Exception) {
-                    Log.e("PlayerActivity", "Metadata parse error", e)
                 }
             }
             override fun onRebuffering() {}
             override fun onSeekCompleted(position: Long) {}
             override fun onVideoSizeChanged(width: Int, height: Int) {}
             override fun onAnalyticsEvent(name: String, properties: String) {}
+        })
+    }
+
+    private fun initializeExoPlayer() {
+        // Optimization: Custom LoadControl for lower latency
+        val loadControl = DefaultLoadControl.Builder()
+            .setBufferDurationsMs(
+                500,  // Min buffer (0.5s)
+                1500, // Max buffer (1.5s)
+                250,  // Buffer for playback start (0.25s)
+                500   // Buffer for playback after rebuffer
+            )
+            .build()
+
+        exoPlayer = ExoPlayer.Builder(this)
+            .setLoadControl(loadControl)
+            .build()
+        
+        binding.exoPlayerView.player = exoPlayer
+        
+        exoPlayer?.addListener(object : ExoPlayerBase.Listener {
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                when (playbackState) {
+                    ExoPlayerBase.STATE_BUFFERING -> {
+                        binding.sidebarLoadingBar.visibility = View.VISIBLE
+                        stopStabilityWatchdog()
+                    }
+                    ExoPlayerBase.STATE_READY -> {
+                         binding.sidebarLoadingBar.visibility = View.GONE
+                         if (exoPlayer?.playWhenReady == true) {
+                            binding.exoPlayerView.visibility = View.VISIBLE
+                            binding.loadingThumbnailView.visibility = View.GONE
+                            binding.offlineBannerView.visibility = View.GONE
+                            hideError()
+                            resetRetryCount()
+                            startStabilityWatchdog()
+                            
+                            // Start background audio service if enabled
+                            if (!isBackgroundAudioEnabled && prefs.backgroundAudioEnabled && !isTvDevice()) {
+                                isBackgroundAudioEnabled = true
+                                startBackgroundPlayback()
+                            }
+                         }
+                         updatePictureInPictureParams()
+                         updateMediaSessionState()
+                    }
+                    ExoPlayerBase.STATE_ENDED -> {
+                        stopStabilityWatchdog()
+                        allChannels.getOrNull(currentChannelIndex)?.let { updateChannelUIForOffline(it) }
+                        startRecoveryPolling()
+                    }
+                }
+            }
+
+            override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
+                Log.e("ExoPlayer", "Error: ${error.message}", error)
+                scheduleRetry()
+            }
+
+            override fun onVideoSizeChanged(videoSize: VideoSize) {
+                if (videoSize.width > 0 && videoSize.height > 0) {
+                    binding.qualityBadge.text = if (videoSize.height >= 1080) "1080P" 
+                                              else if (videoSize.height >= 720) "720P"
+                                              else "${videoSize.height}P"
+                    binding.fpsBadge.visibility = View.GONE // ExoPlayer doesn't expose FPS easily
+                }
+            }
         })
     }
 
@@ -1769,13 +2202,14 @@ class PlayerActivity : FragmentActivity() {
         }
     }
     
-    private fun playCurrentChannel(useZapDelay: Boolean = false, showInfo: Boolean = true) {
+    private fun playCurrentChannel(useZapDelay: Boolean = false, showInfo: Boolean = true, keepBanner: Boolean = false, isRetry: Boolean = false) {
         if (allChannels.isEmpty()) return
         
-        // Cancel any pending zap or load
-        zapHandler.removeCallbacksAndMessages(null)
-        hideError()
-        resetRetryCount()
+        stopRecoveryPolling()
+        if (!isRetry) {
+            hideError()
+            resetRetryCount()
+        }
         
         // Reset refresh timer
         refreshHandler.removeCallbacks(activeChannelRefreshRunnable)
@@ -1801,6 +2235,9 @@ class PlayerActivity : FragmentActivity() {
         ivsPlayer?.pause()
         // RESET VIDEO VIEW IMMEDIATELY (Prevent frozen frame)
         binding.playerView.visibility = View.GONE
+        if (!keepBanner) {
+            binding.offlineBannerView.visibility = View.GONE
+        }
         
         // Reset uptime
         streamCreatedAtMillis = null
@@ -1814,9 +2251,11 @@ class PlayerActivity : FragmentActivity() {
         updateChannelUI(channel)
         if (showInfo) showInfoOverlay() // Show info immediately on explicit play/list change
 
+        // Connect/Subscribe to channel events (StreamerIsLive) and Chat if needed
+        connectToChat(channel.slug)
+
         if (!channel.isLive) {
             updateChannelUIForOffline(channel)
-            reconnectChatIfNeeded()
             return
         }
 
@@ -1832,16 +2271,47 @@ class PlayerActivity : FragmentActivity() {
             binding.loadingThumbnailView.visibility = View.GONE
         }
 
-        // Reconnect chat if needed
-        reconnectChatIfNeeded()
-
         val playAction = Runnable {
             loadingJob?.cancel()
             loadingJob = lifecycleScope.launch {
                 repository.getStreamUrl(channel.slug).onSuccess { url ->
-                    ivsPlayer?.pause()
-                    ivsPlayer?.load(Uri.parse(url))
-                    ivsPlayer?.play()
+                    if (prefs.playerEngine == "exo") {
+                        ivsPlayer?.pause()
+                        exoPlayer?.stop()
+                        
+                        val mode = prefs.catchUpMode
+                        val liveConfigBuilder = MediaItem.LiveConfiguration.Builder()
+                        
+                        if (mode == "off") {
+                            liveConfigBuilder.setTargetOffsetMs(8000)
+                                .setMinPlaybackSpeed(1.0f)
+                                .setMaxPlaybackSpeed(1.0f)
+                        } else if (mode == "high") {
+                            liveConfigBuilder.setTargetOffsetMs(4000)
+                                .setMinPlaybackSpeed(0.97f)
+                                .setMaxPlaybackSpeed(1.08f)
+                        } else { // low
+                            liveConfigBuilder.setTargetOffsetMs(6000)
+                                .setMinPlaybackSpeed(0.98f)
+                                .setMaxPlaybackSpeed(1.04f)
+                        }
+
+                        val liveConfig = liveConfigBuilder.build()
+                            
+                        val mediaItem = MediaItem.Builder()
+                            .setUri(url)
+                            .setLiveConfiguration(liveConfig)
+                            .build()
+                            
+                        exoPlayer?.setMediaItem(mediaItem)
+                        exoPlayer?.prepare()
+                        exoPlayer?.play()
+                    } else {
+                        exoPlayer?.pause()
+                        ivsPlayer?.pause()
+                        ivsPlayer?.load(Uri.parse(url))
+                        ivsPlayer?.play()
+                    }
                 }.onFailure {
                     scheduleRetry()
                 }
@@ -1869,7 +2339,7 @@ class PlayerActivity : FragmentActivity() {
         currentProfileBitmap = null
         Glide.with(this)
             .asBitmap()
-            .load(channel.profilePicUrl)
+            .load(channel.getEffectiveProfilePicUrl())
             .circleCrop()
             .into(object : CustomTarget<Bitmap>() {
                 override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
@@ -1890,7 +2360,6 @@ class PlayerActivity : FragmentActivity() {
         binding.viewerCount.visibility = View.VISIBLE
         binding.categoryName.visibility = View.VISIBLE
         binding.qualityBadge.visibility = View.VISIBLE
-        binding.offlineBannerView.visibility = View.GONE
         binding.viewerIcon.visibility = View.VISIBLE
         binding.tagContainer.visibility = View.VISIBLE
         
@@ -1940,6 +2409,9 @@ class PlayerActivity : FragmentActivity() {
         } ?: run {
             binding.streamTimeBadge.visibility = View.GONE
         }
+        
+        // Ensure MediaSession metadata and state are updated immediately
+        updateMediaSessionState()
     }
 
     // ... formatViewerCount ...
@@ -2061,6 +2533,34 @@ class PlayerActivity : FragmentActivity() {
         binding.btnQualityQuick.visibility = if (isLive) View.VISIBLE else View.GONE
         binding.btnStatsQuick.visibility = if (isLive) View.VISIBLE else View.GONE
         binding.btnRefreshQuick.visibility = View.VISIBLE
+        
+        // Show PIP button: Always on TV, only for "Manual" mode on Mobile
+        val showPipButton = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O && 
+                           (isTvDevice() || !prefs.autoPipEnabled)
+        binding.btnPipQuick.visibility = if (showPipButton) View.VISIBLE else View.GONE
+        
+        // Set focus navigation for PIP button based on visible buttons
+        if (showPipButton) {
+            if (isLive) {
+                // Stats visible: Stats -> PIP
+                binding.btnStatsQuick.nextFocusRightId = R.id.btnPipQuick
+                binding.btnPipQuick.nextFocusLeftId = R.id.btnStatsQuick
+            } else {
+                // Stats hidden: Refresh -> PIP
+                binding.btnRefreshQuick.nextFocusRightId = R.id.btnPipQuick
+                binding.btnPipQuick.nextFocusLeftId = R.id.btnRefreshQuick
+            }
+        } else {
+            // Reset focus navigation
+            binding.btnStatsQuick.nextFocusRightId = View.NO_ID
+            binding.btnRefreshQuick.nextFocusRightId = View.NO_ID
+        }
+        
+        // PIP button click handler
+        binding.btnPipQuick.setOnClickListener {
+            hideAllOverlays()
+            enterPipMode()
+        }
         
         val targetButton = if (isLive) binding.btnQualityQuick else binding.btnRefreshQuick
         
@@ -2418,13 +2918,81 @@ class PlayerActivity : FragmentActivity() {
     }
 
     private fun showPlayerSettings() {
-        val items = listOf(
+        val items = mutableListOf(
+            SelectionItem("engine", getString(R.string.setting_player_engine)),
+            SelectionItem("catch_up", getString(R.string.setting_catch_up)),
             SelectionItem("zap", getString(R.string.setting_zap_delay))
         )
         
+        if (!isTvDevice()) {
+            items.add(SelectionItem("background", getString(R.string.setting_background_audio)))
+            items.add(SelectionItem("auto_pip", getString(R.string.setting_auto_pip)))
+        }
+        
         showSidebar(getString(R.string.settings_category_player), items, "settings_sub") { item ->
             when (item.id) {
+                "engine" -> { lastSubSettingsFocusId = null; showPlayerEngineSidebar() }
+                "catch_up" -> { lastSubSettingsFocusId = null; showCatchUpSidebar() }
                 "zap" -> { lastSubSettingsFocusId = null; showZapDelaySidebar() }
+                "background" -> { lastSubSettingsFocusId = null; showBackgroundAudioSidebar() }
+                "auto_pip" -> { lastSubSettingsFocusId = null; showAutoPipSidebar() }
+            }
+        }
+    }
+
+    private fun showCatchUpSidebar() {
+        val items = listOf(
+            SelectionItem("off", getString(R.string.catch_up_off), isSelected = prefs.catchUpMode == "off"),
+            SelectionItem("low", getString(R.string.catch_up_low), isSelected = prefs.catchUpMode == "low"),
+            SelectionItem("high", getString(R.string.catch_up_high), isSelected = prefs.catchUpMode == "high")
+        )
+        
+        showSidebar(getString(R.string.sidebar_title_catch_up), items, "settings_sub") { item ->
+            prefs.catchUpMode = item.id
+            // Update IVS immediately
+            if (item.id == "off") {
+                ivsPlayer?.playbackRate = 1.0f
+            }
+            showCatchUpSidebar()
+        }
+    }
+
+    private fun showBackgroundAudioSidebar() {
+        val items = listOf(
+            SelectionItem("on", getString(R.string.yes), isSelected = prefs.backgroundAudioEnabled),
+            SelectionItem("off", getString(R.string.no), isSelected = !prefs.backgroundAudioEnabled)
+        )
+        
+        showSidebar(getString(R.string.sidebar_title_background_audio), items, "settings_background") { item ->
+            prefs.backgroundAudioEnabled = item.id == "on"
+            (binding.sidebarRecyclerView.adapter as? GenericSelectionAdapter)?.updateSingleSelection(item.id)
+        }
+    }
+
+    private fun showAutoPipSidebar() {
+        val items = listOf(
+            SelectionItem("on", getString(R.string.pip_automatic), isSelected = prefs.autoPipEnabled),
+            SelectionItem("off", getString(R.string.pip_manual), isSelected = !prefs.autoPipEnabled)
+        )
+        
+        showSidebar(getString(R.string.sidebar_title_auto_pip), items, "settings_auto_pip") { item ->
+            prefs.autoPipEnabled = item.id == "on"
+            (binding.sidebarRecyclerView.adapter as? GenericSelectionAdapter)?.updateSingleSelection(item.id)
+        }
+    }
+
+    private fun showPlayerEngineSidebar() {
+        val currentEngine = prefs.playerEngine
+        val items = listOf(
+            SelectionItem("amazon_ivs", "Amazon IVS (Native/Low-Latency)", isSelected = currentEngine == "amazon_ivs"),
+            SelectionItem("exo", "ExoPlayer (Media3 - Alternative)", isSelected = currentEngine == "exo")
+        )
+        
+        showSidebar(getString(R.string.sidebar_title_engine), items, "settings_engine") { item ->
+            if (prefs.playerEngine != item.id) {
+                prefs.playerEngine = item.id
+                // Re-initialize players or recreate
+                recreate()
             }
         }
     }
@@ -2893,10 +3461,13 @@ class PlayerActivity : FragmentActivity() {
                     if (!isChatVisible) showChat() else hideChat()
                     return true
                 }
-                // In Quick Menu: allow right navigation between buttons, trap only at last button
+                // In Quick Menu: allow right navigation between buttons, trap only at last visible button
                 if (currentState == MenuState.QUICK_MENU) {
                     val focused = currentFocus
-                    if (focused == binding.btnStatsQuick) {
+                    val isPipVisible = binding.btnPipQuick.visibility == View.VISIBLE
+                    // Trap at PIP if visible, otherwise trap at Stats
+                    val lastButton = if (isPipVisible) binding.btnPipQuick else binding.btnStatsQuick
+                    if (focused == lastButton) {
                         return true // At last button, trap
                     }
                     // Otherwise let default focus handling move to next button
@@ -2907,10 +3478,13 @@ class PlayerActivity : FragmentActivity() {
                     showChannelSidebar()
                     return true
                 }
-                // In Quick Menu: allow left navigation between buttons, trap only at first button
+                // In Quick Menu: allow left navigation between buttons, trap only at first visible button
                 if (currentState == MenuState.QUICK_MENU) {
                     val focused = currentFocus
-                    if (focused == binding.btnQualityQuick) {
+                    val isQualityVisible = binding.btnQualityQuick.visibility == View.VISIBLE
+                    // Trap at Quality if visible, otherwise trap at Refresh
+                    val firstButton = if (isQualityVisible) binding.btnQualityQuick else binding.btnRefreshQuick
+                    if (focused == firstButton) {
                         return true // At first button, trap
                     }
                     // Otherwise let default focus handling move to previous button
@@ -2932,12 +3506,12 @@ class PlayerActivity : FragmentActivity() {
                     }
                 }
             }
-            // CH+ / CH- buttons
-            KeyEvent.KEYCODE_CHANNEL_UP, KeyEvent.KEYCODE_PAGE_UP -> {
+            // CH+ / CH- and Media Next/Previous buttons
+            KeyEvent.KEYCODE_CHANNEL_UP, KeyEvent.KEYCODE_PAGE_UP, KeyEvent.KEYCODE_MEDIA_NEXT -> {
                 nextChannel()
                 return true
             }
-            KeyEvent.KEYCODE_CHANNEL_DOWN, KeyEvent.KEYCODE_PAGE_DOWN -> {
+            KeyEvent.KEYCODE_CHANNEL_DOWN, KeyEvent.KEYCODE_PAGE_DOWN, KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
                 previousChannel()
                 return true
             }
@@ -2968,12 +3542,20 @@ class PlayerActivity : FragmentActivity() {
                 }
                 when (currentState) {
                     MenuState.SIDEBAR -> { 
-                        if (sidebarContext == "settings_sub" || sidebarContext == "settings_theme") {
+                        if (sidebarContext == "settings_sub" || sidebarContext == "settings_theme" || 
+                            sidebarContext == "settings_engine" || sidebarContext == "settings_background" || 
+                            sidebarContext == "settings_auto_pip") {
+                            
                             if (sidebarContext == "settings_theme") {
                                 prefs.themeColor = originalThemeColor
                                 applySettings()
+                                showAppearanceSettings()
+                            } else if (sidebarContext == "settings_engine" || sidebarContext == "settings_background" || 
+                                     sidebarContext == "settings_auto_pip") {
+                                showPlayerSettings()
+                            } else {
+                                showSettingsSidebar()
                             }
-                            showSettingsSidebar()
                         } else if (sidebarContext == "settings") {
                             showChannelSidebar(requestFocus = false)
                             showDrawer(focusType = "settings") // Drawer focus wins
@@ -3209,13 +3791,8 @@ class PlayerActivity : FragmentActivity() {
                 val isLive = fullDetails.livestream != null
                 
                 if (isLive) {
-                    // Stream still active, get the stream URL
-                    repository.getStreamUrl(channel.slug).onSuccess { url ->
-                        ivsPlayer?.load(Uri.parse(url))
-                        ivsPlayer?.play()
-                    }.onFailure {
-                        scheduleRetry()
-                    }
+                    // standardize retry to use playCurrentChannel
+                    playCurrentChannel(useZapDelay = false, showInfo = false, keepBanner = true, isRetry = true)
                 } else {
                     // Channel is truly offline
                     resetRetryCount()
@@ -3296,39 +3873,24 @@ class PlayerActivity : FragmentActivity() {
         binding.sidebarLoadingBar.visibility = View.GONE
         binding.loadingThumbnailView.visibility = View.GONE 
         
-        Glide.with(this).load(channel.profilePicUrl).circleCrop().into(binding.profileImage)
+        Glide.with(this).load(channel.getEffectiveProfilePicUrl()).circleCrop().into(binding.profileImage)
         
         // Ensure banner is behind menus (Menus are 10dp, Banner 1dp is fine)
         binding.playerView.visibility = View.GONE
         binding.offlineBannerView.visibility = View.VISIBLE
         
-        if (!channel.offlineBannerUrl.isNullOrEmpty()) {
-            val currentBannerUrl = binding.offlineBannerView.tag as? String
-            
-            // Only reload if the URL has actually changed
-            if (currentBannerUrl != channel.offlineBannerUrl) {
-                binding.offlineBannerView.tag = channel.offlineBannerUrl
-                Glide.with(this)
-                    .load(channel.offlineBannerUrl)
-                    .centerCrop()
-                    .placeholder(binding.offlineBannerView.drawable ?: ColorDrawable(Color.BLACK))
-                    .error(ColorDrawable(Color.BLACK))
-                    .into(binding.offlineBannerView)
-            }
-        } else {
-            // Use profile pic with blur if banner is null
-            val profileTag = "profile_blur_${channel.profilePicUrl}"
-            val currentTag = binding.offlineBannerView.tag as? String
-            
-            if (currentTag != profileTag) {
-                binding.offlineBannerView.tag = profileTag
-                Glide.with(this)
-                    .load(channel.profilePicUrl)
-                    .centerCrop()
-                    .transform(BlurTransformation(25, 3))
-                    .placeholder(binding.offlineBannerView.drawable ?: ColorDrawable(Color.BLACK))
-                    .into(binding.offlineBannerView)
-            }
+        val bannerUrl = channel.getEffectiveOfflineBannerUrl()
+        val currentBannerUrl = binding.offlineBannerView.tag as? String
+        
+        // Only reload if the URL has actually changed
+        if (currentBannerUrl != bannerUrl) {
+            binding.offlineBannerView.tag = bannerUrl
+            Glide.with(this)
+                .load(bannerUrl)
+                .centerCrop()
+                .placeholder(binding.offlineBannerView.drawable ?: ColorDrawable(Color.BLACK))
+                .error(ColorDrawable(Color.BLACK))
+                .into(binding.offlineBannerView)
         }
     }
     private fun Int.toPx(): Float = this * resources.displayMetrics.density
@@ -3503,16 +4065,16 @@ class PlayerActivity : FragmentActivity() {
             binding.playerContainer.layoutParams = lp
         }
         
-        // Start chat connection
+        // Start/Update chat session (will subscribe to chat since isChatVisible is now true)
         connectToChat(channel.slug)
     }
     
     private fun hideChat() {
         isChatVisible = false
         
-        // Close chat connection
-        chatWebSocket?.disconnect()
-        chatWebSocket = null
+        // Unsubscribe from chat to save data, but keep connection for channel events
+        chatWebSocket?.unsubscribeFromChat()
+        chatAdapter?.clearMessages()
         
         val chatWidthPx = (300f * resources.displayMetrics.density).toInt()
         val currentMargin = (binding.playerContainer.layoutParams as FrameLayout.LayoutParams).marginEnd
@@ -3551,51 +4113,65 @@ class PlayerActivity : FragmentActivity() {
     }
     
     private fun connectToChat(slug: String) {
-        android.util.Log.d("PlayerActivity", "connectToChat called for slug: $slug")
+        val slugChanged = lastSubscribedSlug != slug
+        Log.d("PlayerActivity", "Syncing WebSocket - slug: $slug, changed: $slugChanged, chatVisible: $isChatVisible")
         
-        // First get chat info
-        lifecycleScope.launch {
+        // Ensure WebSocket is physically connected to Pusher
+        chatWebSocket?.connect()
+        
+        // Cancel any previous connection attempt for other slugs
+        chatConnectJob?.cancel()
+        
+        chatConnectJob = lifecycleScope.launch {
             repository.getChatInfo(slug).onSuccess { chatInfo ->
-                android.util.Log.d("PlayerActivity", "Got channelId: ${chatInfo.channelId}, chatroomId: ${chatInfo.chatroomId}, badges: ${chatInfo.subscriberBadges.size}")
+                // Update tracker
+                lastSubscribedSlug = slug
                 
-                // Subscriber badges'i adapter'a gönder
-                chatHandler.post {
-                    chatAdapter?.setSubscriberBadges(chatInfo.subscriberBadges)
+                // 1. Subscribe to channel events (e.g., StreamerIsLive)
+                // Always refresh if slug changed
+                if (slugChanged) {
+                    chatWebSocket?.unsubscribeFromChannelEvents()
+                    chatWebSocket?.subscribeToChannelEvents(chatInfo.channelId)
                 }
                 
-                // Load chat history first (with channelId)
-                repository.getChatHistory(chatInfo.channelId).onSuccess { historyMessages ->
-                    android.util.Log.d("PlayerActivity", "Got ${historyMessages.size} history messages")
+                // 2. Manage Chat Subscription
+                if (isChatVisible) {
                     chatHandler.post {
-                        if (historyMessages.isNotEmpty()) {
-                            android.util.Log.d("PlayerActivity", "Submitting ${historyMessages.size} messages to adapter")
-                            chatAdapter?.submitList(historyMessages) {
-                                binding.chatRecyclerView.scrollToPosition(historyMessages.size - 1)
+                        chatAdapter?.setSubscriberBadges(chatInfo.subscriberBadges)
+                        // Only clear if we actually changed channel or need fresh start
+                        if (slugChanged) chatAdapter?.clearMessages()
+                    }
+                    
+                    // Always subscribe to chat if visible (the socket method handles redundant calls)
+                    chatWebSocket?.subscribeToChat(chatInfo.chatroomId)
+                    
+                    // Fetch history only if it's a new channel for the chat
+                    if (slugChanged) {
+                        repository.getChatHistory(chatInfo.channelId).onSuccess { historyMessages ->
+                            chatHandler.post {
+                                if (historyMessages.isNotEmpty()) {
+                                    chatAdapter?.submitList(historyMessages) {
+                                        binding.chatRecyclerView.scrollToPosition(historyMessages.size - 1)
+                                    }
+                                }
                             }
-                        } else {
-                            android.util.Log.d("PlayerActivity", "No history messages to show")
+                        }.onFailure { error ->
+                            Log.e("PlayerActivity", "Chat history failed: ${error.message}")
                         }
                     }
-                }.onFailure { error ->
-                    android.util.Log.e("PlayerActivity", "Chat history failed: ${error.message}")
+                } else {
+                    // Chat hidden: Unsubscribe from chat to save data, but keep connection for channel events
+                    chatWebSocket?.unsubscribeFromChat()
+                    chatHandler.post {
+                        chatAdapter?.clearMessages()
+                    }
                 }
                 
-                // Create WebSocket connection (with chatroomId)
-                chatWebSocket = KcikChatWebSocket(
-                    onMessageReceived = { message ->
-                        chatHandler.post {
-                            addChatMessage(message)
-                        }
-                    },
-                    onConnectionStateChanged = { _ ->
-                        chatHandler.post {
-                            updateChatConnectionIndicator()
-                        }
-                    }
-                )
-                chatWebSocket?.connect(chatInfo.chatroomId)
+                chatHandler.post {
+                    updateChatConnectionIndicator()
+                }
             }.onFailure { error ->
-                android.util.Log.e("PlayerActivity", "getChatInfo failed: ${error.message}")
+                Log.e("PlayerActivity", "getChatInfo failed: ${error.message}")
                 chatHandler.post {
                     updateChatConnectionIndicator()
                 }
@@ -3625,9 +4201,7 @@ class PlayerActivity : FragmentActivity() {
     }
     
     private fun reconnectChatIfNeeded() {
-        if (isChatVisible && allChannels.isNotEmpty()) {
-            chatWebSocket?.disconnect()
-            chatAdapter?.clearMessages()
+        if (allChannels.isNotEmpty()) {
             val channel = allChannels[currentChannelIndex]
             connectToChat(channel.slug)
         }
@@ -3635,12 +4209,8 @@ class PlayerActivity : FragmentActivity() {
     
     override fun onResume() { 
         super.onResume()
-        if (isBackgroundAudioEnabled) {
-            Toast.makeText(this, getString(R.string.background_mode_disabled), Toast.LENGTH_SHORT).show()
-            updateMediaSessionState()
-        }
-        isBackgroundAudioEnabled = false // Reset when returning to foreground
-        setPowerSavingPlayback(false) // Restore quality
+        // Restore high quality when returning to foreground (service keeps running)
+        setPowerSavingPlayback(false)
         // Don't handle resume if in PIP mode (handled in onPictureInPictureModeChanged)
         if (isInPictureInPictureMode) {
             return
@@ -3658,12 +4228,14 @@ class PlayerActivity : FragmentActivity() {
         try {
             unregisterReceiver(pipReceiver)
             unregisterReceiver(screenStateReceiver)
+            unregisterReceiver(stopPlaybackReceiver)
         } catch (e: Exception) {}
         mediaSession?.release()
         mediaSession = null
         hideHandler.removeCallbacks(hideRunnable)
         channelInputHandler.removeCallbacks(channelInputRunnable)
         volumeHandler.removeCallbacks(hideVolumeRunnable)
+        powerSavingHandler.removeCallbacksAndMessages(null)
         retryHandler.removeCallbacksAndMessages(null)
         chatHandler.removeCallbacksAndMessages(null)
         chatWebSocket?.disconnect()
@@ -3672,6 +4244,8 @@ class PlayerActivity : FragmentActivity() {
         loginServer = null
         ivsPlayer?.release()
         ivsPlayer = null 
+        exoPlayer?.release()
+        exoPlayer = null
     }
 
     private fun formatStreamTime(seconds: Long): String {
@@ -3897,38 +4471,60 @@ class PlayerActivity : FragmentActivity() {
     override fun onPause() {
         super.onPause()
         
-        // 1. Check for Background Audio condition (Screen Lock or App Switch)
-        if (!isInPictureInPictureMode && !isFinishing) {
-             if (ivsPlayer?.state == com.amazonaws.ivs.player.Player.State.PLAYING) {
-                 android.util.Log.d("PlayerActivity", "onPause: Entering Background Audio Mode")
-                 isBackgroundAudioEnabled = true
-                 setPowerSavingPlayback(true)
-                 updateMediaSessionState() 
-                 return 
-             }
-        }
-        
-        // 2. If already in Background Mode or PIP, let it run
-        if (isInPictureInPictureMode || isBackgroundAudioEnabled) {
+        // Don't do anything if entering PIP mode - player continues seamlessly
+        if (isInPictureInPictureMode) {
+            Log.d("PlayerActivity", "onPause: In PIP mode, doing nothing")
             return
         }
         
-        // 3. Normal Pause -> Stop Everything
-        ivsPlayer?.pause()
-        refreshHandler.removeCallbacks(activeChannelRefreshRunnable)
-        refreshHandler.removeCallbacks(globalListRefreshRunnable)
-        retryHandler.removeCallbacksAndMessages(null)
-        chatWebSocket?.disconnect()
+        // If activity is finishing, clean up
+        if (isFinishing) {
+            ivsPlayer?.pause()
+            exoPlayer?.stop()
+            refreshHandler.removeCallbacks(activeChannelRefreshRunnable)
+            refreshHandler.removeCallbacks(globalListRefreshRunnable)
+            retryHandler.removeCallbacksAndMessages(null)
+            chatHandler.removeCallbacksAndMessages(null)
+            stopRecoveryPolling()
+            chatWebSocket?.disconnect()
+            return
+        }
+        
+        // Background audio - nothing to do, service is already running
+        Log.d("PlayerActivity", "onPause: Background mode active, audio continues")
     }
 
     override fun onStop() {
         super.onStop()
         
-        // Pause ONLY if not in background mode AND not in PIP
+        // On TV: Always stop playback when going to background (no background audio on TV)
+        if (isTvDevice()) {
+            Log.d("PlayerActivity", "onStop: TV device - stopping playback")
+            ivsPlayer?.pause()
+            exoPlayer?.pause()
+            isBackgroundAudioEnabled = false
+            // Stop the service
+            stopService(Intent(this, PlaybackService::class.java))
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.cancel(NOTIFICATION_ID)
+            return
+        }
+        
+        // On mobile: Pause ONLY if not in background mode AND not in PIP
         if (!isBackgroundAudioEnabled && !isInPictureInPictureMode) {
              ivsPlayer?.pause()
+             exoPlayer?.pause()
         }
     }
 
+    private fun startRecoveryPolling() {
+        stopRecoveryPolling()
+        recoveryAttempts = 0
+        Log.d("PlayerActivity", "Starting quick recovery polling for 1 minute...")
+        recoveryHandler.postDelayed(recoveryRunnable, 5000L)
+    }
 
+    private fun stopRecoveryPolling() {
+        recoveryHandler.removeCallbacks(recoveryRunnable)
+    }
 }

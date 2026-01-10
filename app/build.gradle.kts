@@ -11,10 +11,10 @@ android {
 
     defaultConfig {
         applicationId = "dev.xacnio.kciktv"
-        minSdk = 21
+        minSdk = 23
         targetSdk = 34
         versionCode = 1
-        versionName = "1.1.0-beta"
+        versionName = "1.2.0-beta"
     }
 
     buildTypes {
@@ -74,13 +74,19 @@ dependencies {
     kapt("com.github.bumptech.glide:compiler:4.16.0")
     
     // Amazon IVS Player for ultra-low latency
-    implementation("com.amazonaws:ivs-player:1.24.0")
+    implementation("com.amazonaws:ivs-player:1.48.0")
     
     // Gson
     implementation("com.google.code.gson:gson:2.10.1")
     
     // Local Web Server for QR Login
     implementation("org.nanohttpd:nanohttpd:2.3.1")
+    
+    // Media3 ExoPlayer for alternative playback engine
+    val media3Version = "1.5.1"
+    implementation("androidx.media3:media3-exoplayer:$media3Version")
+    implementation("androidx.media3:media3-exoplayer-hls:$media3Version")
+    implementation("androidx.media3:media3-ui:$media3Version")
     
     // QR Code Generation
     implementation("com.google.zxing:core:3.5.3")

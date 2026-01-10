@@ -35,6 +35,17 @@
             android:layout_height="match_parent"
             android:layout_gravity="center" />
 
+        <!-- Media3 ExoPlayer View (Alternative) -->
+        <androidx.media3.ui.PlayerView
+            android:id="@+id/exoPlayerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            app:use_controller="false"
+            app:surface_type="surface_view"
+            app:resize_mode="fit" />
+
         <!-- Loading Thumbnail (Blurred preview while video loads) -->
         <ImageView
             android:id="@+id/loadingThumbnailView"
@@ -515,7 +526,9 @@
             android:focusableInTouchMode="true"
             android:clickable="true"
             android:background="@android:color/transparent"
-            android:defaultFocusHighlightEnabled="false">
+            android:defaultFocusHighlightEnabled="false"
+            android:nextFocusRight="@id/btnPipQuick"
+            android:nextFocusLeft="@id/btnRefreshQuick">
 
             <FrameLayout
                 android:layout_width="56dp"
@@ -535,6 +548,47 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/stats"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"
+                android:alpha="0.9" />
+        </LinearLayout>
+
+        <!-- PIP Button (for TV) -->
+        <LinearLayout
+            android:id="@+id/btnPipQuick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:paddingHorizontal="16dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:clickable="true"
+            android:background="@android:color/transparent"
+            android:defaultFocusHighlightEnabled="false"
+            android:nextFocusLeft="@id/btnStatsQuick"
+            android:visibility="gone">
+
+            <FrameLayout
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="@drawable/quick_menu_selection_bg"
+                android:duplicateParentState="true">
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_pip"
+                    android:tint="@color/white" />
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PIP"
                 android:textColor="@color/white"
                 android:textSize="11sp"
                 android:textStyle="bold"

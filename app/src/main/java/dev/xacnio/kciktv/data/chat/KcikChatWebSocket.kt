@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit
  */
 class KcikChatWebSocket(
     private val onMessageReceived: (ChatMessage) -> Unit,
+    private val onEventReceived: (String, String) -> Unit = { _, _ -> },
     private val onConnectionStateChanged: (Boolean) -> Unit
 ) {
     companion object {
@@ -37,16 +38,14 @@ class KcikChatWebSocket(
     
     private var webSocket: WebSocket? = null
     private var currentChatroomId: Long? = null
+    private var currentChannelId: Long? = null
     private var isConnected = false
     
     /**
-     * Connect to a chatroom
+     * Connect to Pusher WebSocket
      */
-    fun connect(chatroomId: Long) {
-        // Disconnect from previous chatroom if any
-        disconnect()
-        
-        currentChatroomId = chatroomId
+    fun connect() {
+        if (isConnected) return
         
         val request = Request.Builder()
             .url(buildWebSocketUrl())
@@ -56,10 +55,12 @@ class KcikChatWebSocket(
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 Log.d(TAG, "WebSocket connected")
                 isConnected = true
-                onConnectionStateChanged(true)
                 
-                // Subscribe to chatroom
-                subscribeToChannel(chatroomId)
+                // Re-subscribe to pending requests
+                currentChatroomId?.let { subscribeToChat(it) }
+                currentChannelId?.let { subscribeToChannelEvents(it) }
+                
+                onConnectionStateChanged(true)
             }
             
             override fun onMessage(webSocket: WebSocket, text: String) {
@@ -84,18 +85,52 @@ class KcikChatWebSocket(
         })
     }
     
+    fun subscribeToChat(chatroomId: Long) {
+        currentChatroomId = chatroomId
+        if (!isConnected) {
+            Log.d(TAG, "Postponing chat subscription until connected")
+            return
+        }
+        val subscribe = """{"event":"pusher:subscribe","data":{"auth":"","channel":"chatrooms.$chatroomId.v2"}}"""
+        webSocket?.send(subscribe)
+        Log.d(TAG, "Requested subscription to chatroom: $chatroomId")
+    }
+
+    fun subscribeToChannelEvents(channelId: Long) {
+        currentChannelId = channelId
+        if (!isConnected) {
+            Log.d(TAG, "Postponing channel events subscription until connected")
+            return
+        }
+        val subscribe = """{"event":"pusher:subscribe","data":{"auth":"","channel":"channel.$channelId"}}"""
+        webSocket?.send(subscribe)
+        Log.d(TAG, "Requested subscription to channel events: $channelId")
+    }
+
+    fun unsubscribeFromChat() {
+        currentChatroomId?.let { id ->
+            val unsubscribe = """{"event":"pusher:unsubscribe","data":{"channel":"chatrooms.$id.v2"}}"""
+            webSocket?.send(unsubscribe)
+            currentChatroomId = null
+        }
+    }
+
+    fun unsubscribeFromChannelEvents() {
+        currentChannelId?.let { id ->
+            val unsubscribe = """{"event":"pusher:unsubscribe","data":{"channel":"channel.$id"}}"""
+            webSocket?.send(unsubscribe)
+            currentChannelId = null
+        }
+    }
+    
     /**
-     * Disconnect from current chatroom
+     * Fully disconnect and close WebSocket
      */
     fun disconnect() {
-        currentChatroomId?.let { chatroomId ->
-            // Unsubscribe from channel
-            val unsubscribe = """{"event":"pusher:unsubscribe","data":{"channel":"chatrooms.$chatroomId.v2"}}"""
-            webSocket?.send(unsubscribe)
-        }
+        unsubscribeFromChat()
+        unsubscribeFromChannelEvents()
         webSocket?.close(1000, "User disconnected")
         webSocket = null
-        currentChatroomId = null
         isConnected = false
     }
     
@@ -126,7 +161,16 @@ class KcikChatWebSocket(
                     }
                 }
                 else -> {
-                    Log.d(TAG, "Unhandled event: ${event.event}")
+                    // Try flexible matching for events with different backslash escaping
+                    val rawEventName = event.event ?: ""
+                    if (rawEventName.contains("StreamerIsLive")) {
+                        event.data?.let { dataString ->
+                            Log.d(TAG, "Matched StreamerIsLive event (flexible match: $rawEventName)")
+                            onEventReceived("App\\Events\\StreamerIsLive", dataString)
+                        }
+                    } else {
+                        Log.d(TAG, "Unhandled event: $rawEventName on channel ${event.channel}")
+                    }
                 }
             }
         } catch (e: Exception) {

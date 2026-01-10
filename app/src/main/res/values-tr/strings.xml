@@ -97,6 +97,8 @@
     <string name="setting_animations">Animasyonlar</string>
     <string name="setting_refresh_interval">Güncelleme Sıklığı</string>
     <string name="setting_update_channel">Güncelleme Kanalı</string>
+    <string name="setting_player_engine">Oynatıcı Motoru</string>
+    <string name="setting_catch_up">Yayını Yakalama</string>
     <string name="setting_about">Hakkında</string>
     <string name="visit_github">GitHub\'ı Ziyaret Et</string>
     <string name="sidebar_title_language">DİL SEÇİMİ</string>
@@ -107,6 +109,17 @@
     <string name="sidebar_title_zap">ZAP HIZI</string>
     <string name="sidebar_title_refresh">GÜNCELLEME SIKLIĞI</string>
     <string name="sidebar_title_update_channel">GÜNCELLEME KANALI</string>
+    <string name="sidebar_title_engine">OYNATICI MOTORU</string>
+    <string name="sidebar_title_background_audio">ARKA PLANDA OYNATMA</string>
+    <string name="sidebar_title_auto_pip">OTOMATİK PIP</string>
+    <string name="sidebar_title_catch_up">YAYINI YAKALAMA</string>
+    <string name="setting_background_audio">Arka Planda Oynatma</string>
+    <string name="setting_auto_pip">Otomatik PIP (Home Tuşu)</string>
+    <string name="pip_automatic">Otomatik</string>
+    <string name="pip_manual">Sadece Butonla</string>
+    <string name="catch_up_off">Kapalı</string>
+    <string name="catch_up_low">Düşük Seviye</string>
+    <string name="catch_up_high">Yüksek Seviye</string>
     <string name="only_manual">Sadece Manuel</string>
     <string name="x_minutes">%1$d Dakika</string>
     <string name="x_seconds">%1$d Saniye</string>
@@ -124,7 +137,7 @@
     <string name="premium_rose">Gül Pembesi</string>
     <string name="kciktv_cyan">Elektrik Mavisi</string>
     <string name="sidebar_title_filter_hide">KATEGORİ GİZLEME</string>
-    <string name="stream_ended">Yayın sonlandı</string>
+    <string name="stream_ended">Yayın Offline</string>
     <string name="live_stream">Canlı Yayın</string>
     <string name="load_more">DAHA FAZLA YÜKLE...</string>
     <string name="auto">OTOMATİK</string>

@@ -93,4 +93,23 @@ data class ChannelItem(
     fun getStreamUrl(): String {
         return playbackUrl ?: "https://fa723fc1b171.us-west-2.playback.live-video.net/api/video/v1/us-west-2.196233775518.channel.$slug.m3u8"
     }
+
+    /**
+     * Returns the profile picture URL or a consistent default one if null
+     */
+    fun getEffectiveProfilePicUrl(): String {
+        if (!profilePicUrl.isNullOrEmpty()) return profilePicUrl
+        // Use a consistent default avatar based on username string hash (1-6)
+        val hash = username.hashCode()
+        val index = (if (hash < 0) -hash else hash) % 6 + 1
+        return "https://kick.com/img/default-profile-pictures/default-avatar-$index.webp"
+    }
+
+    /**
+     * Returns the offline banner URL or a default Kick banner if null
+     */
+    fun getEffectiveOfflineBannerUrl(): String {
+        if (!offlineBannerUrl.isNullOrEmpty()) return offlineBannerUrl
+        return "https://kick.com/img/default-channel-banners/offline-banner.webp"
+    }
 }

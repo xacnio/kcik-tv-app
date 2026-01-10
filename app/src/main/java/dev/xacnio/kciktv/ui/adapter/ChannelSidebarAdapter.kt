@@ -108,22 +108,24 @@ class ChannelSidebarAdapter(
             holder.liveBadge.visibility = if (channel.isLive) View.VISIBLE else View.GONE
             holder.matureBadge.visibility = if (channel.isMature) View.VISIBLE else View.GONE
 
-            if (channel.isMature) {
+            val thumbUrl = if (channel.isLive) channel.thumbnailUrl else channel.getEffectiveOfflineBannerUrl()
+
+            if (channel.isMature && channel.isLive) {
                 Glide.with(holder.itemView.context)
-                    .load(channel.thumbnailUrl)
+                    .load(thumbUrl)
                     .transform(com.bumptech.glide.load.resource.bitmap.CenterCrop(), BlurTransformation(25, 4), RoundedCorners(8))
                     .placeholder(R.color.surface_dark)
                     .into(holder.thumbnailImage)
             } else {
                 Glide.with(holder.itemView.context)
-                    .load(channel.thumbnailUrl)
+                    .load(thumbUrl)
                     .transform(com.bumptech.glide.load.resource.bitmap.CenterCrop(), RoundedCorners(8))
                     .placeholder(R.color.surface_dark)
                     .into(holder.thumbnailImage)
             }
 
             Glide.with(holder.itemView.context)
-                .load(channel.profilePicUrl)
+                .load(channel.getEffectiveProfilePicUrl())
                 .circleCrop()
                 .into(holder.profileImage)
 

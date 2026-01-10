@@ -108,6 +108,22 @@ class AppPreferences(private val context: Context) {
         get() = prefs.getString("global_sort_mode", "viewer_count_desc") ?: "viewer_count_desc"
         set(value) = prefs.edit().putString("global_sort_mode", value).apply()
     
+    var playerEngine: String
+        get() = prefs.getString("player_engine", "amazon_ivs") ?: "amazon_ivs"
+        set(value) = prefs.edit().putString("player_engine", value).apply()
+
+    var catchUpMode: String
+        get() = prefs.getString("catch_up_mode", "low") ?: "low"
+        set(value) = prefs.edit().putString("catch_up_mode", value).apply()
+
+    var backgroundAudioEnabled: Boolean
+        get() = prefs.getBoolean("background_audio_enabled", true)
+        set(value) = prefs.edit().putBoolean("background_audio_enabled", value).apply()
+
+    var autoPipEnabled: Boolean
+        get() = prefs.getBoolean("auto_pip_enabled", true)
+        set(value) = prefs.edit().putBoolean("auto_pip_enabled", value).apply()
+    
     // ==================== Auth ====================
     
     var authToken: String?

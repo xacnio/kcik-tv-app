@@ -66,43 +66,48 @@ class ChannelAdapter(
         fun bind(channel: ChannelItem, isSelected: Boolean) {
             channelNumber.text = String.format("%02d", adapterPosition + 1)
             channelName.text = channel.username
-            streamTitle.text = channel.title
-            viewerCount.text = formatViewerCount(channel.viewerCount)
-            categoryName.text = channel.categoryName ?: itemView.context.getString(R.string.live_stream)
+            
+            if (!channel.isLive) {
+                streamTitle.text = itemView.context.getString(R.string.stream_ended)
+                viewerCount.visibility = View.GONE
+                categoryName.visibility = View.GONE
+                itemView.alpha = 0.7f
+            } else {
+                streamTitle.text = channel.title
+                viewerCount.text = formatViewerCount(channel.viewerCount)
+                viewerCount.visibility = View.VISIBLE
+                categoryName.text = channel.categoryName ?: itemView.context.getString(R.string.live_stream)
+                categoryName.visibility = View.VISIBLE
+                itemView.alpha = 1.0f
+            }
             
             liveBadge.visibility = if (channel.isLive) View.VISIBLE else View.GONE
             matureBadge.visibility = if (channel.isMature) View.VISIBLE else View.GONE
             selectionIndicator.visibility = if (isSelected) View.VISIBLE else View.GONE
             
             // Load Thumbnail
-            channel.thumbnailUrl?.let { url ->
-                if (channel.isMature) {
-                    Glide.with(itemView.context)
-                        .load(url)
-                        .transform(com.bumptech.glide.load.resource.bitmap.CenterCrop(), BlurTransformation(25, 4), RoundedCorners(8))
-                        .placeholder(R.drawable.placeholder_thumbnail)
-                        .into(thumbnailImage)
-                } else {
-                    Glide.with(itemView.context)
-                        .load(url)
-                        .transform(com.bumptech.glide.load.resource.bitmap.CenterCrop(), RoundedCorners(8))
-                        .placeholder(R.drawable.placeholder_thumbnail)
-                        .into(thumbnailImage)
-                }
-            } ?: run {
-                thumbnailImage.setImageResource(R.drawable.placeholder_thumbnail)
+            val thumbUrl = if (channel.isLive) channel.thumbnailUrl else channel.getEffectiveOfflineBannerUrl()
+            
+            if (channel.isMature && channel.isLive) {
+                Glide.with(itemView.context)
+                    .load(thumbUrl)
+                    .transform(com.bumptech.glide.load.resource.bitmap.CenterCrop(), BlurTransformation(25, 4), RoundedCorners(8))
+                    .placeholder(R.color.surface_dark)
+                    .into(thumbnailImage)
+            } else {
+                Glide.with(itemView.context)
+                    .load(thumbUrl)
+                    .transform(com.bumptech.glide.load.resource.bitmap.CenterCrop(), RoundedCorners(8))
+                    .placeholder(R.color.surface_dark)
+                    .into(thumbnailImage)
             }
             
             // Load Profile Picture
-            channel.profilePicUrl?.let { url ->
-                Glide.with(itemView.context)
-                    .load(url)
-                    .circleCrop()
-                    .placeholder(R.drawable.placeholder_profile)
-                    .into(profileImage)
-            } ?: run {
-                profileImage.setImageResource(R.drawable.placeholder_profile)
-            }
+            Glide.with(itemView.context)
+                .load(channel.getEffectiveProfilePicUrl())
+                .circleCrop()
+                .placeholder(R.drawable.placeholder_profile)
+                .into(profileImage)
             
             updateSelectionState(isSelected)
         }
