@@ -27,6 +27,8 @@ import android.widget.LinearLayout
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import com.amazonaws.ivs.player.Cue
 import com.amazonaws.ivs.player.Player
 import com.amazonaws.ivs.player.PlayerException
@@ -148,6 +150,9 @@ class PlayerActivity : FragmentActivity() {
     private val statsHandler = Handler(Looper.getMainLooper())
     
     private enum class MenuState { NONE, INFO, QUICK_MENU, SIDEBAR, DRAWER, LOGIN, QUALITY, SEARCH, MATURE_WARNING }
+    
+    // Flags
+    private var lastIsMobile: Boolean? = null
     private var currentState = MenuState.NONE
     private var isChannelMenu = false
     
@@ -185,6 +190,13 @@ class PlayerActivity : FragmentActivity() {
         override fun run() {
             val mode = prefs.catchUpMode
             val engine = prefs.playerEngine
+            
+            // Check Network Change
+            val currentIsMobile = isMobileDataActive()
+            if (lastIsMobile != currentIsMobile) {
+                checkAndApplyTrafficLimits(currentIsMobile)
+                lastIsMobile = currentIsMobile
+            }
             
             if (engine == "exo") {
                 val player = exoPlayer
@@ -966,7 +978,7 @@ class PlayerActivity : FragmentActivity() {
                 // Determine if it's a horizontal or vertical swipe
                 if (kotlin.math.abs(diffX) > kotlin.math.abs(diffY)) {
                     // Horizontal swipe
-                    if (kotlin.math.abs(diffX) > SWIPE_THRESHOLD && kotlin.math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                    if (kotlin.math.abs(diffX) > SWIPE_THRESHOLD && kotlin.math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
                         if (diffX > 0) {
                             // Swipe right -> Chat (in NONE) or BACK (if menu open)
                             if (currentState == MenuState.NONE) {
@@ -975,6 +987,9 @@ class PlayerActivity : FragmentActivity() {
                                 onKeyDown(KeyEvent.KEYCODE_BACK, null)
                             }
                         } else {
+                            // Swipe left
+                            if (currentState == MenuState.SEARCH) return true // Disable Swipe Left in Search
+
                             // Swipe left -> Progression logic and not settings
                             if (currentState == MenuState.SIDEBAR && isChannelMenu) {
                                 showDrawer()
@@ -988,6 +1003,8 @@ class PlayerActivity : FragmentActivity() {
                     }
                 } else {
                     // Vertical swipe (Context-aware: Channel change if NONE, Navigation if Menu open)
+                    if (currentState == MenuState.SEARCH) return true // Disable Vertical Swipe in Search
+
                     if (kotlin.math.abs(diffY) > SWIPE_THRESHOLD && kotlin.math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
                         if (diffY > 0) {
                             onKeyDown(KeyEvent.KEYCODE_DPAD_DOWN, null)
@@ -1002,6 +1019,10 @@ class PlayerActivity : FragmentActivity() {
 
             override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
                 if (scaleGestureDetector.isInProgress) return false
+                
+                // Block actions in SEARCH mode (except maybe keyboard clicks handled natively)
+                if (currentState == MenuState.SEARCH) return true
+
                 val insideMenu = isInsideMenu(e.x)
                 
                 if (insideMenu) return false
@@ -1934,6 +1955,17 @@ class PlayerActivity : FragmentActivity() {
                     binding.sidebarLoadingBar.visibility = View.VISIBLE
                     stopStabilityWatchdog()
                 } else if (state == Player.State.PLAYING) {
+                    binding.loadingThumbnailView.visibility = View.GONE
+                    binding.offlineBannerView.visibility = View.GONE
+                    
+                    // Check Mobile Data Limit
+                    checkAndApplyTrafficLimits(isMobileDataActive())
+                    lastIsMobile = isMobileDataActive()
+
+                    hideError()
+                    resetRetryCount()
+                    startStabilityWatchdog()
+                    
                     // Start background audio service immediately when playback starts (like a music player)
                     // This prevents audio interruption when screen is locked
                     // Start background audio service if enabled
@@ -2273,6 +2305,7 @@ class PlayerActivity : FragmentActivity() {
 
         val playAction = Runnable {
             loadingJob?.cancel()
+            lastIsMobile = null // Reset network state tracking
             loadingJob = lifecycleScope.launch {
                 repository.getStreamUrl(channel.slug).onSuccess { url ->
                     if (prefs.playerEngine == "exo") {
@@ -2298,11 +2331,15 @@ class PlayerActivity : FragmentActivity() {
 
                         val liveConfig = liveConfigBuilder.build()
                             
+                        // Apply Mobile Limit for Exo
+                        checkAndApplyTrafficLimits(isMobileDataActive())
+                        lastIsMobile = isMobileDataActive()
+
                         val mediaItem = MediaItem.Builder()
                             .setUri(url)
                             .setLiveConfiguration(liveConfig)
                             .build()
-                            
+
                         exoPlayer?.setMediaItem(mediaItem)
                         exoPlayer?.prepare()
                         exoPlayer?.play()
@@ -2905,14 +2942,16 @@ class PlayerActivity : FragmentActivity() {
         val items = listOf(
             SelectionItem("lang", getString(R.string.setting_language)),
             SelectionItem("filter", getString(R.string.setting_filter)),
-            SelectionItem("refresh", getString(R.string.setting_refresh_interval))
+            SelectionItem("refresh", getString(R.string.setting_refresh_interval)),
+            SelectionItem("auto_update", getString(R.string.setting_auto_update))
         )
         
         showSidebar(getString(R.string.settings_category_general), items, "settings_sub") { item ->
             when (item.id) {
                 "lang" -> { lastSubSettingsFocusId = null; showLanguageSidebar() }
                 "filter" -> { lastSubSettingsFocusId = null; showFilterSidebar() }
-                "refresh" -> { lastSubSettingsFocusId = null; showRefreshSidebar() }
+                "refresh" -> { lastSubSettingsFocusId = null; showRefreshIntervalSidebar() }
+                "auto_update" -> { lastSubSettingsFocusId = null; showAutoUpdateSidebar() }
             }
         }
     }
@@ -2921,6 +2960,7 @@ class PlayerActivity : FragmentActivity() {
         val items = mutableListOf(
             SelectionItem("engine", getString(R.string.setting_player_engine)),
             SelectionItem("catch_up", getString(R.string.setting_catch_up)),
+            SelectionItem("mobile_quality", getString(R.string.setting_mobile_quality)),
             SelectionItem("zap", getString(R.string.setting_zap_delay))
         )
         
@@ -2933,10 +2973,27 @@ class PlayerActivity : FragmentActivity() {
             when (item.id) {
                 "engine" -> { lastSubSettingsFocusId = null; showPlayerEngineSidebar() }
                 "catch_up" -> { lastSubSettingsFocusId = null; showCatchUpSidebar() }
+                "mobile_quality" -> { lastSubSettingsFocusId = null; showMobileQualitySidebar() }
                 "zap" -> { lastSubSettingsFocusId = null; showZapDelaySidebar() }
                 "background" -> { lastSubSettingsFocusId = null; showBackgroundAudioSidebar() }
                 "auto_pip" -> { lastSubSettingsFocusId = null; showAutoPipSidebar() }
             }
+        }
+    }
+
+    private fun showMobileQualitySidebar() {
+        val current = prefs.mobileQualityLimit
+        val items = listOf(
+            SelectionItem("none", getString(R.string.quality_unlimited), isSelected = current == "none"),
+            SelectionItem("1080", "1080p", isSelected = current == "1080"),
+            SelectionItem("720", "720p", isSelected = current == "720"),
+            SelectionItem("480", "480p", isSelected = current == "480"),
+            SelectionItem("360", "360p", isSelected = current == "360")
+        )
+        
+        showSidebar(getString(R.string.sidebar_title_mobile_quality), items, "settings_sub") { item ->
+            prefs.mobileQualityLimit = item.id
+            showMobileQualitySidebar()
         }
     }
 
@@ -2977,6 +3034,18 @@ class PlayerActivity : FragmentActivity() {
         
         showSidebar(getString(R.string.sidebar_title_auto_pip), items, "settings_auto_pip") { item ->
             prefs.autoPipEnabled = item.id == "on"
+            (binding.sidebarRecyclerView.adapter as? GenericSelectionAdapter)?.updateSingleSelection(item.id)
+        }
+    }
+
+    private fun showAutoUpdateSidebar() {
+        val items = listOf(
+            SelectionItem("on", getString(R.string.on), isSelected = prefs.autoUpdateEnabled),
+            SelectionItem("off", getString(R.string.off), isSelected = !prefs.autoUpdateEnabled)
+        )
+        
+        showSidebar(getString(R.string.sidebar_title_auto_update), items, "settings_sub") { item ->
+            prefs.autoUpdateEnabled = item.id == "on"
             (binding.sidebarRecyclerView.adapter as? GenericSelectionAdapter)?.updateSingleSelection(item.id)
         }
     }
@@ -3044,7 +3113,7 @@ class PlayerActivity : FragmentActivity() {
             }
         }
     }
-    private fun showRefreshSidebar() {
+    private fun showRefreshIntervalSidebar() {
         val options = listOf(
             -1 to getString(R.string.only_manual),
             1 to getString(R.string.x_minutes, 1),
@@ -3161,6 +3230,9 @@ class PlayerActivity : FragmentActivity() {
         if (manual) showError(getString(R.string.checking_updates))
         
         lifecycleScope.launch {
+            // Check if update is available via repository
+            if (!prefs.autoUpdateEnabled && !manual) return@launch
+            
             updateRepository.getLatestRelease(prefs.updateChannel).onSuccess { release ->
                 if (release != null) {
                     val currentVersion = BuildConfig.VERSION_NAME
@@ -3168,20 +3240,7 @@ class PlayerActivity : FragmentActivity() {
                     
                     if (newVersion != currentVersion) {
                         if (manual) hideError()
-                        showSidebar(
-                            getString(R.string.update_available, release.tagName),
-                            listOf(
-                                SelectionItem("update", getString(R.string.update_now)),
-                                SelectionItem("cancel", getString(R.string.cancel))
-                            ),
-                            "update_prompt"
-                        ) { item ->
-                            if (item.id == "update") {
-                                downloadAndInstallApk(release)
-                            } else {
-                                hideAllOverlays()
-                            }
-                        }
+                        showUpdateDialog(release)
                     } else if (manual) {
                         showError(getString(R.string.up_to_date))
                         Handler(Looper.getMainLooper()).postDelayed({ hideError() }, 2000)
@@ -3196,32 +3255,110 @@ class PlayerActivity : FragmentActivity() {
         }
     }
 
-    private fun downloadAndInstallApk(release: GithubRelease) {
-        val asset = release.assets.find { it.name.endsWith(".apk") } ?: return
+    private fun showUpdateDialog(release: GithubRelease) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_update, null)
+        val titleText = dialogView.findViewById<TextView>(R.id.updateTitle)
+        val msgText = dialogView.findViewById<TextView>(R.id.updateMessage)
+        val btnUpdate = dialogView.findViewById<TextView>(R.id.btnUpdateNow)
+        val btnLater = dialogView.findViewById<TextView>(R.id.btnUpdateLater)
+        val progressBar = dialogView.findViewById<android.widget.ProgressBar>(R.id.updateProgressBar)
         
-        showError(getString(R.string.downloading))
+        titleText.text = getString(R.string.update_available_title)
+        msgText.text = getString(R.string.update_available_msg, release.tagName)
         
+        val dialog = android.app.AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+            
+        btnLater.setOnClickListener { dialog.dismiss() }
+        
+        var isDownloading = false
+        
+        btnUpdate.setOnClickListener {
+            if (isDownloading) return@setOnClickListener
+            isDownloading = true
+            btnUpdate.isEnabled = false
+            btnLater.isEnabled = false
+            btnUpdate.alpha = 0.5f
+            btnLater.alpha = 0.5f
+            
+            progressBar.visibility = View.VISIBLE
+            msgText.text = getString(R.string.downloading_percent, 0)
+            
+            // Start download
+            val asset = release.assets.firstOrNull { it.name.endsWith(".apk") }
+            if (asset != null) {
+                downloadAndInstallApk(asset.downloadUrl) { progress ->
+                    runOnUiThread {
+                        if (progress >= 0) {
+                            progressBar.progress = progress
+                            msgText.text = getString(R.string.downloading_percent, progress)
+                        } else {
+                            if (progress == -1) {
+                                dialog.dismiss() 
+                            }
+                        }
+                    }
+                }
+            } else {
+                Toast.makeText(this, "APK not found", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+            }
+        }
+        
+        dialog.show()
+        btnUpdate.requestFocus()
+    }
+
+    private fun downloadAndInstallApk(url: String, onProgress: (Int) -> Unit) {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val client = OkHttpClient()
-                val request = Request.Builder().url(asset.downloadUrl).build()
+                val request = Request.Builder().url(url).build()
                 val response = client.newCall(request).execute()
                 
-                if (response.isSuccessful) {
+                if (response.isSuccessful && response.body != null) {
+                    val body = response.body!!
+                    val contentLength = body.contentLength()
+                    val inputStream = body.byteStream()
                     val apkFile = File(cacheDir, "update.apk")
-                    val fos = FileOutputStream(apkFile)
-                    fos.write(response.body?.bytes() ?: return@launch)
-                    fos.close()
+                    val outputStream = FileOutputStream(apkFile)
+                    
+                    val buffer = ByteArray(8 * 1024)
+                    var bytesRead: Int
+                    var totalBytesRead: Long = 0
+                    
+                    while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                        outputStream.write(buffer, 0, bytesRead)
+                        totalBytesRead += bytesRead
+                        
+                        if (contentLength > 0) {
+                            val progress = (totalBytesRead * 100 / contentLength).toInt()
+                            onProgress(progress)
+                        }
+                    }
+                    
+                    outputStream.flush()
+                    outputStream.close()
+                    inputStream.close()
                     
                     withContext(Dispatchers.Main) {
                         hideError()
+                        onProgress(100)
                         installApk(apkFile)
                     }
                 } else {
-                    withContext(Dispatchers.Main) { showError(getString(R.string.download_failed)) }
+                    withContext(Dispatchers.Main) { 
+                        showError(getString(R.string.download_failed))
+                        onProgress(-1) 
+                    }
                 }
             } catch (e: Exception) {
-                withContext(Dispatchers.Main) { showError(getString(R.string.download_failed) + ": ${e.message}") }
+                withContext(Dispatchers.Main) { 
+                    showError(getString(R.string.download_failed) + ": ${e.message}")
+                    onProgress(-1)
+                }
             }
         }
     }
@@ -4526,5 +4663,70 @@ class PlayerActivity : FragmentActivity() {
 
     private fun stopRecoveryPolling() {
         recoveryHandler.removeCallbacks(recoveryRunnable)
+    }
+    private fun isMobileDataActive(): Boolean {
+        return try {
+            val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val activeNetwork = cm.activeNetwork ?: return false
+            val caps = cm.getNetworkCapabilities(activeNetwork) ?: return false
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+        } catch (e: Exception) {
+            false
+        }
+    }
+    
+    private fun checkAndApplyTrafficLimits(isMobile: Boolean) {
+        val limitStr = prefs.mobileQualityLimit
+        
+        // If not mobile OR limit is "none", we treat as Unlimited/Auto
+        if (!isMobile || limitStr == "none") {
+            // Restore IVS to Auto if it was limited or manual
+            if (ivsPlayer?.isAutoQualityMode == false) {
+                 Log.d("PlayerActivity", "Network Changed to WiFi/Unlimited: Enabling Auto Quality")
+                 ivsPlayer?.setAutoQualityMode(true)
+            }
+            
+            // Restore Exo
+            exoPlayer?.let { player ->
+               val current = player.trackSelectionParameters
+               if (current.maxVideoHeight != Int.MAX_VALUE) {
+                   Log.d("PlayerActivity", "Network Changed to WiFi/Unlimited: Resetting Exo Limits")
+                   player.trackSelectionParameters = current.buildUpon()
+                       .setMaxVideoSize(Int.MAX_VALUE, Int.MAX_VALUE)
+                       .build()
+               }
+            }
+            return
+        }
+
+        // We are Mobile AND have a limit
+        val limit = limitStr.toIntOrNull() ?: 1080
+        
+        // Apply IVS
+        ivsPlayer?.let { player ->
+             val qualities = player.qualities
+             if (!qualities.isNullOrEmpty()) {
+                 val best = qualities.filter { it.height <= limit }.maxByOrNull { it.height }
+                 if (best != null) {
+                      // Only apply if different to prevent loops/re-buffering
+                      if (player.isAutoQualityMode || player.quality?.name != best.name) {
+                          Log.d("PlayerActivity", "Network Mobile: Limiting to ${best.name} (Limit: $limit)")
+                          player.setAutoQualityMode(false)
+                          player.setQuality(best)
+                      }
+                 }
+             }
+        }
+        
+        // Apply Exo
+        exoPlayer?.let { player ->
+             val current = player.trackSelectionParameters
+             if (current.maxVideoHeight != limit) {
+                 Log.d("PlayerActivity", "Network Mobile: Limiting Exo to $limit")
+                 player.trackSelectionParameters = current.buildUpon()
+                     .setMaxVideoSize(Int.MAX_VALUE, limit)
+                     .build()
+             }
+        }
     }
 }

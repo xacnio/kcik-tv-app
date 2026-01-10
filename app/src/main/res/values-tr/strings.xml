@@ -88,6 +88,8 @@
     <string name="stat_muted">Sessiz</string>
     <string name="yes">Evet</string>
     <string name="no">Hayır</string>
+    <string name="on">Açık</string>
+    <string name="off">Kapalı</string>
     <string name="setting_language">Dil Seçimi</string>
     <string name="setting_info_delay">Bilgi Ekranı Süresi</string>
     <string name="setting_transparency">Saydamlık Ayarı</string>
@@ -98,7 +100,9 @@
     <string name="setting_refresh_interval">Güncelleme Sıklığı</string>
     <string name="setting_update_channel">Güncelleme Kanalı</string>
     <string name="setting_player_engine">Oynatıcı Motoru</string>
+    <string name="setting_mobile_quality">Mobil Veri Limiti</string>
     <string name="setting_catch_up">Yayını Yakalama</string>
+    <string name="setting_auto_update">Otomatik Güncelleme Kontrolü</string>
     <string name="setting_about">Hakkında</string>
     <string name="visit_github">GitHub\'ı Ziyaret Et</string>
     <string name="sidebar_title_language">DİL SEÇİMİ</string>
@@ -110,8 +114,10 @@
     <string name="sidebar_title_refresh">GÜNCELLEME SIKLIĞI</string>
     <string name="sidebar_title_update_channel">GÜNCELLEME KANALI</string>
     <string name="sidebar_title_engine">OYNATICI MOTORU</string>
+    <string name="sidebar_title_mobile_quality">MOBİL VERİ LİMİTİ</string>
     <string name="sidebar_title_background_audio">ARKA PLANDA OYNATMA</string>
     <string name="sidebar_title_auto_pip">OTOMATİK PIP</string>
+    <string name="sidebar_title_auto_update">OTOMATİK GÜNCELLEME KONTROLÜ</string>
     <string name="sidebar_title_catch_up">YAYINI YAKALAMA</string>
     <string name="setting_background_audio">Arka Planda Oynatma</string>
     <string name="setting_auto_pip">Otomatik PIP (Home Tuşu)</string>
@@ -120,9 +126,15 @@
     <string name="catch_up_off">Kapalı</string>
     <string name="catch_up_low">Düşük Seviye</string>
     <string name="catch_up_high">Yüksek Seviye</string>
+    <string name="quality_unlimited">Sınırsız</string>
     <string name="only_manual">Sadece Manuel</string>
     <string name="x_minutes">%1$d Dakika</string>
     <string name="x_seconds">%1$d Saniye</string>
+    <string name="update_available_title">Yeni Güncelleme Mevcut</string>
+    <string name="update_available_msg">%1$s sürümü mevcut. Güncellemek ister misiniz?</string>
+    <string name="update_now">Şimdi Güncelle</string>
+    <string name="later">Daha Sonra</string>
+    <string name="downloading_percent">İndiriliyor... %%%d</string>
     <string name="instant_ms">Anında (0ms)</string>
     <string name="fast_ms">Hızlı (300ms)</string>
     <string name="normal_ms">Normal (700ms)</string>
@@ -154,7 +166,6 @@
     <string name="stable">Kararlı (Stable)</string>
     <string name="beta">Beta</string>
     <string name="update_available">Yeni güncelleme mevcut: %s</string>
-    <string name="update_now">Şimdi Güncelle</string>
     <string name="up_to_date">Uygulama güncel</string>
     <string name="checking_updates">Güncellemeler kontrol ediliyor...</string>
     <string name="check_update">Güncellemeleri Denetle</string>

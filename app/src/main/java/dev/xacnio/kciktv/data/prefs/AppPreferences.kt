@@ -112,6 +112,10 @@ class AppPreferences(private val context: Context) {
         get() = prefs.getString("player_engine", "amazon_ivs") ?: "amazon_ivs"
         set(value) = prefs.edit().putString("player_engine", value).apply()
 
+    var mobileQualityLimit: String
+        get() = prefs.getString("mobile_quality_limit", "none") ?: "none"
+        set(value) = prefs.edit().putString("mobile_quality_limit", value).apply()
+
     var catchUpMode: String
         get() = prefs.getString("catch_up_mode", "low") ?: "low"
         set(value) = prefs.edit().putString("catch_up_mode", value).apply()
@@ -123,6 +127,10 @@ class AppPreferences(private val context: Context) {
     var autoPipEnabled: Boolean
         get() = prefs.getBoolean("auto_pip_enabled", true)
         set(value) = prefs.edit().putBoolean("auto_pip_enabled", value).apply()
+
+    var autoUpdateEnabled: Boolean
+        get() = prefs.getBoolean("auto_update_enabled", true)
+        set(value) = prefs.edit().putBoolean("auto_update_enabled", value).apply()
     
     // ==================== Auth ====================
     
