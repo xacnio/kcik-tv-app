@@ -15,6 +15,7 @@ import android.os.Looper
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
+import android.view.WindowManager
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.DecelerateInterpolator
@@ -693,6 +694,9 @@ class PlayerActivity : FragmentActivity() {
         
         // Enable immersive fullscreen mode
         enableImmersiveMode()
+        
+        // Keep screen on while watching video
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         
         // Restore last list mode
         try {
