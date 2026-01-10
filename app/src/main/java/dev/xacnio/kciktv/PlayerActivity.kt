@@ -4251,57 +4251,73 @@ class PlayerActivity : FragmentActivity() {
     
     private fun connectToChat(slug: String) {
         val slugChanged = lastSubscribedSlug != slug
-        Log.d("PlayerActivity", "Syncing WebSocket - slug: $slug, changed: $slugChanged, chatVisible: $isChatVisible")
-        
-        // Ensure WebSocket is physically connected to Pusher
-        chatWebSocket?.connect()
+        val chatMessagesEmpty = chatAdapter?.currentList?.isEmpty() != false
+        Log.d("PlayerActivity", "connectToChat - slug: $slug, changed: $slugChanged, chatVisible: $isChatVisible, messagesEmpty: $chatMessagesEmpty, lastSlug: $lastSubscribedSlug")
         
         // Cancel any previous connection attempt for other slugs
         chatConnectJob?.cancel()
         
+        // If slug changed, disconnect WebSocket completely and clear messages
+        if (slugChanged) {
+            Log.d("PlayerActivity", "Slug changed - disconnecting WebSocket and clearing messages")
+            chatWebSocket?.disconnect()
+            if (isChatVisible) {
+                chatHandler.post {
+                    chatAdapter?.clearMessages()
+                }
+            }
+        }
+        
+        // Update lastSubscribedSlug BEFORE API call to prevent race conditions
+        lastSubscribedSlug = slug
+        
+        // Connect WebSocket (will be a fresh connection if we just disconnected)
+        chatWebSocket?.connect()
+        
         chatConnectJob = lifecycleScope.launch {
             repository.getChatInfo(slug).onSuccess { chatInfo ->
-                // Update tracker
-                lastSubscribedSlug = slug
+                Log.d("PlayerActivity", "getChatInfo success - chatroomId: ${chatInfo.chatroomId}, channelId: ${chatInfo.channelId}")
                 
                 // 1. Subscribe to channel events (e.g., StreamerIsLive)
-                // Always refresh if slug changed
-                if (slugChanged) {
-                    chatWebSocket?.unsubscribeFromChannelEvents()
-                    chatWebSocket?.subscribeToChannelEvents(chatInfo.channelId)
-                }
+                chatWebSocket?.subscribeToChannelEvents(chatInfo.channelId)
                 
                 // 2. Manage Chat Subscription
                 if (isChatVisible) {
                     chatHandler.post {
                         chatAdapter?.setSubscriberBadges(chatInfo.subscriberBadges)
-                        // Only clear if we actually changed channel or need fresh start
-                        if (slugChanged) chatAdapter?.clearMessages()
                     }
                     
-                    // Always subscribe to chat if visible (the socket method handles redundant calls)
+                    // Subscribe to chat
                     chatWebSocket?.subscribeToChat(chatInfo.chatroomId)
                     
-                    // Fetch history only if it's a new channel for the chat
-                    if (slugChanged) {
+                    // Fetch history if:
+                    // 1. Slug changed (new channel), OR
+                    // 2. Chat was empty (chat just opened)
+                    val shouldFetchHistory = slugChanged || chatMessagesEmpty
+                    Log.d("PlayerActivity", "shouldFetchHistory: $shouldFetchHistory (slugChanged: $slugChanged, messagesEmpty: $chatMessagesEmpty)")
+                    
+                    if (shouldFetchHistory) {
                         repository.getChatHistory(chatInfo.channelId).onSuccess { historyMessages ->
-                            chatHandler.post {
-                                if (historyMessages.isNotEmpty()) {
-                                    chatAdapter?.submitList(historyMessages) {
-                                        binding.chatRecyclerView.scrollToPosition(historyMessages.size - 1)
+                            // Double-check we're still on the same slug (user might have switched again)
+                            if (lastSubscribedSlug == slug) {
+                                chatHandler.post {
+                                    if (historyMessages.isNotEmpty()) {
+                                        Log.d("PlayerActivity", "Loading ${historyMessages.size} history messages for $slug")
+                                        chatAdapter?.submitList(historyMessages) {
+                                            binding.chatRecyclerView.scrollToPosition(historyMessages.size - 1)
+                                        }
                                     }
                                 }
+                            } else {
+                                Log.d("PlayerActivity", "Discarding history for $slug - user switched to $lastSubscribedSlug")
                             }
                         }.onFailure { error ->
                             Log.e("PlayerActivity", "Chat history failed: ${error.message}")
                         }
                     }
                 } else {
-                    // Chat hidden: Unsubscribe from chat to save data, but keep connection for channel events
-                    chatWebSocket?.unsubscribeFromChat()
-                    chatHandler.post {
-                        chatAdapter?.clearMessages()
-                    }
+                    // Chat hidden: Don't subscribe to chat, but keep connection for channel events
+                    Log.d("PlayerActivity", "Chat not visible - not subscribing to chat")
                 }
                 
                 chatHandler.post {
