@@ -598,7 +598,9 @@ const DownloadSection = () => {
         return res.json();
       })
       .then(data => {
-        setReleases(data);
+        // Sort explicitly by published_at DESC to fix potential API ordering issues
+        const sortedData = data.sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
+        setReleases(sortedData);
         setLoading(false);
       })
       .catch(err => {
