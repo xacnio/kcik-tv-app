@@ -76,7 +76,7 @@ jobs:
           keyPassword: ${{ secrets.KEY_PASSWORD }}
 
       - name: Rename APK
-        run: mv ${{ steps.sign_app.outputs.signedReleaseFile }} app/build/outputs/apk/release/kciktv-release.apk
+        run: mv ${{ steps.sign_app.outputs.signedReleaseFile }} app/build/outputs/apk/release/KCIKTV-release.apk
 
       - name: Extract Version Name
         id: version
@@ -95,7 +95,7 @@ jobs:
           fi
         
       - name: Rename file to version
-        run: mv app/build/outputs/apk/release/kciktv-release.apk app/build/outputs/apk/release/kciktv-${{ env.VERSION }}.apk
+        run: mv app/build/outputs/apk/release/KCIKTV-release.apk app/build/outputs/apk/release/KCIKTV-${{ env.VERSION }}.apk
 
       - name: Create Release
         id: create_release
