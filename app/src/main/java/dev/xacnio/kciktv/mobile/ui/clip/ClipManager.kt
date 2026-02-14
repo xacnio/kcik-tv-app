@@ -149,7 +149,7 @@ class ClipManager(
 
     private fun createClipViaWebView(targetId: String, token: String, dialog: BottomSheetDialog, sheetView: View, isDvrVideo: Boolean, startTimeSeconds: Int? = null, channelSlug: String) {
         val apiUrl = if (isDvrVideo) "https://kick.com/api/internal/v1/videos/$targetId/clips" else "https://kick.com/api/internal/v1/livestreams/$targetId/clips"
-        val apiBody = if (isDvrVideo) "{\"start_time\": $startTimeSeconds}" else "{}"
+        val apiBody = if (isDvrVideo) "{\"start_time\": $startTimeSeconds, \"duration\": 180}" else "{\"duration\": 180}"
 
         Log.d("ClipManager", "Creating clip via WebViewManager: $apiUrl")
 
@@ -357,12 +357,12 @@ class ClipManager(
         })
         
         // Initial Slider Values (Defensive)
-        val totalDur = clipResponse.sourceDuration.toFloat().coerceAtLeast(15f)
+        val totalDur = clipResponse.sourceDuration.toFloat().coerceAtLeast(10f)
         rangeSlider.valueFrom = 0f
         rangeSlider.valueTo = totalDur
-        rangeSlider.setMinSeparationValue(15f)
+        rangeSlider.setMinSeparationValue(10f)
         
-        val safeStart = defaultStart.coerceIn(0f, totalDur - 15f)
+        val safeStart = defaultStart.coerceIn(0f, totalDur - 10f)
         val safeEnd = totalDur
         rangeSlider.setValues(safeStart, safeEnd)
         
@@ -384,7 +384,7 @@ class ClipManager(
                 val padding = clipSeekBar.paddingStart + clipSeekBar.paddingEnd
                 val usableWidth = containerWidth - padding
                 
-                if (totalDuration > 15f && usableWidth > 0) {
+                if (totalDuration > 10f && usableWidth > 0) {
                     val startX = (startTime / totalDuration * usableWidth + clipSeekBar.paddingStart).toInt()
                     val endX = (endTime / totalDuration * usableWidth + clipSeekBar.paddingStart).toInt()
                     
@@ -431,7 +431,7 @@ class ClipManager(
             val endSec = (endTime % 60).toInt()
             timeRangeText.text = String.format("%d:%02d - %d:%02d", startMin, startSec, endMin, endSec)
             
-            val isValid = duration in 15..60
+            val isValid = duration in 15..180
             btnPublish.isEnabled = isValid
             btnPublish.alpha = if (isValid) 1.0f else 0.5f
             
@@ -530,21 +530,21 @@ class ClipManager(
             }
             // If both changed (due to correction), keep previous lastMovingThumb
 
-            // Constraints (15s - 60s)
+            // Constraints (10s - 180s)
             val duration = end - start
-            if (duration < 15f) {
-                if (lastMovingThumb == 1) start = (end - 15f).coerceAtLeast(0f)
-                else end = (start + 15f).coerceAtMost(clipResponse.sourceDuration.toFloat())
+            if (duration < 10f) {
+                if (lastMovingThumb == 1) start = (end - 10f).coerceAtLeast(0f)
+                else end = (start + 10f).coerceAtMost(clipResponse.sourceDuration.toFloat())
                 
                 // Final boundary verification
-                if (end - start < 15f) {
-                    if (lastMovingThumb == 1) end = (start + 15f).coerceAtMost(clipResponse.sourceDuration.toFloat())
-                    else start = (end - 15f).coerceAtLeast(0f)
+                if (end - start < 10f) {
+                    if (lastMovingThumb == 1) end = (start + 10f).coerceAtMost(clipResponse.sourceDuration.toFloat())
+                    else start = (end - 10f).coerceAtLeast(0f)
                 }
                 correctionNeeded = true
-            } else if (duration > 60f) {
-                 if (lastMovingThumb == 1) start = end - 60f
-                 else end = start + 60f
+            } else if (duration > 180f) {
+                 if (lastMovingThumb == 1) start = end - 180f
+                 else end = start + 180f
                  correctionNeeded = true
             }
 
