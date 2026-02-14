@@ -80,3 +80,6 @@ lint/tmp/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# VSCode
+.vscode/
