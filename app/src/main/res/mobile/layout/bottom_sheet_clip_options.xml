@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_bottom_sheet"
+    android:paddingBottom="24dp"
+    android:theme="@style/Theme.MaterialComponents.Light">
+
+    <!-- Handle/Bar -->
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginVertical="12dp"
+        android:src="@drawable/bg_bottom_sheet_handle" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/options_title"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="16dp" />
+
+    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#1AFFFFFF" />
+
+    <!-- Auto Scroll Option -->
+    <LinearLayout
+        android:id="@+id/optionAutoScroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="24dp"
+        android:paddingVertical="16dp"
+        android:gravity="center_vertical"
+        android:background="?attr/selectableItemBackground">
+        
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_history" 
+            app:tint="#FFFFFF"/>
+            
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/auto_scroll"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:layout_marginStart="16dp"/>
+            
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switchAutoScroll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:trackTint="#777777"
+            app:thumbTint="#FFFFFF"/>
+    </LinearLayout>
+
+    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#1AFFFFFF" android:layout_marginHorizontal="24dp"/>
+
+    <!-- Save Video Option -->
+    <LinearLayout
+        android:id="@+id/optionDownload"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="24dp"
+        android:paddingVertical="16dp"
+        android:gravity="center_vertical"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground">
+        
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_download"
+            app:tint="#FFFFFF"/>
+            
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/save_video"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:layout_marginStart="16dp"/>
+    </LinearLayout>
+
+</LinearLayout>

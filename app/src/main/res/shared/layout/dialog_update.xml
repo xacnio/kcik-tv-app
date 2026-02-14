@@ -1,0 +1,235 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_update_dialog"
+        app:layout_constraintWidth_max="600dp"
+        app:layout_constraintWidth_percent="0.95"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <!-- Header with gradient background -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:paddingTop="32dp"
+            android:paddingBottom="24dp"
+            android:paddingHorizontal="24dp"
+            android:background="@drawable/bg_update_header">
+
+            <!-- App Logo Wrap with Black Background -->
+            <FrameLayout
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:background="@drawable/bg_logo_circle_black"
+                android:padding="8dp">
+                
+                <ImageView
+                    android:id="@+id/appLogo"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_kick_splash_logo"
+                    android:contentDescription="@string/app_name" />
+            </FrameLayout>
+
+            <!-- Title -->
+            <TextView
+                android:id="@+id/updateTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/update_available_title"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:gravity="center" />
+
+            <!-- Version info -->
+            <TextView
+                android:id="@+id/updateVersion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textSize="16sp"
+                android:textColor="#AAAAAA"
+                android:gravity="center" />
+
+        </LinearLayout>
+
+        <!-- Content section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp">
+
+            <!-- What's New header -->
+            <TextView
+                android:id="@+id/whatsNewHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/whats_new"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="#53FC18"
+                android:textAllCaps="true"
+                android:letterSpacing="0.1" />
+
+            <!-- Changelog ScrollView -->
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:maxHeight="180dp"
+                android:fadingEdge="vertical"
+                android:fadingEdgeLength="24dp"
+                android:requiresFadingEdge="vertical">
+
+                <TextView
+                    android:id="@+id/updateChangelog"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#CCCCCC"
+                    android:lineSpacingMultiplier="1.4" />
+
+            </ScrollView>
+
+            <!-- Download Progress Section -->
+            <LinearLayout
+                android:id="@+id/progressSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="16dp"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/progressLabel"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/downloading"
+                        android:textSize="14sp"
+                        android:textColor="#AAAAAA" />
+
+                    <TextView
+                        android:id="@+id/progressPercent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="#53FC18"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <!-- Download Stats Row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="4dp"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/downloadSize"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textSize="12sp"
+                        android:textColor="#888888" />
+
+                    <TextView
+                        android:id="@+id/downloadSpeed"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:textColor="#888888" />
+
+                </LinearLayout>
+
+                <ProgressBar
+                    android:id="@+id/updateProgressBar"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="8dp"
+                    android:layout_marginTop="8dp"
+                    android:indeterminate="false"
+                    android:max="100"
+                    android:progress="0"
+                    android:progressDrawable="@drawable/progress_update_download" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="16dp"
+            android:background="#22FFFFFF" />
+
+        <!-- Buttons -->
+        <LinearLayout
+            android:id="@+id/buttonsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:gravity="end">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnUpdateLater"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:text="@string/later"
+                android:textColor="#888888"
+                android:textSize="15sp"
+                android:textAllCaps="false"
+                android:letterSpacing="0"
+                android:layout_marginEnd="8dp"
+                app:rippleColor="#22FFFFFF" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnUpdateNow"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:text="@string/update_now"
+                android:textColor="#000000"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                android:letterSpacing="0"
+                android:paddingHorizontal="24dp"
+                app:backgroundTint="#53FC18"
+                app:cornerRadius="24dp"
+                app:icon="@drawable/ic_download"
+                app:iconSize="18dp"
+                app:iconTint="#000000"
+                app:iconPadding="8dp"
+                app:iconGravity="textStart" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

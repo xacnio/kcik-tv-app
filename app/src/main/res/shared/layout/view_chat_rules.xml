@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/chatRulesCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:layout_margin="12dp"
+    app:cardBackgroundColor="#1F2125"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="8dp"
+    app:contentPadding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/chatRulesChannelIcon"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="#333333"
+                app:shapeAppearanceOverlay="@style/CircleImageView" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/chat_rules_title"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/chatRulesChannelName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/channel_name"
+                    android:textColor="#AAAAAA"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/chatRulesCloseBtn"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:padding="2dp"
+                android:src="@drawable/ic_close"
+                app:tint="#888888"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/notification_action_close" />
+        </LinearLayout>
+
+        <!-- Rules Text -->
+        <TextView
+            android:id="@+id/chatRulesText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:lineSpacingExtra="4dp"
+            tools:text="rulesText"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp" />
+
+        <!-- Accept Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAgreeRules"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:backgroundTint="#53fc18"
+            android:text="@string/chat_rules_agree"
+            android:textAllCaps="false"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="8dp"
+            app:rippleColor="#333333" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

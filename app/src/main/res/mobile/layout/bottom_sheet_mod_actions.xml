@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#141414"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:paddingBottom="16dp">
+        
+        <ImageView
+            android:id="@+id/modActionsHeaderIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_security"
+            app:tint="@color/brand_green"/>
+            
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="12dp"
+            android:text="@string/mod_view_title"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"/>
+            
+        <ProgressBar
+            android:id="@+id/modActionsLoading"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:visibility="gone"
+            android:indeterminateTint="@color/brand_green"/>
+    </LinearLayout>
+
+    <!-- Slow Mode -->
+    <LinearLayout
+        android:id="@+id/slowModeRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="12dp"
+        android:background="?attr/selectableItemBackground">
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mod_slow_mode"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"/>
+            <TextView
+                android:id="@+id/slowModeValueText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/off"
+                android:textColor="#AAAAAA"
+                android:textSize="12sp"/>
+        </LinearLayout>
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switchSlowMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <!-- Followers Only -->
+    <LinearLayout
+        android:id="@+id/followersModeRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="12dp"
+        android:background="?attr/selectableItemBackground">
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mod_followers_only"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"/>
+            <TextView
+                android:id="@+id/followersModeValueText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/off"
+                android:textColor="#AAAAAA"
+                android:textSize="12sp"/>
+        </LinearLayout>
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switchFollowersMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <!-- Subscribers Only -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="12dp">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/mod_subscribers_only"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"/>
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switchSubscribersMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <!-- Emotes Only -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="12dp">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/mod_emotes_only"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"/>
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switchEmotesMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#333333"
+        android:layout_marginVertical="8dp"/>
+
+    <!-- Create Poll -->
+    <LinearLayout
+        android:id="@+id/rowCreatePoll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="12dp"
+        android:background="?attr/selectableItemBackground">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/mod_create_poll"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"/>
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_poll"
+            app:tint="#AAAAAA"/>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#333333"
+        android:layout_marginVertical="8dp"/>
+        
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/channel_info_title"
+        android:textColor="#AAAAAA"
+        android:padding="12dp"/>
+
+    <!-- Stream Title -->
+    <LinearLayout
+        android:id="@+id/rowStreamTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:background="?attr/selectableItemBackground">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/mod_stream_title"
+            android:textColor="#AAAAAA"
+            android:textSize="12sp"/>
+        <TextView
+            android:id="@+id/streamTitleValueText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/stream_title"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:maxLines="2"
+            android:ellipsize="end"/>
+    </LinearLayout>
+
+    <!-- Category -->
+    <LinearLayout
+        android:id="@+id/rowCategory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:background="?attr/selectableItemBackground">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/mod_category"
+            android:textColor="#AAAAAA"
+            android:textSize="12sp"/>
+        <TextView
+            android:id="@+id/categoryValueText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/cat_just_chatting"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"/>
+    </LinearLayout>
+
+    <!-- Mature Content -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="12dp">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/mod_mature_content"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"/>
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switchMatureContent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+</LinearLayout>

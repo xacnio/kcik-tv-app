@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+      - 'LICENSE'
 
 permissions:
   contents: write
@@ -22,11 +27,24 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+          
+      - name: Verify Translations
+        run: python3 scripts/verify_translations_strict.py
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
             gradle-version: 8.5
+
+      - name: Create google-services.json
+        run: |
+          if [ ! -z "${{ secrets.GOOGLE_SERVICES_JSON }}" ]; then
+            echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > app/google-services.json
+            echo "Used real google-services.json from secrets"
+          else
+            cp app/google-services.json.example app/google-services.json
+            echo "Used mock google-services.json from example file"
+          fi
 
       - name: Build with Gradle
         run: gradle assembleRelease
@@ -61,10 +79,14 @@ jobs:
       - name: Extract Version Name
         id: version
         run: |
-          VERSION=$(grep "versionName =" app/build.gradle.kts | head -n 1 | awk -F '"' '{print $2}')
+          VERSION_BASE=$(grep "versionName =" app/build.gradle.kts | head -n 1 | awk -F '"' '{print $2}')
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          VERSION="${VERSION_BASE}-${SHORT_SHA}"
+          
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "tag=v$VERSION" >> $GITHUB_OUTPUT
-          if [[ $VERSION == *"beta"* ]]; then
+          
+          if [[ $VERSION_BASE == *"beta"* ]]; then
             echo "is_prerelease=true" >> $GITHUB_OUTPUT
           else
             echo "is_prerelease=false" >> $GITHUB_OUTPUT
@@ -80,14 +102,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v${{ env.VERSION }}
-          name: KcikTV v${{ env.VERSION }}
+          name: KCIKTV v${{ env.VERSION }}
           draft: false
           prerelease: ${{ steps.version.outputs.is_prerelease }}
-          files: app/build/outputs/apk/release/kciktv-${{ env.VERSION }}.apk
+          files: app/build/outputs/apk/release/KCIKTV-${{ env.VERSION }}.apk
           generate_release_notes: true
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: KcikTV-v${{ env.VERSION }}
-          path: app/build/outputs/apk/release/kciktv-${{ env.VERSION }}.apk
+          name: KCIKTV-v${{ env.VERSION }}
+          path: app/build/outputs/apk/release/KCIKTV-${{ env.VERSION }}.apk

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="is_tablet">true</bool>
+    <integer name="grid_span_count">3</integer>
+    <!-- Reset max width so grid can fill screen on tablet -->
+     <dimen name="max_content_width">10000dp</dimen>
+</resources>

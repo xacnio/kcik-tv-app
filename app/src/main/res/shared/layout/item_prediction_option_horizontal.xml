@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/optionButton"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:minHeight="64dp"
+    android:layout_weight="1"
+    android:background="@drawable/bg_prediction_option_gray"
+    android:orientation="vertical"
+    android:gravity="center_vertical"
+    android:padding="12dp">
+
+    <!-- Row 1: Title and Total Points -->
+    <LinearLayout
+        android:id="@+id/optionContentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/optionTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            tools:text="optionTitle" />
+
+        <TextView
+            android:id="@+id/optionPointsFormatted"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#B0B0B0"
+            android:textSize="12sp"
+            android:layout_marginStart="8dp"
+            tools:text="optionPointsFormatted" />
+    </LinearLayout>
+    
+    <!-- Row 2: User Stats (Spent & Win) -->
+    <LinearLayout
+        android:id="@+id/userStatsContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="4dp"
+        android:visibility="gone"
+        tools:visibility="visible">
+        
+        <LinearLayout
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:orientation="horizontal">
+            
+            <TextView
+                android:id="@+id/userSpentText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#AAAAAA"
+                android:textSize="11sp"
+                tools:text="userSpentText" />
+                
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dot_separator"
+                android:textColor="#555555"
+                android:textSize="11sp"
+                android:layout_marginHorizontal="4dp"/>
+                
+            <TextView
+                android:id="@+id/potentialWinText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#53FC18"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                tools:text="potentialWinText" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Legacy / Hidden fields -->
+    <TextView android:id="@+id/optionPercentLeft" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
+    <TextView android:id="@+id/optionPercentRight" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
+    <TextView android:id="@+id/optionIndex" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
+    <View android:id="@+id/statsDot" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
+    <TextView android:id="@+id/statsPoints" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
+    <TextView android:id="@+id/statsRatio" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
+    
+    <!-- Top Users Placeholders if code uses them (Optional but safe to keep invisible) -->
+    <LinearLayout android:id="@+id/topUsersContainer" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone">
+        <ImageView android:id="@+id/topUsersIcon" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/topUsersText" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+</LinearLayout>

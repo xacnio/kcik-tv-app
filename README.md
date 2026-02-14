@@ -1,112 +1,126 @@
-# KcikTV - Android TV Client
+# KCIKTV - Android Client (TV & Mobile)
 
-An Android TV client for the Kick.com streaming platform. Designed for TV screens with D-Pad navigation and low-latency playback.
-
-[Türkçe Versiyon için Tıklayın](README_tr.md)
+An unofficial client for the Kick.com streaming platform. Designed for both **Android TV** (fully D-Pad compatible) and **Mobile devices**, featuring low-latency playback, chat integration, and a modern UI.
 
 [![Build and Release](https://github.com/xacnio/kcik-tv-app/actions/workflows/release.yml/badge.svg)](https://github.com/xacnio/kcik-tv-app/actions/workflows/release.yml)
-[![Website](https://img.shields.io/badge/Website-KcikTV-53FC18)](https://xacnio.github.io/kcik-tv-app/)
+[![Website](https://img.shields.io/badge/Website-KCIKTV-53FC18)](https://xacnio.github.io/kcik-tv-app/)
 
 
-## 📺 Features
+## 🌟 Features & Usage
 
-- **Ultra Low-Latency Playback**: Optimized using Amazon IVS and Media3 for the fastest possible HLS streaming with minimal delay.
-- **Full Remote Control Optimization**: Native D-Pad navigation for a seamless TV experience.
-- **Advanced Chat System**:
-    - Real-time interaction with user badges.
-    - Full Emote Support: Supports static and **animated (GIF/WebP)** emotes.
-    - Optimized rendering for smooth performance on TV hardware.
-- **Dual Login Methods**:
-    - **QR Code Login**: Quick and easy login by scanning a QR code with your mobile device.
-    - **Manual Login**: Login via username/email and password with full **2FA (OTP)** support.
-- **Dynamic Interface**:
-    - **Focus System**: Clear visual state for focused items using semi-transparent backgrounds and borders.
-    - **Theme Engine**: Multiple theme colors (Electric Cyan, Midnight Indigo, Ocean Blue, etc.).
-    - **Adjustable Spacing**: Layout optimized for TV viewing distances.
-- **Global Stream Discovery**:
-    - **Language Options**: Consolidated multi-language selection sidebar.
-    - **Dynamic Sorting**: Featured, Viewers (High/Low).
-- **Stream Stats & Diagnostics**: Real-time technical info (Resolution, FPS, Bitrate, Latency, Buffer).
-- **Fast Channel Switching**: Navigate through channels using CH+/CH- or numerical input.
-- **Picture-in-Picture (PIP) Support (Mobile)**: Continue watching your favorite streams while using other apps. Includes playback and "Live Edge" controls.
-- **Background Audio Mode (Mobile)**: 
-    - Full background playback support with system media notification.
-    - **Automatic Data Saving**: Dynamically lowers video quality (to 360p or lower) in background mode.
-    - Integrated with Android Media Session for music player-like controls.
-- **Advanced Gesture Engine (Mobile)**:
-    - **Edge Deadzones**: 48dp deadzones to prevent conflicts with system navigation gestures.
-    - **Two-Finger Pan**: Drag and move video content in FILL mode.
-    - **Auto-Hide Chat**: Chat panel hides automatically when opening the channel sidebar for better usability.
+For a comprehensive list of features, screenshots, and usage instructions, please visit our official website:
+**[xacnio.github.io/kcik-tv-app](https://xacnio.github.io/kcik-tv-app/)**
 
-## 🎮 Navigation & Controls
+## 📋 Target Devices
 
-| Key | Action |
-|-----|--------|
-| **D-Pad Up** | Next channel (Zap) |
-| **D-Pad Down** | Previous channel (Zap) |
-| **D-Pad Left** | Open Channel List (Press again for Main Menu) |
-| **D-Pad Right** | Toggle Chat panel |
-| **D-Pad Center (OK)** | Show Info Overlay (Channel info / Stats) |
-| **OK (while Info open)** | Open Quick Menu (Quality, Refresh, Stats) |
-| **Back** | Close current menu / Search panel / Exit app |
-| **Numeric (0-9)** | Jump to specific channel index |
-| **CH+ / CH-** | Next / Previous channel |
+This project is optimized and tested for the following form factors:
 
-### 📱 Mobile Touch Controls
-
-| Gesture | Action |
-|---------|--------|
-| **Swipe Up** | Next channel |
-| **Swipe Down** | Previous channel |
-| **Swipe Left** | Open Channel List / Menu |
-| **Swipe Right** | Toggle Chat (only when watching) |
-| **Swipe Right** | Back (when menu is open) |
-| **Single Tap** | Show Info Overlay |
-| **Double Tap** | Toggle video format (Fit/FILL) |
-| **Pinch Zoom** | Toggle video format (Fit/FILL) |
-| **Two-Finger Pan** | Move video (only in FILL mode) |
-| **Home Button** | Enter PIP mode (if playing) |
+*   📱 **Mobile (Portrait):** Android Phones (Foldable & Standard).
+*   📺 **TV (Landscape):** Android TV, Google TV, Fire TV Stick, Nvidia Shield.
+*   📐 **Tablets (Landscape/Portrait):** Responsive tablet UI.
+*   💻 **Desktop/Chromebooks:** Large screen support with keyboard/mouse navigation.
 
 ## 🛠️ Tech Stack
 
-- **Kotlin** - 100% Kotlin codebase.
-- **Media3 / Amazon IVS** - High-performance video playback.
-- **Retrofit 2** - REST API integration.
-- **Pusher Client** - Real-time WebSocket connection for Chat.
-- **Glide** - Image loading with animated WebP/GIF support.
-- **Coroutines & Flow** - Modern reactive asynchronous handling.
-- **Material Components** - TV-optimized UI design.
+### Core
+*   **Language:** Kotlin (100%)
+*   **Architecture:** MVVM (Model-View-ViewModel)
+*   **Async:** Kotlin Coroutines & Flow
+
+### UI & Presentation
+*   **TV UI:** AndroidX Leanback SDK
+*   **Mobile UI:** Material Design Components 3
+*   **Image Loading:** Glide (Verified Memory Caching) + Glide Transformations
+*   **Animations:** APNG (for animated verified badges)
+
+### Networking & Data
+*   **API Client:** Retrofit 2 + OkHttp 3
+*   **Serialization:** Gson
+*   **WebSocket:** Native OkHttp WebSocket (Kick Chat)
+
+### Media & Playback
+*   **Player Engine:** Amazon IVS Player SDK (Native Low-Latency)
+*   **Background Playback:** Android Foreground Services + MediaSessionCompat
+
+### Features & Utilities
+*   **QR Code:** ZXing Core + ZXing Android Embedded
+*   **HTML Parsing:** Jsoup (Link Previews)
+*   **Browser Integration:** AndroidX WebKit
+*   **Background Tasks:** AndroidX WorkManager
+*   **Analytics:** Firebase Analytics (Privacy-focused / GDPR Compliant configuration)
 
 ## 🏗️ Project Architecture
 
+The codebase follows a modular monolithic approach, separating platform-specific logic while sharing the core data and business layer.
+
 ```
 app/src/main/java/dev/xacnio/kciktv/
-├── data/
-│   ├── api/          # Retrofit Service Definitions
-│   ├── chat/         # WebSocket & Chat Logic
-│   ├── model/        # Data Structures (Kick API entities)
-│   ├── prefs/        # Local Preferences & Auth storage
-│   └── repository/   # Data Layer / API abstractions
-└── ui/
-    ├── activity/     # PlayerActivity (Main UI Controller)
-    └── adapter/      # Optimized Adapters (Chat, Channels, Settings)
+├── mobile/                     # Mobile (Touch) Implementation
+│   ├── ui/                     # UI Logic Managers (Delegation Pattern)
+│   ├── LoginActivity.kt        # Mobile Authentication UI
+│   └── MobilePlayerActivity.kt # Main Mobile Activity
+│
+├── tv/                         # Android TV (D-Pad) Implementation
+│   └── PlayerActivity.kt       # Main TV Activity
+│
+└── shared/                     # Shared Core & Business Logic
+    ├── data/
+    │   ├── api/                # Retrofit Interfaces
+    │   ├── chat/               # Chat Flow & Connection Logic
+    │   ├── model/              # Data Entites
+    ├── ui/                     # Shared UI Adapters & ViewHolders
+    ├── websocket/              # Low-level WebSocket Handling
+    ├── LauncherActivity.kt     # Entry Point: Detects Device & Routes
+    └── PlaybackService.kt      # Foreground Service for Background Audio
 ```
+
+## 🌍 Translation
+The app supports multiple languages. If you want to contribute a translation:
+
+1.  Fork the repository.
+2.  Navigate to `app/src/main/res/`.
+3.  Create a new values directory for your language code (e.g., `values-fr` for French).
+4.  Copy `strings.xml` from `values/` and translate the strings.
+5.  Register your new language in `app/src/main/java/dev/xacnio/kciktv/shared/util/SupportedLanguages.kt`.
+6.  Run the verification script to ensure everything is correct:
+    ```bash
+    python3 scripts/verify_translations_strict.py
+    ```
+7.  Submit a Pull Request!
+
+> **⚠️ IMPORTANT:** Creating a translation file is NOT enough. You MUST add the language code and name to the `SupportedLanguages.kt` file for it to appear in the app settings.
+
+> **⚠️ WARNING:** Do NOT remove any lines or change the order of keys. The `strings.xml` structure must match the English version exactly line-by-line for our automation scripts to work correctly.
+
+### 🌍 Supported Languages
+
+| Language |
+| :--- |
+| 🇺🇸 English |
+| 🇹🇷 Turkish |
+| 🇪🇸 Spanish |
+| 🇫🇷 French |
+| 🇩🇪 German |
+| 🇸🇦 Arabic |
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Android Studio Ladybug or newer.
-- Android SDK 21+ (Compatible with most TV Boxes/Sticks).
-- Gradle 8.2+.
+- Android Studio Iguana or newer.
+- Android SDK 24+ (Android 7.0+).
+- Gradle 8.5+.
 
 ### Installation
 1. Clone the repository:
    ```bash
    git clone https://github.com/xacnio/kcik-tv-app.git
    ```
-2. Open the project in Android Studio.
-3. Sync Project with Gradle Files.
-4. Run on your Android TV device or Emulator.
+2. Set up Firebase:
+   - Copy `app/google-services.json.example` to `app/google-services.json`.
+   - OR place your own `google-services.json` in the `app/` directory.
+3. Open the project in Android Studio.
+4. Sync Project with Gradle Files.
+5. Run on your Android TV or Mobile device (or Emulator).
 
 ## 🔧 Build Commands
 
@@ -118,20 +132,9 @@ app/src/main/java/dev/xacnio/kciktv/
 ./gradlew assembleRelease
 ```
 
-## 📋 Target Devices
-
-- Android TV Box / Stick (Xiaomi Mi Box, Shield TV, etc.)
-- Smart TVs (Sony, Philips, TCL, etc.)
-- Amazon Fire TV / FireStick.
-- Google TV.
-
 ## 📝 License
 
 Distributed under the MIT License.
-
-## 📸 Screenshots
-
-You can find application screenshots in the [docs/screenshots/](/docs/screenshots) directory.
 
 ## 🌐 Website & Releases
 

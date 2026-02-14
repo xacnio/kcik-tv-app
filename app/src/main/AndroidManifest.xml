@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Broad Package Visibility for Link Handling -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:ignore="QueryAllPackagesPermission" />
+
     <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -10,11 +13,14 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
 
-    <!-- TV Feature -->
+    <!-- TV Feature - NOT required so app works on mobile too -->
     <uses-feature
         android:name="android.software.leanback"
-        android:required="true" />
+        android:required="false" />
 
     <!-- Touch screen not required for TV -->
     <uses-feature
@@ -22,13 +28,27 @@
         android:required="false" />
 
     <application
-        android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher_green"
         android:label="@string/app_name"
         android:banner="@drawable/app_banner"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.KcikTV"
+        android:supportsRtl="false"
+        android:theme="@style/Theme.KCIKTV"
         tools:targetApi="31">
+        
+        <!-- Firebase Privacy Settings -->
+        <!-- Disable personalized ads (GDPR/Privacy compliant) -->
+        <meta-data
+            android:name="google_analytics_adid_collection_enabled"
+            android:value="false" />
+        <!-- Disable advertising ID collection -->
+        <meta-data
+            android:name="google_analytics_default_allow_ad_personalization_signals"
+            android:value="false" />
+        <!-- Disable automatic screen reporting (we do it manually with anonymous names) -->
+        <meta-data
+            android:name="google_analytics_automatic_screen_reporting_enabled"
+            android:value="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -40,27 +60,67 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <!-- Player Activity IS NOW THE MAIN ENTRY POINT -->
+        <!-- Launcher Activity - Routes to TV or Mobile UI -->
+        <!-- Launcher Activity - Core logic remains here -->
         <activity
-            android:name=".PlayerActivity"
+            android:name=".shared.LauncherActivity"
             android:exported="true"
-            android:screenOrientation="landscape"
-            android:theme="@style/Theme.KcikTV.Fullscreen"
-            android:configChanges="keyboard|keyboardHidden|navigation|screenSize|smallestScreenSize|screenLayout|orientation"
-            android:supportsPictureInPicture="true"
-            android:launchMode="singleTask">
+            android:theme="@style/Theme.KCIKTV.LauncherTransparent"
+            android:launchMode="singleTask" />
+
+        <!-- Launcher Alias for App Icon -->
+        <activity-alias
+            android:name=".LauncherGreen"
+            android:enabled="true"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_green"
+            android:label="@string/app_name"
+            android:targetActivity=".shared.LauncherActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
                 <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity-alias>
+
+        <!-- TV Player Activity (Landscape) -->
+        <activity
+            android:name=".tv.PlayerActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.KCIKTV.Fullscreen"
+            android:configChanges="keyboard|keyboardHidden|navigation|screenSize|smallestScreenSize|screenLayout|orientation"
+            android:supportsPictureInPicture="true"
+            android:launchMode="singleTask" />
+
+        <activity
+            android:name=".mobile.MobilePlayerActivity"
+            android:exported="false"
+            android:screenOrientation="sensor"
+            android:theme="@style/Theme.KCIKTV.Mobile"
+            android:configChanges="keyboard|keyboardHidden|navigation|screenSize|smallestScreenSize|screenLayout|orientation"
+            android:supportsPictureInPicture="true"
+            android:windowSoftInputMode="adjustResize"
+            android:launchMode="singleTask" />
+
+        <!-- Login Activity -->
+        <activity
+            android:name=".mobile.LoginActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.KCIKTV.Mobile.Full"
+            android:windowSoftInputMode="adjustResize" />
 
         <service
-            android:name=".PlaybackService"
+            android:name=".shared.PlaybackService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
+
+        <activity
+            android:name=".mobile.ui.settings.qr.QRScannerActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.KCIKTV.Mobile" />
 
     </application>
 

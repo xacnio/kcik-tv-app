@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Black circle background -->
+  <circle cx="256" cy="256" r="256" fill="#000000"/>
+  <!-- Reversed K in Kick green, centered and scaled -->
+  <g transform="translate(256,256) scale(-20,20) translate(-8,-8)">
+    <path d="M3.84165 3.23056H6.95919V5.34011H7.99501V4.29043H9.03084V3.24075H12.1484V6.39999H11.1126V7.44967H10.0667V8.49935H11.1126V9.54903H12.1484V12.7083H9.03084V11.6586H7.99501V10.6089H6.95919V12.7185H3.84165V3.23056Z" fill="#53FC18"/>
+  </g>
+</svg>

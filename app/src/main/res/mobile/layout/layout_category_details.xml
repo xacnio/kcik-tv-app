@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- Shimmer Overlay -->
+    <include
+        android:id="@+id/categoryDetailsShimmer"
+        layout="@layout/layout_category_details_shimmer"
+        android:visibility="visible" />
+
+    <!-- Main Content -->
+    <LinearLayout
+        android:id="@+id/categoryDetailsContent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <!-- Header -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="200dp">
+
+            <ImageView
+                android:id="@+id/categoryBanner"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@color/placeholder_grey"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/gradient_bottom_dark"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/categoryTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="categoryTitle"
+                    android:textColor="#FFFFFF"
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    android:shadowColor="#000000"
+                    android:shadowRadius="4"
+                    android:shadowDx="0"
+                    android:shadowDy="2"/>
+
+                <TextView
+                    android:id="@+id/categoryStats"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    tools:text="categoryStats"
+                    android:textColor="#DDDDDD"
+                    android:textSize="14sp"
+                    android:shadowColor="#000000"
+                    android:shadowRadius="4"
+                    android:shadowDx="0"
+                    android:shadowDy="1"/>
+
+                <LinearLayout
+                    android:id="@+id/categoryTagsContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="8dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="8dp">
+
+                    <FrameLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/categoryFollowButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:paddingHorizontal="16dp"
+                            android:text=""
+                            android:textColor="#000000"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            app:cornerRadius="18dp"
+                            app:backgroundTint="#333333"
+                            android:visibility="visible"
+                            android:enabled="false"
+                            tools:visibility="visible"
+                            tools:text="Follow"/>
+
+                        <ProgressBar
+                            android:id="@+id/categoryFollowLoading"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:indeterminateTint="#FFFFFF"
+                            android:visibility="visible"/>
+                    </FrameLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/categoryBlockButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:layout_marginStart="12dp"
+                        android:paddingHorizontal="16dp"
+                        android:text="@string/hide_action"
+                        android:textColor="#FFFFFF"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        app:cornerRadius="18dp"
+                        app:backgroundTint="#333333"
+                        app:strokeColor="#555555"
+                        app:strokeWidth="1dp"
+                        app:icon="@drawable/ic_block"
+                        app:iconSize="16dp"
+                        app:iconGravity="textStart"
+                        app:iconPadding="8dp"
+                        app:iconTint="#FFFFFF"
+                        android:visibility="visible"/>
+
+                </LinearLayout>
+            </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/backButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_arrow_back"
+                app:tint="#FFFFFF"
+                android:padding="12dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="8dp"/>
+
+        </FrameLayout>
+
+        <!-- Tabs -->
+        <LinearLayout
+            android:id="@+id/categoryTabsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp"
+            android:background="@android:color/black">
+
+            <TextView
+                android:id="@+id/tabLive"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/live_streams_tab"
+                android:textColor="#53FC18"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginEnd="24dp"/>
+
+            <TextView
+                android:id="@+id/tabClips"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tab_clips"
+                android:textColor="#888888"
+                android:textStyle="bold"
+                android:textSize="16sp"/>
+        </LinearLayout>
+
+        <!-- Content Area -->
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/categoryDetailsSwipeRefresh"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <!-- Live Streams List -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/categoryStreamsRecycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:paddingBottom="16dp"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:listitem="@layout/item_mobile_channel"
+                    android:visibility="visible"/>
+
+                <!-- Live Streams Loading More Spinner -->
+                <ProgressBar
+                    android:id="@+id/categoryStreamsLoadingMore"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="bottom|center_horizontal"
+                    android:layout_marginBottom="72dp"
+                    android:indeterminateTint="#53FC18"
+                    android:visibility="gone"/>
+
+
+                <!-- Clips List -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/categoryClipsRecycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:paddingBottom="16dp"
+                    android:visibility="gone"
+                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                    app:spanCount="2"
+                    tools:listitem="@layout/item_clip_card"/>
+
+                <!-- Clips Shimmer -->
+                <include
+                    android:id="@+id/categoryClipsShimmer"
+                    layout="@layout/layout_clips_shimmer"
+                    android:visibility="gone" />
+
+                <!-- Clips Loading More Spinner -->
+                <ProgressBar
+                    android:id="@+id/categoryClipsLoadingMore"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="bottom|center_horizontal"
+                    android:layout_marginBottom="72dp"
+                    android:indeterminateTint="#53FC18"
+                    android:visibility="gone"/>
+
+                <!-- Empty State -->
+                <LinearLayout
+                    android:id="@+id/categoryEmptyState"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:paddingBottom="100dp"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:id="@+id/emptyStateIcon"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:alpha="0.3"
+                        android:src="@drawable/ic_block"
+                        app:tint="#FFFFFF" />
+
+                    <TextView
+                        android:id="@+id/emptyStateText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginHorizontal="40dp"
+                        android:alpha="0.6"
+                        android:gravity="center"
+                        android:text="@string/category_hidden_message"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp" />
+                </LinearLayout>
+            </FrameLayout>
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </LinearLayout>
+
+</FrameLayout>

@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="200dp"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="12dp"
+    android:orientation="vertical"
+    android:background="@drawable/bg_home_card"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
+
+    <!-- Thumbnail Container 16:9 -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="112dp">
+
+        <!-- Thumbnail Image with Top Rounded Corners -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/clipThumbnail"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter"
+            android:background="@android:color/black"
+            app:shapeAppearanceOverlay="@style/RoundedTopCorners"
+            tools:src="@drawable/default_avatar" />
+
+        <!-- Duration Badge -->
+        <TextView
+            android:id="@+id/durationBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="6dp"
+            android:background="@drawable/bg_badge_dark"
+            android:fontFamily="sans-serif-medium"
+            android:paddingHorizontal="5dp"
+            android:paddingVertical="2dp"
+            tools:text="0:00"
+            android:textColor="@android:color/white"
+            android:textSize="10sp"
+            tools:ignore="HardcodedText" />
+
+        <!-- View Count Badge -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|start"
+            android:layout_margin="6dp"
+            android:background="@drawable/bg_viewer_count"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="6dp"
+            android:paddingVertical="3dp">
+
+            <ImageView
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:src="@drawable/ic_play"
+                app:tint="#FFFFFF" />
+
+            <TextView
+                android:id="@+id/viewCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:textColor="#FFFFFF"
+                android:textSize="10sp"
+                tools:text="viewCount" />
+        </LinearLayout>
+
+        <!-- Mature Badge -->
+        <TextView
+            android:id="@+id/matureBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|start"
+            android:layout_margin="6dp"
+            android:background="@drawable/bg_badge_red"
+            android:fontFamily="sans-serif-medium"
+            android:paddingHorizontal="4dp"
+            android:paddingVertical="1dp"
+            android:text="@string/rating_18_plus"
+            android:textColor="@android:color/white"
+            android:textSize="9sp"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+    </FrameLayout>
+
+    <!-- Clip Info -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="10dp"
+        android:gravity="center_vertical">
+
+        <!-- Channel Avatar -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/channelAvatar"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:scaleType="centerCrop"
+            app:shapeAppearanceOverlay="@style/CircleImageView"
+            tools:src="@drawable/default_avatar" />
+
+        <!-- Clip Details -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:orientation="vertical">
+
+            <!-- Clip Title -->
+            <TextView
+                android:id="@+id/clipTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                tools:text="clipTitle" />
+
+            <!-- Channel Name -->
+            <TextView
+                android:id="@+id/channelName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="#A0A0A0"
+                android:textSize="11sp"
+                tools:text="channelName" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

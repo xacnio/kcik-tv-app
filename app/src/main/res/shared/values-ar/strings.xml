@@ -1,0 +1,1106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- General -->
+    <string name="back_label">عودة</string>
+    <string name="arrow_sep"> ← </string>
+    <string name="preview_label">معاينة</string>
+    <string name="celebration_emoji">🎉</string>
+    <string name="arrow_right_symbol">←</string>
+    <string name="dot_separator"> • </string>
+    <string name="app_name_caps">KCIKTV</string>
+    <string name="loading">جارٍ التحميل…</string>
+    <string name="loading_channels">جارٍ تحميل القنوات…</string>
+    <string name="retry">إعادة المحاولة</string>
+    <string name="cancel">إلغاء</string>
+    <string name="confirm">تأكيد</string>
+    <string name="close">إغلاق</string>
+    <string name="back">رجوع</string>
+    <string name="save">حفظ</string>
+    <string name="delete">حذف</string>
+    <string name="remove">إزالة</string>
+    <string name="yes">نعم</string>
+    <string name="no">لا</string>
+    <string name="on">مفعّل</string>
+    <string name="off">معطّل</string>
+    <string name="unknown">غير معروف</string>
+    <string name="gift">هدية</string>
+    <string name="live">مباشر</string>
+    <string name="channel">قناة</string>
+    <string name="offline">غير متصل</string>
+    <string name="category">فئة</string>
+    <string name="email">البريد الإلكتروني</string>
+    <string name="password">كلمة المرور</string>
+    <string name="exit">خروج</string>
+    <string name="reply">رد</string>
+    <string name="pause">إيقاف مؤقت</string>
+    <string name="play">تشغيل</string>
+    <string name="download">تحميل</string>
+    <string name="publish">نشر</string>
+    <string name="beta">تجريبي</string>
+    <string name="replying_to">رد على %s</string>
+    <string name="language_selected_format">تم اختيار %s</string>
+
+    <!-- Navigation -->
+    <string name="press_back_to_close">رجوع للإغلاق</string>
+    <string name="press_again_to_exit">اضغط مرة أخرى للخروج</string>
+
+    <!-- Channels -->
+    <string name="channel_name">اسم القناة</string>
+    <string name="following_channels_header">القنوات المتابَعة</string>
+    <string name="offline_channels_title">القنوات غير المتصلة</string>
+    <string name="following_empty_state">أنت لا تتابع أي قناة بعد</string>
+    <string name="category_no_streams">لا توجد بثوث في هذه الفئة حالياً</string>
+
+    <!-- Categories -->
+    <string name="cat_art">فن</string>
+    <string name="cat_chess">شطرنج</string>
+    <string name="cat_food_drink">طعام ومشروبات</string>
+    <string name="cat_slots">سلوتس وكازينو</string>
+    <string name="cat_games_demos">ألعاب وعروض توضيحية</string>
+    <string name="cat_just_chatting">دردشة فقط</string>
+    <string name="cat_just_sleeping">نوم فقط</string>
+    <string name="cat_music">موسيقى</string>
+    <string name="cat_music_production">إنتاج موسيقي</string>
+    <string name="cat_pools_hot_tubs">مسابح وجاكوزي وشاطئ</string>
+    <string name="cat_special_events">فعاليات خاصة</string>
+    <string name="cat_sports">رياضة</string>
+    <string name="cat_video_production">إنتاج فيديو</string>
+    <string name="cat_gaming">ألعاب</string>
+    <string name="cat_creative">إبداعي</string>
+    <string name="cat_crypto_trading">العملات الرقمية والتداول</string>
+    <string name="cat_music_stations">محطات الموسيقى</string>
+    <string name="cat_news">أخبار</string>
+
+    <!-- Blocked Categories -->
+    <string name="manage_hidden_categories">إدارة الفئات المحجوبة</string>
+    <string name="blocked_categories_subtitle">انقر فوق الرمز الموجود بجوار فئة لإظهارها</string>
+    <string name="blocked_categories_empty">لا توجد فئات محجوبة بعد</string>
+    <string name="category_hidden_msg">لقد قمت بإخفاء هذه الفئة، لذا لا يتم عرض المحتوى.</string>
+    <string name="category_hide">إخفاء</string>
+    <string name="category_hidden">مخفي</string>
+    <string name="category_hidden_toast">تم إخفاء الفئة</string>
+    <string name="category_unhidden_toast">تم إظهار الفئة</string>
+    <string name="category_unblocked_toast">لم يعد %s مخفياً</string>
+    <string name="no_blocked_categories_toast">لا توجد فئات مخفية حالياً</string>
+
+    <!-- Player UI -->
+    <string name="pip_label">صورة داخل صورة</string>
+    <string name="playback_speed_title">سرعة التشغيل</string>
+    <string name="resolution">الدقة</string>
+    <string name="refresh">تحديث</string>
+    <string name="stats">إحصائيات</string>
+    <string name="settings">الإعدادات</string>
+    <string name="guest">ضيف</string>
+    <string name="not_logged_in">غير مسجّل</string>
+    <string name="list_sorting">ترتيب القائمة</string>
+    <string name="stream_language">خيارات اللغة</string>
+    <string name="viewers_high_to_low">المشاهدون (تنازلي)</string>
+    <string name="viewers_low_to_high">المشاهدون (تصاعدي)</string>
+    <string name="recommended_streams">الموصى بها</string>
+    <string name="my_list">قائمتي</string>
+    <string name="my_channel">قناتي</string>
+    <string name="search">بحث</string>
+    <string name="following">المتابَعون</string>
+    <string name="app_settings">إعدادات التطبيق</string>
+    <string name="stream_title">عنوان البث</string>
+    <string name="view_and_filters">العرض والفلاتر</string>
+    <string name="view_mode">وضع العرض</string>
+    <string name="view_list">قائمة</string>
+    <string name="view_grid">شبكة</string>
+    <string name="sorting">الترتيب</string>
+    <string name="sort_title_featured">مميز</string>
+    <string name="sort_title_viewers_desc">الأكثر مشاهدة</string>
+    <string name="sort_title_viewers_asc">الأقل مشاهدة</string>
+
+    <!-- Login -->
+    <string name="login_with_kick_account">تسجيل الدخول بحساب Kick</string>
+    <string name="email_or_username_label">البريد الإلكتروني أو اسم المستخدم</string>
+    <string name="email_label">البريد الإلكتروني</string>
+    <string name="password_label">كلمة المرور</string>
+    <string name="error_invalid_credentials">اسم المستخدم أو كلمة المرور غير صالحة</string>
+    <string name="login_button">تسجيل الدخول</string>
+    <string name="login_with_webview">تسجيل الدخول عبر المتصفح</string>
+    <string name="login_data_disclaimer">بيانات المستخدم مشفرة وتستخدم فقط لتسجيل الدخول.</string>
+    <string name="verify_2fa_title">التحقق من الرمز الثنائي 2FA</string>
+    <string name="verify_2fa_desc">يرجى إدخال الرمز المكون من 6 أرقام من تطبيق المصادقة</string>
+    <string name="login">تسجيل الدخول</string>
+    <string name="logout">تسجيل الخروج</string>
+    <string name="user_default_name">مستخدم</string>
+    <string name="logged_out">تم تسجيل الخروج</string>
+    <string name="online_status">متصل</string>
+    <string name="login_prompt">سجّل الدخول إلى حسابك</string>
+    <string name="logout_confirm_title">تأكيد تسجيل الخروج</string>
+    <string name="logout_confirm_message">هل أنت متأكد أنك تريد تسجيل الخروج؟</string>
+    <string name="login_success">مرحباً، %s</string>
+    <string name="login_required_following">يجب تسجيل الدخول لمشاهدة المتابَعين</string>
+    <string name="manual_login">تسجيل دخول يدوي</string>
+    <string name="email_hint">مثال: user@mail.com</string>
+    <string name="show_password">إظهار كلمة المرور</string>
+    <string name="otp_code">رمز OTP</string>
+    <string name="otp_hint">رمز من 6 أرقام</string>
+    <string name="login_action">تسجيل الدخول</string>
+    <string name="qr_login_title">تسجيل الدخول بـ QR</string>
+    <string name="qr_login_subtitle">امسح بهاتفك للتسجيل السريع</string>
+    <string name="ip_not_found">لم يتم العثور على IP. تحقق من اتصالك.</string>
+    <string name="server_error">خطأ في الخادم: %s</string>
+    <string name="login_fields_required">البريد وكلمة المرور مطلوبان</string>
+    <string name="two_fa_required">رمز 2FA مطلوب</string>
+    <string name="login_required">يجب تسجيل الدخول</string>
+    <string name="login_required_chat">سجّل الدخول للدردشة</string>
+    <string name="session_expired">انتهت الجلسة</string>
+    <string name="login_button_label">تسجيل الدخول</string>
+    <string name="login_success_welcome">نجح تسجيل الدخول! مرحباً %s</string>
+    <string name="login_success_cookie">نجح تسجيل الدخول (Cookie)!</string>
+    <string name="twofa_required">رمز 2FA مطلوب</string>
+    <string name="enter_6_digit_code">أدخل الرمز المكون من 6 أرقام</string>
+    <string name="verifying">جارٍ التحقق…</string>
+    <string name="logging_in">جارٍ تسجيل الدخول…</string>
+    <string name="logging_out_secure">جارٍ تسجيل الخروج الآمن…</string>
+    <string name="otp_required_title">تحقق من رمز البريد الإلكتروني</string>
+    <string name="otp_required_desc">الرجاء إدخال الرمز المكون من 6 أرقام المرسل إلى بريدك الإلكتروني</string>
+
+    <!-- Mature Content -->
+    <string name="mature_content_warning">تحذير محتوى للبالغين</string>
+    <string name="mature_content_description">هذا البث مخصص للبالغين فقط.</string>
+    <string name="im_plus_18">عمري +18 سنة</string>
+
+    <!-- Settings -->
+    <string name="setting_option">خيار الإعداد</string>
+    <string name="setting_language">اختيار اللغة</string>
+    <string name="setting_app_language">لغة التطبيق</string>
+    <string name="system_default">الافتراضي للنظام</string>
+    <string name="setting_info_delay">مدة عرض المعلومات</string>
+    <string name="setting_transparency">ضبط الشفافية</string>
+    <string name="setting_filter">تصفية الفئات</string>
+    <string name="setting_theme">لون السمة</string>
+    <string name="setting_zap_delay">سرعة التبديل</string>
+    <string name="setting_animations">الحركات</string>
+    <string name="setting_chat_animation">حركة رسائل الدردشة</string>
+    <string name="animation_none">بدون</string>
+    <string name="animation_fade_in">تلاشي</string>
+    <string name="animation_slide_left">انزلاق من اليسار</string>
+    <string name="animation_slide_right">انزلاق من اليمين</string>
+    <string name="animation_slide_bottom">انزلاق من الأسفل</string>
+    <string name="animation_scale">تكبير</string>
+    <string name="animation_typewriter">Typewriter</string>
+    <string name="animation_curtain">Curtain</string>
+    <string name="animation_flip">Flip</string>
+    <string name="animation_rotate">Rotate</string>
+    <string name="animation_zoom_out">Zoom Out</string>
+    <string name="animation_swing">Swing</string>
+    <string name="setting_refresh_interval">معدل التحديث</string>
+    <string name="setting_update_channel">قناة التحديثات</string>
+    <string name="switch_to_tv_ui">التبديل لواجهة التلفزيون</string>
+    <string name="switch_to_mobile_ui">التبديل لواجهة الهاتف</string>
+    <string name="setting_mobile_quality">حد بيانات الهاتف</string>
+    <string name="setting_dynamic_quality">الجودة الديناميكية</string>
+    <string name="dynamic_quality_desc">يتم تغيير الجودة دون إيقاف البث. يبقى في الوضع التلقائي.</string>
+    <string name="setting_catch_up">اللحاق</string>
+    <string name="setting_auto_update">التحقق التلقائي من التحديثات</string>
+    <string name="setting_auto_update_desc">التحقق من وجود إصدارات جديدة تلقائيًا عند البدء</string>
+    <string name="setting_about">حول</string>
+    <string name="support_developer">دعم المطور</string>
+    <string name="visit_github">زيارة GitHub</string>
+    <string name="setting_background_audio">التشغيل في الخلفية</string>
+    <string name="setting_auto_pip">PIP تلقائي</string>
+    <string name="setting_chat_refresh_title">سرعة تحديث الدردشة</string>
+    <string name="setting_whats_new">ما الجديد</string>
+
+    <!-- Settings Sidebar Titles -->
+    <string name="sidebar_title_language">اختيار اللغة</string>
+    <string name="sidebar_title_delay">مدة عرض المعلومات</string>
+    <string name="sidebar_title_transparency">الشفافية</string>
+    <string name="sidebar_title_theme">لون السمة</string>
+    <string name="sidebar_title_zap">سرعة التبديل</string>
+    <string name="sidebar_title_refresh">معدل التحديث</string>
+    <string name="sidebar_title_update_channel">قناة التحديثات</string>
+    <string name="sidebar_title_mobile_quality">حد بيانات الهاتف</string>
+    <string name="sidebar_title_background_audio">الصوت في الخلفية</string>
+    <string name="sidebar_title_auto_pip">PIP تلقائي</string>
+    <string name="sidebar_title_auto_update">التحقق التلقائي من التحديثات</string>
+    <string name="sidebar_title_catch_up">اللحاق</string>
+    <string name="sidebar_title_filter_hide">إخفاء الفئة</string>
+    <string name="sidebar_channels">القنوات</string>
+
+    <!-- Settings Categories -->
+    <string name="blerp_overlay">Blerp Overlay</string>
+    <string name="settings_category_general">عام</string>
+    <string name="settings_category_player">المشغّل</string>
+    <string name="settings_category_appearance">المظهر</string>
+    <string name="settings_category_app">التطبيق</string>
+    <string name="settings_category_third_party">مكونات الطرف الثالث</string>
+    <string name="blerp_title">Blerp</string>
+    <string name="blerp_desc">ادعم البثوث بالميمز الصوتية والمؤثرات والإيموتات</string>
+    <string name="settings_player_desc">الجودة، الصوت في الخلفية وإعدادات التشغيل</string>
+    <string name="settings_appearance_desc">اللغة والتفضيلات المرئية</string>
+    <string name="settings_third_party_desc">Blerp وتكاملات أخرى</string>
+    <string name="settings_app_desc">التحديثات، معلومات الإصدار والمزيد</string>
+    <string name="settings_category_advanced">متقدم</string>
+    <string name="settings_category_advanced_desc">ميزات وأدوات تجريبية</string>
+    <string name="settings_kick_webview">Kick WebView</string>
+    <string name="settings_kick_webview_desc">افتح Kick.com في المتصفح الداخلي (تسجيل الدخول نشط)</string>
+    <string name="settings_clear_cache">مسح ذاكرة التخزين المؤقت</string>
+    <string name="settings_clear_cache_desc">مسح ذاكرة التخزين المؤقت للتطبيق والملفات المؤقتة</string>
+    <string name="settings_clear_blerp_auth">مسح مصادقة Blerp</string>
+    <string name="settings_clear_blerp_auth_desc">تسجيل الخروج من Blerp ومسح البيانات المحفوظة</string>
+    <string name="cache_cleared">تم مسح ذاكرة التخزين المؤقت بنجاح</string>
+    <string name="blerp_auth_cleared">تم مسح مصادقة Blerp بنجاح</string>
+    <string name="settings_trusted_domains">النطاقات الموثوقة</string>
+    <string name="privacy_policy">سياسة الخصوصية</string>
+    <string name="settings_trusted_domains_desc">إدارة النطاقات لمعاينات الروابط</string>
+    <string name="trusted_domains_count">%d نطاقات</string>
+    <string name="trusted_domain_add_title">إضافة نطاق</string>
+    <string name="trusted_domain_add_hint">مثل reddit.com</string>
+    <string name="trusted_domain_added">تمت إضافة النطاق: %s</string>
+    <string name="trusted_domain_removed">تمت إزالة النطاق: %s</string>
+    <string name="trusted_domain_exists">النطاق موجود بالفعل</string>
+    <string name="trusted_domain_invalid">يرجى إدخال نطاق صالح</string>
+    <string name="trusted_domains_reset">إعادة تعيين للافتراضي</string>
+    <string name="trusted_domains_reset_confirm">هل تريد إعادة تعيين النطاقات الموثوقة للافتراضي؟</string>
+    <string name="trusted_domains_reset_done">تمت إعادة تعيين النطاقات الموثوقة</string>
+    <string name="trusted_domain_remove_confirm">إزالة %s من النطاقات الموثوقة؟</string>
+    <string name="add">Add</string>
+
+    <!-- Settings Options -->
+    <string name="pip_automatic">تلقائي</string>
+    <string name="pip_manual">زر فقط</string>
+    <string name="catch_up_off">مغلق</string>
+    <string name="catch_up_low">مستوى منخفض</string>
+    <string name="catch_up_high">مستوى عالي</string>
+    <string name="quality_unlimited">بلا حدود</string>
+    <string name="only_manual">يدوي فقط</string>
+    <string name="x_minutes">%1$d دقائق</string>
+    <string name="x_seconds">%1$d ثواني</string>
+    <string name="instant_ms">فوري (0ms)</string>
+    <string name="fast_ms">سريع (300ms)</string>
+    <string name="normal_ms">عادي (700ms)</string>
+    <string name="slow_ms">بطيء (1200ms)</string>
+    <string name="speed_ultra_fast">سريع جداً (100ms)</string>
+    <string name="speed_fast">سريع (الافتراضي - 200ms)</string>
+    <string name="speed_normal">عادي (500ms)</string>
+    <string name="speed_slow">بطيء (1000ms)</string>
+
+    <!-- Theme Colors -->
+    <string name="premium_emerald">أخضر زمردي</string>
+    <string name="premium_sapphire">أزرق ياقوتي</string>
+    <string name="premium_ruby">أحمر ياقوتي</string>
+    <string name="premium_gold">ذهبي عنبري</string>
+    <string name="premium_violet">بنفسجي جمشتي</string>
+    <string name="premium_teal">أخضر مزرق داكن</string>
+    <string name="premium_rose">وردي</string>
+    <string name="kciktv_cyan">سماوي كهربائي</string>
+    <string name="brand_green">أخضر Kick</string>
+
+    <!-- Stream Status -->
+    <string name="stream_ended">انتهى البث</string>
+    <string name="live_stream">بث مباشر</string>
+    <string name="stream_offline">البث غير متصل</string>
+    <string name="list_empty">القائمة فارغة</string>
+    <string name="currently_live">مباشر الآن</string>
+    <string name="currently_offline">غير متصل حالياً</string>
+    <string name="last_stream_time">آخر بث %s</string>
+    <string name="live_badge">مباشر</string>
+    <string name="offline_badge">غير متصل</string>
+
+    <!-- Stats -->
+    <string name="stats_nerd_title">إحصائيات الفيديو (Nerd Stats)</string>
+    <string name="stats_resolution_label">الدقة:</string>
+    <string name="stats_fps_label">إطارات/ث:</string>
+    <string name="stats_bitrate_label">معدل البت:</string>
+    <string name="stats_latency_label">التأخير:</string>
+    <string name="stats_buffer_label">التخزين المؤقت:</string>
+    <string name="stats_dropped_frames_label">الإطارات المفقودة:</string>
+    <string name="stats_playback_rate_label">سرعة التشغيل:</string>
+    <string name="stats_player_state_label">حالة المشغل:</string>
+    <string name="stats_volume_label">الصوت:</string>
+    <string name="stat_resolution">الدقة</string>
+    <string name="stat_bitrate">معدل البت</string>
+    <string name="stat_codec">الترميز</string>
+    <string name="stat_dropped_frames">الإطارات المتساقطة</string>
+    <string name="stat_decoded_frames">الإطارات المفككة</string>
+    <string name="stat_rendered_frames">الإطارات المعروضة</string>
+    <string name="stat_buffer_health">صحة التخزين</string>
+    <string name="stat_latency">زمن الوصول</string>
+    <string name="stat_playback_rate">سرعة التشغيل</string>
+    <string name="stat_ready_state">حالة الاستعداد</string>
+    <string name="stat_volume">الصوت</string>
+    <string name="stat_muted">مكتوم</string>
+    <string name="player_statistics">إحصائيات المشغّل</string>
+
+    <!-- Updates -->
+    <string name="stable">مستقر</string>
+    <string name="update_available">تحديث جديد متاح: %s</string>
+    <string name="update_now">حدّث الآن</string>
+    <string name="up_to_date">التطبيق محدّث</string>
+    <string name="checking_updates">جارٍ البحث عن تحديثات…</string>
+    <string name="check_update">التحقق من التحديثات</string>
+    <string name="download_failed">فشل التحميل</string>
+    <string name="update_available_title">تحديث جديد متاح</string>
+    <string name="update_available_msg">الإصدار %1$s متاح. هل تريد التحديث؟</string>
+    <string name="downloading_percent">جارٍ التحميل… %1$d%%</string>
+    <string name="later">لاحقاً</string>
+    <string name="no_updates">التطبيق محدّث</string>
+    <string name="update_check_failed">فشل التحقق من التحديثات</string>
+    <string name="update_message">الإصدار %1$s متاح. هل تريد التحميل؟</string>
+    <string name="apk_not_found">APK غير موجود</string>
+    <string name="whats_new">ما الجديد</string>
+    <string name="downloading">جارٍ التحميل…</string>
+    <string name="update_version_format">%1$s ← %2$s</string>
+
+    <!-- Languages Array -->
+    <string-array name="stream_language_names">
+        <item>Turkish</item>
+        <item>English</item>
+        <item>Afrikaans</item>
+        <item>German</item>
+        <item>Arabic</item>
+        <item>Albanian</item>
+        <item>Azerbaijani</item>
+        <item>Belarusian</item>
+        <item>Bengali</item>
+        <item>Bosnian</item>
+        <item>Bulgarian</item>
+        <item>Czech</item>
+        <item>Chinese</item>
+        <item>Danish</item>
+        <item>Indonesian</item>
+        <item>Esperanto</item>
+        <item>Estonian</item>
+        <item>Faroese</item>
+        <item>Persian</item>
+        <item>Dutch</item>
+        <item>Filipino</item>
+        <item>Finnish</item>
+        <item>French</item>
+        <item>Georgian</item>
+        <item>Hawaiian</item>
+        <item>Croatian</item>
+        <item>Hindi</item>
+        <item>Hebrew</item>
+        <item>Interlingua</item>
+        <item>Spanish</item>
+        <item>Swedish</item>
+        <item>Italian</item>
+        <item>Japanese</item>
+        <item>Catalan</item>
+        <item>Korean</item>
+        <item>Latin</item>
+        <item>Polish</item>
+        <item>Latvian</item>
+        <item>Lithuanian</item>
+        <item>Hungarian</item>
+        <item>Macedonian</item>
+        <item>Malayalam</item>
+        <item>Malay</item>
+        <item>Mongolian</item>
+        <item>Norwegian</item>
+        <item>Norwegian Bokmål</item>
+        <item>Portuguese</item>
+        <item>Romanian</item>
+        <item>Moldavian</item>
+        <item>Russian</item>
+        <item>Serbian</item>
+        <item>Slovak</item>
+        <item>Slovenian</item>
+        <item>Somali</item>
+        <item>Sundanese</item>
+        <item>Tatar</item>
+        <item>Thai</item>
+        <item>Ukrainian</item>
+        <item>Urdu</item>
+        <item>Vietnamese</item>
+        <item>Greek</item>
+        <item>Zulu</item>
+    </string-array>
+    <string name="app_version_label">الإصدار: %s</string>
+
+    <!-- Quality -->
+    <string name="format_fit">ملء الشاشة</string>
+    <string name="load_more">تحميل المزيد...</string>
+    <string name="auto">تلقائي</string>
+    <string name="quality_selection">الجودة</string>
+    <string name="auto_quality">تلقائي</string>
+    <string name="quality_loading">جارٍ التحميل</string>
+    <string name="quality_auto">تلقائي</string>
+    <string name="quality_auto_description">أفضل جودة لاتصالك</string>
+    <string name="quality_audio_only">صوت فقط</string>
+    <string name="auto_quality_with_limit">تلقائي (%dp)</string>
+    <string name="speed_normal_1x">عادي (1x)</string>
+    <string name="speed_x_format">%sx</string>
+
+    <!-- Connection & Errors -->
+    <string name="connection_failed">فشل الاتصال بالبث</string>
+    <string name="stream_error_retrying">خطأ في البث، إعادة المحاولة %1$d/%2$d</string>
+    <string name="channel_not_found">القناة غير موجودة: %1$s</string>
+    <string name="channels_load_failed">فشل تحميل القنوات</string>
+    <string name="category_load_failed">فشل تحميل الفئة</string>
+    <string name="data_load_failed">فشل تحميل البيانات</string>
+    <string name="categories_load_failed">فشل تحميل الفئات</string>
+    <string name="channel_load_failed">فشل تحميل القناة: %s</string>
+    <string name="history_load_failed">فشل تحميل السجل</string>
+    <string name="history_load_failed_web">فشل تحميل السجل (ويب)</string>
+    <string name="error_occurred">حدث خطأ</string>
+    <string name="error_format">خطأ: %s</string>
+    <string name="link_open_failed">تعذر فتح الرابط</string>
+    <string name="video_load_failed">تعذر تحميل الفيديو</string>
+    <string name="error_open_link">خطأ في فتح الرابط</string>
+    <string name="error_loading_clip">خطأ في تحميل المقطع: %s</string>
+    <string name="failed_to_load_streams">Failed to load streams</string>
+    <string name="failed_to_load_clips">Failed to load clips</string>
+    <string name="clip_url_missing">رابط المقطع مفقود</string>
+
+    <!-- Search -->
+    <string name="search_channel_hint">أدخل اسم القناة (مثال: xqc)</string>
+    <string name="search_no_result">القناة غير موجودة</string>
+    <string name="search_channels">البحث عن قناة…</string>
+    <string name="recent_searches">عمليات البحث الأخيرة</string>
+    <string name="clear_all">مسح الكل</string>
+    <string name="no_results_found">لم يتم العثور على نتائج</string>
+    <string name="search_categories_hint">البحث عن فئة...</string>
+    <string name="tag_format">وسم: #%s</string>
+    <string name="type_channel">قناة</string>
+    <string name="type_category">فئة</string>
+    <string name="type_tag">علامة</string>
+
+    <!-- Mobile UI -->
+    <string name="send_message">اكتب رسالة…</string>
+    <string name="no_messages">لا توجد رسائل بعد</string>
+
+    <!-- Chat Errors -->
+    <string name="chat_system_username">النظام</string>
+    <string name="chat_error_subscribers_only">هذه الدردشة للمشتركين فقط.</string>
+    <string name="chat_error_followers_only">هذه الدردشة للمتابعين فقط.</string>
+    <string name="chat_error_slow_mode">الوضع البطيء مفعّل. انتظر قليلاً.</string>
+    <string name="chat_error_banned">تم حظرك من هذه القناة.</string>
+    <string name="chat_error_message_too_long">الرسالة طويلة جداً.</string>
+    <string name="chat_error_duplicate_message">لا يمكنك إرسال نفس الرسالة مرة أخرى.</string>
+    <string name="chat_error_generic">فشل إرسال الرسالة: %s</string>
+
+    <!-- Audio Modes -->
+    <string name="audio_mode_custom_eq">معادل صوت مخصص</string>
+
+    <!-- Chat Hints -->
+    <string name="chat_hint_subscribers_only">الدردشة للمشتركين فقط</string>
+    <string name="chat_hint_followers_only">الدردشة للمتابعين فقط</string>
+    <string name="chat_hint_emotes_only">استخدم الرموز التعبيرية...</string>
+    <string name="chat_hint_default">اكتب رسالة...</string>
+    <string name="chat_hint_follower_min_duration">متابع فقط (%d دقيقة)</string>
+    <string name="chat_hint_follower_remaining">%d دقيقة متبقية للدردشة</string>
+    <string name="chat_hint_login_required">سجّل للدردشة</string>
+    <string name="chat_preview_message">مرحبا بالعالم!</string>
+
+    <!-- Chat Status -->
+    <string name="chat_status_slow_mode_on">تم تفعيل الوضع البطيء</string>
+    <string name="chat_status_slow_mode_on_duration">تم تفعيل الوضع البطيء. (%1$s)</string>
+    <string name="chat_status_slow_mode_on_by">تم تفعيل الوضع البطيء بواسطة &lt;b&gt;%1$s&lt;/b&gt;</string>
+    <string name="chat_status_slow_mode_off">تم إلغاء الوضع البطيء</string>
+    <string name="chat_status_slow_mode_off_by">تم إلغاء الوضع البطيء بواسطة &lt;b&gt;%1$s&lt;/b&gt;</string>
+    <string name="chat_status_subscribers_mode_on">تم تفعيل وضع المشتركين فقط</string>
+    <string name="chat_status_subscribers_mode_on_by">تم تفعيل وضع المشتركين فقط بواسطة &lt;b&gt;%1$s&lt;/b&gt;</string>
+    <string name="chat_status_subscribers_mode_off">تم إلغاء وضع المشتركين فقط</string>
+    <string name="chat_status_subscribers_mode_off_by">تم إلغاء وضع المشتركين فقط بواسطة &lt;b&gt;%1$s&lt;/b&gt;</string>
+    <string name="chat_status_emotes_mode_on">تم تفعيل وضع الرموز فقط</string>
+    <string name="chat_status_emotes_mode_on_by">تم تفعيل وضع الرموز فقط بواسطة &lt;b&gt;%1$s&lt;/b&gt;</string>
+    <string name="chat_status_emotes_mode_off">تم إلغاء وضع الرموز فقط</string>
+    <string name="chat_status_emotes_mode_off_by">تم إلغاء وضع الرموز فقط بواسطة &lt;b&gt;%1$s&lt;/b&gt;</string>
+    <string name="chat_status_followers_mode_on">تم تفعيل وضع المتابعين فقط</string>
+    <string name="chat_status_followers_mode_on_by">تم تفعيل وضع المتابعين فقط بواسطة &lt;b&gt;%1$s&lt;/b&gt;</string>
+    <string name="chat_status_followers_mode_off">تم إلغاء وضع المتابعين فقط</string>
+    <string name="chat_status_followers_mode_off_by">تم إلغاء وضع المتابعين فقط بواسطة &lt;b&gt;%1$s&lt;/b&gt;</string>
+
+    <!-- Chat User Events -->
+    <string name="chat_user_banned">تم إسكات المستخدم &lt;b&gt;%1$s&lt;/b&gt; بواسطة &lt;b&gt;%2$s&lt;/b&gt; لمدة %3$s.</string>
+    <string name="chat_user_banned_permanently">تم حظر المستخدم &lt;b&gt;%1$s&lt;/b&gt; بواسطة &lt;b&gt;%2$s&lt;/b&gt; نهائياً.</string>
+    <string name="chat_user_unbanned">تم رفع الحظر عن المستخدم &lt;b&gt;%1$s&lt;/b&gt; بواسطة &lt;b&gt;%2$s&lt;/b&gt;.</string>
+    <string name="pinned_by_format">تم التثبيت بواسطة: %s</string>
+
+    <!-- Duration -->
+    <string name="duration_days">%1$d أيام</string>
+    <string name="duration_hours">%1$d ساعات</string>
+    <string name="duration_minutes">%1$d دقائق</string>
+    <string name="duration_seconds">%1$d ثواني</string>
+    <string name="duration_months">%1$d شهور</string>
+
+    <!-- Emotes -->
+    <string name="emote_available_only_for_subscribers">هذا الرمز متاح للمشتركين فقط</string>
+    <string name="emote_category_subscribers">رموز المشتركين</string>
+    <string name="emote_section_subscribers_only">للمشتركين فقط</string>
+    <string name="emote_subscriber_only_suffix"> (للمشتركين فقط)</string>
+
+    <!-- Moderation Errors -->
+    <string name="error_cannot_ban_moderator">لا يمكنك حظر مشرف</string>
+    <string name="error_moderation_failed">فشل إجراء الإشراف</string>
+    <string name="error_moderation_failed_reason">فشل إجراء الإشراف: %s</string>
+    <string name="error_user_not_exists">المستخدم غير موجود</string>
+    <string name="error_cannot_ban_owner">لا يمكنك حظر مالك القناة</string>
+
+    <!-- Moderator Actions -->
+    <string name="mod_actions_title">إجراءات القناة</string>
+    <string name="mod_slow_mode">الوضع البطيء</string>
+    <string name="mod_followers_only">الدردشة للمتابعين فقط</string>
+    <string name="mod_subscribers_only">الدردشة للمشتركين فقط</string>
+    <string name="mod_emotes_only">الرموز فقط</string>
+    <string name="mod_settings_updated">تم تحديث إعدادات الدردشة</string>
+    <string name="mod_settings_update_failed">فشل تحديث إعدادات الدردشة</string>
+    <string name="mod_preset_options">اختيار سريع</string>
+    <string name="mod_custom_duration">مدة مخصصة</string>
+    <string name="mod_slow_mode_title">مدة الوضع البطيء</string>
+    <string name="mod_followers_mode_title">الحد الأدنى لمدة المتابعة</string>
+    <string name="mod_unit_seconds">ثواني</string>
+    <string name="mod_unit_minutes">دقائق</string>
+    <string name="mod_unit_hours">ساعات</string>
+    <string name="mod_unit_days">أيام</string>
+    <string name="mod_duration_format_seconds">%d ث</string>
+    <string name="mod_duration_format_minutes">%d د</string>
+    <string name="mod_duration_format_hours">%d س</string>
+    <string name="mod_duration_format_days">%d ي</string>
+    <string name="mod_followers_any">أي متابع</string>
+    <string name="mod_error_slow_mode_limit">يجب أن تكون مدة الوضع البطيء بين 1 و300 ثانية.</string>
+    <string name="mod_error_followers_limit">تم تجاوز حد مدة المتابعين (الحد الأقصى سنة واحدة).</string>
+    <string name="mod_error_invalid_input">يرجى إدخال رقم صالح.</string>
+    <string name="mod_stream_title">عنوان البث</string>
+    <string name="mod_category">فئة البث</string>
+    <string name="mod_search_category">البحث عن فئة</string>
+    <string name="mod_error_metadata_offline">فقط المالك يمكنه تغيير البيانات عندما يكون غير متصل.</string>
+    <string name="mod_mature_content">محتوى للبالغين (+18)</string>
+    <string name="mod_timeout_success">تم إسكات المستخدم لـ %s</string>
+    <string name="mod_unban_success">تم رفع الحظر عن المستخدم</string>
+    <string name="mod_unban_failed">فشل رفع الحظر</string>
+    <string name="mod_ban_success">تم حظر المستخدم %s</string>
+    <string name="mod_ban_confirm_title">حظر المستخدم</string>
+    <string name="mod_ban_confirm_msg">هل أنت متأكد من حظر %s نهائياً؟</string>
+    <string name="mod_pin_confirm_title">Pin Message</string>
+    <string name="mod_pin_confirm_msg">Are you sure you want to pin this message?</string>
+    <string name="mod_delete_success">تم حذف الرسالة</string>
+    <string name="mod_view_title">إجراءات المشرف</string>
+    <string name="mod_create_poll">إنشاء استطلاع</string>
+    <string name="mod_edit_stream_title">تعديل معلومات البث</string>
+    <string name="duration_picker_title">اختر المدة</string>
+
+    <!-- Chat Overlays -->
+    <string name="chat_banned_overlay">أنت محظور في هذه القناة!</string>
+    <string name="chat_timed_out_overlay">تم إسكاتك في هذه القناة!</string>
+    <string name="chat_timeout_remaining_format">تم إسكاتك. (المتبقي: %s)</string>
+
+    <!-- Chat Clear -->
+    <string name="chat_cleared">تم مسح الدردشة</string>
+    <string name="chat_restore_messages">استعادة %d رسائل</string>
+
+    <!-- Ban Status -->
+    <string name="ban_permanent">حظر دائم</string>
+    <string name="ban_timeout">إسكات</string>
+    <string name="ban_remaining_format">المتبقي: %s</string>
+    <string name="ban_banned_by_format">محظور بواسطة: %s</string>
+    <string name="ban_reason_format">السبب: %s</string>
+    <string name="ban_date_format">التاريخ: %s</string>
+    <string name="ban_label_caps">حظر</string>
+    <string name="banned_users">المستخدمون المحظورون</string>
+    <string name="no_banned_users">لم يتم العثور على مستخدمين محظورين</string>
+
+    <!-- User Actions -->
+    <string name="action_watch_stream">مشاهدة البث</string>
+    <string name="action_go_to_chat">الذهاب للدردشة</string>
+    <string name="action_share_channel">مشاركة القناة</string>
+    <string name="save_video">حفظ الفيديو</string>
+    <string name="send_action">إرسال</string>
+    <string name="clear_action">مسح</string>
+    <string name="hide_action">إخفاء</string>
+    <string name="action_unban">رفع الحظر</string>
+    <string name="action_reply">رد</string>
+    <string name="action_mention">إشارة</string>
+    <string name="action_pin">تثبيت الرسالة</string>
+    <string name="action_user_info">إجراءات المستخدم</string>
+    <string name="action_timeout">إسكات</string>
+    <string name="action_delete">حذف</string>
+    <string name="action_ban_with_label">حظر المستخدم</string>
+    <string name="action_delete_message">حذف الرسالة</string>
+    <string name="action_follow">متابعة</string>
+    <string name="action_load_all">تحميل الكل</string>
+    <string name="action_redeem">استبدال</string>
+    <string name="action_previous">السابق</string>
+    <string name="action_next">التالي</string>
+
+    <!-- Timeout Durations -->
+    <string name="timeout_1m">1 دقيقة</string>
+    <string name="timeout_5m">5 دقائق</string>
+    <string name="timeout_1h">1 ساعة</string>
+    <string name="timeout_1d">1 يوم</string>
+    <string name="timeout_1w">1 أسبوع</string>
+
+    <!-- User Info -->
+    <string name="user_history_session">سجل الرسائل (الجلسة)</string>
+    <string name="user_history_empty">لا توجد رسائل بعد</string>
+    <string name="follow_date_format">متابع منذ: %s</string>
+    <string name="date_format_label">التاريخ: %s</string>
+    <string name="sub_duration_format">مشترك: %s</string>
+    <string name="subscription_months_format">الاشتراك: %d شهر</string>
+    <string name="user_banned_success">تم حظر المستخدم</string>
+    <string name="user_unbanned_success">تم رفع الحظر</string>
+    <string name="anonymous_user">مجهول</string>
+
+    <!-- Chat UI -->
+    <string name="chat_login_prompt_prefix">للدردشة </string>
+    <string name="auto_scroll">تمرين تلقائي</string>
+    <string name="chat_jump_to_bottom">الانتقال للأسفل</string>
+    <string name="chat_new_messages_count">%s رسائل جديدة ↓</string>
+    <string name="chat_replying_to">رد على: %s</string>
+    <string name="message_copied">تم نسخ الرسالة</string>
+    <string name="delete_message_confirm_msg">هل أنت متأكد من حذف هذه الرسالة؟</string>
+    <string name="login_to_chat">سجّل للدردشة</string>
+    <string name="slow_mode_active">الوضع البطيء: %ds</string>
+    <string name="slow_mode_exempt">الوضع البطيء: %ds (غير متأثر)</string>
+    <string name="subscribers_only_mode">للمشتركين فقط</string>
+    <string name="followers_only_mode">للمتابعين فقط</string>
+    <string name="followers_only_mode_min">للمتابعين فقط (%dm+)</string>
+    <string name="emotes_only_mode">الرموز فقط</string>
+    <string name="unknown_command">أمر غير معروف: /%s</string>
+    <string name="command_failed">فشل الأمر</string>
+    <string name="chat_only_live_msg">الدردشة متاحة فقط أثناء البث المباشر</string>
+
+    <!-- Chat Settings -->
+    <string name="chat_setting_highlighted">الرسائل المميزة</string>
+    <string name="chat_setting_highlights">أبرز الأحداث</string>
+    <string name="chat_setting_own_messages">رسائلك</string>
+    <string name="chat_setting_mod_messages">رسائل المشرفين</string>
+    <string name="chat_setting_vip_messages">رسائل VIP</string>
+    <string name="chat_setting_name_color">استخدام لون الاسم</string>
+    <string name="chat_settings_title">إعدادات الدردشة</string>
+    <string name="chat_identity_title">هوية الدردشة</string>
+    <string name="chat_appearance_title">مظهر الدردشة</string>
+    <string name="chat_rules_title">قواعد الدردشة</string>
+    <string name="chat_identity_preview">معاينة</string>
+    <string name="chat_identity_badges">الشارات</string>
+    <string name="chat_identity_color">لون الاسم</string>
+    <string name="chat_font_size">حجم الخط</string>
+    <string name="chat_emote_size">حجم الرموز</string>
+    <string name="chat_section_sizes">Sizes</string>
+    <string name="chat_section_features">Features</string>
+    <string name="chat_section_advanced">Advanced</string>
+    <string name="chat_timestamps">الطوابع الزمنية</string>
+    <string name="chat_seconds">تضمين الثواني</string>
+    <string name="show_pinned_gifts">الهدايا المثبتة</string>
+    <string name="chat_low_battery_mode">وضع توفير البطارية</string>
+    <string name="chat_emote_combo">كومبو الرموز</string>
+    <string name="chat_settings_vibrate_on_mention">اهتزاز عند الإشارة</string>
+    <string name="chat_settings_floating_emotes">رموز عائمة</string>
+
+    <!-- Chat Connection -->
+    <string name="chat_low_battery_paused">تم تفعيل وضع الخلفية. الدردشة متوقفة (وضع توفير البطارية)</string>
+
+    <!-- Chat Rules -->
+    <string name="chat_rules_not_found">لم يتم العثور على قواعد الدردشة لهذه القناة.</string>
+    <string name="chat_rules_load_error">حدث خطأ أثناء تحميل القواعد.</string>
+    <string name="chat_rules_close">إغلاق</string>
+    <string name="chat_rules_agree">أوافق</string>
+
+    <!-- Gifted Subs -->
+    <string name="gift_message_hint">اكتب رسالة هدية</string>
+    <string name="chat_gifted_subs_plural">قام %1$s بإهداء %2$d اشتراكات للمجتمع! أهدى إجمالي %3$d اشتراكات في هذه القناة.</string>
+    <string name="chat_gifted_sub_single">قام %1$s بإهداء اشتراك للمجتمع! أهدى إجمالي %2$d اشتراكات في هذه القناة.</string>
+    <string name="chat_gifted_sub_individual">قام %1$s بإهداء اشتراك لـ %2$s!</string>
+    <string name="chat_celebration_sub_renew_title">يحتفل بتجديد اشتراكه!</string>
+    <string name="chat_celebration_generic_title">يحتفل!</string>
+    <string name="chat_celebration_sub_renew_duration">إجمالي مدة الاشتراك: %d شهور!</string>
+    <string name="celebration_banner_sub_renew_title">أنت تحتفل بتجديد اشتراكك!</string>
+    <string name="celebration_banner_sub_renew_duration">لقد كنت مشتركًا لمدة %d شهرًا!</string>
+    <string name="celebration_action_celebrate">مشاركة</string>
+    <string name="celebration_action_dismiss">تجاهل</string>
+    <string name="celebration_context_title">مشاركة احتفال الاشتراك</string>
+    <string name="celebration_context_info_sub">أخبر الجميع أنك اشتركت لدى %1$s لمدة %2$d شهرًا</string>
+
+    <!-- Mentions -->
+    <string name="mentions_title">الإشارات</string>
+    <string name="mentions_empty">لا توجد إشارات بعد</string>
+    <string name="mentions_count_format">%d رسائل</string>
+    <string name="go_to_message">الانتقال للرسالة</string>
+    <string name="time_ago_just_now">الآن</string>
+    <string name="time_ago_minutes">منذ %d دقيقة</string>
+    <string name="time_ago_hours">منذ %d ساعات</string>
+    <string name="error_generic">حدث خطأ ما</string>
+
+    <!-- Background Audio -->
+    <string name="background_audio_active">وضع الصوت في الخلفية مفعّل</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">الرئيسية</string>
+    <string name="nav_browse">تصفح</string>
+    <string name="nav_following">المتابَعون</string>
+    <string name="nav_search">بحث</string>
+
+    <!-- Home Screen -->
+    <string name="home_featured_title">القنوات المباشرة</string>
+    <string name="home_top_categories_title">أفضل الفئات</string>
+    <string name="home_following_title">قنواتك المباشرة</string>
+    <string name="home_popular_clips_title">مقاطع فيديو شائعة</string>
+
+    <!-- PIP and Notifications -->
+    <string name="pip_action_return_to_live">العودة للمباشر</string>
+    <string name="pip_action_mute">كتم</string>
+    <string name="pip_action_unmute">إلغاء الكتم</string>
+    <string name="pip_action_audio_only">وضع الصوت</string>
+    <string name="pip_action_audio_only_desc">وضع الصوت في الخلفية</string>
+    <string name="notification_action_close">إغلاق</string>
+
+    <!-- Loading States -->
+    <string name="history_loading">جارٍ التحميل...</string>
+    <string name="history_all_loaded">تم تحميل الكل</string>
+
+    <!-- Action Feedback -->
+    <string name="vote_failed">فشل التصويت: %s</string>
+    <string name="operation_failed">فشلت العملية: %s</string>
+    <string name="login_failed_code">فشل تسجيل الدخول (%d)</string>
+    <string name="operation_failed_code">فشلت العملية (الرمز: %d)</string>
+
+    <!-- Polls -->
+    <string name="poll_header">استطلاع</string>
+    <string name="poll_option_hint">الخيار %d</string>
+    <string name="poll_question_required">يرجى إدخال سؤال</string>
+    <string name="poll_min_options_required">مطلوب خياران على الأقل</string>
+    <string name="poll_create_failed">فشل إنشاء الاستطلاع: %s</string>
+    <string name="poll_result">النتيجة</string>
+    <string name="poll_result_title">نتيجة الاستطلاع</string>
+    <string name="poll_label">استطلاع</string>
+    <string name="poll_result_label">نتيجة الاستطلاع</string>
+    <string name="total_votes">إجمالي الأصوات: %d</string>
+    <string name="delete_poll_title">حذف الاستطلاع</string>
+    <string name="delete_poll_message">هل أنت متأكد من إنهاء هذا الاستطلاع؟</string>
+    <string name="poll_deleted">تم حذف الاستطلاع</string>
+    <string name="poll_delete_failed">لا يمكن حذف الاستطلاع</string>
+    <string name="poll_created">تم إنشاء الاستطلاع!</string>
+    <string name="create_poll">إنشاء استطلاع</string>
+    <string name="poll_question_label">السؤال</string>
+    <string name="poll_question_hint">اكتب سؤال الاستطلاع...</string>
+    <string name="poll_options_label">الخيارات</string>
+    <string name="poll_option_1_hint">الخيار 1</string>
+    <string name="poll_option_2_hint">الخيار 2</string>
+    <string name="poll_option_3_hint">الخيار 3</string>
+    <string name="poll_option_4_hint">الخيار 4</string>
+    <string name="poll_option_5_hint">الخيار 5</string>
+    <string name="poll_option_6_hint">الخيار 6</string>
+    <string name="poll_duration_label">المدة</string>
+    <string name="poll_result_duration_label">مدة عرض النتيجة</string>
+    <string name="enter_question">يرجى إدخال سؤال.</string>
+    <string name="min_2_options">مطلوب خياران على الأقل.</string>
+    <string name="creating">جارٍ الإنشاء…</string>
+
+    <!-- Clips -->
+    <string name="check_out_clip">شاهد هذا المقطع!</string>
+    <string name="trim_label">قص: </string>
+    <string name="clip_title_label">عنوان المقطع</string>
+    <string name="popular_clips_header">مقاطع شائعة</string>
+    <string name="clip_url_copied">تم نسخ رابط المقطع</string>
+    <string name="share_clip">مشاركة المقطع</string>
+    <string name="clip_only_live">يمكن إنشاء المقاطع فقط أثناء البث المباشر (Slug غير موجود)</string>
+    <string name="clip_login_required">يجب تسجيل الدخول لإنشاء مقاطع</string>
+    <string name="clip_error">خطأ في المقطع: %s</string>
+    <string name="create_clip">إنشاء مقطع: %s</string>
+    <string name="publishing">جارٍ النشر…</string>
+    <string name="clip_prepared_info_error">تم إعداد المقطع ولكن لم نتمكن من قراءة المعلومات.</string>
+    <string name="clip_publish_failed">لم يتم نشر المقطع: %d</string>
+    <string name="untitled_clip">مقطع بدون عنوان</string>
+    <string name="clipped_by">مقطع بواسطة %s</string>
+
+    <!-- Channel Profile -->
+    <string name="channel_info_title">معلومات القناة</string>
+    <string name="follow">متابعة</string>
+    <string name="unfollow">إلغاء المتابعة</string>
+    <string name="following_status">متابَع</string>
+    <string name="unfollow_confirm_title">إلغاء متابعة %s؟</string>
+    <string name="unfollow_confirm_message">هل أنت متأكد من إلغاء متابعة %s؟</string>
+    <string name="followers_millions">%.1f مليون متابع</string>
+    <string name="followers_thousands">%.1f ألف متابع</string>
+    <string name="followers_count">%d متابع</string>
+    <string name="category_stream">بث</string>
+    <string name="uptime_hours_minutes">%1$dh %2$dm</string>
+    <string name="uptime_minutes">%dد</string>
+    <string name="no_channel_info">لا توجد معلومات عن هذه القناة.</string>
+    <string name="followed">تمت المتابعة</string>
+    <string name="unfollowed">تم إلغاء المتابعة</string>
+
+    <!-- Tabs -->
+    <string name="live_streams_tab">بث مباشر</string>
+    <string name="tab_home">الرئيسية</string>
+    <string name="tab_live">مباشر</string>
+    <string name="tab_categories">الفئات</string>
+    <string name="tab_about">حول</string>
+    <string name="tab_videos">فيديوهات</string>
+    <string name="tab_clips">مقاطع</string>
+
+    <!-- Loyalty Points -->
+    <string name="channel_points">نقاط القناة</string>
+    <string name="default_prediction_title">التوقعات</string>
+    <string name="loyalty_rewards_empty">لا توجد مكافآت نقاط ولاء متاحة في هذه القناة.</string>
+    <string name="loyalty_reward_cost_label">التكلفة: </string>
+    <string name="loyalty_add_message_label">أضف رسالة</string>
+    <string name="loyalty_redeem_action">استبدال</string>
+    <string name="input_message_hint">اكتب رسالتك...</string>
+    <string name="points_needed_format">تحتاج %s نقاط إضافية لهذه المكافأة</string>
+    <string name="reward_redeemed">تم استبدال المكافأة: %s</string>
+    <string name="reward_redeem_failed">خطأ: لم نتمكن من استبدال المكافأة</string>
+    <string name="enter_message_required">يرجى إدخال رسالة</string>
+    <string name="processing">جارٍ المعالجة…</string>
+
+    <!-- Predictions -->
+    <string name="prediction_header">توقع</string>
+    <string name="prediction_ended_desc">انتهى التوقع / تم التوزيع: </string>
+    <string name="prediction_active">نشط</string>
+    <string name="prediction_bet_title_format">صوّت لـ %s</string>
+    <string name="bet_amount_label">كمية النقاط</string>
+    <string name="prediction_balance_label">الرصيد: %s</string>
+    <string name="prediction_max_bet">كل شيء</string>
+    <string name="error_prediction_conflict">لا يمكنك إدارة هذا التوقع لأنك صوّت فيه.</string>
+    <string name="prediction_control">التحكم بالتوقع</string>
+    <string name="winner_label">الفائز</string>
+    <string name="prediction_status_open">التوقعات مفتوحة</string>
+    <string name="prediction_status_open_format">التوقعات مفتوحة - %s</string>
+    <string name="prediction_status_locked">مقفل</string>
+    <string name="prediction_status_resolved">محسوم</string>
+    <string name="prediction_status_refunded">مسترد</string>
+    <string name="points_contributed_format">النقاط المساهمة - %s</string>
+    <string name="bet_amount_total_format">راهنت بإجمالي %1$s نقاط</string>
+    <string name="bet_on_format">الرهان على %s</string>
+    <string name="new_prediction_start">بدء توقع جديد</string>
+    <string name="lock_submissions">قفل التقديمات</string>
+    <string name="select_result">اختر النتيجة</string>
+    <string name="select_winning_result">اختر النتيجة الفائزة</string>
+    <string name="resolve_prediction">حل التوقع</string>
+    <string name="prediction_label">توقع</string>
+    <string name="prediction_result_label">النتيجة</string>
+    <string name="points_label">%s نقاط</string>
+    <string name="delete_prediction_title">حذف التوقع</string>
+    <string name="prediction_delete_desc">سيؤدي هذا الإجراء إلى إزالة لعبة التوقع الحالية. لن يتمكن المشاهدون من المشاركة بعد الآن، وستُلغى الأصوات، وستُسترد نقاط القناة تلقائياً.</string>
+    <string name="prediction_refund_info_format">اختيار \'حذف واسترداد النقاط\' سيُعيد %s نقاط قناة للمشاهدين المشاركين.</string>
+    <string name="go_back">رجوع</string>
+    <string name="delete_and_refund">حذف واسترداد النقاط</string>
+    <string name="invalid_amount">مبلغ غير صالح</string>
+    <string name="prediction_saved">تم حفظ توقعك!</string>
+    <string name="lock_failed">فشل القفل</string>
+    <string name="prediction_locked">تم قفل التوقع</string>
+    <string name="cancel_failed">فشل الإلغاء</string>
+    <string name="prediction_cancelled">تم إلغاء التوقع</string>
+    <string name="resolve_failed">فشل الحل</string>
+    <string name="prediction_resolved">تم حل التوقع</string>
+    <string name="prediction_login_required">يجب تسجيل الدخول لإنشاء التوقعات</string>
+    <string name="fill_all_fields">يرجى ملء جميع الحقول</string>
+    <string name="prediction_created">تم إنشاء التوقع!</string>
+    <string name="prediction_resolved_title">محلول</string>
+    <string name="prediction_default_title">توقع</string>
+    <string name="prediction_cancelled_desc">تم إلغاء التوقع / تم استرداد النقاط</string>
+    <string name="prediction_menu_title">التوقعات</string>
+    <string name="start_prediction">بدء التوقع</string>
+    <string name="prediction_presets_label">القوالب (السجل)</string>
+    <string name="prediction_question_label">سؤال التوقع</string>
+    <string name="prediction_question_hint">مثال: من سيفوز؟</string>
+    <string name="prediction_outcomes_label">النتائج</string>
+    <string name="prediction_yes_hint">نعم</string>
+    <string name="prediction_no_hint">لا</string>
+    <string name="prediction_duration_label">المدة</string>
+
+    <!-- Miscellaneous -->
+    <string name="ban_temporary_label">حظر مؤقت</string>
+    <string name="category_hidden_message">لقد قمت بإخفاء هذه الفئة.</string>
+    <string name="max_badges_reached">يمكنك اختيار %d شارات كحد أقصى</string>
+    <string name="options_title">خيارات</string>
+    <string name="make_selection">اختر...</string>
+    <string name="gift_sent_label">%s أرسل</string>
+    <string name="chat_reward_used">استُخدم</string>
+    <string name="date_label_format">التاريخ: %s</string>
+    <string name="about_version_format">الإصدار: %s</string>
+    <string name="label_version">الإصدار</string>
+
+    <!-- About Page -->
+    <string name="about_title">حول</string>
+    <string name="about_developed_by">طورت بواسطة</string>
+    <string name="about_repo_label">الكود المصدري</string>
+    <string name="about_github_label">GitHub الخاص بي</string>
+    <string name="about_coffee_label">اشتر لي قهوة</string>
+
+    <!-- Gift Shop -->
+    <string name="gift_shop_title">متجر الهدايا</string>
+    <string name="gift_shop_basic_gifts">هدايا أساسية</string>
+    <string name="gift_shop_basic_desc">هدايا مجانية للجميع</string>
+    <string name="gift_shop_level_up_gifts">هدايا رفع المستوى</string>
+    <string name="gift_shop_level_up_desc">هدايا متميزة</string>
+
+    <!-- Custom EQ -->
+    <string name="zero_db">0 ديسيبل</string>
+    <string name="custom_eq_title">معادل صوت مخصص</string>
+    <string name="eq_preset_flat">مسطح</string>
+    <string name="eq_preset_bass">باس</string>
+    <string name="eq_preset_vocal">صوتي</string>
+    <string name="eq_preset_pop">بوب</string>
+    <string name="eq_preset_rock">روك</string>
+    <string name="eq_preset_jazz">جاز</string>
+    <string name="eq_preset_classical">كلاسيكي</string>
+    <string name="eq_preset_metal">ميتال</string>
+    <string name="eq_pre_amp">مضخم أولي</string>
+    <string name="eq_reset">إعادة تعيين</string>
+
+    <!-- Pinned Messages -->
+    <string name="pinned_message_header">رسالة مثبتة</string>
+    <string name="pin_removed">تمت إزالة التثبيت</string>
+    <string name="message_pinned">تم تثبيت الرسالة</string>
+    <string name="unpin_title">إزالة التثبيت</string>
+    <string name="unpin_message">إلغاء تثبيت الرسالة</string>
+    <string name="message_unpinned">تم إلغاء تثبيت الرسالة</string>
+
+    <!-- Browse -->
+    <string name="streams_load_failed">فشل تحميل البثوث: %s</string>
+    <string name="viewer_count_label">%s المشاهدون</string>
+    <string name="watching_count_label">%s يشاهدون</string>
+    <string name="viewer_follower_format">%1$s مشاهد · %2$s متابع</string>
+
+    <!-- VOD/Clip -->
+    <string name="video_url_not_found">لم يتم العثور على رابط الفيديو</string>
+    <string name="clip_url_not_found">لم يتم العثور على رابط المقطع</string>
+    <string name="category_clip">مقطع</string>
+    <string name="vod_title">VOD</string>
+    <string name="unknown_category">فئة غير معروفة</string>
+    <string name="video_default_title">فيديو</string>
+
+    <!-- DVR/Rewind -->
+    <string name="dvr_mode_activating">جارٍ تفعيل وضع DVR</string>
+    <string name="returning_to_live">العودة للبث المباشر</string>
+    <string name="live_url_not_found">لم يتم العثور على رابط البث</string>
+    <string name="dvr_not_available">ميزة الترجيع غير متوفرة لهذا البث</string>
+
+    <!-- Screenshot -->
+    <string name="screenshot_error">خطأ في لقطة الشاشة: %s</string>
+    <string name="android_version_not_supported">إصدار Android غير مدعوم</string>
+    <string name="screenshot_failed">فشل التقاط الشاشة</string>
+    <string name="screenshot_saved">تم حفظ لقطة الشاشة</string>
+    <string name="save_error">خطأ في الحفظ: %s</string>
+
+    <!-- Time Utils -->
+    <string name="daily_filter">يومي</string>
+    <string name="time_year_ago">منذ %d سنة</string>
+    <string name="time_month_ago">منذ %d شهر</string>
+    <string name="time_day_ago">منذ %d يوم</string>
+    <string name="time_hour_ago">منذ %d ساعة</string>
+    <string name="time_minute_ago">منذ %d دقيقة</string>
+    <string name="time_just_now">الآن</string>
+
+    <!-- Dialogs -->
+    <string name="link_warning_title">تحذير الرابط</string>
+    <string name="link_warning_message">أنت على وشك زيارة رابط خارجي.\nيتم توجيهك خارج تطبيق KCIKTV. استمر إذا كنت تثق في هذا الرابط:\n\n%s</string>
+    <string name="link_warning_message_simple">أنت على وشك زيارة رابط خارجي. سيتم توجيهك إلى خارج التطبيق.</string>
+    <string name="open_in_app">فتح في التطبيق</string>
+    <string name="link_open_error">خطأ في فتح الرابط: %s</string>
+    <string name="visit_site">الذهاب للموقع</string>
+
+    <!-- Sheets -->
+    <string name="message_history_all">سجل الرسائل (الكل)</string>
+    <string name="message_history_session">سجل الرسائل (الجلسة)</string>
+    <string name="user_id_not_found">لم يتم العثور على معرّف المستخدم</string>
+    <string name="channel_id_error">خطأ في معرّف القناة</string>
+    <string name="no_messages_in_session">لا توجد رسائل في هذه الجلسة</string>
+
+    <!-- Channel Videos/Clips -->
+    <string name="go_to_chat">الذهاب للدردشة</string>
+    <string name="stream_videos_title">فيديوهات</string>
+    <string name="no_videos_found">لم يتم العثور على فيديوهات</string>
+    <string name="popular_clips_title">المقاطع الشائعة</string>
+    <string name="no_clips_found">لم يتم العثور على مقاطع</string>
+    <string name="sort_label">ترتيب</string>
+    <string name="sort_popular">الأكثر شعبية</string>
+    <string name="sort_newest">الأحدث</string>
+    <string name="time_label">الوقت</string>
+    <string name="time_all">الكل</string>
+    <string name="time_24h">آخر 24 ساعة</string>
+    <string name="time_weekly">أسبوعي</string>
+    <string name="time_monthly">شهري</string>
+
+    <!-- Categories -->
+    <string name="channel_slug_error">خطأ في slug القناة</string>
+    <string name="category_not_found">الفئة غير موجودة</string>
+    <string name="category_updated_success">تم تحديث الفئة</string>
+    <string name="category_update_failed">فشل تحديث الفئة: %s</string>
+    <string name="popular_categories_label">الفئات الشائعة</string>
+    <string name="recent_categories_label">الفئات الأخيرة</string>
+
+    <!-- Number Suffix -->
+    <string name="number_suffix_thousand">ألف</string>
+
+    <!-- Clip -->
+    <string name="clip_preparing">جارٍ تحضير المقطع…</string>
+    <string name="clip_title_hint">أضف عنواناً للمقطع (اختياري)</string>
+    <string name="clip_created">تم إنشاء المقطع! 🎉</string>
+    <string name="clip_url_label">رابط المقطع</string>
+    <string name="clip_share">مشاركة</string>
+    <string name="clip_publish">نشر</string>
+
+    <!-- Browse Clips -->
+    <string name="sort_date">التاريخ</string>
+    <string name="sort_views">المشاهدات</string>
+    <string name="clips_load_failed">تعذر تحميل المقاطع: %s</string>
+    <string name="clip_stats_format">%1$s مشاهدة • %2$s</string>
+    <string name="open_clip">فتح المقطع</string>
+    <string name="browse_clips_filter_title">فلتر المقاطع</string>
+
+    <!-- Stream Feed -->
+    <string name="no_streams_available">لا توجد بثوث متاحة</string>
+    <string name="is_live_on_kick">مباشر الآن على Kick!</string>
+    <string name="share_via">مشاركة عبر</string>
+    <string name="live_now">مباشر الآن</string>
+
+    <!-- Theatre Mode -->
+    <string name="theatre_mode_enabled">تم تفعيل وضع المسرح. اضغط رجوع للخروج.</string>
+    <string name="continue_watching">استئناف المشاهدة</string>
+
+    <!-- Whats New -->
+    <string name="whats_new_title">ما الجديد</string>
+
+    <!-- Clip Feed Filters -->
+    <string name="clip_filter_all">الكل</string>
+    <string name="clip_filter_daily">يومي</string>
+    <string name="clip_filter_weekly">أسبوعي</string>
+    <string name="clip_filter_monthly">شهري</string>
+    <string name="clip_filter_popular">مقاطع شائعة</string>
+    <string name="clip_filter_newest">أحدث المقاطع</string>
+    <string name="clip_filter_featured">مقاطع مميزة</string>
+    <string name="clip_category_just_chatting">دردشة فقط</string>
+
+    <!-- Download Messages -->
+    <string name="download_getting_url">جارٍ الحصول على رابط التحميل…</string>
+    <string name="download_starting">بدء التحميل…</string>
+    <string name="download_complete">اكتمل التحميل: %s</string>
+    <string name="download_failed_with_error">فشل التحميل: %s</string>
+    <string name="download_url_failed">تعذر الحصول على رابط التحميل: %s</string>
+
+    <!-- Gift Shop -->
+    <string name="gift_sent_success">تم إرسال الهدية بنجاح!</string>
+    <string name="gift_send_failed">تعذر إرسال الهدية: %s</string>
+    <string name="gift_unknown_error">خطأ غير معروف</string>
+    <string name="gift_sent_format">أرسل %s</string>
+    <string name="gift_sent_format_pin">%1$s %2$s\nأرسل</string>
+
+    <!-- VOD/Clip Actions -->
+    <string name="watch_full_vod">مشاهدة البث الكامل</string>
+
+    <!-- Link Options -->
+    <string name="add_trusted_domain_preview">Add trusted domain and preview</string>
+
+    <!-- Adapter Items and Time -->
+    <string name="untitled_video">فيديو بدون عنوان</string>
+    <string name="time_ago_years">منذ %d سنة</string>
+    <string name="time_ago_months">منذ %d شهر</string>
+    <string name="time_ago_days">منذ %d يوم</string>
+    <string name="chat_preview_text">: يبدو هكذا</string>
+    <string name="text_view_contains">مشاهدة</string>
+    <string name="view_count_suffix">مشاهدة</string>
+    <string name="unknown_channel">غير معروف</string>
+    <string name="no_date">لا يوجد تاريخ</string>
+
+
+    <string name="scan_qr_instruction">امسح رمز QR للاتصال</string>
+    <string name="qr_scan_success">تم مسح رمز QR</string>
+    <string name="qr_confirm_message">تم العثور على المفتاح: %s\nهل تريد المتابعة؟</string>
+    <string name="send_request">إرسال الطلب</string>
+    <string name="request_sent">تم إرسال الطلب بنجاح</string>
+    <string name="request_failed">فشل الطلب: %s</string>
+    <string name="invalid_qr_code">تنسيق رمز QR غير صالح</string>
+    <string name="code_label">رمز التأكيد</string>
+    <string name="qr_confirm_instruction">إذا كان الرمز التالي يطابق الرمز المعروض على التلفزيون، انقر فوق تأكيد للمتابعة.</string>
+    <string name="tv_qr_login">تسجيل QR للتلفزيون</string>
+</resources>

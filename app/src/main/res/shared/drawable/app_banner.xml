@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp"
+    android:height="180dp"
+    android:viewportWidth="36"
+    android:viewportHeight="20.25">
+    
+    <!-- Background -->
+    <path
+        android:pathData="M0,0h36v20.25h-36z"
+        android:fillColor="#FF000000"/>
+
+    <!-- Common Y Translate: 2.125 (Centers height 10 in 20.25 viewport) -->
+    
+    <!-- Rev K -->
+    <!-- Width 8 (4..12). Stroke 3. -->
+    <!-- Target Start X: 2.5. Translate X: 2.5 - 4 = -1.5 -->
+    <group
+        android:translateX="-1.5"
+        android:translateY="2.125">
+        <group
+            android:pivotX="8"
+            android:pivotY="8"
+            android:scaleX="-1">
+            <path
+                android:pathData="M4,3 H7 V5 H8 V4 H9 V3 H12 V6 H11 V7 H10 V8 H11 V9 H12 V13 H9 V12 H8 V11 H7 V13 H4 V3 Z"
+                android:fillColor="#53FC18"/>
+        </group>
+    </group>
+
+    <!-- C -->
+    <!-- Width 6 (4..10). Stroke 3. -->
+    <!-- Target Start X: 12.5. Translate X: 12.5 - 4 = 8.5 -->
+    <group
+        android:translateX="8.5"
+        android:translateY="2.125">
+        <path
+            android:pathData="M4,3 h6 v3 h-3 v4 h3 v3 h-6 z"
+            android:fillColor="#53FC18"/>
+    </group>
+
+    <!-- I -->
+    <!-- Width 3 (6..9). Stroke 3. -->
+    <!-- Target Start X: 20.5. Translate X: 20.5 - 6 = 14.5 -->
+    <group
+        android:translateX="14.5"
+        android:translateY="2.125">
+        <path
+            android:pathData="M6,3 h3 v10 h-3 z"
+            android:fillColor="#53FC18"/>
+    </group>
+
+    <!-- K -->
+    <!-- Width 8 (4..12). Stroke 3. -->
+    <!-- Target Start X: 25.5. Translate X: 25.5 - 4 = 21.5 -->
+    <group
+        android:translateX="21.5"
+        android:translateY="2.125">
+        <path
+            android:pathData="M4,3 H7 V5 H8 V4 H9 V3 H12 V6 H11 V7 H10 V8 H11 V9 H12 V13 H9 V12 H8 V11 H7 V13 H4 V3 Z"
+            android:fillColor="#53FC18"/>
+    </group>
+    
+</vector>

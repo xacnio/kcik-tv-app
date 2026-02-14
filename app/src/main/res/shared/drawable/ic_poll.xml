@@ -1,0 +1,10 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Clean 3-pillar bar chart icon -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M4,10h3v10H4V10z M10,5h4v15h-4V5z M17,13h3v7h-3V13z" />
+</vector>

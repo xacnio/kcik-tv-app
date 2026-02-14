@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@drawable/bg_bottom_sheet">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingBottom="16dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/stats_nerd_title"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"/>
+
+        <ImageButton
+            android:id="@+id/btnCloseStats"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_close"
+            android:contentDescription="@string/notification_action_close"
+            android:tint="@android:color/white"/>
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+        <TextView android:layout_width="0dp" android:layout_weight="1" android:text="@string/stats_resolution_label" android:textColor="#AAAAAA"/>
+        <TextView android:id="@+id/statResolution" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="--" android:textColor="#FFFFFF" android:textStyle="bold"/>
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="8dp">
+        <TextView android:layout_width="0dp" android:layout_weight="1" android:text="@string/stats_fps_label" android:textColor="#AAAAAA"/>
+        <TextView android:id="@+id/statFps" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="--" android:textColor="#FFFFFF" android:textStyle="bold"/>
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="8dp">
+        <TextView android:layout_width="0dp" android:layout_weight="1" android:text="@string/stats_bitrate_label" android:textColor="#AAAAAA"/>
+        <TextView android:id="@+id/statBitrate" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="--" android:textColor="#FFFFFF" android:textStyle="bold"/>
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="8dp">
+        <TextView android:layout_width="0dp" android:layout_weight="1" android:text="@string/stats_latency_label" android:textColor="#AAAAAA"/>
+        <TextView android:id="@+id/statLatency" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="--" android:textColor="#FFFFFF" android:textStyle="bold"/>
+    </LinearLayout>
+    
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="8dp">
+        <TextView android:layout_width="0dp" android:layout_weight="1" android:text="@string/stats_buffer_label" android:textColor="#AAAAAA"/>
+        <TextView android:id="@+id/statBuffer" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="--" android:textColor="#FFFFFF" android:textStyle="bold"/>
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="8dp">
+        <TextView android:layout_width="0dp" android:layout_weight="1" android:text="@string/stats_dropped_frames_label" android:textColor="#AAAAAA"/>
+        <TextView android:id="@+id/statDroppedFrames" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="--" android:textColor="#FFFFFF" android:textStyle="bold"/>
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="8dp">
+        <TextView android:layout_width="0dp" android:layout_weight="1" android:text="@string/stats_playback_rate_label" android:textColor="#AAAAAA"/>
+        <TextView android:id="@+id/statPlaybackRate" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="--" android:textColor="#FFFFFF" android:textStyle="bold"/>
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="8dp">
+        <TextView android:layout_width="0dp" android:layout_weight="1" android:text="@string/stats_player_state_label" android:textColor="#AAAAAA"/>
+        <TextView android:id="@+id/statPlayerState" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="--" android:textColor="#FFFFFF" android:textStyle="bold"/>
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="8dp">
+        <TextView android:layout_width="0dp" android:layout_weight="1" android:text="@string/stats_volume_label" android:textColor="#AAAAAA"/>
+        <TextView android:id="@+id/statVolume" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="--" android:textColor="#FFFFFF" android:textStyle="bold"/>
+    </LinearLayout>
+
+</LinearLayout>

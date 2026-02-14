@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/ic_kick_splash_logo">
+    
+    <target android:name="logo">
+        <set>
+            <objectAnimator
+                android:startOffset="0"
+                android:duration="1000"
+                android:propertyName="scaleX"
+                android:valueFrom="0.01"
+                android:valueTo="1.0"
+                android:interpolator="@android:anim/overshoot_interpolator" />
+            <objectAnimator
+                android:startOffset="0"
+                android:duration="1000"
+                android:propertyName="scaleY"
+                android:valueFrom="0.01"
+                android:valueTo="1.0"
+                android:interpolator="@android:anim/overshoot_interpolator" />
+        </set>
+    </target>
+
+</animated-vector>

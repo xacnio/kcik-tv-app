@@ -1,0 +1,860 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/refreshProfile"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/background_dark">
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scrollView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:id="@+id/contentContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="100dp">
+
+                <!-- Banner Image -->
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="180dp">
+
+                    <ImageView
+                        android:id="@+id/channelBanner"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:background="#1A1A1A" />
+
+                    <!-- Gradient Overlay -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/gradient_bottom_dark" />
+
+                    <!-- Back Button -->
+                    <ImageButton
+                        android:id="@+id/btnBack"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_margin="12dp"
+                        android:background="@drawable/circle_bg_translucent"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_arrow_back"
+                        app:tint="#FFFFFF" />
+
+                    <!-- More Options Button -->
+                    <ImageButton
+                        android:id="@+id/btnMore"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_gravity="end"
+                        android:layout_margin="12dp"
+                        android:background="@drawable/circle_bg_translucent"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_more_vert"
+                        app:tint="#FFFFFF" />
+                </FrameLayout>
+
+                <!-- Channel Info Section -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="16dp"
+                    android:paddingTop="12dp">
+
+                    <!-- Avatar + Name Row -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <!-- Channel Avatar -->
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/channelAvatar"
+                            android:layout_width="56dp"
+                            android:layout_height="56dp"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/default_avatar"
+                            app:shapeAppearanceOverlay="@style/CircleImageView"
+                            app:strokeColor="#53FC18"
+                            app:strokeWidth="2dp" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="12dp"
+                            android:orientation="vertical">
+
+                            <!-- Channel Name + Verified Badge -->
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:id="@+id/channelName"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="18sp"
+                                    android:textStyle="bold"
+                                    tools:text="channelName" />
+
+                                <ImageView
+                                    android:id="@+id/verifiedBadge"
+                                    android:layout_width="18dp"
+                                    android:layout_height="18dp"
+                                    android:layout_marginStart="6dp"
+                                    android:src="@drawable/ic_verified"
+                                    android:visibility="gone"
+                                    tools:visibility="visible" />
+                            </LinearLayout>
+
+                            <!-- Last Stream + Followers -->
+                            <TextView
+                                android:id="@+id/channelSubtitle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:textColor="#888888"
+                                android:textSize="13sp"
+                                tools:text="channelSubtitle" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Social Links -->
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/socialLinksList"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        app:singleLine="false"
+                        app:chipSpacingHorizontal="12dp"
+                        app:chipSpacingVertical="8dp"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
+                    <!-- Live Stream Card -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/liveStreamCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:visibility="gone"
+                        app:cardBackgroundColor="#1A1A1A"
+                        app:cardCornerRadius="8dp"
+                        app:cardElevation="2dp"
+                        app:contentPadding="0dp"
+                        tools:visibility="visible">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <!-- Thumbnail Container -->
+                            <FrameLayout
+                                android:layout_width="170dp"
+                                android:layout_height="100dp">
+
+                                <ImageView
+                                    android:id="@+id/cardLiveThumbnail"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:scaleType="fitCenter"
+                                    android:background="#000000" />
+
+                                <!-- Live Badge -->
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="top|start"
+                                    android:layout_margin="6dp"
+                                    android:background="#E9113C"
+                                    android:paddingHorizontal="6dp"
+                                    android:paddingVertical="2dp"
+                                    android:text="@string/live_badge"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="10sp"
+                                    android:textStyle="bold" />
+
+                                <!-- Uptime Badge -->
+                                <TextView
+                                    android:id="@+id/cardLiveUptime"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="bottom|end"
+                                    android:layout_margin="6dp"
+                                    android:background="#99000000"
+                                    android:paddingHorizontal="4dp"
+                                    android:paddingVertical="2dp"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="10sp"
+                                    android:textStyle="bold"
+                                    tools:text="00:00" />
+                            </FrameLayout>
+
+                            <!-- Live Info -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:padding="10dp"
+                                android:gravity="center_vertical">
+
+                                <TextView
+                                    android:id="@+id/cardLiveTitle"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:ellipsize="end"
+                                    android:maxLines="3"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="13sp"
+                                    android:textStyle="bold"
+                                    tools:text="cardLiveTitle" />
+
+                                <TextView
+                                    android:id="@+id/cardLiveCategory"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="2dp"
+                                    android:textColor="#53FC18"
+                                    android:textSize="12sp"
+                                    android:maxLines="1"
+                                    android:ellipsize="end"
+                                    tools:text="cardLiveCategory" />
+
+                                <com.google.android.material.chip.ChipGroup
+                                    android:id="@+id/cardInfoBadges"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="6dp"
+                                    app:singleLine="false"
+                                    app:chipSpacingHorizontal="6dp"
+                                    app:chipSpacingVertical="4dp">
+
+                                    <TextView
+                                        android:id="@+id/cardLiveLanguage"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:background="#333333"
+                                        android:paddingHorizontal="6dp"
+                                        android:paddingVertical="2dp"
+                                        tools:text="cardLiveLanguage"
+                                        android:textColor="#AAAAAA"
+                                        android:textSize="10sp"
+                                        android:textStyle="bold"
+                                        android:layout_marginEnd="6dp" />
+
+                                    <TextView
+                                        android:id="@+id/cardLiveMature"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:background="#FFCA28"
+                                        android:paddingHorizontal="6dp"
+                                        android:paddingVertical="2dp"
+                                        android:text="@string/rating_18_plus"
+                                        android:textColor="#000000"
+                                        android:textSize="10sp"
+                                        android:textStyle="bold"
+                                        android:visibility="gone"
+                                        tools:visibility="visible" />
+
+                                    <!-- Tags added dynamically -->
+                                </com.google.android.material.chip.ChipGroup>
+                            </LinearLayout>
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- Offline Stream Card -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/offlineStreamCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:visibility="gone"
+                        app:cardBackgroundColor="#1A1A1A"
+                        app:cardCornerRadius="8dp"
+                        app:cardElevation="2dp"
+                        app:contentPadding="0dp"
+                        tools:visibility="visible">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <!-- Offline Banner Container -->
+                            <FrameLayout
+                                android:layout_width="170dp"
+                                android:layout_height="100dp">
+
+                                <ImageView
+                                    android:id="@+id/offlineThumbnail"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:scaleType="centerCrop"
+                                    android:background="#000000" />
+
+                                <!-- Offline Badge -->
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="top|start"
+                                    android:layout_margin="6dp"
+                                    android:background="#555555"
+                                    android:paddingHorizontal="6dp"
+                                    android:paddingVertical="2dp"
+                                    android:text="@string/offline_badge"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="10sp"
+                                    android:textStyle="bold" />
+                            </FrameLayout>
+
+                            <!-- Offline Info -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:padding="10dp"
+                                android:gravity="center_vertical">
+
+                                <FrameLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content">
+
+                                    <TextView
+                                        android:id="@+id/offlineLastStreamTime"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:textColor="#888888"
+                                        android:textSize="12sp"
+                                        android:visibility="gone"
+                                        tools:text="offlineLastStreamTime"
+                                        tools:visibility="visible" />
+
+                                    <dev.xacnio.kciktv.shared.ui.widget.ShimmerLayout
+                                        android:id="@+id/offlineLastStreamShimmer"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:visibility="visible">
+
+                                        <View
+                                            android:layout_width="150dp"
+                                            android:layout_height="14dp"
+                                            android:background="@drawable/bg_rounded_grey_search"
+                                            android:backgroundTint="#2A2A2A" />
+                                    </dev.xacnio.kciktv.shared.ui.widget.ShimmerLayout>
+                                </FrameLayout>
+
+                                <com.google.android.material.button.MaterialButton
+                                    android:id="@+id/btnGoToChat"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="36dp"
+                                    android:layout_marginTop="8dp"
+                                    android:text="@string/go_to_chat"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="12sp"
+                                    android:textAllCaps="false"
+                                    app:backgroundTint="#53FC18"
+                                    app:cornerRadius="18dp"
+                                    app:icon="@drawable/ic_chat"
+                                    app:iconTint="#FFFFFF"
+                                    app:iconSize="16dp"
+                                    app:iconGravity="textStart"
+                                    app:iconPadding="4dp" />
+                            </LinearLayout>
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- Action Buttons Row -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <!-- Follow Button (Container) -->
+                        <FrameLayout
+                            android:id="@+id/btnFollow"
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:background="@drawable/bg_action_button_outline">
+                            
+                            <ImageView
+                                android:id="@+id/btnFollowIcon"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:padding="10dp"
+                                android:src="@drawable/ic_person_add"
+                                app:tint="#FFFFFF" />
+
+                            <ProgressBar
+                                android:id="@+id/btnFollowLoader"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_gravity="center"
+                                android:indeterminate="true"
+                                android:indeterminateTint="#FFFFFF"
+                                android:visibility="gone" />
+                        </FrameLayout>
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="1dp"
+                            android:layout_weight="1" />
+                    </LinearLayout>
+
+                    <!-- Tab Layout -->
+                    <com.google.android.material.tabs.TabLayout
+                        android:id="@+id/channelTabs"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="16dp"
+                        android:background="@android:color/transparent"
+                        app:tabGravity="start"
+                        app:tabMode="scrollable"
+                        app:tabIndicatorColor="#53FC18"
+                        app:tabIndicatorHeight="2dp"
+                        app:tabSelectedTextColor="#53FC18"
+                        app:tabTextColor="#888888"
+                        app:tabRippleColor="#2053FC18"
+                        app:tabPaddingStart="0dp"
+                        app:tabPaddingEnd="24dp" />
+                </LinearLayout>
+
+                <!-- ======= HOME TAB ======= -->
+                <LinearLayout
+                    android:id="@+id/tabHomeContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="visible">
+
+                    <!-- Yayın Videoları Section -->
+                    <LinearLayout
+                        android:id="@+id/videosSection"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginTop="16dp">
+
+                        <!-- Section Header -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="16dp"
+                            android:paddingVertical="8dp">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/stream_videos_title"
+                                android:textColor="#FFFFFF"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+
+                            <ImageView
+                                android:id="@+id/btnVideosMore"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/ic_chevron_right"
+                                app:tint="#888888" />
+                        </LinearLayout>
+
+                        <!-- Videos RecyclerView (Horizontal) -->
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/videosRecyclerView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:clipToPadding="false"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="12dp"
+                            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                            tools:listitem="@layout/item_channel_video" />
+
+                        <!-- Empty State -->
+                        <TextView
+                            android:id="@+id/videosEmptyText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:padding="32dp"
+                            android:text="@string/no_videos_found"
+                            android:textColor="#666666"
+                            android:textSize="14sp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+
+                    <!-- Popüler Klipler Section -->
+                    <LinearLayout
+                        android:id="@+id/clipsSection"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginTop="24dp">
+
+                        <!-- Section Header -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="16dp"
+                            android:paddingVertical="8dp">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/popular_clips_title"
+                                android:textColor="#FFFFFF"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+
+                            <ImageView
+                                android:id="@+id/btnClipsMore"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/ic_chevron_right"
+                                app:tint="#888888" />
+                        </LinearLayout>
+
+                        <!-- Clips RecyclerView (Horizontal) -->
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/clipsRecyclerView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:clipToPadding="false"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="12dp"
+                            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                            tools:listitem="@layout/item_channel_clip" />
+
+                        <!-- Empty State -->
+                        <TextView
+                            android:id="@+id/clipsEmptyText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:padding="32dp"
+                            android:text="@string/no_clips_found"
+                            android:textColor="#666666"
+                            android:textSize="14sp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- ======= ABOUT TAB ======= -->
+                <LinearLayout
+                    android:id="@+id/tabAboutContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/aboutText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:lineSpacingMultiplier="1.3"
+                        tools:text="aboutText" />
+
+                    <!-- Social Links List -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/aboutLinksRecyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:nestedScrollingEnabled="false"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                        tools:listitem="@layout/item_channel_about_link" />
+                </LinearLayout>
+
+                <!-- ======= VIDEOS TAB ======= -->
+                <LinearLayout
+                    android:id="@+id/tabVideosContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/allVideosRecyclerView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:clipToPadding="false"
+                            android:padding="4dp"
+                            android:nestedScrollingEnabled="false" />
+
+                        <dev.xacnio.kciktv.shared.ui.widget.ShimmerLayout
+                            android:id="@+id/allVideosShimmer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
+                            android:padding="4dp">
+
+                            <include layout="@layout/layout_shimmer_channel_videos_grid" />
+                        </dev.xacnio.kciktv.shared.ui.widget.ShimmerLayout>
+                    </FrameLayout>
+                </LinearLayout>
+
+                <!-- ======= CLIPS TAB ======= -->
+                <LinearLayout
+                    android:id="@+id/tabClipsContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <!-- Filters -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="8dp">
+
+                        <!-- Sort Filter -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:paddingHorizontal="16dp">
+                            
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/sort_label"
+                                android:textColor="#888888"
+                                android:textSize="12sp"
+                                android:textAllCaps="true"
+                                android:fontFamily="sans-serif-medium" />
+
+                            <HorizontalScrollView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:scrollbars="none"
+                                android:layout_marginStart="8dp">
+                                
+                                <com.google.android.material.chip.ChipGroup
+                                    android:id="@+id/chipGroupSort"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    app:singleSelection="true"
+                                    app:selectionRequired="true">
+
+                                    <com.google.android.material.chip.Chip
+                                        android:id="@+id/chipSortPop"
+                                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="@string/sort_popular"
+                                        android:textColor="@color/clip_chip_text_selector"
+                                        app:chipBackgroundColor="@color/clip_chip_bg_selector"
+                                        app:chipStrokeColor="#33FFFFFF"
+                                        app:chipStrokeWidth="1dp"
+                                        app:chipIconVisible="false" />
+
+                                    <com.google.android.material.chip.Chip
+                                        android:id="@+id/chipSortNew"
+                                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="@string/sort_newest"
+                                        android:textColor="@color/clip_chip_text_selector"
+                                        app:chipBackgroundColor="@color/clip_chip_bg_selector"
+                                        app:chipStrokeColor="#33FFFFFF"
+                                        app:chipStrokeWidth="1dp" />
+                                </com.google.android.material.chip.ChipGroup>
+                            </HorizontalScrollView>
+                        </LinearLayout>
+
+                        <!-- Time Filter -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginTop="4dp"
+                            android:paddingHorizontal="16dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/time_label"
+                                android:textColor="#888888"
+                                android:textSize="12sp"
+                                android:textAllCaps="true"
+                                android:fontFamily="sans-serif-medium" />
+
+                            <HorizontalScrollView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:scrollbars="none"
+                                android:layout_marginStart="8dp">
+
+                                <com.google.android.material.chip.ChipGroup
+                                    android:id="@+id/chipGroupTime"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    app:singleSelection="true"
+                                    app:selectionRequired="true">
+
+                                    <com.google.android.material.chip.Chip
+                                        android:id="@+id/chipTimeAll"
+                                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="@string/time_all"
+                                        android:textColor="@color/clip_chip_text_selector"
+                                        app:chipBackgroundColor="@color/clip_chip_bg_selector"
+                                        app:chipStrokeColor="#33FFFFFF"
+                                        app:chipStrokeWidth="1dp" />
+
+                                    <com.google.android.material.chip.Chip
+                                        android:id="@+id/chipTimeDay"
+                                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="@string/time_24h"
+                                        android:textColor="@color/clip_chip_text_selector"
+                                        app:chipBackgroundColor="@color/clip_chip_bg_selector"
+                                        app:chipStrokeColor="#33FFFFFF"
+                                        app:chipStrokeWidth="1dp" />
+
+                                    <com.google.android.material.chip.Chip
+                                        android:id="@+id/chipTimeWeek"
+                                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="@string/time_weekly"
+                                        android:textColor="@color/clip_chip_text_selector"
+                                        app:chipBackgroundColor="@color/clip_chip_bg_selector"
+                                        app:chipStrokeColor="#33FFFFFF"
+                                        app:chipStrokeWidth="1dp" />
+
+                                    <com.google.android.material.chip.Chip
+                                        android:id="@+id/chipTimeMonth"
+                                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="@string/time_monthly"
+                                        android:textColor="@color/clip_chip_text_selector"
+                                        app:chipBackgroundColor="@color/clip_chip_bg_selector"
+                                        app:chipStrokeColor="#33FFFFFF"
+                                        app:chipStrokeWidth="1dp" />
+                                </com.google.android.material.chip.ChipGroup>
+                            </HorizontalScrollView>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/allClipsRecyclerView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:clipToPadding="false"
+                            android:padding="4dp"
+                            android:nestedScrollingEnabled="false" />
+
+                        <dev.xacnio.kciktv.shared.ui.widget.ShimmerLayout
+                            android:id="@+id/allClipsShimmer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
+                            android:padding="4dp">
+
+                            <include layout="@layout/layout_shimmer_channel_clips_grid" />
+                        </dev.xacnio.kciktv.shared.ui.widget.ShimmerLayout>
+                    </FrameLayout>
+                    
+                    <!-- Loading More Indicator -->
+                    <LinearLayout
+                        android:id="@+id/clipsLoadingMore"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:padding="16dp"
+                        android:visibility="gone">
+                        
+                        <ProgressBar
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:indeterminateTint="#53FC18" />
+                        
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:text="@string/loading"
+                            android:textColor="#AAAAAA"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- ======= SOHBET TAB ======= -->
+                <LinearLayout
+                    android:id="@+id/tabChatContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    android:minHeight="400dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:padding="32dp"
+                        android:text="@string/chat_only_live_msg"
+                        android:textColor="#666666"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <!-- Loading Overlay (Shimmer) -->
+        <dev.xacnio.kciktv.shared.ui.widget.ShimmerLayout
+            android:id="@+id/loadingOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/black"
+            android:visibility="gone">
+
+            <include layout="@layout/layout_shimmer_channel_profile" />
+        </dev.xacnio.kciktv.shared.ui.widget.ShimmerLayout>
+    </FrameLayout>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

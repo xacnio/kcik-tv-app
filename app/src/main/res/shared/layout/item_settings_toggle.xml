@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="68dp"
+    android:background="@drawable/bg_item_ripple"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingHorizontal="20dp">
+
+    <ImageView
+        android:id="@+id/settingIcon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        app:tint="#888888" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/settingTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/settingSubtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#888888"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <!-- Custom Toggle -->
+    <FrameLayout
+        android:id="@+id/toggleBackground"
+        android:layout_width="52dp"
+        android:layout_height="28dp"
+        android:background="@drawable/bg_toggle_off">
+
+        <View
+            android:id="@+id/toggleThumb"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_gravity="center_vertical|start"
+            android:layout_marginStart="3dp"
+            android:background="@drawable/bg_toggle_thumb" />
+    </FrameLayout>
+
+</LinearLayout>

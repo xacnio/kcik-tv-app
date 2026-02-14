@@ -1,0 +1,18 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Chat bubble (outlined) -->
+    <path
+        android:fillColor="#FF9800"
+        android:pathData="M20,2H4C2.9,2 2,2.9 2,4v12c0,1.1 0.9,2 2,2h14l4,4V4c0,-1.1 -0.9,-2 -2,-2zM20,17.2L18.8,16H4V4h16v13.2z"/>
+    <!-- Exclamation mark line -->
+    <path
+        android:fillColor="#FF9800"
+        android:pathData="M11,6h2v5h-2z"/>
+    <!-- Exclamation mark dot -->
+    <path
+        android:fillColor="#FF9800"
+        android:pathData="M11,13h2v2h-2z"/>
+</vector>

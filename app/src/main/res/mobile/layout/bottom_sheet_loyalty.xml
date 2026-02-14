@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_bottom_sheet"
+    android:orientation="vertical"
+    android:paddingBottom="8dp">
+
+    <!-- Header -->
+    <LinearLayout
+        android:id="@+id/headerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/channel_points"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/btnClose"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_close"
+            app:tint="#FFFFFF" />
+    </LinearLayout>
+
+    <!-- Predictions Entry Button -->
+    <LinearLayout
+        android:id="@+id/predictionEntryButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true">
+
+        <!-- Default View (Horizontal) -->
+        <LinearLayout
+            android:id="@+id/defaultPredictionLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:padding="16dp"
+            android:orientation="horizontal">
+            
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_loyalty"
+                app:tint="#53FC18" />
+                
+            <TextView
+                android:id="@+id/predictionButtonTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:text="@string/default_prediction_title"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+                
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_chevron_right"
+                app:tint="#808080" />
+        </LinearLayout>
+        
+        <!-- Resolved/Result View (Vertical) -->
+        <LinearLayout
+            android:id="@+id/resolvedPredictionLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp"
+            android:visibility="gone">
+            
+            <TextView
+                android:id="@+id/resolvedOutcomeTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="resolvedOutcomeTitle"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold" 
+                android:layout_marginBottom="4dp"/>
+                
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                
+                <ImageView
+                    android:id="@+id/resolvedStatusIcon"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_loyalty"
+                    app:tint="#FFFFFF"
+                    android:layout_marginEnd="6dp"/>
+                    
+                <TextView
+                    android:id="@+id/resolvedStatusText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/prediction_ended_desc"
+                    android:textColor="#AAAAAA"
+                    android:textSize="12sp" />
+                    
+                <ImageView
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:src="@drawable/ic_loyalty"
+                    app:tint="#53FC18"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="2dp"/>
+                    
+                <TextView
+                    android:id="@+id/resolvedPointsText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="0"
+                    android:textColor="#53FC18"
+                    android:textSize="12sp" 
+                    android:textStyle="bold"/>
+            </LinearLayout>
+        </LinearLayout>
+        
+        <!-- Active/Locked Prediction Mini View -->
+        <LinearLayout
+            android:id="@+id/activePredictionLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp"
+            android:visibility="gone">
+            
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                
+                <!-- Fixed loyalty icon on left -->
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_loyalty"
+                    app:tint="#53FC18"
+                    android:layout_marginEnd="8dp"/>
+                    
+                <TextView
+                    android:id="@+id/activePredictionTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    tools:text="predictionTitle"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:maxLines="1"
+                    android:ellipsize="end"/>
+                
+                <!-- Status icon on right (lock/check/refresh) -->
+                <ImageView
+                    android:id="@+id/activePredictionStatusIcon"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_lock"
+                    app:tint="#FFC107"
+                    android:layout_marginEnd="6dp"
+                    android:visibility="gone"/>
+                    
+                <TextView
+                    android:id="@+id/activePredictionStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_loyalty_points"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp"
+                    tools:text="@string/prediction_active"
+                    android:textColor="#53FC18"
+                    android:textSize="11sp"
+                    android:textStyle="bold"/>
+                    
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_chevron_right"
+                    app:tint="#808080"
+                    android:layout_marginStart="8dp"/>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Content Container - Takes remaining space -->
+    <FrameLayout
+        android:id="@+id/contentFrame"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginBottom="8dp">
+
+        <!-- List View -->
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/listViewContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/loyaltyItemsRecyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clipToPadding="false"
+                    android:nestedScrollingEnabled="false"
+                    android:paddingHorizontal="12dp"
+                    android:paddingBottom="16dp"
+                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                    app:spanCount="3"
+                    tools:itemCount="9"
+                    tools:listitem="@layout/item_loyalty_reward" />
+
+                <TextView
+                    android:id="@+id/emptyRewardsText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:padding="32dp"
+                    android:text="@string/loyalty_rewards_empty"
+                    android:textColor="#808080"
+                    android:textSize="14sp"
+                    android:visibility="gone" />
+            </FrameLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <!-- Detail View -->
+        <ScrollView
+            android:id="@+id/detailViewContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:fillViewport="true"
+            tools:visibility="gone">
+            
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <ImageButton
+                        android:id="@+id/btnBackToList"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_chevron_left" 
+                        app:tint="#FFFFFF"/>
+
+                    <TextView
+                        android:id="@+id/detailTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        tools:text="detailTitle"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Cost Section - Compact -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_loyalty_detail_card"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="12dp"
+                    android:layout_marginBottom="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/loyalty_reward_cost_label"
+                        android:textColor="#AAAAAA"
+                        android:textSize="14sp"/>
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_loyalty"
+                        app:tint="#53FC18" />
+                        
+                    <TextView
+                        android:id="@+id/detailCost"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        tools:text="0"
+                        android:textColor="#53FC18"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/loyalty_add_message_label"
+                    android:textColor="#AAAAAA"
+                    android:textSize="12sp"
+                    android:layout_marginBottom="8dp"/>
+
+                <EditText
+                    android:id="@+id/rewardInputMessage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_chat_input"
+                    android:padding="12dp"
+                    android:hint="@string/input_message_hint"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#808080"
+                    android:minHeight="80dp"
+                    android:gravity="top|start"
+                    android:layout_marginBottom="16dp"/>
+
+                <Button
+                    android:id="@+id/btnRedeemReward"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:backgroundTint="#53FC18"
+                    android:text="@string/loyalty_redeem_action"
+                    android:textColor="#000000"
+                    android:textStyle="bold"/>
+                    
+                <!-- Insufficient Points Message -->
+                <TextView
+                    android:id="@+id/insufficientPointsText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:paddingVertical="8dp"
+                    android:textColor="#FF6B6B"
+                    android:textSize="13sp"
+                    android:visibility="gone"
+                    tools:text="insufficientPointsText"
+                    tools:visibility="visible"/>
+
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- Loading Rewards Spinner -->
+        <ProgressBar
+            android:id="@+id/rewardsLoading"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:indeterminateTint="#53FC18"
+            android:visibility="gone" />
+    </FrameLayout>
+
+    <!-- Footer with Points Balance -->
+    <LinearLayout
+        android:id="@+id/footerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#202020"
+        android:padding="16dp">
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:id="@+id/pointsContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_loyalty_points"
+                android:gravity="center"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="6dp">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_loyalty"
+                    app:tint="#53FC18" />
+
+                <TextView
+                    android:id="@+id/currentPointsText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    tools:text="0"
+                    android:textColor="#53FC18"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:id="@+id/loyaltyInfinityIcon"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginStart="6dp"
+                    android:src="@drawable/ic_infinity"
+                    android:visibility="gone"
+                    app:tint="#53FC18" />
+            </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/pointsLoading"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:indeterminateTint="#53FC18"
+                android:visibility="gone" />
+        </FrameLayout>
+
+    </LinearLayout>
+</LinearLayout>

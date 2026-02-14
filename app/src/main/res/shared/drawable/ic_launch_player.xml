@@ -1,0 +1,18 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Portrait Phone Frame -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M16,2H8C6.9,2,6,2.9,6,4v16c0,1.1,0.9,2,2,2h8c1.1,0,2,-0.9,2,-2V4C18,2.9,17.1,2,16,2z M16,19H8V5h8V19z"/>
+    <!-- Small Notch -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M10,3h4v1h-4z"/>
+    <!-- Play Icon in center of 'screen' -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M10,9.5l5,2.5-5,2.5V9.5z"/>
+</vector>

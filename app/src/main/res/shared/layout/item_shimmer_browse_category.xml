@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:gravity="center_vertical"
+    android:background="@android:color/transparent">
+
+    <!-- Category Image Placeholder (60x80dp like real card) -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="60dp"
+        android:layout_height="80dp"
+        app:cardCornerRadius="4dp"
+        app:cardBackgroundColor="#2A2A2A"
+        app:cardElevation="0dp">
+    </androidx.cardview.widget.CardView>
+
+    <!-- Info Section -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_marginStart="12dp">
+
+        <!-- Name Placeholder -->
+        <View
+            android:layout_width="140dp"
+            android:layout_height="16dp"
+            android:background="#2A2A2A"
+            android:layout_marginBottom="6dp"/>
+
+        <!-- Viewers Placeholder -->
+        <View
+            android:layout_width="100dp"
+            android:layout_height="13dp"
+            android:background="#2A2A2A"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Tags Placeholder -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="20dp"
+                android:background="#2A2A2A"
+                android:layout_marginEnd="6dp"/>
+
+            <View
+                android:layout_width="50dp"
+                android:layout_height="20dp"
+                android:background="#2A2A2A"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Heart Icon Placeholder -->
+    <View
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:background="#2A2A2A"
+        android:layout_marginStart="8dp"/>
+
+</LinearLayout>

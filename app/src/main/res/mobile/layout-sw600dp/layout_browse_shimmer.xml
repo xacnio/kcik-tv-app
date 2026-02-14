@@ -1,0 +1,150 @@
+<dev.xacnio.kciktv.shared.ui.widget.ShimmerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/browseShimmerLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- Categories Shimmer -->
+            <LinearLayout
+                android:id="@+id/shimmerCategoriesContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp"
+                android:visibility="gone">
+                <include layout="@layout/item_shimmer_browse_category"/>
+                <include layout="@layout/item_shimmer_browse_category"/>
+                <include layout="@layout/item_shimmer_browse_category"/>
+                <include layout="@layout/item_shimmer_browse_category"/>
+                <include layout="@layout/item_shimmer_browse_category"/>
+                <include layout="@layout/item_shimmer_browse_category"/>
+                <include layout="@layout/item_shimmer_browse_category"/>
+                <include layout="@layout/item_shimmer_browse_category"/>
+            </LinearLayout>
+
+            <!-- Live List Shimmer -->
+            <LinearLayout
+                android:id="@+id/shimmerLiveListContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="80dp"
+                android:clipToPadding="false"
+                android:paddingHorizontal="16dp"
+                android:visibility="gone">
+                <include layout="@layout/item_shimmer_following_card"/>
+                <include layout="@layout/item_shimmer_following_card"/>
+                <include layout="@layout/item_shimmer_following_card"/>
+                <include layout="@layout/item_shimmer_following_card"/>
+                <include layout="@layout/item_shimmer_following_card"/>
+                <include layout="@layout/item_shimmer_following_card"/>
+                <include layout="@layout/item_shimmer_following_card"/>
+                <include layout="@layout/item_shimmer_following_card"/>
+            </LinearLayout>
+
+            <!-- Live Grid Shimmer (3 Columns for Tablet) -->
+            <LinearLayout
+                android:id="@+id/shimmerLiveGridContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="80dp"
+                android:clipToPadding="false"
+                android:paddingHorizontal="10dp"
+                android:visibility="gone">
+                
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingBottom="4dp">
+                    <include layout="@layout/item_shimmer_mobile_channel_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="6dp"/>
+                    <include layout="@layout/item_shimmer_mobile_channel_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="6dp"/>
+                    <include layout="@layout/item_shimmer_mobile_channel_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="6dp"/>
+                </LinearLayout>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingBottom="4dp">
+                    <include layout="@layout/item_shimmer_mobile_channel_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="6dp"/>
+                    <include layout="@layout/item_shimmer_mobile_channel_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="6dp"/>
+                    <include layout="@layout/item_shimmer_mobile_channel_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="6dp"/>
+                </LinearLayout>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingBottom="4dp">
+                    <include layout="@layout/item_shimmer_mobile_channel_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="6dp"/>
+                    <include layout="@layout/item_shimmer_mobile_channel_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="6dp"/>
+                    <include layout="@layout/item_shimmer_mobile_channel_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="6dp"/>
+                </LinearLayout>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingBottom="4dp">
+                    <include layout="@layout/item_shimmer_mobile_channel_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="6dp"/>
+                    <include layout="@layout/item_shimmer_mobile_channel_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="6dp"/>
+                    <include layout="@layout/item_shimmer_mobile_channel_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="6dp"/>
+                </LinearLayout>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingBottom="4dp">
+                    <include layout="@layout/item_shimmer_mobile_channel_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="6dp"/>
+                    <include layout="@layout/item_shimmer_mobile_channel_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="6dp"/>
+                    <include layout="@layout/item_shimmer_mobile_channel_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="6dp"/>
+                </LinearLayout>
+             </LinearLayout>
+
+            <!-- Clips Grid Shimmer (3 Columns for Tablet) -->
+            <LinearLayout
+                android:id="@+id/shimmerClipsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="80dp"
+                android:clipToPadding="false"
+                android:paddingHorizontal="10dp"
+                android:visibility="gone">
+                
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingBottom="4dp">
+                    <include layout="@layout/item_shimmer_clip_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="4dp"/>
+                    <include layout="@layout/item_shimmer_clip_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="4dp"/>
+                    <include layout="@layout/item_shimmer_clip_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="4dp"/>
+                </LinearLayout>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingBottom="4dp">
+                    <include layout="@layout/item_shimmer_clip_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="4dp"/>
+                    <include layout="@layout/item_shimmer_clip_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="4dp"/>
+                    <include layout="@layout/item_shimmer_clip_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="4dp"/>
+                </LinearLayout>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingBottom="4dp">
+                    <include layout="@layout/item_shimmer_clip_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="4dp"/>
+                    <include layout="@layout/item_shimmer_clip_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="4dp"/>
+                    <include layout="@layout/item_shimmer_clip_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="4dp"/>
+                </LinearLayout>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingBottom="4dp">
+                    <include layout="@layout/item_shimmer_clip_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="4dp"/>
+                    <include layout="@layout/item_shimmer_clip_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="4dp"/>
+                    <include layout="@layout/item_shimmer_clip_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="4dp"/>
+                </LinearLayout>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingBottom="4dp">
+                    <include layout="@layout/item_shimmer_clip_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="4dp"/>
+                    <include layout="@layout/item_shimmer_clip_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="4dp"/>
+                    <include layout="@layout/item_shimmer_clip_grid" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="4dp"/>
+                </LinearLayout>
+             </LinearLayout>
+             
+            <!-- Clips List Shimmer -->
+            <LinearLayout
+                android:id="@+id/shimmerClipsListContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="80dp"
+                android:clipToPadding="false"
+                android:visibility="gone">
+                <include layout="@layout/item_shimmer_clip_list"/>
+                <include layout="@layout/item_shimmer_clip_list"/>
+                <include layout="@layout/item_shimmer_clip_list"/>
+                <include layout="@layout/item_shimmer_clip_list"/>
+                <include layout="@layout/item_shimmer_clip_list"/>
+                <include layout="@layout/item_shimmer_clip_list"/>
+                <include layout="@layout/item_shimmer_clip_list"/>
+                <include layout="@layout/item_shimmer_clip_list"/>
+            </LinearLayout>
+        </FrameLayout>
+    </ScrollView>
+</dev.xacnio.kciktv.shared.ui.widget.ShimmerLayout>

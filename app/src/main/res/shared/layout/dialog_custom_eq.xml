@@ -1,0 +1,400 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@drawable/bg_bottom_sheet">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp">
+
+        <ImageButton
+            android:id="@+id/btnBackEq"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_back"
+            app:tint="#FFFFFF" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/custom_eq_title"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF" />
+    </RelativeLayout>
+
+    <!-- Presets Scroll -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:layout_marginBottom="16dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/btnPresetFlat"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:minWidth="70dp"
+                android:paddingHorizontal="12dp"
+                android:text="@string/eq_preset_flat"
+                android:gravity="center"
+                android:background="@drawable/bg_chip"
+                android:textColor="#FFFFFF"
+                android:layout_marginEnd="8dp"
+                android:textStyle="bold"
+                android:textSize="12sp"/>
+
+            <TextView
+                android:id="@+id/btnPresetBass"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:minWidth="70dp"
+                android:paddingHorizontal="12dp"
+                android:text="@string/eq_preset_bass"
+                android:gravity="center"
+                android:background="@drawable/bg_chip"
+                android:textColor="#FFFFFF"
+                android:layout_marginEnd="8dp"
+                android:textStyle="bold"
+                android:textSize="12sp"/>
+
+            <TextView
+                android:id="@+id/btnPresetVocal"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:minWidth="70dp"
+                android:paddingHorizontal="12dp"
+                android:text="@string/eq_preset_vocal"
+                android:gravity="center"
+                android:background="@drawable/bg_chip"
+                android:textColor="#FFFFFF"
+                android:layout_marginEnd="8dp"
+                android:textStyle="bold"
+                android:textSize="12sp"/>
+
+            <TextView
+                android:id="@+id/btnPresetPop"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:minWidth="70dp"
+                android:paddingHorizontal="12dp"
+                android:text="@string/eq_preset_pop"
+                android:gravity="center"
+                android:background="@drawable/bg_chip"
+                android:textColor="#FFFFFF"
+                android:layout_marginEnd="8dp"
+                android:textStyle="bold"
+                android:textSize="12sp"/>
+
+            <TextView
+                android:id="@+id/btnPresetRock"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:minWidth="70dp"
+                android:paddingHorizontal="12dp"
+                android:text="@string/eq_preset_rock"
+                android:gravity="center"
+                android:background="@drawable/bg_chip"
+                android:textColor="#FFFFFF"
+                android:layout_marginEnd="8dp"
+                android:textStyle="bold"
+                android:textSize="12sp"/>
+
+            <TextView
+                android:id="@+id/btnPresetJazz"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:minWidth="70dp"
+                android:paddingHorizontal="12dp"
+                android:text="@string/eq_preset_jazz"
+                android:gravity="center"
+                android:background="@drawable/bg_chip"
+                android:textColor="#FFFFFF"
+                android:layout_marginEnd="8dp"
+                android:textStyle="bold"
+                android:textSize="12sp"/>
+
+            <TextView
+                android:id="@+id/btnPresetClassical"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:minWidth="70dp"
+                android:paddingHorizontal="12dp"
+                android:text="@string/eq_preset_classical"
+                android:gravity="center"
+                android:background="@drawable/bg_chip"
+                android:textColor="#FFFFFF"
+                android:layout_marginEnd="8dp"
+                android:textStyle="bold"
+                android:textSize="12sp"/>
+                
+            <TextView
+                android:id="@+id/btnPresetMetal"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:minWidth="70dp"
+                android:paddingHorizontal="12dp"
+                android:text="@string/eq_preset_metal"
+                android:gravity="center"
+                android:background="@drawable/bg_chip"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="12sp"/>
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <!-- 8D Surround and Reverb sections removed - features don't work with IVS Player -->
+
+    <!-- PreAmp -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp">
+        
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/eq_pre_amp"
+                android:textColor="#AAAAAA"
+                android:textSize="12sp"/>
+            <TextView
+                android:id="@+id/valPreAmp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:text="@string/eq_zero_db"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="12sp"/>
+        </RelativeLayout>
+        
+        <SeekBar
+            android:id="@+id/seekPreAmp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="60"
+            android:progress="30"
+            android:progressTint="@color/brand_green"
+            android:thumbTint="@color/brand_green"/>
+    </LinearLayout>
+
+    <!-- Bass (60Hz) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp">
+        
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/eq_bass"
+                android:textColor="#AAAAAA"
+                android:textSize="12sp"/>
+            <TextView
+                android:id="@+id/valBass"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:text="@string/eq_zero_db"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="12sp"/>
+        </RelativeLayout>
+        
+        <SeekBar
+            android:id="@+id/seekBass"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="60"
+            android:progress="30"
+            android:progressTint="@color/brand_green"
+            android:thumbTint="@color/brand_green"/>
+    </LinearLayout>
+
+    <!-- Low Mid (230Hz) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp">
+        
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/eq_low_mid"
+                android:textColor="#AAAAAA"
+                android:textSize="12sp"/>
+            <TextView
+                android:id="@+id/valLowMid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:text="@string/zero_db"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="12sp"/>
+        </RelativeLayout>
+        
+        <SeekBar
+            android:id="@+id/seekLowMid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="60"
+            android:progress="30"
+            android:progressTint="@color/brand_green"
+            android:thumbTint="@color/brand_green"/>
+    </LinearLayout>
+
+    <!-- Mid (910Hz) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp">
+        
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/eq_mid"
+                android:textColor="#AAAAAA"
+                android:textSize="12sp"/>
+            <TextView
+                android:id="@+id/valMid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:text="@string/zero_db"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="12sp"/>
+        </RelativeLayout>
+        
+        <SeekBar
+            android:id="@+id/seekMid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="60"
+            android:progress="30"
+            android:progressTint="@color/brand_green"
+            android:thumbTint="@color/brand_green"/>
+    </LinearLayout>
+
+    <!-- High Mid (4kHz) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp">
+        
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/eq_high_mid"
+                android:textColor="#AAAAAA"
+                android:textSize="12sp"/>
+            <TextView
+                android:id="@+id/valHighMid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:text="@string/zero_db"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="12sp"/>
+        </RelativeLayout>
+        
+        <SeekBar
+            android:id="@+id/seekHighMid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="60"
+            android:progress="30"
+            android:progressTint="@color/brand_green"
+            android:thumbTint="@color/brand_green"/>
+    </LinearLayout>
+
+    <!-- Treble (14kHz) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="24dp">
+        
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/eq_treble"
+                android:textColor="#AAAAAA"
+                android:textSize="12sp"/>
+            <TextView
+                android:id="@+id/valTreble"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:text="@string/zero_db"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="12sp"/>
+        </RelativeLayout>
+        
+        <SeekBar
+            android:id="@+id/seekTreble"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="60"
+            android:progress="30"
+            android:progressTint="@color/brand_green"
+            android:thumbTint="@color/brand_green"/>
+    </LinearLayout>
+
+    <!-- Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/btnResetEq"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="@string/eq_reset"
+            android:textColor="#FFFFFF"
+            android:gravity="center"
+            android:background="@drawable/bg_chip"
+            android:textStyle="bold"/>
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/background_card"
+    android:padding="16dp">
+
+    <!-- Title -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/browse_clips_filter_title"
+        android:textColor="@color/text_primary"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- View Mode Section -->
+    <TextView
+        android:id="@+id/viewModeLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/view_mode"
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
+        android:layout_marginBottom="8dp"/>
+
+    <RadioGroup
+        android:id="@+id/viewModeGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <RadioButton
+            android:id="@+id/radioList"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/view_list"
+            android:textColor="@color/text_primary"
+            android:buttonTint="@color/brand_green"/>
+
+        <RadioButton
+            android:id="@+id/radioGrid"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/view_grid"
+            android:textColor="@color/text_primary"
+            android:buttonTint="@color/brand_green"/>
+    </RadioGroup>
+
+
+
+    <!-- Sort Section -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/sort_label"
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
+        android:layout_marginBottom="8dp"/>
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/sortChipGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:singleSelection="true"
+        app:selectionRequired="true"
+        android:layout_marginBottom="16dp">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipSortDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sort_date"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            app:chipBackgroundColor="@color/chip_background_color"
+            android:textColor="@color/text_primary"
+            app:checkedIconVisible="true"
+            app:checkedIconTint="@color/brand_green"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipSortViews"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sort_views"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            app:chipBackgroundColor="@color/chip_background_color"
+            android:textColor="@color/text_primary"
+            app:checkedIconVisible="true"
+            app:checkedIconTint="@color/brand_green"/>
+
+    </com.google.android.material.chip.ChipGroup>
+
+    <!-- Time Section -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/time_label"
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
+        android:layout_marginBottom="8dp"/>
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/timeChipGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:singleSelection="true"
+        app:selectionRequired="true"
+        android:layout_marginBottom="8dp">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipTimeDay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/time_24h"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            app:chipBackgroundColor="@color/chip_background_color"
+            android:textColor="@color/text_primary"
+            app:checkedIconVisible="true"
+            app:checkedIconTint="@color/brand_green"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipTimeWeek"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/time_weekly"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            app:chipBackgroundColor="@color/chip_background_color"
+            android:textColor="@color/text_primary"
+            app:checkedIconVisible="true"
+            app:checkedIconTint="@color/brand_green"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipTimeMonth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/time_monthly"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            app:chipBackgroundColor="@color/chip_background_color"
+            android:textColor="@color/text_primary"
+            app:checkedIconVisible="true"
+            app:checkedIconTint="@color/brand_green"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipTimeAll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/time_all"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            app:chipBackgroundColor="@color/chip_background_color"
+            android:textColor="@color/text_primary"
+            app:checkedIconVisible="true"
+            app:checkedIconTint="@color/brand_green"/>
+
+    </com.google.android.material.chip.ChipGroup>
+
+</LinearLayout>

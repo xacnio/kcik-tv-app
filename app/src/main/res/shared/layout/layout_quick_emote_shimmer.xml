@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dev.xacnio.kciktv.shared.ui.widget.ShimmerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#151515"
+        android:orientation="horizontal"
+        android:padding="8dp">
+
+        <View
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_shimmer_shape" />
+        <View
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_shimmer_shape" />
+        <View
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_shimmer_shape" />
+        <View
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_shimmer_shape" />
+        <View
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_shimmer_shape" />
+        <View
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_shimmer_shape" />
+        <View
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_shimmer_shape" />
+        <View
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_shimmer_shape" />
+
+    </LinearLayout>
+</dev.xacnio.kciktv.shared.ui.widget.ShimmerLayout>

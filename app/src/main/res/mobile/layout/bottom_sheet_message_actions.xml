@@ -1,0 +1,567 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_bottom_sheet"
+    android:orientation="vertical"
+    android:paddingBottom="24dp">
+
+    <!-- Drag Handle -->
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_handle_bar" />
+
+    <!-- Message Preview Card -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/messagePreviewCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="16dp"
+        app:cardBackgroundColor="#1F1F1F"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="12dp">
+
+            <!-- User Avatar with Shimmer -->
+            <FrameLayout
+                android:layout_width="40dp"
+                android:layout_height="40dp">
+
+                <!-- Shimmer Placeholder -->
+                <View
+                    android:id="@+id/avatarShimmer"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_circle" />
+
+                <!-- Actual Avatar -->
+                <ImageView
+                    android:id="@+id/userAvatar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_circle"
+                    android:scaleType="centerCrop"
+                    android:visibility="invisible"
+                    tools:src="@drawable/ic_person"
+                    tools:visibility="visible" />
+
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <!-- Username -->
+                <TextView
+                    android:id="@+id/previewUsername"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#53FC18"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    tools:text="previewUsername" />
+
+                <!-- Message Content -->
+                <android.widget.TextView
+                    android:id="@+id/previewMessage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:ellipsize="end"
+                    android:maxLines="3"
+                    android:textColor="#FFFFFF"
+                    android:textSize="13sp"
+                    android:textDirection="ltr"
+                    android:textAlignment="viewStart"
+                    tools:text="previewMessage" />
+
+            </LinearLayout>
+
+            <!-- Copy Button -->
+            <ImageView
+                android:id="@+id/btnCopyMessageInSheet"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="8dp"
+                android:src="@drawable/ic_copy"
+                app:tint="#888888" />
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- User Badges and Info Section -->
+    <FrameLayout
+        android:id="@+id/userDetailSection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp">
+
+        <!-- Loading State -->
+        <ProgressBar
+            android:id="@+id/userDetailProgress"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+            android:indeterminateTint="#53FC18"
+            android:visibility="visible" />
+
+        <!-- Content State -->
+        <LinearLayout
+            android:id="@+id/userDetailContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <!-- Badges and Info Container -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <!-- Badges -->
+                    <LinearLayout
+                        android:id="@+id/previewBadgesContainer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:clipChildren="false"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal" />
+
+                    <!-- Divider between badges and info -->
+                    <View
+                        android:id="@+id/badgeInfoDivider"
+                        android:layout_width="1dp"
+                        android:layout_height="16dp"
+                        android:layout_marginHorizontal="12dp"
+                        android:background="#444444"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
+                    <!-- Follow & Sub Info -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <android.widget.TextView
+                            android:id="@+id/followDateText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="#AAAAAA"
+                            android:textSize="10sp"
+                            android:visibility="gone"
+                            tools:text="followDateText"
+                            tools:visibility="visible" />
+
+                        <android.widget.TextView
+                            android:id="@+id/subDurationText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="#53FC18"
+                            android:textSize="10sp"
+                            android:visibility="gone"
+                            tools:text="subDurationText"
+                            tools:visibility="visible" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </HorizontalScrollView>
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <!-- Ban Status Indicator -->
+    <LinearLayout
+        android:id="@+id/banStatusContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_category_badge"
+        android:backgroundTint="#33FF4444"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_block"
+            app:tint="#FF4444" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/banStatusTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FF4444"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                tools:text="banStatusTitle" />
+
+            <TextView
+                android:id="@+id/banStatusDetail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#AAAAAA"
+                android:textSize="11sp"
+                android:visibility="gone"
+                tools:text="banStatusDetail"
+                tools:visibility="visible" />
+
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/unbanButton"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:minHeight="0dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:paddingHorizontal="12dp"
+            android:text="@string/action_unban"
+            android:textColor="#53FC18"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="16dp"
+        android:background="#2A2A2A" />
+
+    <!-- Action Buttons Container -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="8dp"
+        android:paddingTop="8dp">
+
+        <!-- Reply Action -->
+        <LinearLayout
+            android:id="@+id/actionReply"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_reply"
+                app:tint="#FFFFFF" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/action_reply"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp" />
+
+        </LinearLayout>
+
+        <!-- Mention Action -->
+        <LinearLayout
+            android:id="@+id/actionMention"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_mentions"
+                app:tint="#FFFFFF" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/action_mention"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp" />
+
+        </LinearLayout>
+
+        <!-- Pin Action (Moderator/Owner only) -->
+        <LinearLayout
+            android:id="@+id/actionPin"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_star"
+                app:tint="#53FC18" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/action_pin"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp" />
+
+        </LinearLayout>
+
+        <!-- User Info Action -->
+        <LinearLayout
+            android:id="@+id/actionUserInfo"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_person"
+                app:tint="#FFFFFF" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/action_user_info"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp" />
+
+        </LinearLayout>
+
+        <!-- Divider for Moderation Actions -->
+        <View
+            android:id="@+id/moderationDivider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="8dp"
+            android:background="#2A2A2A"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <!-- Timeout Action with Duration Buttons -->
+        <LinearLayout
+            android:id="@+id/actionTimeoutContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_timer"
+                    app:tint="#FFA500" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="@string/action_timeout"
+                    android:textColor="#FFA500"
+                    android:textSize="15sp" />
+
+            </LinearLayout>
+
+            <!-- Timeout Duration Buttons -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="56dp"
+                android:layout_marginEnd="8dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/timeout1min"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/bg_timeout_button"
+                        android:gravity="center"
+                        android:paddingHorizontal="12dp"
+                        android:text="@string/timeout_1m"
+                        android:textColor="#FFA500"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/timeout5min"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/bg_timeout_button"
+                        android:gravity="center"
+                        android:paddingHorizontal="12dp"
+                        android:text="@string/timeout_5m"
+                        android:textColor="#FFA500"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/timeout1hour"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/bg_timeout_button"
+                        android:gravity="center"
+                        android:paddingHorizontal="12dp"
+                        android:text="@string/timeout_1h"
+                        android:textColor="#FFA500"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/timeout1day"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/bg_timeout_button"
+                        android:gravity="center"
+                        android:paddingHorizontal="12dp"
+                        android:text="@string/timeout_1d"
+                        android:textColor="#FFA500"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/timeout1week"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:background="@drawable/bg_timeout_button"
+                        android:gravity="center"
+                        android:paddingHorizontal="12dp"
+                        android:text="@string/timeout_1w"
+                        android:textColor="#FFA500"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
+
+            </HorizontalScrollView>
+
+        </LinearLayout>
+
+        <!-- Ban Action -->
+        <LinearLayout
+            android:id="@+id/actionBan"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_block"
+                app:tint="#FF4444" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/action_ban_with_label"
+                android:textColor="#FF4444"
+                android:textSize="15sp" />
+
+        </LinearLayout>
+
+        <!-- Delete Action -->
+        <LinearLayout
+            android:id="@+id/actionDelete"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_delete"
+                app:tint="#FF4444" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/action_delete_message"
+                android:textColor="#FF4444"
+                android:textSize="15sp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

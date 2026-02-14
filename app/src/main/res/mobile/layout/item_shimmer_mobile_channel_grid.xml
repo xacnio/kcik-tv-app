@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_margin="6dp">
+
+    <!-- Thumbnail Container with Top Rounded Corners - 16:9 aspect ratio -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <View
+            android:id="@+id/shimmerThumbnail"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@drawable/bg_shimmer_thumbnail_top_rounded_8dp"
+            app:layout_constraintDimensionRatio="H,16:9"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+        
+         <!-- Viewer Count Badge (Bottom Left) -->
+        <View
+            android:layout_width="50dp"
+            android:layout_height="16dp"
+            android:layout_margin="4dp"
+            android:background="#3A3A3A"
+            app:layout_constraintBottom_toBottomOf="@id/shimmerThumbnail"
+            app:layout_constraintStart_toStartOf="parent"/>
+            
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <!-- Info Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="8dp">
+
+        <!-- Avatar Shimmer -->
+        <View
+            android:id="@+id/shimmerAvatar"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/circle_shimmer_bg" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:orientation="vertical">
+
+            <!-- Name Shimmer -->
+            <View
+                android:id="@+id/shimmerName"
+                android:layout_width="80dp"
+                android:layout_height="12dp"
+                android:background="#2A2A2A" />
+
+            <!-- Title Shimmer -->
+            <View
+                android:id="@+id/shimmerTitle"
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:layout_marginTop="4dp"
+                android:background="#2A2A2A" />
+
+            <!-- Tags Row Shimmer -->
+             <View
+                android:id="@+id/shimmerCategory"
+                android:layout_width="40dp"
+                android:layout_height="14dp"
+                android:layout_marginTop="4dp"
+                android:background="#2A2A2A" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="32dp"
+    android:height="32dp"
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+
+    <!-- Antenna top -->
+    <path
+        android:pathData="M17.56,0H14.45C13.72,0 13.12,0.6 13.12,1.33V4.44C13.12,5.18 13.72,5.78 14.45,5.78H17.56C18.3,5.78 18.89,5.18 18.89,4.44V1.33C18.89,0.6 18.3,0 17.56,0Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="15.96"
+                android:startY="0.89"
+                android:endX="15.96"
+                android:endY="43.31">
+                <item android:offset="0" android:color="#FF00C7FF"/>
+                <item android:offset="0.99" android:color="#FF006399"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Antenna connector -->
+    <path
+        android:pathData="M17.33,5.78H14.67V8.45H17.33V5.78Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="16"
+                android:startY="0"
+                android:endX="16"
+                android:endY="32">
+                <item android:offset="0" android:color="#FF00C7FF"/>
+                <item android:offset="0.99" android:color="#FF006399"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Left ear -->
+    <path
+        android:pathData="M5.33,14.83C5.33,14.83 0,14.83 0,20.16C0,25.5 5.33,25.5 5.33,25.5V14.83Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="17.28"
+                android:startY="-0.2"
+                android:endX="16.86"
+                android:endY="31.78">
+                <item android:offset="0" android:color="#FF00C7FF"/>
+                <item android:offset="0.99" android:color="#FF006399"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Right ear -->
+    <path
+        android:pathData="M26.67,14.83C26.67,14.83 32,14.83 32,20.16C32,25.5 26.67,25.5 26.67,25.5V14.83Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="14.72"
+                android:startY="-0.2"
+                android:endX="15.14"
+                android:endY="31.78">
+                <item android:offset="0" android:color="#FF00C7FF"/>
+                <item android:offset="0.99" android:color="#FF006399"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Face background -->
+    <path
+        android:pathData="M26.67,10.82H5.33V28.17H26.67V10.82Z"
+        android:fillColor="#FF4FD8FF"/>
+
+    <!-- Face frame -->
+    <path
+        android:pathData="M15.76,11.28C20.41,11.28 24.09,12.3 25.24,13.29C26.39,14.87 26.17,24.47 24.91,26.08C24.25,26.85 21.07,28.01 16.28,28.01C11.24,28.01 7.73,26.76 6.95,25.93C5.71,24.37 5.65,14.72 6.84,13.21C7.59,12.46 10.67,11.28 15.76,11.28ZM15.76,7.27C10.91,7.27 6.12,8.29 4.01,10.38C1.25,13.13 1.35,25.79 4.01,28.64C6.08,30.85 11.21,32 16.28,32C21.35,32 26.08,30.91 27.99,28.64C30.48,25.65 30.87,13 27.99,10.38C25.75,8.34 20.72,7.27 15.76,7.27Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="5.14"
+                android:startY="0.59"
+                android:endX="36.66"
+                android:endY="34.85">
+                <item android:offset="0" android:color="#FF00C7FF"/>
+                <item android:offset="0.99" android:color="#FF006399"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Right eye -->
+    <path
+        android:pathData="M23,17.98C23,16.69 21.96,15.64 20.67,15.64C19.38,15.64 18.33,16.69 18.33,17.98V21.31C18.33,22.6 19.38,23.65 20.67,23.65C21.96,23.65 23,22.6 23,21.31V17.98Z"
+        android:fillColor="#FF000000"/>
+
+    <!-- Left eye -->
+    <path
+        android:pathData="M13.67,17.98C13.67,16.69 12.62,15.64 11.33,15.64C10.04,15.64 9,16.69 9,17.98V21.31C9,22.6 10.04,23.65 11.33,23.65C12.62,23.65 13.67,22.6 13.67,21.31V17.98Z"
+        android:fillColor="#FF000000"/>
+</vector>

@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:clipChildren="true"
+    android:clipToPadding="true">
+
+    <!-- Blurred Background Thumbnail (Full screen for visual effect) -->
+    <ImageView
+        android:id="@+id/backgroundImage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:alpha="0.6" />
+
+    <!-- Content Wrapper - will be constrained on tablet/portrait -->
+    <FrameLayout
+        android:id="@+id/feedContentWrapper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:clipChildren="true"
+        android:clipToPadding="true">
+
+        <!-- Content Container -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipChildren="true"
+            android:clipToPadding="true">
+
+
+
+        <!-- Background for proper video display -->
+        <View
+            android:id="@+id/feedBackground"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#000000"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="@id/clipPreviewContainer"
+            app:layout_constraintBottom_toBottomOf="@id/clipPreviewContainer"
+            app:layout_constraintStart_toStartOf="@id/clipPreviewContainer"
+            app:layout_constraintEnd_toEndOf="@id/clipPreviewContainer" />
+
+        <!-- Clip Preview Container -->
+        <FrameLayout
+            android:id="@+id/clipPreviewContainer"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <!-- TextureView for video playback -->
+            <TextureView
+                android:id="@+id/clipPlayerTexture"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
+
+            <!-- Last Frame Image -->
+            <ImageView
+                android:id="@+id/lastFrameImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:visibility="gone" />
+
+            <!-- Thumbnail -->
+            <ImageView
+                android:id="@+id/clipThumbnail"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:background="#1A1A1A" />
+
+            <!-- Loading Spinner -->
+            <ProgressBar
+                android:id="@+id/clipLoadingSpinner"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:indeterminateTint="#53FC18"
+                android:visibility="gone" />
+
+            <!-- Play Icon Overlay -->
+            <FrameLayout
+                android:id="@+id/playOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#00000000"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/playIcon"
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_play"
+                    app:tint="#FFFFFF"
+                    android:alpha="0.9" />
+            </FrameLayout>
+
+            <!-- Mute/Unmute Indicator Overlay -->
+            <ImageView
+                android:id="@+id/visualMuteIndicator"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_gravity="center"
+                android:background="@drawable/bg_circle_dark"
+                android:padding="16dp"
+                android:alpha="0"
+                android:visibility="gone"
+                android:src="@drawable/ic_volume_off"
+                app:tint="#FFFFFF" />
+
+        </FrameLayout>
+
+        <!-- Top Gradient (Overlays video for readability) -->
+        <View
+            android:id="@+id/feedTopGradient"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:background="@drawable/bg_top_gradient"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Right Side Actions -->
+        <LinearLayout
+            android:id="@+id/actionsContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_marginEnd="12dp"
+            android:layout_marginBottom="120dp"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <!-- Avatar -->
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/channelAvatar"
+                android:layout_width="51dp"
+                android:layout_height="51dp"
+                android:scaleType="centerCrop"
+                android:background="@drawable/bg_circle_dark_shadow"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="1dp"
+                android:backgroundTint="@null"
+                android:foreground="?android:attr/selectableItemBackgroundBorderless"
+                app:shapeAppearanceOverlay="@style/CircleImageView"
+                tools:src="@drawable/ic_person" />
+
+            <!-- Views Count Group -->
+            <LinearLayout
+                android:id="@+id/viewsClickWrapper"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="@drawable/bg_feed_button_stroke"
+                android:padding="8dp">
+                
+                <ImageView
+                    android:id="@+id/iconViews"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:src="@drawable/ic_viewers"
+                    app:tint="#FFFFFF" />
+
+                <TextView
+                    android:id="@+id/viewsCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:layout_marginTop="2dp"
+                    android:shadowColor="#000000"
+                    android:shadowDx="1"
+                    android:shadowDy="1"
+                    android:shadowRadius="2"
+                    tools:text="feedViewsCount" />
+            </LinearLayout>
+
+            <!-- Share -->
+            <ImageButton
+                android:id="@+id/btnShare"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="12dp"
+                android:src="@drawable/ic_share"
+                android:padding="10dp"
+                android:scaleType="fitCenter"
+                android:background="@drawable/bg_feed_button_stroke"
+                app:tint="#FFFFFF" />
+
+            <!-- Play in Player -->
+            <ImageButton
+                android:id="@+id/btnPlayInPlayer"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="12dp"
+                android:src="@drawable/ic_launch_player"
+                android:padding="6dp"
+                android:scaleType="fitCenter"
+                android:background="@drawable/bg_feed_button_stroke"
+                app:tint="#FFFFFF" />
+
+            <!-- More Options -->
+            <ImageButton
+                android:id="@+id/btnMore"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="12dp"
+                android:src="@drawable/ic_more_vert"
+                android:padding="10dp"
+                android:scaleType="fitCenter"
+                android:background="@drawable/bg_feed_button_stroke"
+                app:tint="#FFFFFF" />
+
+        </LinearLayout>
+
+        <!-- Bottom Gradient Overlay -->
+        <View
+            android:id="@+id/feedBottomGradient"
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            android:background="@drawable/gradient_bottom_overlay"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Bottom Info Section -->
+        <LinearLayout
+            android:id="@+id/bottomInfoContainer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="4dp"
+            android:translationY="10dp"
+            android:orientation="vertical"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/timeDisplay"
+            app:layout_constraintBottom_toTopOf="@id/clipSeekBar">
+
+            <!-- Channel Name -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                
+                <TextView
+                    android:id="@+id/channelName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    tools:text="channelName" />
+
+
+            </LinearLayout>
+
+            <!-- Clip Title -->
+            <TextView
+                android:id="@+id/clipTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="#CCCCCC"
+                android:textSize="14sp"
+                android:maxLines="2"
+                android:ellipsize="end"
+                tools:text="clipTitle" />
+
+            <!-- Clip Creator -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_clip"
+                    app:tint="#888888" />
+
+                <TextView
+                    android:id="@+id/clipCreator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:textColor="#888888"
+                    android:textSize="13sp"
+                    tools:text="clipCreator" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Time Display -->
+        <TextView
+            android:id="@+id/timeDisplay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="0dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="4dp"
+            android:translationY="10dp"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:shadowColor="#000000"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:shadowRadius="2"
+            app:layout_constraintBottom_toTopOf="@id/clipSeekBar"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="timeDisplay" />
+
+        <!-- Scale Toggle Button (Top Right) -->
+        <ImageView
+            android:id="@+id/ivScaleType"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/ic_fullscreen"
+            android:padding="10dp"
+            app:tint="#FFFFFF"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <SeekBar
+            android:id="@+id/clipSeekBar"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:layout_marginBottom="0dp"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:thumbOffset="0dp"
+            android:minHeight="14dp"
+            android:maxHeight="14dp"
+            android:translationY="13dp"
+            android:progressDrawable="@drawable/feed_seekbar_progress"
+            android:max="10000"
+            android:progress="0"
+            android:progressTint="@null"
+            android:thumbTint="#00000000"
+            android:splitTrack="false"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Filter Header (Top Left) -->
+        <LinearLayout
+            android:id="@+id/headerFilterContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            android:padding="8dp"
+            app:layout_constraintTop_toTopOf="@id/ivScaleType"
+            app:layout_constraintBottom_toBottomOf="@id/ivScaleType"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                android:id="@+id/headerFilterText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/popular_clips_header"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:shadowColor="#80000000"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="2" />
+
+            <TextView
+                android:id="@+id/headerSubFilterText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="@string/daily_filter"
+                android:textColor="#AAAAAA"
+                android:textSize="14sp"
+                android:visibility="visible"
+                android:shadowColor="#80000000"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="2" />
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_chevron_down"
+                app:tint="#FFFFFF"
+                android:layout_marginStart="4dp"
+                android:layout_gravity="center_vertical"
+                android:shadowColor="#80000000"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="2" />
+        </LinearLayout>
+            
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    
+    </FrameLayout>
+
+</FrameLayout>

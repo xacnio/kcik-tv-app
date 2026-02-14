@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_bottom_sheet">
+
+    <!-- ============ SHIMMER LOADING STATE ============ -->
+    <include
+        android:id="@+id/clipLoadingShimmer"
+        layout="@layout/layout_clip_shimmer"
+        android:visibility="visible" />
+
+    <!-- ============ ACTUAL CONTENT ============ -->
+    <LinearLayout
+        android:id="@+id/clipEditorContent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:visibility="gone">
+
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingBottom="16dp">
+
+            <ImageView
+                android:id="@+id/channelAvatar"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/bg_circle"
+                android:src="@drawable/ic_person"
+                app:tint="#FFFFFF" />
+
+            <TextView
+                android:id="@+id/channelName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/channel_name"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="14sp" />
+                
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+                
+            <ImageButton
+                android:id="@+id/closeButton"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_close"
+                app:tint="#FFFFFF" />
+        </LinearLayout>
+
+        <!-- Title Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/clip_title_hint"
+            app:boxBackgroundColor="#1A1A1A"
+            app:boxStrokeColor="#53FC18"
+            app:hintTextColor="#AAAAAA"
+            app:cursorColor="#53FC18"
+            android:textColorHint="#AAAAAA"
+            app:counterEnabled="true"
+            app:counterMaxLength="50"
+            app:counterTextColor="@android:color/darker_gray">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/clipTitleInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#FFFFFF"
+                android:inputType="textCapSentences"
+                android:maxLength="50" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Video Preview -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardBackgroundColor="#000000">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <com.amazonaws.ivs.player.PlayerView
+                    android:id="@+id/clipPlayerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <!-- Custom Controls Overlay -->
+                <FrameLayout
+                    android:id="@+id/clipControlsOverlay"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#20000000">
+
+                    <!-- Center Play/Pause Button -->
+                    <ImageButton
+                        android:id="@+id/clipPlayPauseButton"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_play_button"
+                        android:src="@drawable/ic_pause"
+                        android:padding="16dp"
+                        app:tint="#FFFFFF"
+                        android:scaleType="fitCenter" />
+
+                    <!-- Bottom Bar with Time Info -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom"
+                        android:background="#80000000"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="12dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="4dp">
+
+                        <!-- Seekbar Row with Trim Markers -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/clipCurrentTime"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="#FFFFFF"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                tools:text="0:00" />
+
+                            <!-- SeekBar Container with Trim Overlay -->
+                            <FrameLayout
+                                android:id="@+id/seekBarContainer"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginHorizontal="8dp">
+
+                                <SeekBar
+                                    android:id="@+id/clipSeekBar"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:progressTint="#53FC18"
+                                    android:thumbTint="#53FC18"
+                                    android:max="1000" />
+
+                                <!-- Trim Start Marker -->
+                                <View
+                                    android:id="@+id/trimStartMarker"
+                                    android:layout_width="3dp"
+                                    android:layout_height="24dp"
+                                    android:layout_gravity="center_vertical"
+                                    android:background="#FF5555"
+                                    android:elevation="2dp" />
+
+                                <!-- Trim End Marker -->
+                                <View
+                                    android:id="@+id/trimEndMarker"
+                                    android:layout_width="3dp"
+                                    android:layout_height="24dp"
+                                    android:layout_gravity="center_vertical"
+                                    android:background="#FF5555"
+                                    android:elevation="2dp" />
+
+                                <!-- Trim Range Highlight (between markers) -->
+                                <View
+                                    android:id="@+id/trimRangeHighlight"
+                                    android:layout_width="0dp"
+                                    android:layout_height="8dp"
+                                    android:layout_gravity="center_vertical"
+                                    android:background="#4053FC18" />
+                            </FrameLayout>
+
+                            <TextView
+                                android:id="@+id/clipEndTime"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="#AAAAAA"
+                                android:textSize="12sp"
+                                tools:text="0:00" />
+                        </LinearLayout>
+
+                        <!-- Trim Range Info Row -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:orientation="horizontal"
+                            android:paddingTop="2dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/trim_label"
+                                android:textColor="#888888"
+                                android:textSize="10sp" />
+
+                            <TextView
+                                android:id="@+id/clipTrimStartTime"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="#53FC18"
+                                android:textSize="10sp"
+                                android:textStyle="bold"
+                                tools:text="0:00" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/arrow_sep"
+                                android:textColor="#888888"
+                                android:textSize="10sp" />
+
+                            <TextView
+                                android:id="@+id/clipTrimEndTime"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="#53FC18"
+                                android:textSize="10sp"
+                                android:textStyle="bold"
+                                tools:text="0:30" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </FrameLayout>
+
+                <!-- Loading Indicator -->
+                <ProgressBar
+                    android:id="@+id/clipLoading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:indeterminateTint="#53FC18" />
+            </FrameLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Trimming Controls -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="16dp">
+
+            <com.google.android.material.slider.RangeSlider
+                android:id="@+id/clipRangeSlider"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:valueFrom="0"
+                android:valueTo="90"
+                app:values="@array/clip_range_default_values"
+                app:thumbColor="#FFFFFF"
+                app:trackColorActive="#53FC18"
+                app:trackColorInactive="#333333" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="end">
+                
+                <TextView
+                    android:id="@+id/clipDurationText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="60s"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold" />
+                    
+                <TextView
+                    android:id="@+id/clipTimeRangeText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    tools:text="1:00 - 1:30"
+                    android:textColor="#AAAAAA"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Action Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="24dp"
+            android:gravity="end">
+
+            <Button
+                android:id="@+id/btnCancel"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/cancel"
+                android:textColor="#FFFFFF" />
+
+            <Button
+                android:id="@+id/btnPublish"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:backgroundTint="#333333"
+                android:text="@string/clip_publish"
+                android:textColor="#AAAAAA"
+                android:enabled="false" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>

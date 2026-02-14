@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_bottom_sheet"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/start_prediction"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/btnClose"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_close"
+            app:tint="#FFFFFF" />
+    </LinearLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:overScrollMode="never">
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Recent Predictions Dropdown -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/prediction_presets_label"
+                android:textColor="#AAAAAA"
+                android:textSize="12sp"
+                android:layout_marginBottom="6dp"/>
+
+            <Spinner
+                android:id="@+id/recentPredictionsSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_chat_input"
+                android:padding="12dp"
+                android:popupBackground="#1A1A1A"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Prediction Title -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/prediction_question_label"
+                android:textColor="#AAAAAA"
+                android:textSize="12sp"
+                android:layout_marginBottom="6dp"/>
+
+            <EditText
+                android:id="@+id/predictionTitleInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_chat_input"
+                android:hint="@string/prediction_question_hint"
+                android:padding="12dp"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#808080"
+                android:textSize="14sp"
+                android:maxLines="2"
+                android:inputType="textMultiLine"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Outcomes Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/prediction_outcomes_label"
+                android:textColor="#AAAAAA"
+                android:textSize="12sp"
+                android:layout_marginBottom="8dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/outcome1Input"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    android:background="@drawable/bg_chat_input"
+                    android:hint="@string/prediction_yes_hint"
+                    android:padding="12dp"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#808080"
+                    android:textSize="14sp"
+                    android:maxLines="1"
+                    android:singleLine="true"/>
+
+                <EditText
+                    android:id="@+id/outcome2Input"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:background="@drawable/bg_chat_input"
+                    android:hint="@string/prediction_no_hint"
+                    android:padding="12dp"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#808080"
+                    android:textSize="14sp"
+                    android:maxLines="1"
+                    android:singleLine="true"/>
+            </LinearLayout>
+
+            <!-- Duration Dropdown -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/prediction_duration_label"
+                android:textColor="#AAAAAA"
+                android:textSize="12sp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="6dp"/>
+
+            <Spinner
+                android:id="@+id/durationSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_chat_input"
+                android:padding="12dp"
+                android:popupBackground="#1A1A1A"
+                android:layout_marginBottom="12dp"/>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Create Button -->
+    <Button
+        android:id="@+id/btnCreatePrediction"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:backgroundTint="#53FC18"
+        android:text="@string/start_prediction"
+        android:textColor="#000000"
+        android:textStyle="bold"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"/>
+
+    <!-- Error Text -->
+    <TextView
+        android:id="@+id/errorText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingTop="8dp"
+        android:textColor="#FF6B6B"
+        android:textSize="13sp"
+        android:visibility="gone"/>
+
+</LinearLayout>

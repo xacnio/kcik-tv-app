@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="8dp"
+    android:paddingVertical="4dp"
+    android:orientation="vertical"
+    android:background="@drawable/chat_message_background">
+
+    <TextView
+        android:id="@+id/messageText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="4dp"
+        android:paddingVertical="2dp"
+        android:textColor="@color/text_primary"
+        android:textSize="14sp"
+        android:lineSpacingMultiplier="1.1"
+        android:letterSpacing="0.01" />
+
+    <FrameLayout
+        android:id="@+id/clipPreviewContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginStart="4dp"
+        android:visibility="gone"
+        android:background="#1A1A1A">
+
+        <dev.xacnio.kciktv.shared.ui.widget.ShimmerLayout
+            android:id="@+id/clipShimmerLayout"
+            android:layout_width="280dp"
+            android:layout_height="76dp"
+            app:shimmer_auto_start="false">
+            
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:padding="4dp">
+                <View
+                    android:layout_width="120dp"
+                    android:layout_height="match_parent"
+                    android:background="#333333" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="4dp"
+                    android:paddingTop="2dp">
+                     <View
+                        android:layout_width="100dp"
+                        android:layout_height="12dp"
+                        android:layout_marginBottom="4dp"
+                        android:background="#333333" />
+                     <View
+                        android:layout_width="80dp"
+                        android:layout_height="10dp"
+                        android:layout_marginBottom="4dp"
+                        android:background="#333333" />
+                </LinearLayout>
+            </LinearLayout>
+        </dev.xacnio.kciktv.shared.ui.widget.ShimmerLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clipContentLayout"
+            android:layout_width="280dp"
+            android:layout_height="wrap_content"
+            android:padding="4dp"
+            android:visibility="gone">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/clipThumbCard"
+                android:layout_width="120dp"
+                android:layout_height="68dp"
+                app:cardCornerRadius="6dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent">
+                
+                <ImageView
+                    android:id="@+id/clipThumbnail"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/placeholder_thumbnail" />
+                    
+                <TextView
+                    android:id="@+id/clipDuration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|end"
+                    android:background="#99000000"
+                    android:paddingHorizontal="4dp"
+                    android:paddingVertical="1dp"
+                    tools:text="0:00"
+                    android:textColor="#FFFFFFFF"
+                    android:textSize="10sp"
+                    android:visibility="gone"/>
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/clipTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:maxLines="2"
+                android:ellipsize="end"
+                app:layout_constraintStart_toEndOf="@id/clipThumbCard"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/clipThumbCard" />
+
+            <TextView
+                android:id="@+id/clipChannel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:textColor="#B0B0B0"
+                android:textSize="11sp"
+                app:layout_constraintStart_toEndOf="@id/clipThumbCard"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/clipTitle" 
+                android:layout_marginTop="2dp"/>
+
+             <TextView
+                android:id="@+id/clipViews"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:textColor="#808080"
+                android:textSize="10sp"
+                app:layout_constraintStart_toEndOf="@id/clipThumbCard"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/clipChannel" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </FrameLayout>
+
+</LinearLayout>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Left: Snail (Slow Mode) - scaled from original 16x16 -->
+    <group
+        android:scaleX="0.7"
+        android:scaleY="0.7"
+        android:translateX="0"
+        android:translateY="4">
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M15,3.9c0,-0.5 -0.4,-0.9 -0.9,-0.9s-0.8,0.4 -0.8,0.9c0,0.3 0.1,0.6 0.4,0.7v1h-1.8v-1c0.3,-0.1 0.5,-0.4 0.5,-0.7 0,-0.5 -0.4,-0.9 -0.9,-0.9s-0.9,0.4 -0.9,0.9c0,0.3 0.2,0.6 0.5,0.7v1L9.7,6.7a4.4,4.4 0 1 0 -7,4.2l-1.7,0.8v1.8h10.5l3,-3.5V4.6c0.3,-0.1 0.5,-0.4 0.5,-0.7Zm-9.6,0.9a2.6,2.6 0 1 1 0,5.2 2.6,2.6 0 0 1 0,-5.3Z"/>
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M7.1,7.2H5.6V5.6H4.3v2.9H7V7.2Z"/>
+    </group>
+    <!-- Right: Heart (Followers) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M18.5,10c-0.88,0 -1.72,0.4 -2.25,1.05C15.72,10.4 14.88,10 14,10c-1.66,0 -3,1.34 -3,3c0,2.1 1.9,3.8 4.75,6.4l0.75,0.7l0.75,-0.7C20.1,16.8 22,15.1 22,13C22,11.34 20.66,10 18.5,10z"/>
+</vector>

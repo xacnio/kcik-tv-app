@@ -1,0 +1,68 @@
+name: ✨ Feature Request
+description: Suggest a new feature or improvement
+title: "[FEATURE] "
+labels: ["enhancement"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature! Please fill out the form below to help us understand your request.
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      description: Which platform is this feature for?
+      options:
+        - Android (Mobile)
+        - Android TV
+        - Both
+        - Landing Page / Web
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Feature Description
+      description: Describe the feature and what problem it solves.
+      placeholder: This feature would solve ... because ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: How would you like this feature to work?
+      placeholder: I would like it to work like...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any alternative solutions?
+      placeholder: Alternatively...
+    validations:
+      required: false
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: Design / Screenshots
+      description: If applicable, add mockups or reference images of how the feature should look.
+      placeholder: Drag and drop images here...
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues and this feature has not been requested before.
+          required: true

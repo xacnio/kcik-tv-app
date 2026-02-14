@@ -1,0 +1,2841 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <!-- Global Top Header (Visible on most screens) -->
+    <LinearLayout
+        android:id="@+id/mobileHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="56dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:background="@android:color/black"
+        android:elevation="30dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- KCIK Logo -->
+        <LinearLayout
+            android:id="@+id/kickLogo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/kickLogoP1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="K"
+                android:textColor="#53FC18"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:fontFamily="@font/brand_logo_font"
+                app:fontFamily="@font/brand_logo_font"
+                android:scaleX="-1" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/kickLogoP2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CIK"
+                android:textColor="#53FC18"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:fontFamily="@font/brand_logo_font"
+                app:fontFamily="@font/brand_logo_font" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+
+
+        <!-- Profile Picture -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/mobileProfilePic"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/default_avatar"
+            android:visibility="visible"
+            app:shapeAppearanceOverlay="@style/CircleImageView" />
+
+        <!-- Settings Button (Visible when logged out) -->
+        <ImageButton
+            android:id="@+id/mobileSettingsBtn"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_settings"
+            android:padding="8dp"
+            app:tint="#FFFFFF"
+            android:visibility="gone"
+            android:contentDescription="@string/settings" />
+
+        <!-- Login Button -->
+        <TextView
+            android:id="@+id/mobileLoginBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:background="@drawable/bg_button_primary"
+            android:backgroundTint="#53FC18"
+            android:gravity="center"
+            android:paddingHorizontal="16dp"
+            android:text="@string/login"
+            android:textColor="#000000"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <!-- Header Divider -->
+    <View
+        android:id="@+id/headerDivider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#262626"
+        android:elevation="31dp"
+        app:layout_constraintTop_toBottomOf="@id/mobileHeader"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Home Screen Container -->
+    <include
+        android:id="@+id/homeScreenContainer"
+        layout="@layout/layout_home_screen"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="visible"
+        app:layout_constraintWidth_max="@dimen/max_content_width"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/mobileHeader"
+        android:paddingBottom="100dp"
+        android:clipToPadding="false" />
+
+    <!-- Browse Screen Container -->
+    <include
+        android:id="@+id/browseScreenContainer"
+        layout="@layout/layout_browse"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintWidth_max="@dimen/max_content_width"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/mobileHeader"
+        android:paddingBottom="100dp"
+        android:clipToPadding="false" />
+
+
+
+    <!-- Following Screen Container -->
+    <include
+        android:id="@+id/followingScreenContainer"
+        layout="@layout/layout_following_screen"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintWidth_max="@dimen/max_content_width"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/mobileHeader"
+        android:paddingBottom="0dp"
+        android:clipToPadding="false" />
+
+    <!-- Search Screen Container -->
+    <LinearLayout
+        android:id="@+id/searchContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@android:color/black"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintWidth_max="@dimen/max_content_width"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/mobileHeader"
+        android:paddingBottom="100dp"
+        android:clipToPadding="false">
+
+        <!-- Search Input Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp">
+
+            <EditText
+                android:id="@+id/searchInput"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_marginHorizontal="8dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_search_input"
+                android:hint="@string/search_channels"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:maxLines="1"
+                android:paddingHorizontal="16dp"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#666666"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#2a2a2a" />
+
+        <!-- Search Results -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/searchResultsRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="8dp"
+                android:visibility="gone" />
+
+            <ProgressBar
+                android:id="@+id/searchLoading"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:indeterminateTint="#53fc18"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/searchEmptyState"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@drawable/ic_search"
+                    app:tint="#444444" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/no_results_found"
+                    android:textColor="#888888"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/searchInitialState"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <ImageView
+                    android:id="@+id/searchInitialIcon"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/ic_search"
+                    app:tint="#333333" />
+
+                <TextView
+                    android:id="@+id/searchInitialText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/search_channels"
+                    android:textColor="#555555"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <!-- Search History -->
+            <LinearLayout
+                android:id="@+id/searchHistoryContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="16dp"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="8dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/recent_searches"
+                        android:textColor="#555555"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <ImageButton
+                        android:id="@+id/clearSearchHistoryButton"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_delete"
+                        app:tint="#FF4444" />
+                </LinearLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/searchHistoryRecyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:paddingBottom="16dp" />
+            </LinearLayout>
+        </FrameLayout>
+
+    </LinearLayout>
+
+
+    <!-- Category Details Container -->
+    <include
+        android:id="@+id/categoryDetailsContainer"
+        layout="@layout/layout_category_details"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintWidth_max="@dimen/max_content_width"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/mobileHeader"
+        android:elevation="10dp" />
+
+    <!-- Channel Profile Container -->
+    <include
+        android:id="@+id/channelProfileContainer"
+        layout="@layout/layout_channel_profile"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintWidth_max="@dimen/max_content_width"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:elevation="10dp" />
+
+    <!-- Mini Player Container (PiP within App) -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/miniPlayerContainer"
+        android:layout_width="200dp"
+        android:layout_height="112dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="80dp"
+        android:visibility="gone"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="110dp"
+        app:cardBackgroundColor="#000000"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+         
+         <FrameLayout
+             android:id="@+id/miniPlayerContent"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
+             <!-- Video Container will be moved here -->
+             
+             <!-- Close Miniplayer Button -->
+             <ImageButton
+                 android:id="@+id/btnSplitClose"
+                 android:layout_width="24dp"
+                 android:layout_height="24dp"
+                 android:layout_gravity="top|end"
+                 android:layout_margin="4dp"
+                 android:background="@drawable/circle_bg_translucent"
+                 android:src="@drawable/ic_close"
+                 android:padding="4dp"
+                 app:tint="#FFFFFF" />
+                 
+             <!-- Maximize Overlay (Click catcher) -->
+             <View
+                 android:id="@+id/viewSplitMaximize"
+                 android:layout_width="match_parent"
+                 android:layout_height="match_parent"
+                 android:clickable="true"
+                 android:focusable="true"/>
+         </FrameLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Player Screen Container (Hidden on start, shown when watching) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/playerScreenContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:background="@android:color/black"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:clickable="true"
+        android:focusable="true"
+        tools:visibility="visible">
+
+    <!-- Theatre Background (Blurred) -->
+    <ImageView
+        android:id="@+id/theatreBackground"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Video Player Container -->
+    <FrameLayout
+        android:id="@+id/videoContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#000000"
+        app:layout_constraintDimensionRatio="16:9"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- IVS Player View -->
+        <com.amazonaws.ivs.player.PlayerView
+            android:id="@+id/playerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+
+        <!-- Offline Banner -->
+        <ImageView
+            android:id="@+id/offlineBanner"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:visibility="gone" />
+
+        <!-- Error Overlay -->
+        <LinearLayout
+            android:id="@+id/errorOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#99000000"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_error"
+                app:tint="#FF5555" />
+
+            <TextView
+                android:id="@+id/errorText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/stream_offline"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/retryButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:backgroundTint="#53fc18"
+                android:text="@string/retry"
+                android:textColor="#000000" />
+        </LinearLayout>
+
+        <!-- Play/Pause & Seek Controls Overlay -->
+        <FrameLayout
+            android:id="@+id/playPauseOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#40000000" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageButton
+                    android:id="@+id/playPauseButton"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_play_button"
+                    android:padding="12dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_pause"
+                    app:tint="#FFFFFF"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <ImageButton
+                    android:id="@+id/rewindButton"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:padding="6dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_replay_10"
+                    android:visibility="visible"
+                    android:layout_marginEnd="40dp"
+                    app:layout_constraintEnd_toStartOf="@id/playPauseButton"
+                    app:layout_constraintTop_toTopOf="@id/playPauseButton"
+                    app:layout_constraintBottom_toBottomOf="@id/playPauseButton" />
+
+                <ImageButton
+                    android:id="@+id/forwardButton"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:padding="6dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_forward_10"
+                    android:visibility="gone"
+                    android:layout_marginStart="40dp"
+                    app:layout_constraintStart_toEndOf="@id/playPauseButton"
+                    app:layout_constraintTop_toTopOf="@id/playPauseButton"
+                    app:layout_constraintBottom_toBottomOf="@id/playPauseButton" />
+
+                <TextView
+                    android:id="@+id/rewindSeekAnim"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    android:elevation="10dp"
+                    tools:text="-10s"
+                    app:layout_constraintTop_toBottomOf="@id/rewindButton"
+                    app:layout_constraintStart_toStartOf="@id/rewindButton"
+                    app:layout_constraintEnd_toEndOf="@id/rewindButton" />
+
+                <TextView
+                    android:id="@+id/forwardSeekAnim"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    android:elevation="10dp"
+                    tools:text="+10s"
+                    app:layout_constraintTop_toBottomOf="@id/forwardButton"
+                    app:layout_constraintStart_toStartOf="@id/forwardButton"
+                    app:layout_constraintEnd_toEndOf="@id/forwardButton" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </FrameLayout>
+
+        <!-- Top Controls Overlay -->
+        <!-- Top Controls Overlay -->
+        <LinearLayout
+            android:id="@+id/videoTopBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:orientation="horizontal"
+            android:gravity="end|center_vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/videoQualityBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:shadowColor="#80000000"
+                android:shadowDx="0"
+                android:shadowDy="2"
+                android:shadowRadius="4"
+                tools:text="1080p60" />
+
+            <FrameLayout
+                android:id="@+id/clipButtonContainer"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginEnd="8dp">
+
+                <ImageButton
+                    android:id="@+id/clipButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_item_ripple"
+                    android:src="@drawable/ic_clip"
+                    android:padding="8dp"
+                    android:scaleType="fitCenter"
+                    app:tint="#FFFFFF" />
+
+                <ProgressBar
+                    android:id="@+id/clipButtonSpinner"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:indeterminateTint="#53FC18"
+                    android:visibility="gone" />
+            </FrameLayout>
+
+            <ImageButton
+                android:id="@+id/videoSettingsButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_item_ripple"
+                android:padding="8dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_settings"
+                app:tint="#FFFFFF" />
+        </LinearLayout>
+
+        <!-- Channel Info Overlay (on video) : Bottom Bar -->
+        <LinearLayout
+            android:id="@+id/videoOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="@drawable/gradient_bottom_dark"
+            android:paddingBottom="0dp"
+            android:paddingHorizontal="0dp"
+            android:paddingTop="8dp"
+            android:orientation="vertical"
+            android:visibility="visible">
+            
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="16dp">
+
+                <LinearLayout
+                    android:id="@+id/channelInfoLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_toStartOf="@+id/overlayActionButtons"
+                    android:layout_marginEnd="12dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+    
+                    <LinearLayout
+                        android:id="@+id/viewerLayout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:background="@drawable/bg_item_ripple"
+                        android:paddingHorizontal="4dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:elevation="4dp"
+                        android:minWidth="48dp"
+                        android:minHeight="48dp">
+    
+                        <View
+                            android:id="@+id/liveDot"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginEnd="6dp"
+                            android:background="@drawable/bg_live_dot" />
+    
+                        <TextView
+                            android:id="@+id/viewerCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="#FFFFFF"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            tools:text="0" />
+                    </LinearLayout>
+    
+                    <View
+                        android:id="@+id/uptimeDivider"
+                        android:layout_width="1dp"
+                        android:layout_height="12dp"
+                        android:layout_marginHorizontal="10dp"
+                        android:background="#33FFFFFF"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
+                    <TextView
+                        android:id="@+id/returnToLiveButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="28dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/bg_return_live"
+                        android:gravity="center"
+                        android:paddingHorizontal="10dp"
+                        android:text="@string/pip_action_return_to_live"
+                        android:textColor="#FFFFFF"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:visibility="gone"
+                        android:clickable="true"
+                        android:focusable="true"
+                        tools:visibility="visible" />
+    
+                    <TextView
+                        android:id="@+id/streamTimeBadge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#AAAAAA"
+                        android:textSize="12sp"
+                        android:visibility="gone"
+                        tools:text="00:00"
+                        tools:visibility="visible" />
+                </LinearLayout>
+    
+                <LinearLayout
+                    android:id="@+id/overlayActionButtons"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+    
+
+
+                    <ImageButton
+                        android:id="@+id/muteButton"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:background="@drawable/bg_item_ripple"
+                        android:src="@drawable/ic_volume"
+                        app:tint="#FFFFFF" />
+
+                    <ImageButton
+                        android:id="@+id/theatreModeButton"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_marginStart="4dp"
+                        android:background="@drawable/bg_item_ripple"
+                        android:padding="8dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_theatre_mode"
+                        app:tint="#FFFFFF" />
+    
+                    <ImageButton
+                        android:id="@+id/fullscreenButton"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_marginStart="4dp"
+                        android:background="@drawable/bg_item_ripple"
+                        android:src="@drawable/ic_fullscreen"
+                        app:tint="#FFFFFF" />
+                </LinearLayout>
+
+            </RelativeLayout>
+
+            <!-- SeekBar (Bottom of bottom bar) -->
+            <SeekBar
+                android:id="@+id/playerSeekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="0dp"
+                android:paddingHorizontal="0dp"
+                android:thumb="@drawable/bg_seekbar_thumb"
+                android:progressTint="#53FC18"
+                android:visibility="visible"
+                android:enabled="false"
+                android:thumbTint="#53FC18"
+                android:secondaryProgressTint="#80FFFFFF"
+                android:max="1000"
+                android:progress="1000" />
+        </LinearLayout>
+
+        <!-- Loading Overlay (Solid Black to hide ghost frame) -->
+        <FrameLayout
+            android:id="@+id/loadingOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#FF000000"
+            android:visibility="gone"
+            tools:visibility="visible" />
+        <FrameLayout
+            android:id="@+id/miniPlayerControls"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+            
+            <View
+                android:id="@+id/miniPlayerMaximizeArea"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clickable="true"
+                android:focusable="true"/>
+
+             <ImageButton
+                 android:id="@+id/miniPlayerCloseButton"
+                 android:layout_width="24dp"
+                 android:layout_height="24dp"
+                 android:layout_gravity="top|end"
+                 android:layout_margin="4dp"
+                 android:background="@drawable/circle_bg_translucent"
+                 android:src="@drawable/ic_close"
+                 android:padding="4dp"
+                 app:tint="#FFFFFF"
+                 android:elevation="2dp" />
+        </FrameLayout>
+    </FrameLayout>
+
+    <!-- Modern Thin Loading Indicator (Horizontal) -->
+    <ProgressBar
+        android:id="@+id/loadingIndicator"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:indeterminate="true"
+        android:indeterminateTint="#53fc18"
+        android:visibility="gone"
+        android:elevation="10dp"
+        app:layout_constraintTop_toBottomOf="@id/videoContainer"
+        app:layout_constraintStart_toStartOf="@id/videoContainer"
+        app:layout_constraintEnd_toEndOf="@id/videoContainer" />
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_weight="1" />
+
+
+    <View
+        android:id="@+id/theatreBottomGradient"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@drawable/gradient_bottom_overlay"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Chat Container -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/chatContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@android:color/black"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/videoContainer">
+
+        <FrameLayout
+            android:id="@+id/chatListContainer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@id/chatInputRoot"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <!-- Chat RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/chatRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingHorizontal="12dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp" />
+            
+            <!-- Floating Emote Effect Container -->
+            <FrameLayout
+                android:id="@+id/floatingEmoteContainer"
+                android:layout_width="120dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="end"
+                android:layout_marginEnd="8dp"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:clickable="false"
+                android:focusable="false" />
+
+            <!-- Emote Combo Container -->
+            <LinearLayout
+                android:id="@+id/emoteComboContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_marginBottom="60dp"
+                android:layout_marginEnd="16dp"
+                android:orientation="vertical"
+                android:gravity="end"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:elevation="10dp"
+                android:animateLayoutChanges="true" />
+
+            <!-- Jump to Bottom Button - Modern Design -->
+            <TextView
+                android:id="@+id/chatJumpToBottom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/bg_jump_to_bottom"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="10dp"
+                android:text="@string/chat_jump_to_bottom"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                app:drawableStartCompat="@drawable/ic_chevron_down"
+                android:drawablePadding="8dp"
+                app:drawableTint="#53fc18"
+                android:elevation="8dp"
+                android:stateListAnimator="@null"
+                android:visibility="gone" />
+            <!-- Empty Chat State -->
+            <TextView
+                android:id="@+id/emptyChatText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/no_messages"
+                android:textColor="#666666"
+                android:textSize="14sp"
+                android:visibility="gone" />
+
+            <!-- Chat Shimmer (Loading) -->
+            <include
+                android:id="@+id/chatShimmer"
+                layout="@layout/layout_chat_shimmer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
+
+            <!-- Viewer Connection Indicator (Floating Circle) -->
+            <FrameLayout
+                android:id="@+id/viewerConnectionContainer"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="bottom|end"
+                android:layout_marginEnd="12dp"
+                android:layout_marginBottom="72dp"
+                android:visibility="gone"
+                android:elevation="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                tools:visibility="visible">
+
+                <View
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_chat_reconnect_circle" />
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_eye"
+                    app:tint="#FF9800" />
+
+                <ProgressBar
+                    android:id="@+id/viewerConnectionProgress"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:visibility="gone"
+                    android:indeterminateTint="#FF9800" />
+            </FrameLayout>
+
+            <!-- Chat Connection Reconnect Indicator (Floating Circle) -->
+            <FrameLayout
+                android:id="@+id/chatConnectionContainer"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="bottom|end"
+                android:layout_marginEnd="12dp"
+                android:layout_marginBottom="12dp"
+                android:visibility="gone"
+                android:elevation="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                tools:visibility="visible">
+
+                <!-- Background circle -->
+                <View
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_chat_reconnect_circle" />
+
+                <!-- Chat Warning Icon (chat bubble + exclamation) -->
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_chat_warning" />
+
+                <!-- Spinning ring around the circle (reconnecting indicator) -->
+                <ProgressBar
+                    android:id="@+id/chatConnectionProgress"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:indeterminateTint="#FF9800" />
+
+            </FrameLayout>
+
+        </FrameLayout>
+
+
+        <!-- Chat Input Area (Wraps Input + Emote Panel) -->
+
+
+
+        <!-- Pinned Message & Poll Stack Area -->
+        <FrameLayout
+            android:id="@+id/chatOverlayContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginTop="8dp"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <!-- Pinned Message Area -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/pinnedMessageContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#33FFFFFF"
+                app:strokeWidth="1dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <FrameLayout
+                    android:id="@+id/pinnedBlurView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#EB1A1A1A">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:clipChildren="false"
+                        android:clipToPadding="false">
+
+                        <ImageView
+                            android:id="@+id/pinnedHeaderIcon"
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
+                            android:src="@drawable/ic_pin"
+                            app:tint="#53FC18" />
+
+                        <TextView
+                            android:id="@+id/pinnedHeaderText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:text="@string/pinned_message_header"
+                            android:textColor="#53FC18"
+                            android:textSize="10sp"
+                            android:includeFontPadding="false"
+                            android:textStyle="bold" />
+
+                        <View
+                            android:layout_width="8dp"
+                            android:layout_height="1dp" />
+
+                        <!-- Badges Container -->
+                        <LinearLayout
+                            android:id="@+id/pinnedBadgesContainer"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:clipChildren="false"
+                            android:gravity="center_vertical" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+                            
+                            <TextView
+                                android:id="@+id/pinnedSenderName"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="2dp"
+                                android:ellipsize="end"
+                                android:maxLines="1"
+                                android:textColor="#FFFFFF"
+                                android:textSize="13sp"
+                                android:includeFontPadding="false"
+                                android:gravity="center_vertical"
+                                android:textStyle="bold"
+                                tools:text="pinnedSenderName" />
+
+                            <ImageView
+                                android:id="@+id/verifiedBadge"
+                                android:layout_width="11dp"
+                                android:layout_height="11dp"
+                                android:layout_marginStart="3dp"
+                                android:src="@drawable/ic_badge_verified"
+                                android:visibility="gone"
+                                tools:visibility="visible" />
+                        </LinearLayout>
+
+                        <ImageView
+                            android:id="@+id/pinnedExpand"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:padding="4dp"
+                            android:src="@drawable/ic_chevron_down"
+                            app:tint="#808080" />
+
+                        <ImageView
+                            android:id="@+id/pinnedClose"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_marginStart="4dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:padding="4dp"
+                            android:src="@drawable/ic_close"
+                            app:tint="#808080" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/pinnedMsgText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:ellipsize="end"
+                        android:maxLines="2"
+                        android:textColor="#FFFFFF"
+                        android:textColorLink="#53FC18"
+                        android:textSize="13sp"
+                        tools:text="pinnedMsgText" />
+
+                    <LinearLayout
+                        android:id="@+id/pinnedDetailSection"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:background="#252525"
+                        android:orientation="vertical"
+                        android:padding="8dp"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:id="@+id/pinnedByText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="#B0B0B0"
+                            android:textSize="11sp"
+                            tools:text="pinnedByText" />
+
+                        <TextView
+                            android:id="@+id/pinnedDateText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:textColor="#808080"
+                            android:textSize="10sp"
+                            tools:text="pinnedDateText" />
+                    </LinearLayout>
+                </LinearLayout>
+                </FrameLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Poll Area -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/pollContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:cardBackgroundColor="#F21A1A1A"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="8dp"
+                tools:visibility="visible"
+                android:clickable="true"
+                android:focusable="true">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:src="@drawable/ic_poll"
+                            app:tint="#53FC18" />
+
+                        <TextView
+                            android:id="@+id/pollStatusText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:text="@string/poll_header"
+                            android:textColor="#53FC18"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+
+                        <ProgressBar
+                            android:id="@+id/pollDurationProgress"
+                            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                            android:layout_width="0dp"
+                            android:layout_height="4dp"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginEnd="12dp"
+                            android:layout_weight="1"
+                            android:indeterminate="false"
+                            android:max="100"
+                            android:progress="100"
+                            android:progressDrawable="@drawable/bg_poll_timer_progress" />
+
+                        <TextView
+                            android:id="@+id/pollTimerText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="#AAAAAA"
+                            android:textSize="11sp"
+                            tools:text="00:30" />
+
+                        <ImageView
+                            android:id="@+id/pollExpand"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_marginStart="8dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:padding="2dp"
+                            android:src="@drawable/ic_chevron_down"
+                            app:tint="#808080" />
+
+                        <ImageView
+                            android:id="@+id/pollDeleteButton"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_marginStart="8dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:padding="2dp"
+                            android:src="@drawable/ic_delete"
+                            android:visibility="gone"
+                            app:tint="#FF6B6B" />
+
+                        <ImageView
+                            android:id="@+id/pollCloseButton"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_marginStart="8dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:padding="2dp"
+                            android:src="@drawable/ic_close"
+                            app:tint="#808080" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/pollTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        tools:text="pollTitle" />
+
+                    <LinearLayout
+                        android:id="@+id/pollCollapseSection"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:id="@+id/pollOptionsContainer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:orientation="vertical" />
+
+                        <TextView
+                            android:id="@+id/pollTotalVotes"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:gravity="end"
+                            android:textColor="#808080"
+                            android:textSize="10sp"
+                            tools:text="pollTotalVotes" />
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+            
+            <!-- Prediction Area -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/predictionContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:cardBackgroundColor="#F21A1A1A"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="8dp"
+                tools:visibility="visible"
+                android:clickable="true"
+                android:focusable="true">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    
+
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                    <ProgressBar
+                        android:id="@+id/predictionDurationProgress"
+                        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="3dp"
+                        android:indeterminate="false"
+                        android:max="100"
+                        android:progress="100"
+                        android:progressDrawable="@drawable/bg_poll_timer_progress" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="12dp">
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <ImageView
+                                android:id="@+id/predictionIcon"
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:src="@drawable/ic_loyalty"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:tint="#53FC18" />
+
+                            <TextView
+                                android:id="@+id/predictionStatusText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:text="@string/prediction_header"
+                                android:textColor="#53FC18"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintStart_toEndOf="@id/predictionIcon"
+                                app:layout_constraintTop_toTopOf="parent" />
+                            
+                            <!-- State icon (lock/check/refresh) shown after status text -->
+                            <ImageView
+                                android:id="@+id/predictionStateIcon"
+                                android:layout_width="14dp"
+                                android:layout_height="14dp"
+                                android:layout_marginStart="6dp"
+                                android:src="@drawable/ic_lock"
+                                android:visibility="gone"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintStart_toEndOf="@id/predictionStatusText"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:tint="#FFC107" />
+
+
+
+                            <TextView
+                                android:id="@+id/predictionTimerText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="8dp"
+                                android:textColor="#AAAAAA"
+                                android:textSize="11sp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toStartOf="@id/predictionCloseButton"
+                                app:layout_constraintTop_toTopOf="parent"
+                                tools:text="00:30" />
+
+                            <ImageView
+                                android:id="@+id/predictionCloseButton"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_marginStart="8dp"
+                                android:background="?attr/selectableItemBackgroundBorderless"
+                                android:padding="2dp"
+                                android:src="@drawable/ic_close"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:tint="#808080" />
+
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                        <TextView
+                            android:id="@+id/predictionTitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            tools:text="predictionTitle" />
+
+                    <!-- Two Column Stats (Green/Red) -->
+                    <LinearLayout
+                        android:id="@+id/predictionStatsContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal"
+                        android:baselineAligned="false">
+
+                        <!-- Left (Green) -->
+                        <LinearLayout
+                            android:id="@+id/predictionLeftStats"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="6dp"
+                            android:background="@drawable/bg_prediction_card_green"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:padding="8dp">
+
+                            <!-- Left Percent (Big) -->
+                            <TextView
+                                android:id="@+id/predictionLeftPercent"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                tools:text="50%"
+                                android:textColor="#FFFFFF"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:layout_marginEnd="8dp"
+                                android:shadowColor="#000000"
+                                android:shadowDx="1"
+                                android:shadowDy="1"
+                                android:shadowRadius="3" />
+
+                            <!-- Text Container (Right Aligned) -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:gravity="end">
+
+                                <TextView
+                                    android:id="@+id/predictionLeftName"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="-"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="12sp"
+                                    android:textStyle="bold"
+                                    android:maxLines="1"
+                                    android:ellipsize="end"
+                                    android:gravity="end"
+                                    android:shadowColor="#000000"
+                                    android:shadowDx="1"
+                                    android:shadowDy="1"
+                                    android:shadowRadius="2" />
+
+                                <TextView
+                                    android:id="@+id/predictionLeftPoints"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="2dp"
+                                    android:text="0"
+                                    android:textColor="#CDFDC2"
+                                    android:textSize="10sp"
+                                    android:gravity="end"
+                                    android:shadowColor="#000000"
+                                    android:shadowDx="1"
+                                    android:shadowDy="1"
+                                    android:shadowRadius="2" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <!-- Right (Red) -->
+                        <LinearLayout
+                            android:id="@+id/predictionRightStats"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="6dp"
+                            android:background="@drawable/bg_prediction_card_red"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:padding="8dp">
+
+                            <!-- Text Container (Left Aligned) -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:gravity="start">
+
+                                <TextView
+                                    android:id="@+id/predictionRightName"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="-"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="12sp"
+                                    android:textStyle="bold"
+                                    android:maxLines="1"
+                                    android:ellipsize="end"
+                                    android:gravity="start"
+                                    android:shadowColor="#000000"
+                                    android:shadowDx="1"
+                                    android:shadowDy="1"
+                                    android:shadowRadius="2" />
+
+                                <TextView
+                                    android:id="@+id/predictionRightPoints"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="2dp"
+                                    android:text="0"
+                                    android:textColor="#FFC2C2"
+                                    android:textSize="10sp"
+                                    android:gravity="start"
+                                    android:shadowColor="#000000"
+                                    android:shadowDx="1"
+                                    android:shadowDy="1"
+                                    android:shadowRadius="2" />
+                            </LinearLayout>
+
+                            <!-- Right Percent (Big) -->
+                            <TextView
+                                android:id="@+id/predictionRightPercent"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                tools:text="50%"
+                                android:textColor="#FFFFFF"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:layout_marginStart="8dp"
+                                android:shadowColor="#000000"
+                                android:shadowDx="1"
+                                android:shadowDy="1"
+                                android:shadowRadius="3" />
+                        </LinearLayout>
+                    </LinearLayout>
+                    
+                    <!-- Top Users Container (shown when resolved) -->
+                    <LinearLayout
+                        android:id="@+id/predictionTopUsersContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="vertical"
+                        android:visibility="gone"
+                        tools:visibility="visible">
+                        
+                        <!-- Winners Row (Green) -->
+                        <LinearLayout
+                            android:id="@+id/predictionWinnersRow"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:visibility="gone">
+                            
+                            <ImageView
+                                android:layout_width="14dp"
+                                android:layout_height="14dp"
+                                android:src="@drawable/ic_check"
+                                app:tint="#53FC18"
+                                android:layout_marginEnd="6dp" />
+                            
+                            <TextView
+                                android:id="@+id/predictionWinnersText"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:textColor="#53FC18"
+                                android:textSize="11sp"
+                                android:maxLines="1"
+                                android:ellipsize="end"
+                                tools:text="predictionWinnersText" />
+                        </LinearLayout>
+                        
+                        <!-- Losers Row (Red) -->
+                        <LinearLayout
+                            android:id="@+id/predictionLosersRow"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:visibility="gone">
+                            
+                            <ImageView
+                                android:layout_width="14dp"
+                                android:layout_height="14dp"
+                                android:src="@drawable/ic_lose"
+                                app:tint="#FF4D4D"
+                                android:layout_marginEnd="6dp" />
+                            
+                            <TextView
+                                android:id="@+id/predictionLosersText"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:textColor="#FF4D4D"
+                                android:textSize="11sp"
+                                android:maxLines="1"
+                                android:ellipsize="end"
+                                tools:text="predictionLosersText" />
+                    </LinearLayout>
+                    </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+
+
+        </FrameLayout>
+
+        <!-- Celebration Banner (Sticky Bottom) -->
+        <include
+            android:id="@+id/celebrationContainer"
+            layout="@layout/layout_celebration_banner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@id/chatInputRoot"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/chatInputRoot"
+            android:elevation="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#1a1a1a"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+
+
+
+            <!-- Chat Error Bar (Persistent) -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/chatErrorContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#33FF4444"
+                android:paddingVertical="8dp"
+                android:paddingHorizontal="12dp"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <ImageView
+                    android:id="@+id/chatErrorIcon"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_error"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:tint="#FF4444" />
+
+                <TextView
+                    android:id="@+id/chatErrorText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:textColor="#FF4444"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/chatErrorClose"
+                    app:layout_constraintStart_toEndOf="@id/chatErrorIcon"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="chatErrorText" />
+
+                <ImageView
+                    android:id="@+id/chatErrorClose"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:padding="4dp"
+                    android:src="@drawable/ic_close"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="#80888888" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Chat Status Bar (Slow mode, etc) -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/chatStatusContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#3353FC18"
+                android:paddingVertical="8dp"
+                android:paddingHorizontal="12dp"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <ImageView
+                    android:id="@+id/chatStatusIcon"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_info"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:tint="#53FC18" />
+
+                <TextView
+                    android:id="@+id/chatStatusText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:textColor="#53FC18"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/chatStatusClose"
+                    app:layout_constraintStart_toEndOf="@id/chatStatusIcon"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="chatStatusText" />
+
+                <ImageView
+                    android:id="@+id/chatStatusClose"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:padding="4dp"
+                    android:src="@drawable/ic_close"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="#80888888" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Quick Emote Bar -->
+            <FrameLayout
+                android:id="@+id/quickEmoteBarContainer"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:clipChildren="false">
+
+                <include
+                    android:id="@+id/quickEmoteShimmer"
+                    layout="@layout/layout_quick_emote_shimmer"
+                    android:visibility="gone" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/quickEmoteRecyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#151515"
+                    android:clipChildren="false"
+                    android:clipToPadding="false"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="4dp"
+                    android:visibility="gone"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:listitem="@layout/item_emote"
+                    tools:visibility="visible" />
+            </FrameLayout>
+
+            <!-- Command Suggestions -->
+            <dev.xacnio.kciktv.shared.ui.view.MaxHeightRecyclerView
+                android:id="@+id/commandSuggestionsRecycler"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#1A1A1A"
+                android:maxHeight="180dp"
+                android:visibility="gone"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:visibility="visible"
+                tools:itemCount="3" />
+
+            <!-- Reply Container -->
+            <LinearLayout
+                android:id="@+id/replyContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#222222"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="8dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_reply"
+                    app:tint="#999999" />
+
+                <TextView
+                    android:id="@+id/replyUsername"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="@string/chat_replying_to"
+                    android:textColor="#CCCCCC"
+                    android:textSize="12sp" />
+
+                <ImageButton
+                    android:id="@+id/replyCloseButton"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_close"
+                    app:tint="#999999" />
+            </LinearLayout>
+
+            <!-- Celebration Context Container (Reply-style) -->
+            <include
+                android:id="@+id/celebrationContextContainer"
+                layout="@layout/layout_celebration_context"
+                android:visibility="gone" />
+
+            <!-- Chat Input Row -->
+            <FrameLayout
+                 android:layout_width="match_parent"
+                 android:layout_height="56dp">
+                 
+                <LinearLayout
+                    android:id="@+id/chatInputContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:layoutDirection="ltr"
+                    android:paddingHorizontal="12dp">
+
+                    <!-- Chat Input with Emoji Button inside -->
+                    <FrameLayout
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_weight="1"
+                        android:layoutDirection="ltr">
+
+                        <EditText
+                            android:id="@+id/chatInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/bg_chat_input"
+                            android:hint="@string/send_message"
+                            android:imeOptions="actionSend"
+                            android:inputType="text"
+                            android:paddingStart="16dp"
+                            android:paddingEnd="44dp"
+                            android:textColor="#FFFFFF"
+                            android:textColorHint="#808080"
+                            android:textSize="14sp"
+                            android:layoutDirection="ltr"
+                            android:textDirection="ltr"
+                            android:textAlignment="viewStart"
+                            android:gravity="start|center_vertical" />
+
+                        <!-- Icons Container (Right side inside input) -->
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="end|center_vertical"
+                            android:layout_marginEnd="2dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <!-- Chat Mode Indicator (Single combined icon) -->
+                            <ImageView
+                                android:id="@+id/chatModeIndicator"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_marginEnd="4dp"
+                                android:background="?attr/selectableItemBackgroundBorderless"
+                                android:scaleType="fitCenter"
+                                android:src="@drawable/ic_slow_mode_indicator"
+                                android:visibility="gone"
+                                app:tint="#53FC18"
+                                tools:visibility="visible" />
+
+                            <!-- Emoji Button Frame -->
+                            <FrameLayout
+                                android:layout_width="36dp"
+                                android:layout_height="36dp">
+
+                                <ImageButton
+                                    android:id="@+id/chatEmoteButton"
+                                    android:layout_width="36dp"
+                                    android:layout_height="36dp"
+                                    android:background="?attr/selectableItemBackgroundBorderless"
+                                    android:padding="6dp"
+                                    android:scaleType="fitCenter"
+                                    android:src="@drawable/ic_emoji"
+                                    app:tint="#808080" />
+
+                                <!-- Slow Mode Countdown Badge -->
+                                <TextView
+                                    android:id="@+id/chatSlowModeCountdown"
+                                    android:layout_width="36dp"
+                                    android:layout_height="36dp"
+                                    android:background="@drawable/bg_slow_mode_countdown"
+                                    android:gravity="center"
+                                    android:textColor="#53FC18"
+                                    android:textSize="12sp"
+                                    android:textStyle="bold"
+                                    android:visibility="gone"
+                                    tools:visibility="visible"
+                                    tools:text="15" />
+                            </FrameLayout>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/chatLoginOverlay"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="#1a1a1a"
+                            android:gravity="center"
+                            android:orientation="horizontal"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:visibility="gone">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/chat_login_prompt_prefix"
+                                android:textColor="#808080"
+                                android:textSize="13sp" />
+
+                            <TextView
+                                android:id="@+id/chatLoginButton"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="?attr/selectableItemBackground"
+                                android:padding="4dp"
+                                android:text="@string/login_button"
+                                android:textColor="#53FC18"
+                                android:textSize="13sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </FrameLayout>
+
+                    <!-- Loyalty Points Button (Inline style like reference app) -->
+                    <FrameLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp">
+
+                        <LinearLayout
+                            android:id="@+id/loyaltyPointsButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:gravity="center"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="4dp"
+                            android:visibility="visible"
+                            tools:visibility="visible">
+
+                            <ImageView
+                                android:id="@+id/loyaltyPointsIcon"
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:src="@drawable/ic_loyalty"
+                                app:tint="#53FC18" />
+
+                            <TextView
+                                android:id="@+id/loyaltyPointsText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="4dp"
+                                android:textColor="#53FC18"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                tools:text="0" />
+
+                            <ImageView
+                                android:id="@+id/loyaltyInfinityIcon"
+                                android:layout_width="14dp"
+                                android:layout_height="14dp"
+                                android:layout_marginStart="4dp"
+                                android:src="@drawable/ic_infinity"
+                                android:visibility="gone"
+                                app:tint="#53FC18" />
+                        </LinearLayout>
+                        
+                        <TextView
+                            android:id="@+id/floatingPointsText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal|top"
+                            android:translationY="-8dp"
+                            tools:text="+500"
+                            android:textColor="#53FC18"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:visibility="gone"/>
+                    </FrameLayout>
+
+                    <!-- Store Button -->
+                    <ImageButton
+                        android:id="@+id/loyaltyStoreButton"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="2dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:padding="8dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_store_shop_v2"
+                        android:visibility="gone"
+                        app:tint="#FFFFFF" />
+
+                    <!-- Celebration Button (Input) -->
+                    <ImageButton
+                        android:id="@+id/chatInputCelebrationButton"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="2dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:padding="8dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_celebration_popper_white"
+                        android:rotation="-45"
+                        android:visibility="gone"
+                        app:tint="#FFFFFF" />
+
+                    <!-- Settings/Options Button (Larger) -->
+                    <ImageButton
+                        android:id="@+id/chatSettingsButton"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:layout_marginStart="4dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:padding="8dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_more_vert"
+                        app:tint="#FFFFFF" />
+
+                    <FrameLayout
+                        android:id="@+id/chatSendContainer"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:layout_marginStart="2dp"
+                        android:elevation="8dp"
+                        android:visibility="gone">
+                        
+                        <ImageButton
+                            android:id="@+id/chatSendButton"
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:background="@drawable/bg_send_button"
+                            android:padding="10dp"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/ic_send"
+                            android:visibility="gone"
+                            app:tint="#000000" />
+                            
+                        <ProgressBar
+                            android:id="@+id/chatSendLoading"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center"
+                            android:visibility="gone"
+                            android:indeterminateTint="#53FC18" />
+                    </FrameLayout>
+                </LinearLayout>
+
+
+
+                <LinearLayout
+                    android:id="@+id/chatBannedOverlay"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#1a1a1a"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/chatBannedText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/chat_banned_overlay"
+                        android:textColor="#FF4444"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </FrameLayout>
+
+            <!-- Emote Panel Container -->
+            <FrameLayout
+                android:id="@+id/emotePanelContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone">
+                <include 
+                    android:id="@+id/emotePickerLayout"
+                    layout="@layout/bottom_sheet_emote_picker"
+                    android:layout_width="match_parent"
+                    android:layout_height="280dp" />
+            </FrameLayout>
+            
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Bottom Sheet: Channel List -->
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/bottomSheetCoordinator"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <!-- Startup Loading -->
+    <FrameLayout
+        android:id="@+id/startupLoadingOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black"
+        android:elevation="100dp"
+        android:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/startupLogo"
+                android:layout_width="120dp"
+                android:layout_height="60dp"
+                android:src="@drawable/ic_kick_splash_logo" />
+
+            <ProgressBar
+                android:id="@+id/startupProgressBar"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginTop="32dp"
+                android:indeterminateTint="#53fc18"
+                style="?android:attr/progressBarStyleSmall" />
+
+            <TextView
+                android:id="@+id/startupText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/loading_channels"
+                android:textColor="#53fc18"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:alpha="0.7" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- Detailed Info Panel (Move to end of XML to draw on TOP) -->
+    <FrameLayout
+        android:id="@+id/infoPanel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:elevation="20dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="#CC1a1a1a"
+        app:layout_constraintEnd_toEndOf="@id/videoContainer"
+        app:layout_constraintStart_toStartOf="@id/videoContainer"
+        app:layout_constraintTop_toBottomOf="@id/videoContainer">
+
+        <!-- Content Container (With Padding) -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/infoPanelContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/infoProfileImage"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/circle_border"
+                android:scaleType="centerCrop"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/infoChannelName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:textColor="#53fc18"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:singleLine="true"
+                android:ellipsize="end"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintHorizontal_bias="0"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintEnd_toStartOf="@id/infoVerifiedBadge"
+                app:layout_constraintStart_toEndOf="@id/infoProfileImage"
+                app:layout_constraintTop_toTopOf="@id/infoProfileImage"
+                tools:text="infoChannelName" />
+
+            <ImageView
+                android:id="@+id/infoVerifiedBadge"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="4dp"
+                android:src="@drawable/ic_badge_verified"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@id/infoChannelName"
+                app:layout_constraintEnd_toStartOf="@id/infoFollowContainer"
+                app:layout_constraintStart_toEndOf="@id/infoChannelName"
+                app:layout_constraintTop_toTopOf="@id/infoChannelName"
+                tools:visibility="visible" />
+
+            <FrameLayout
+                android:id="@+id/infoFollowContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="@id/infoProfileImage"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/infoProfileImage">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/infoFollowButton"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:minHeight="0dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:paddingLeft="12dp"
+                    android:paddingRight="12dp"
+                    android:text="@string/action_follow"
+                    android:textColor="#53fc18"
+                    android:textSize="12sp"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    app:strokeColor="#53fc18"
+                    app:strokeWidth="1dp"
+                    app:cornerRadius="16dp" />
+                
+                <ProgressBar
+                    android:id="@+id/infoFollowLoader"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:indeterminate="true"
+                    android:indeterminateTint="#53fc18"
+                    android:visibility="gone" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/infoStreamTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:layout_marginEnd="8dp"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:scrollHorizontally="true"
+                android:singleLine="true"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                app:layout_constraintEnd_toStartOf="@id/infoFollowContainer"
+                app:layout_constraintStart_toStartOf="@id/infoChannelName"
+                app:layout_constraintTop_toBottomOf="@id/infoChannelName"
+                tools:text="infoStreamTitle" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@id/infoChannelName"
+                app:layout_constraintTop_toBottomOf="@id/infoStreamTitle">
+
+                <TextView
+                    android:id="@+id/infoCategoryName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_category_badge"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="2dp"
+                    android:textColor="#FFFFFF"
+                    android:textSize="11sp"
+                    tools:text="infoCategoryName" />
+
+                <TextView
+                    android:id="@+id/infoMatureBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:background="@drawable/bg_mature_badge"
+                    android:paddingHorizontal="6dp"
+                    android:paddingVertical="2dp"
+                    android:text="@string/rating_18_plus"
+                    android:textColor="#FFFFFF"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/infoTagsText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:ellipsize="marquee"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:scrollHorizontally="true"
+                    android:singleLine="true"
+                    android:textColor="#AAAAAA"
+                    android:textSize="11sp"
+                    tools:text="infoTagsText" />
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </FrameLayout>
+
+    <!-- Action Bar (Move to end of XML to draw on TOP) -->
+    <LinearLayout
+        android:id="@+id/actionBar"
+        android:layout_width="0dp"
+        android:layout_height="44dp"
+        android:animateLayoutChanges="true"
+        android:elevation="10dp"
+        android:background="#CC1a1a1a"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="6dp"
+        app:layout_constraintEnd_toEndOf="@id/videoContainer"
+        app:layout_constraintStart_toStartOf="@id/videoContainer"
+        app:layout_constraintTop_toBottomOf="@id/infoPanel">
+
+
+
+        <ImageButton
+            android:id="@+id/restorePinnedMessage"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginStart="6dp"
+            android:background="@drawable/bg_item_ripple"
+            android:padding="5dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_pin"
+            android:visibility="gone"
+            app:tint="#53FC18" />
+
+        <ImageButton
+            android:id="@+id/restorePoll"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginStart="6dp"
+            android:background="@drawable/bg_item_ripple"
+            android:padding="5dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_poll"
+            android:visibility="gone"
+            app:tint="#53FC18" />
+            
+        <ImageButton
+            android:id="@+id/restorePrediction"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginStart="6dp"
+            android:background="@drawable/bg_item_ripple"
+            android:padding="5dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_loyalty"
+            android:visibility="gone"
+            app:tint="#53FC18" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <!-- Mentions Button -->
+        <FrameLayout
+            android:id="@+id/mentionsButtonContainer"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="4dp"
+            android:visibility="visible"
+            tools:visibility="visible">
+            
+            <ImageButton
+                android:id="@+id/mentionsButton"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="@drawable/bg_item_ripple"
+                android:contentDescription="@string/mentions_title"
+                android:padding="9dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_mentions"
+                app:tint="#FFFFFF" />
+            
+            <TextView
+                android:id="@+id/mentionsBadge"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="top|end"
+                android:background="@drawable/bg_badge_count"
+                android:gravity="center"
+                tools:text="0"
+                android:textColor="#FFFFFF"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <!-- Blerp Button -->
+        <ImageButton
+            android:id="@+id/blerpButton"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/bg_item_ripple"
+            android:contentDescription="@string/blerp_title"
+            android:padding="9dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_blerp"
+            android:visibility="gone"
+            app:tint="#FFFFFF"
+            tools:visibility="visible" />
+
+        <!-- Moderator Menu Button (Only visible to Mods/Owners) -->
+        <ImageButton
+            android:id="@+id/modMenuButton"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_item_ripple"
+            android:contentDescription="@string/mod_actions_title"
+            android:padding="9dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_mod_menu"
+            android:visibility="gone"
+            app:tint="#53fc18" />
+
+    </LinearLayout>
+
+    <!-- Pinned Gifts Container (Move to end of XML to draw on TOP) -->
+    <FrameLayout
+        android:id="@+id/pinnedGiftsBlur"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:elevation="10dp"
+        android:background="#CC0f0f0f"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/actionBar"
+        tools:visibility="visible">
+
+        <HorizontalScrollView
+            android:id="@+id/pinnedGiftsScroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:paddingVertical="8dp"
+            android:paddingHorizontal="12dp">
+
+            <LinearLayout
+                android:id="@+id/pinnedGiftsLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
+    </FrameLayout>
+        <!-- Full Screen Side Chat Container (Tablet Split View) -->
+        <LinearLayout
+            android:id="@+id/sideChatContainer"
+            android:layout_width="400dp"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            android:background="@android:color/black"
+            android:orientation="vertical"
+            android:elevation="180dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+            <!-- actionBar and chatContainer will be reparented here in landscape on tablets -->
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- End of Player Screen Container -->
+
+    <!-- Full Screen Settings Panel -->
+    <FrameLayout
+        android:id="@+id/settingsPanel"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@android:color/black"
+        android:visibility="gone"
+        android:elevation="100dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Settings Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:background="#121212"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="8dp">
+
+                <ImageButton
+                    android:id="@+id/settingsBackButton"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_item_ripple"
+                    android:src="@drawable/ic_arrow_back"
+                    app:tint="#FFFFFF" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/settings"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Settings Content -->
+            <include
+                android:id="@+id/settingsContent"
+                layout="@layout/bottom_sheet_settings"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </LinearLayout>
+    </FrameLayout>
+    <!-- End of Player Screen Container -->
+
+    <!-- System Navigation Bar Gradient Background -->
+    <View
+        android:id="@+id/bottomNavGradient"
+        android:layout_width="0dp"
+        android:layout_height="100dp"
+        android:background="@drawable/bg_bottom_nav_gradient"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Bottom Navigation Panel -->
+    <FrameLayout
+        android:id="@+id/bottomNavContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/bg_bottom_nav_panel"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        
+        <!-- Custom Navigation Bar (Visual Replacement) -->
+        <LinearLayout
+            android:id="@+id/customBottomNav"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="56dp"
+            android:orientation="horizontal"
+            android:elevation="25dp"
+            android:translationZ="25dp"
+            android:background="@android:color/transparent">
+
+            <LinearLayout
+                android:id="@+id/btnNavHome"
+                android:layout_width="75dp"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="0dp"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="@android:color/transparent">
+                
+                <LinearLayout
+                    android:id="@+id/indicatorNavHome"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp">
+                    
+                    <ImageView
+                        android:id="@+id/iconNavHome"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_home"
+                        app:tint="#808080" />
+                        
+                    <TextView
+                        android:id="@+id/textNavHome"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/nav_home"
+                        android:textSize="10sp"
+                        android:layout_marginTop="2dp"
+                        android:textColor="#808080" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Browse -->
+            <LinearLayout
+                android:id="@+id/btnNavBrowse"
+                android:layout_width="75dp"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="0dp"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="@android:color/transparent">
+
+                <LinearLayout
+                    android:id="@+id/indicatorNavBrowse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp">
+
+                    <ImageView
+                        android:id="@+id/iconNavBrowse"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_browse"
+                        app:tint="#808080" />
+
+                    <TextView
+                        android:id="@+id/textNavBrowse"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/nav_browse"
+                        android:textSize="10sp"
+                        android:layout_marginTop="2dp"
+                        android:textColor="#808080" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Following -->
+            <LinearLayout
+                android:id="@+id/btnNavFollowing"
+                android:layout_width="75dp"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="0dp"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="@android:color/transparent">
+
+                <LinearLayout
+                    android:id="@+id/indicatorNavFollowing"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp">
+
+                    <ImageView
+                        android:id="@+id/iconNavFollowing"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_heart_filled"
+                        app:tint="#808080" />
+
+                    <TextView
+                        android:id="@+id/textNavFollowing"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/nav_following"
+                        android:textSize="10sp"
+                        android:layout_marginTop="2dp"
+                        android:textColor="#808080" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Search -->
+            <LinearLayout
+                android:id="@+id/btnNavSearch"
+                android:layout_width="75dp"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="0dp"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="@android:color/transparent">
+
+                <LinearLayout
+                    android:id="@+id/indicatorNavSearch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp">
+
+                    <ImageView
+                        android:id="@+id/iconNavSearch"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_search"
+                        app:tint="#808080" />
+
+                    <TextView
+                        android:id="@+id/textNavSearch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/nav_search"
+                        android:textSize="10sp"
+                        android:layout_marginTop="2dp"
+                        android:textColor="#808080" />
+                </LinearLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Hidden Original BottomNavigation (Kept for code compatibility) -->
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/mainBottomNavigation"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="invisible"
+            app:itemTextAppearanceActive="@style/BottomNavTextActive"
+            app:itemTextAppearanceInactive="@style/BottomNavTextInactive"
+            app:menu="@menu/bottom_nav_menu" />
+            
+    </FrameLayout>
+
+    <!-- Hidden WebView for KPSDK Bypass -->
+    <WebView
+        android:id="@+id/authWebView"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

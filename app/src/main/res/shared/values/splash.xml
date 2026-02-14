@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Splash Screen Theme (Android 12+) -->
+    <style name="Theme.KCIKTV.Splash" parent="Theme.SplashScreen">
+        <!-- Background color of the splash screen -->
+        <item name="windowSplashScreenBackground">@color/black</item>
+        <!-- Status bar should be transparent for edge-to-edge -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="23">false</item>
+        <!-- Ensure no circular background behind the icon -->
+        <item name="windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
+        <!-- Icon to show in the center of the splash screen -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_kick_splash_logo</item>
+        <!-- Duration to keep splash on screen (optional) -->
+        <item name="windowSplashScreenAnimationDuration">1000</item>
+        <!-- Transition to Main Activity without system animation to prevent flicker -->
+        <item name="postSplashScreenTheme">@style/Theme.KCIKTV.Fullscreen</item>
+    </style>
+</resources>

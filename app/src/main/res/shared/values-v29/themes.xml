@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mobile Theme for API 29+ (Android 10+) -->
+    <style name="Theme.KCIKTV.Mobile" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary brand color -->
+        <item name="colorPrimary">@color/black</item>
+        <item name="colorPrimaryVariant">@color/black</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <!-- Secondary brand color -->
+        <item name="colorSecondary">@color/brand_green</item>
+        <item name="colorSecondaryVariant">@color/brand_green_dark</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color -->
+        <item name="android:statusBarColor">@color/black</item>
+        <!-- Navigation bar - fully transparent for gradient effect -->
+        <item name="android:navigationBarColor">#80000000</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+        <!-- Background -->
+        <item name="android:windowBackground">@color/black</item>
+        <item name="android:colorBackground">@color/black</item>
+        <item name="postSplashScreenTheme">@style/Theme.KCIKTV.Mobile</item>
+    </style>
+</resources>

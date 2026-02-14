@@ -1,0 +1,1106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- General -->
+    <string name="back_label">RETOUR</string>
+    <string name="arrow_sep"> → </string>
+    <string name="preview_label">Aperçu</string>
+    <string name="celebration_emoji">🎉</string>
+    <string name="arrow_right_symbol">➔</string>
+    <string name="dot_separator"> • </string>
+    <string name="app_name_caps">KCIKTV</string>
+    <string name="loading">Chargement…</string>
+    <string name="loading_channels">Chargement des chaînes…</string>
+    <string name="retry">Réessayer</string>
+    <string name="cancel">Annuler</string>
+    <string name="confirm">Confirmer</string>
+    <string name="close">Fermer</string>
+    <string name="back">Retour</string>
+    <string name="save">Enregistrer</string>
+    <string name="delete">Supprimer</string>
+    <string name="remove">Retirer</string>
+    <string name="yes">Oui</string>
+    <string name="no">Non</string>
+    <string name="on">Activé</string>
+    <string name="off">Désactivé</string>
+    <string name="unknown">Inconnu</string>
+    <string name="gift">Cadeau</string>
+    <string name="live">EN DIRECT</string>
+    <string name="channel">Chaîne</string>
+    <string name="offline">Hors ligne</string>
+    <string name="category">Catégorie</string>
+    <string name="email">E-mail</string>
+    <string name="password">Mot de passe</string>
+    <string name="exit">Quitter</string>
+    <string name="reply">Répondre</string>
+    <string name="pause">Pause</string>
+    <string name="play">Lecture</string>
+    <string name="download">Télécharger</string>
+    <string name="publish">Publier</string>
+    <string name="beta">Bêta</string>
+    <string name="replying_to">Réponse à %s</string>
+    <string name="language_selected_format">%s sélectionné</string>
+
+    <!-- Navigation -->
+    <string name="press_back_to_close">RETOUR pour fermer</string>
+    <string name="press_again_to_exit">Appuyez à nouveau pour quitter</string>
+
+    <!-- Channels -->
+    <string name="channel_name">Nom de la Chaîne</string>
+    <string name="following_channels_header">Chaînes Suivies</string>
+    <string name="offline_channels_title">Chaînes Hors Ligne</string>
+    <string name="following_empty_state">Vous ne suivez aucune chaîne</string>
+    <string name="category_no_streams">Aucun stream dans cette catégorie actuellement</string>
+
+    <!-- Categories -->
+    <string name="cat_art">Art</string>
+    <string name="cat_chess">Échecs</string>
+    <string name="cat_food_drink">Nourriture et Boissons</string>
+    <string name="cat_slots">Machines à Sous et Casino</string>
+    <string name="cat_games_demos">Jeux et Démos</string>
+    <string name="cat_just_chatting">Discussion</string>
+    <string name="cat_just_sleeping">Sommeil</string>
+    <string name="cat_music">Musique</string>
+    <string name="cat_music_production">Production Musicale</string>
+    <string name="cat_pools_hot_tubs">Piscines, Jacuzzis et Plage</string>
+    <string name="cat_special_events">Événements Spéciaux</string>
+    <string name="cat_sports">Sports</string>
+    <string name="cat_video_production">Production Vidéo</string>
+    <string name="cat_gaming">Jeux Vidéo</string>
+    <string name="cat_creative">Créatif</string>
+    <string name="cat_crypto_trading">Crypto &amp; Trading</string>
+    <string name="cat_music_stations">Stations de Musique</string>
+    <string name="cat_news">Actualités</string>
+
+    <!-- Blocked Categories -->
+    <string name="manage_hidden_categories">Gérer les catégories masquées</string>
+    <string name="blocked_categories_subtitle">Appuyez sur l\'icône à côté d\'une catégorie pour l\'afficher</string>
+    <string name="blocked_categories_empty">Aucune catégorie masquée pour le moment</string>
+    <string name="category_hidden_msg">Cette catégorie est masquée, le contenu n\'est donc pas affiché.</string>
+    <string name="category_hide">Masquer</string>
+    <string name="category_hidden">Masquée</string>
+    <string name="category_hidden_toast">Catégorie masquée</string>
+    <string name="category_unhidden_toast">Catégorie visible</string>
+    <string name="category_unblocked_toast">%s n\'est plus masquée</string>
+    <string name="no_blocked_categories_toast">Aucune catégorie n\'est masquée</string>
+
+    <!-- Player UI -->
+    <string name="pip_label">PIP</string>
+    <string name="playback_speed_title">Vitesse de lecture</string>
+    <string name="resolution">RÉSOLUTION</string>
+    <string name="refresh">ACTUALISER</string>
+    <string name="stats">STATISTIQUES</string>
+    <string name="settings">PARAMÈTRES</string>
+    <string name="guest">Invité</string>
+    <string name="not_logged_in">Non connecté</string>
+    <string name="list_sorting">TRIER LA LISTE</string>
+    <string name="stream_language">Options de Langue</string>
+    <string name="viewers_high_to_low">Spectateurs (Décroissant)</string>
+    <string name="viewers_low_to_high">Spectateurs (Croissant)</string>
+    <string name="recommended_streams">Recommandés</string>
+    <string name="my_list">PERSONNEL</string>
+    <string name="my_channel">Ma Chaîne</string>
+    <string name="search">Rechercher</string>
+    <string name="following">Abonnements</string>
+    <string name="app_settings">Paramètres de l\'App</string>
+    <string name="stream_title">Titre du Stream</string>
+    <string name="view_and_filters">Affichage et Filtres</string>
+    <string name="view_mode">Mode d\'affichage</string>
+    <string name="view_list">Liste</string>
+    <string name="view_grid">Grille</string>
+    <string name="sorting">Tri</string>
+    <string name="sort_title_featured">En vedette</string>
+    <string name="sort_title_viewers_desc">Les plus vus</string>
+    <string name="sort_title_viewers_asc">Les moins vus</string>
+
+    <!-- Login -->
+    <string name="login_with_kick_account">Connexion avec compte Kick</string>
+    <string name="email_or_username_label">E-mail ou nom d\'utilisateur</string>
+    <string name="email_label">E-mail</string>
+    <string name="password_label">Mot de passe</string>
+    <string name="error_invalid_credentials">Nom d\'utilisateur ou mot de passe invalide</string>
+    <string name="login_button">Se connecter</string>
+    <string name="login_with_webview">Connexion via WebView</string>
+    <string name="login_data_disclaimer">Vos données sont chiffrées et utilisées uniquement pour la connexion.</string>
+    <string name="verify_2fa_title">Vérifier le code 2FA</string>
+    <string name="verify_2fa_desc">Veuillez entrer le code à 6 chiffres de votre authentificateur</string>
+    <string name="login">Connexion</string>
+    <string name="logout">Déconnexion</string>
+    <string name="user_default_name">Utilisateur</string>
+    <string name="logged_out">Déconnecté</string>
+    <string name="online_status">En ligne</string>
+    <string name="login_prompt">Connectez-vous à votre compte</string>
+    <string name="logout_confirm_title">Confirmer la Déconnexion</string>
+    <string name="logout_confirm_message">Êtes-vous sûr de vouloir vous déconnecter ?</string>
+    <string name="login_success">Bienvenue, %s</string>
+    <string name="login_required_following">Connectez-vous pour voir vos abonnements</string>
+    <string name="manual_login">Connexion Manuelle</string>
+    <string name="email_hint">ex: utilisateur@mail.com</string>
+    <string name="show_password">Afficher le Mot de Passe</string>
+    <string name="otp_code">Code OTP</string>
+    <string name="otp_hint">Code à 6 chiffres</string>
+    <string name="login_action">SE CONNECTER</string>
+    <string name="qr_login_title">Connexion par QR Code</string>
+    <string name="qr_login_subtitle">Scannez avec votre téléphone pour vous connecter</string>
+    <string name="ip_not_found">IP introuvable. Vérifiez votre connexion.</string>
+    <string name="server_error">Erreur serveur: %s</string>
+    <string name="login_fields_required">E-mail et mot de passe requis</string>
+    <string name="two_fa_required">Code 2FA requis</string>
+    <string name="login_required">Vous devez vous connecter</string>
+    <string name="login_required_chat">Connectez-vous pour discuter</string>
+    <string name="session_expired">Session expirée</string>
+    <string name="login_button_label">Connexion</string>
+    <string name="login_success_welcome">Connexion réussie ! Bienvenue %s</string>
+    <string name="login_success_cookie">Connexion réussie (Cookie) !</string>
+    <string name="twofa_required">Code 2FA requis</string>
+    <string name="enter_6_digit_code">Entrez le code à 6 chiffres</string>
+    <string name="verifying">Vérification…</string>
+    <string name="logging_in">Connexion en cours…</string>
+    <string name="logging_out_secure">Déconnexion sécurisée…</string>
+    <string name="otp_required_title">Vérifier le code e-mail</string>
+    <string name="otp_required_desc">Veuillez saisir le code à 6 chiffres envoyé à votre e-mail</string>
+
+    <!-- Mature Content -->
+    <string name="mature_content_warning">Avertissement Contenu Adulte</string>
+    <string name="mature_content_description">Ce stream est destiné à un public adulte.</string>
+    <string name="im_plus_18">J\'ai +18 ans</string>
+
+    <!-- Settings -->
+    <string name="setting_option">Option de Paramètre</string>
+    <string name="setting_language">Sélection de la Langue</string>
+    <string name="setting_app_language">Langue de l\'App</string>
+    <string name="system_default">Par Défaut du Système</string>
+    <string name="setting_info_delay">Durée d\'affichage info</string>
+    <string name="setting_transparency">Réglage transparence</string>
+    <string name="setting_filter">Filtrer catégories</string>
+    <string name="setting_theme">Couleur du Thème</string>
+    <string name="setting_zap_delay">Vitesse changement chaîne</string>
+    <string name="setting_animations">Animations</string>
+    <string name="setting_chat_animation">Animation des messages</string>
+    <string name="animation_none">Aucune</string>
+    <string name="animation_fade_in">Fondu</string>
+    <string name="animation_slide_left">Glisser depuis la gauche</string>
+    <string name="animation_slide_right">Glisser depuis la droite</string>
+    <string name="animation_slide_bottom">Glisser depuis le bas</string>
+    <string name="animation_scale">Agrandissement</string>
+    <string name="animation_typewriter">Typewriter</string>
+    <string name="animation_curtain">Curtain</string>
+    <string name="animation_flip">Flip</string>
+    <string name="animation_rotate">Rotate</string>
+    <string name="animation_zoom_out">Zoom Out</string>
+    <string name="animation_swing">Swing</string>
+    <string name="setting_refresh_interval">Fréquence actualisation</string>
+    <string name="setting_update_channel">Canal de Mise à Jour</string>
+    <string name="switch_to_tv_ui">Passer à l\'Interface TV</string>
+    <string name="switch_to_mobile_ui">Passer à l\'Interface Mobile</string>
+    <string name="setting_mobile_quality">Limite de Données Mobiles</string>
+    <string name="setting_dynamic_quality">Qualité Dynamique</string>
+    <string name="dynamic_quality_desc">La qualité change sans arrêter le flux. Reste en mode automatique.</string>
+    <string name="setting_catch_up">Rattrapage</string>
+    <string name="setting_auto_update">Vérification Auto des Mises à Jour</string>
+    <string name="setting_auto_update_desc">Vérifier automatiquement les nouvelles versions au démarrage</string>
+    <string name="setting_about">À Propos</string>
+    <string name="support_developer">Soutenir le Développeur</string>
+    <string name="visit_github">Visiter GitHub</string>
+    <string name="setting_background_audio">Lecture en Arrière-plan</string>
+    <string name="setting_auto_pip">PIP Automatique</string>
+    <string name="setting_chat_refresh_title">Vitesse de Rafraîchissement du Chat</string>
+    <string name="setting_whats_new">Nouveautés</string>
+
+    <!-- Settings Sidebar Titles -->
+    <string name="sidebar_title_language">SÉLECTION LANGUE</string>
+    <string name="sidebar_title_delay">DURÉE INFO</string>
+    <string name="sidebar_title_transparency">TRANSPARENCE</string>
+    <string name="sidebar_title_theme">COULEUR THÈME</string>
+    <string name="sidebar_title_zap">VITESSE ZAP</string>
+    <string name="sidebar_title_refresh">INTERVALLE ACTUALISATION</string>
+    <string name="sidebar_title_update_channel">CANAL MISE À JOUR</string>
+    <string name="sidebar_title_mobile_quality">LIMITE DONNÉES MOBILES</string>
+    <string name="sidebar_title_background_audio">AUDIO EN ARRIÈRE-PLAN</string>
+    <string name="sidebar_title_auto_pip">PIP AUTO</string>
+    <string name="sidebar_title_auto_update">VÉRIF AUTO MISES À JOUR</string>
+    <string name="sidebar_title_catch_up">RATTRAPAGE</string>
+    <string name="sidebar_title_filter_hide">MASQUER CATÉGORIE</string>
+    <string name="sidebar_channels">CHAÎNES</string>
+
+    <!-- Settings Categories -->
+    <string name="blerp_overlay">Blerp Overlay</string>
+    <string name="settings_category_general">Général</string>
+    <string name="settings_category_player">LECTEUR</string>
+    <string name="settings_category_appearance">APPARENCE</string>
+    <string name="settings_category_app">Application</string>
+    <string name="settings_category_third_party">COMPOSANTS TIERS</string>
+    <string name="blerp_title">Blerp</string>
+    <string name="blerp_desc">Soutenez les streams avec des mèmes sonores, effets et emotes</string>
+    <string name="settings_player_desc">Qualité, audio en arrière-plan et lecture</string>
+    <string name="settings_appearance_desc">Langue et préférences visuelles</string>
+    <string name="settings_third_party_desc">Blerp et autres intégrations</string>
+    <string name="settings_app_desc">Mises à jour, infos de version, et plus</string>
+    <string name="settings_category_advanced">Avancé</string>
+    <string name="settings_category_advanced_desc">Fonctionnalités et outils expérimentaux</string>
+    <string name="settings_kick_webview">Kick WebView</string>
+    <string name="settings_kick_webview_desc">Ouvrir Kick.com dans le navigateur interne (Connecté)</string>
+    <string name="settings_clear_cache">Vider le cache</string>
+    <string name="settings_clear_cache_desc">Effacer le cache de l\'app et les fichiers temporaires</string>
+    <string name="settings_clear_blerp_auth">Effacer l\'auth Blerp</string>
+    <string name="settings_clear_blerp_auth_desc">Se déconnecter de Blerp et supprimer les données enregistrées</string>
+    <string name="cache_cleared">Cache vidé avec succès</string>
+    <string name="blerp_auth_cleared">Authentification Blerp effacée avec succès</string>
+    <string name="settings_trusted_domains">Domaines de Confiance</string>
+    <string name="privacy_policy">Politique de confidentialité</string>
+    <string name="settings_trusted_domains_desc">Gérer les domaines pour les aperçus de liens</string>
+    <string name="trusted_domains_count">%d domaines</string>
+    <string name="trusted_domain_add_title">Ajouter un Domaine</string>
+    <string name="trusted_domain_add_hint">ex. reddit.com</string>
+    <string name="trusted_domain_added">Domaine ajouté : %s</string>
+    <string name="trusted_domain_removed">Domaine supprimé : %s</string>
+    <string name="trusted_domain_exists">Le domaine existe déjà</string>
+    <string name="trusted_domain_invalid">Veuillez entrer un domaine valide</string>
+    <string name="trusted_domains_reset">Rétablir par Défaut</string>
+    <string name="trusted_domains_reset_confirm">Rétablir les domaines de confiance par défaut ?</string>
+    <string name="trusted_domains_reset_done">Domaines de confiance rétablis</string>
+    <string name="trusted_domain_remove_confirm">Supprimer %s des domaines de confiance ?</string>
+    <string name="add">Add</string>
+
+    <!-- Settings Options -->
+    <string name="pip_automatic">Automatique</string>
+    <string name="pip_manual">Bouton uniquement</string>
+    <string name="catch_up_off">Désactivé</string>
+    <string name="catch_up_low">Bas</string>
+    <string name="catch_up_high">Élevé</string>
+    <string name="quality_unlimited">Illimité</string>
+    <string name="only_manual">Manuel uniquement</string>
+    <string name="x_minutes">%1$d Minutes</string>
+    <string name="x_seconds">%1$d Secondes</string>
+    <string name="instant_ms">Instantané (0ms)</string>
+    <string name="fast_ms">Rapide (300ms)</string>
+    <string name="normal_ms">Normal (700ms)</string>
+    <string name="slow_ms">Lent (1200ms)</string>
+    <string name="speed_ultra_fast">Ultra rapide (100ms)</string>
+    <string name="speed_fast">Rapide (Par défaut - 200ms)</string>
+    <string name="speed_normal">Normal (500ms)</string>
+    <string name="speed_slow">Lent (1000ms)</string>
+
+    <!-- Theme Colors -->
+    <string name="premium_emerald">Premium Émeraude</string>
+    <string name="premium_sapphire">Premium Saphir</string>
+    <string name="premium_ruby">Premium Rubis</string>
+    <string name="premium_gold">Premium Or</string>
+    <string name="premium_violet">Premium Violet</string>
+    <string name="premium_teal">Premium Sarcelle</string>
+    <string name="premium_rose">Premium Rose</string>
+    <string name="kciktv_cyan">KCIKTV Cyan</string>
+    <string name="brand_green">Vert KCIKTV</string>
+
+    <!-- Stream Status -->
+    <string name="stream_ended">Stream Terminé</string>
+    <string name="live_stream">Stream en Direct</string>
+    <string name="stream_offline">Stream Hors Ligne</string>
+    <string name="list_empty">Liste vide</string>
+    <string name="currently_live">Actuellement EN DIRECT</string>
+    <string name="currently_offline">Actuellement hors ligne</string>
+    <string name="last_stream_time">Dernier stream %s</string>
+    <string name="live_badge">EN DIRECT</string>
+    <string name="offline_badge">HORS LIGNE</string>
+
+    <!-- Stats -->
+    <string name="stats_nerd_title">Stats Vidéo (Nerd Stats)</string>
+    <string name="stats_resolution_label">Résolution:</string>
+    <string name="stats_fps_label">FPS:</string>
+    <string name="stats_bitrate_label">Débit:</string>
+    <string name="stats_latency_label">Latence:</string>
+    <string name="stats_buffer_label">Tampon:</string>
+    <string name="stats_dropped_frames_label">Images perdues:</string>
+    <string name="stats_playback_rate_label">Vitesse de lecture:</string>
+    <string name="stats_player_state_label">État du lecteur:</string>
+    <string name="stats_volume_label">Volume:</string>
+    <string name="stat_resolution">Résolution</string>
+    <string name="stat_bitrate">Débit</string>
+    <string name="stat_codec">Codec</string>
+    <string name="stat_dropped_frames">Images perdues</string>
+    <string name="stat_decoded_frames">Images décodées</string>
+    <string name="stat_rendered_frames">Images affichées</string>
+    <string name="stat_buffer_health">Santé tampon</string>
+    <string name="stat_latency">Latence</string>
+    <string name="stat_playback_rate">Vitesse lecture</string>
+    <string name="stat_ready_state">État prêt</string>
+    <string name="stat_volume">Volume</string>
+    <string name="stat_muted">Muet</string>
+    <string name="player_statistics">Statistiques lecteur</string>
+
+    <!-- Updates -->
+    <string name="stable">Stable</string>
+    <string name="update_available">Nouvelle mise à jour: %s</string>
+    <string name="update_now">Mettre à Jour</string>
+    <string name="up_to_date">L\'app est à jour</string>
+    <string name="checking_updates">Recherche de mises à jour…</string>
+    <string name="check_update">Vérifier les Mises à Jour</string>
+    <string name="download_failed">Échec du téléchargement</string>
+    <string name="update_available_title">Nouvelle Mise à Jour</string>
+    <string name="update_available_msg">Version %1$s disponible. Voulez-vous mettre à jour ?</string>
+    <string name="downloading_percent">Téléchargement… %1$d%%</string>
+    <string name="later">Plus Tard</string>
+    <string name="no_updates">L\'app est à jour</string>
+    <string name="update_check_failed">Échec de la vérification</string>
+    <string name="update_message">Version %1$s disponible. Télécharger ?</string>
+    <string name="apk_not_found">APK introuvable</string>
+    <string name="whats_new">Nouveautés</string>
+    <string name="downloading">Téléchargement…</string>
+    <string name="update_version_format">%1$s → %2$s</string>
+
+    <!-- Languages Array -->
+    <string-array name="stream_language_names">
+        <item>Turc</item>
+        <item>Anglais</item>
+        <item>Afrikaans</item>
+        <item>Allemand</item>
+        <item>Arabe</item>
+        <item>Albanais</item>
+        <item>Azéri</item>
+        <item>Biélorusse</item>
+        <item>Bengali</item>
+        <item>Bosniaque</item>
+        <item>Bulgare</item>
+        <item>Tchèque</item>
+        <item>Chinois</item>
+        <item>Danois</item>
+        <item>Indonésien</item>
+        <item>Espéranto</item>
+        <item>Estonien</item>
+        <item>Féroïen</item>
+        <item>Persan</item>
+        <item>Néerlandais</item>
+        <item>Filipino</item>
+        <item>Finnois</item>
+        <item>Français</item>
+        <item>Géorgien</item>
+        <item>Hawaïen</item>
+        <item>Croate</item>
+        <item>Hindi</item>
+        <item>Hébreu</item>
+        <item>Interlingua</item>
+        <item>Espagnol</item>
+        <item>Suédois</item>
+        <item>Italien</item>
+        <item>Japonais</item>
+        <item>Catalan</item>
+        <item>Coréen</item>
+        <item>Latin</item>
+        <item>Polonais</item>
+        <item>Letton</item>
+        <item>Lituanien</item>
+        <item>Hongrois</item>
+        <item>Macédonien</item>
+        <item>Malayalam</item>
+        <item>Malais</item>
+        <item>Mongol</item>
+        <item>Norvégien</item>
+        <item>Norvégien Bokmål</item>
+        <item>Portugais</item>
+        <item>Roumain</item>
+        <item>Moldave</item>
+        <item>Russe</item>
+        <item>Serbe</item>
+        <item>Slovaque</item>
+        <item>Slovène</item>
+        <item>Somali</item>
+        <item>Soundanais</item>
+        <item>Tatar</item>
+        <item>Thaï</item>
+        <item>Ukrainien</item>
+        <item>Ourdou</item>
+        <item>Vietnamien</item>
+        <item>Grec</item>
+        <item>Zoulou</item>
+    </string-array>
+    <string name="app_version_label">Version: %s</string>
+
+    <!-- Quality -->
+    <string name="format_fit">Ajuster</string>
+    <string name="load_more">Charger plus</string>
+    <string name="auto">AUTOMATIQUE</string>
+    <string name="quality_selection">Qualité</string>
+    <string name="auto_quality">Automatique</string>
+    <string name="quality_loading">Chargement qualité...</string>
+    <string name="quality_auto">Automatique</string>
+    <string name="quality_auto_description">Meilleure qualité pour votre connexion</string>
+    <string name="quality_audio_only">Audio Uniquement</string>
+    <string name="auto_quality_with_limit">Auto (max. %s)</string>
+    <string name="speed_normal_1x">Normal (1x)</string>
+    <string name="speed_x_format">%sx</string>
+
+    <!-- Connection & Errors -->
+    <string name="connection_failed">Échec de connexion au stream</string>
+    <string name="stream_error_retrying">Erreur stream, nouvelle tentative %1$d/%2$d</string>
+    <string name="channel_not_found">Chaîne introuvable: %1$s</string>
+    <string name="channels_load_failed">Échec chargement des chaînes</string>
+    <string name="category_load_failed">Échec chargement catégorie</string>
+    <string name="data_load_failed">Échec chargement données</string>
+    <string name="categories_load_failed">Échec chargement catégories</string>
+    <string name="channel_load_failed">Échec chargement chaîne: %s</string>
+    <string name="history_load_failed">Échec chargement historique</string>
+    <string name="history_load_failed_web">Échec chargement historique (Web)</string>
+    <string name="error_occurred">Une erreur s\'est produite</string>
+    <string name="error_format">Erreur: %s</string>
+    <string name="link_open_failed">Impossible d\'ouvrir le lien</string>
+    <string name="video_load_failed">Impossible de charger la vidéo</string>
+    <string name="error_open_link">Erreur lors de l\'ouverture du lien</string>
+    <string name="error_loading_clip">Erreur de chargement du clip : %s</string>
+    <string name="failed_to_load_streams">Failed to load streams</string>
+    <string name="failed_to_load_clips">Failed to load clips</string>
+    <string name="clip_url_missing">URL du clip manquante</string>
+
+    <!-- Search -->
+    <string name="search_channel_hint">Entrez le nom de la chaîne (ex: xqc)</string>
+    <string name="search_no_result">Chaîne introuvable</string>
+    <string name="search_channels">Rechercher une chaîne…</string>
+    <string name="recent_searches">Recherches Récentes</string>
+    <string name="clear_all">Tout Effacer</string>
+    <string name="no_results_found">Aucun résultat trouvé</string>
+    <string name="search_categories_hint">Rechercher catégories...</string>
+    <string name="tag_format">#%s</string>
+    <string name="type_channel">Chaîne</string>
+    <string name="type_category">Catégorie</string>
+    <string name="type_tag">Tag</string>
+
+    <!-- Mobile UI -->
+    <string name="send_message">Écrivez un message…</string>
+    <string name="no_messages">Pas encore de messages</string>
+
+    <!-- Chat Errors -->
+    <string name="chat_system_username">SYSTÈME</string>
+    <string name="chat_error_subscribers_only">Ce chat est réservé aux abonnés.</string>
+    <string name="chat_error_followers_only">Ce chat est réservé aux followers.</string>
+    <string name="chat_error_slow_mode">Mode lent actif. Veuillez patienter.</string>
+    <string name="chat_error_banned">Vous êtes banni de cette chaîne.</string>
+    <string name="chat_error_message_too_long">Le message est trop long</string>
+    <string name="chat_error_duplicate_message">Message en double détecté</string>
+    <string name="chat_error_generic">Impossible d\'envoyer le message: %s</string>
+
+    <!-- Audio Modes -->
+    <string name="audio_mode_custom_eq">EQ Personnalisé</string>
+
+    <!-- Chat Hints -->
+    <string name="chat_hint_subscribers_only">Chat abonnés uniquement</string>
+    <string name="chat_hint_followers_only">Chat abonnés uniquement</string>
+    <string name="chat_hint_emotes_only">Utilisez des emotes...</string>
+    <string name="chat_hint_default">Écrivez un message...</string>
+    <string name="chat_hint_follower_min_duration">Followers uniquement (%d min)</string>
+    <string name="chat_hint_follower_remaining">%d min restantes pour discuter</string>
+    <string name="chat_hint_login_required">Connectez-vous pour discuter</string>
+    <string name="chat_preview_message">Bonjour le monde!</string>
+
+    <!-- Chat Status -->
+    <string name="chat_status_slow_mode_on">Mode lent activé</string>
+    <string name="chat_status_slow_mode_on_duration">Mode lent activé (%s)</string>
+    <string name="chat_status_slow_mode_on_by">Mode lent activé par &lt;b&gt;%1$s&lt;/b&gt;</string>
+    <string name="chat_status_slow_mode_off">Mode lent désactivé</string>
+    <string name="chat_status_slow_mode_off_by">Mode lent désactivé par &lt;b&gt;%1$s&lt;/b&gt;</string>
+    <string name="chat_status_subscribers_mode_on">Mode abonnés uniquement activé</string>
+    <string name="chat_status_subscribers_mode_on_by">Mode abonnés activé par &lt;b&gt;%1$s&lt;/b&gt;</string>
+    <string name="chat_status_subscribers_mode_off">Mode abonnés uniquement désactivé</string>
+    <string name="chat_status_subscribers_mode_off_by">Mode abonnés désactivé par &lt;b&gt;%1$s&lt;/b&gt;</string>
+    <string name="chat_status_emotes_mode_on">Mode emotes uniquement activé</string>
+    <string name="chat_status_emotes_mode_on_by">Mode emotes activé par &lt;b&gt;%1$s&lt;/b&gt;</string>
+    <string name="chat_status_emotes_mode_off">Mode emotes uniquement désactivé</string>
+    <string name="chat_status_emotes_mode_off_by">Mode emotes désactivé par &lt;b&gt;%1$s&lt;/b&gt;</string>
+    <string name="chat_status_followers_mode_on">Mode followers uniquement activé</string>
+    <string name="chat_status_followers_mode_on_by">Mode followers activé par &lt;b&gt;%1$s&lt;/b&gt;</string>
+    <string name="chat_status_followers_mode_off">Mode followers uniquement désactivé</string>
+    <string name="chat_status_followers_mode_off_by">Mode followers désactivé par &lt;b&gt;%1$s&lt;/b&gt;</string>
+
+    <!-- Chat User Events -->
+    <string name="chat_user_banned">Utilisateur &lt;b&gt;%1$s&lt;/b&gt; a été exclu par &lt;b&gt;%2$s&lt;/b&gt; pour %3$s.</string>
+    <string name="chat_user_banned_permanently">Utilisateur &lt;b&gt;%1$s&lt;/b&gt; a été banni définitivement par &lt;b&gt;%2$s&lt;/b&gt;.</string>
+    <string name="chat_user_unbanned">Utilisateur &lt;b&gt;%1$s&lt;/b&gt; a été débanni par &lt;b&gt;%2$s&lt;/b&gt;.</string>
+    <string name="pinned_by_format">Épinglé par: %s</string>
+
+    <!-- Duration -->
+    <string name="duration_days">%1$d jours</string>
+    <string name="duration_hours">%1$d heures</string>
+    <string name="duration_minutes">%1$d minutes</string>
+    <string name="duration_seconds">%1$d secondes</string>
+    <string name="duration_months">%1$d mois</string>
+
+    <!-- Emotes -->
+    <string name="emote_available_only_for_subscribers">Cet emote est réservé aux abonnés</string>
+    <string name="emote_category_subscribers">Emotes Abonnés</string>
+    <string name="emote_section_subscribers_only">Abonnés Uniquement</string>
+    <string name="emote_subscriber_only_suffix"> (Abonnés Uniquement)</string>
+
+    <!-- Moderation Errors -->
+    <string name="error_cannot_ban_moderator">Vous ne pouvez pas bannir un modérateur</string>
+    <string name="error_moderation_failed">Action de modération échouée</string>
+    <string name="error_moderation_failed_reason">Action de modération échouée: %s</string>
+    <string name="error_user_not_exists">L\'utilisateur n\'existe pas</string>
+    <string name="error_cannot_ban_owner">Vous ne pouvez pas bannir le propriétaire de la chaîne</string>
+
+    <!-- Moderator Actions -->
+    <string name="mod_actions_title">Actions de la chaîne</string>
+    <string name="mod_slow_mode">Mode lent</string>
+    <string name="mod_followers_only">Chat followers uniquement</string>
+    <string name="mod_subscribers_only">Chat abonnés uniquement</string>
+    <string name="mod_emotes_only">Emotes uniquement</string>
+    <string name="mod_settings_updated">Paramètres chat mis à jour</string>
+    <string name="mod_settings_update_failed">Échec mise à jour paramètres chat</string>
+    <string name="mod_preset_options">Sélection rapide</string>
+    <string name="mod_custom_duration">Durée personnalisée</string>
+    <string name="mod_slow_mode_title">Durée mode lent</string>
+    <string name="mod_followers_mode_title">Temps minimum de suivi</string>
+    <string name="mod_unit_seconds">Secondes</string>
+    <string name="mod_unit_minutes">Minutes</string>
+    <string name="mod_unit_hours">Heures</string>
+    <string name="mod_unit_days">Jours</string>
+    <string name="mod_duration_format_seconds">%d sec</string>
+    <string name="mod_duration_format_minutes">%d min</string>
+    <string name="mod_duration_format_hours">%d heure</string>
+    <string name="mod_duration_format_days">%d jour</string>
+    <string name="mod_followers_any">Tout follower</string>
+    <string name="mod_error_slow_mode_limit">Durée mode lent doit être entre 1 et 300 secondes.</string>
+    <string name="mod_error_followers_limit">Limite durée followers dépassée (max. 1 an).</string>
+    <string name="mod_error_invalid_input">Veuillez entrer un nombre valide.</string>
+    <string name="mod_stream_title">Titre de diffusion</string>
+    <string name="mod_category">Catégorie de diffusion</string>
+    <string name="mod_search_category">Rechercher catégorie</string>
+    <string name="mod_error_metadata_offline">Seul le propriétaire peut modifier les métadonnées hors ligne.</string>
+    <string name="mod_mature_content">Contenu adulte (+18)</string>
+    <string name="mod_timeout_success">Utilisateur exclu pour %s</string>
+    <string name="mod_unban_success">Utilisateur débanni</string>
+    <string name="mod_unban_failed">Échec du débannissement</string>
+    <string name="mod_ban_success">Utilisateur %s banni</string>
+    <string name="mod_ban_confirm_title">Bannir utilisateur</string>
+    <string name="mod_ban_confirm_msg">Êtes-vous sûr de vouloir bannir %s définitivement?</string>
+    <string name="mod_pin_confirm_title">Pin Message</string>
+    <string name="mod_pin_confirm_msg">Are you sure you want to pin this message?</string>
+    <string name="mod_delete_success">Message supprimé</string>
+    <string name="mod_view_title">Actions modérateur</string>
+    <string name="mod_create_poll">Créer sondage</string>
+    <string name="mod_edit_stream_title">Modifier info stream</string>
+    <string name="duration_picker_title">Sélectionner durée</string>
+
+    <!-- Chat Overlays -->
+    <string name="chat_banned_overlay">Vous êtes banni de cette chaîne!</string>
+    <string name="chat_timed_out_overlay">Vous êtes exclu de cette chaîne!</string>
+    <string name="chat_timeout_remaining_format">Exclu. (Restant: %s)</string>
+
+    <!-- Chat Clear -->
+    <string name="chat_cleared">Le chat a été effacé</string>
+    <string name="chat_restore_messages">Restaurer %d messages</string>
+
+    <!-- Ban Status -->
+    <string name="ban_permanent">Bannissement permanent</string>
+    <string name="ban_timeout">Exclusion temporaire</string>
+    <string name="ban_remaining_format">Restant: %s</string>
+    <string name="ban_banned_by_format">Banni par: %s</string>
+    <string name="ban_reason_format">Raison: %s</string>
+    <string name="ban_date_format">Date: %s</string>
+    <string name="ban_label_caps">BANNI</string>
+    <string name="banned_users">Utilisateurs bannis</string>
+    <string name="no_banned_users">Aucun utilisateur banni trouvé</string>
+
+    <!-- User Actions -->
+    <string name="action_watch_stream">Regarder le stream</string>
+    <string name="action_go_to_chat">Aller au chat</string>
+    <string name="action_share_channel">Partager la chaîne</string>
+    <string name="save_video">Enregistrer la vidéo</string>
+    <string name="send_action">Envoyer</string>
+    <string name="clear_action">Effacer</string>
+    <string name="hide_action">Masquer</string>
+    <string name="action_unban">Débannir</string>
+    <string name="action_reply">Répondre</string>
+    <string name="action_mention">Mentionner</string>
+    <string name="action_pin">Épingler message</string>
+    <string name="action_user_info">Actions utilisateur</string>
+    <string name="action_timeout">Exclure</string>
+    <string name="action_delete">Supprimer</string>
+    <string name="action_ban_with_label">Bannir utilisateur</string>
+    <string name="action_delete_message">Supprimer message</string>
+    <string name="action_follow">Suivre</string>
+    <string name="action_load_all">Tout charger</string>
+    <string name="action_redeem">Échanger</string>
+    <string name="action_previous">Précédent</string>
+    <string name="action_next">Suivant</string>
+
+    <!-- Timeout Durations -->
+    <string name="timeout_1m">1 min</string>
+    <string name="timeout_5m">5 min</string>
+    <string name="timeout_1h">1 heure</string>
+    <string name="timeout_1d">1 jour</string>
+    <string name="timeout_1w">1 semaine</string>
+
+    <!-- User Info -->
+    <string name="user_history_session">Historique (Session)</string>
+    <string name="user_history_empty">Aucun historique</string>
+    <string name="follow_date_format">Suit depuis: %s</string>
+    <string name="date_format_label">Date: %s</string>
+    <string name="sub_duration_format">Abonné: %s</string>
+    <string name="subscription_months_format">Abonnement : %d Mois</string>
+    <string name="user_banned_success">Utilisateur a été banni</string>
+    <string name="user_unbanned_success">Bannissement levé</string>
+    <string name="anonymous_user">Anonyme</string>
+
+    <!-- Chat UI -->
+    <string name="chat_login_prompt_prefix">Pour discuter </string>
+    <string name="auto_scroll">Défilement auto</string>
+    <string name="chat_jump_to_bottom">Aller en bas</string>
+    <string name="chat_new_messages_count">%s nouveaux messages ↓</string>
+    <string name="chat_replying_to">Répondre à: %s</string>
+    <string name="message_copied">Message copié</string>
+    <string name="delete_message_confirm_msg">Êtes-vous sûr de vouloir supprimer ce message?</string>
+    <string name="login_to_chat">Connectez-vous pour discuter</string>
+    <string name="slow_mode_active">Mode lent: %ds</string>
+    <string name="slow_mode_exempt">Mode lent: %ds (Non affecté)</string>
+    <string name="subscribers_only_mode">Abonnés uniquement</string>
+    <string name="followers_only_mode">Followers uniquement</string>
+    <string name="followers_only_mode_min">Followers uniquement (%dm+)</string>
+    <string name="emotes_only_mode">Emotes uniquement</string>
+    <string name="unknown_command">Commande inconnue: /%s</string>
+    <string name="command_failed">Commande échouée</string>
+    <string name="chat_only_live_msg">Le chat n\'est actif que pendant le stream en direct</string>
+
+    <!-- Chat Settings -->
+    <string name="chat_setting_highlighted">Messages en surbrillance</string>
+    <string name="chat_setting_highlights">Faits marquants</string>
+    <string name="chat_setting_own_messages">Vos messages</string>
+    <string name="chat_setting_mod_messages">Messages des modérateurs</string>
+    <string name="chat_setting_vip_messages">Messages VIP</string>
+    <string name="chat_setting_name_color">Utiliser la couleur du nom</string>
+    <string name="chat_settings_title">Paramètres du chat</string>
+    <string name="chat_identity_title">Identité chat</string>
+    <string name="chat_appearance_title">Apparence chat</string>
+    <string name="chat_rules_title">Règles du chat</string>
+    <string name="chat_identity_preview">Aperçu</string>
+    <string name="chat_identity_badges">Badges</string>
+    <string name="chat_identity_color">Couleur du nom</string>
+    <string name="chat_font_size">Taille police</string>
+    <string name="chat_emote_size">Taille emotes</string>
+    <string name="chat_section_sizes">Sizes</string>
+    <string name="chat_section_features">Features</string>
+    <string name="chat_section_advanced">Advanced</string>
+    <string name="chat_timestamps">Horodatages</string>
+    <string name="chat_seconds">Inclure secondes</string>
+    <string name="show_pinned_gifts">Cadeaux épinglés</string>
+    <string name="chat_low_battery_mode">Mode économie batterie</string>
+    <string name="chat_emote_combo">Combo emotes</string>
+    <string name="chat_settings_vibrate_on_mention">Vibrer lors mention</string>
+    <string name="chat_settings_floating_emotes">Emotes flottants</string>
+
+    <!-- Chat Connection -->
+    <string name="chat_low_battery_paused">Mode arrière-plan activé. Chat en pause (Mode économie)</string>
+
+    <!-- Chat Rules -->
+    <string name="chat_rules_not_found">Aucune règle de chat trouvée pour cette chaîne.</string>
+    <string name="chat_rules_load_error">Erreur lors du chargement des règles.</string>
+    <string name="chat_rules_close">Fermer</string>
+    <string name="chat_rules_agree">Accepter</string>
+
+    <!-- Gifted Subs -->
+    <string name="gift_message_hint">Écrire un message cadeau</string>
+    <string name="chat_gifted_subs_plural">%1$s a offert %2$d abonnements à la communauté. Total de %3$d abonnements offerts sur cette chaîne.</string>
+    <string name="chat_gifted_sub_single">%1$s a offert un abonnement à la communauté. Total de %2$d abonnements offerts sur cette chaîne.</string>
+    <string name="chat_gifted_sub_individual">%1$s a offert un abonnement à %2$s!</string>
+    <string name="chat_celebration_sub_renew_title">célèbre le renouvellement de son abonnement!</string>
+    <string name="chat_celebration_generic_title">célèbre!</string>
+    <string name="chat_celebration_sub_renew_duration">Durée totale d\'abonnement: %d mois!</string>
+    <string name="celebration_banner_sub_renew_title">Vous célébrez le renouvellement de votre abonnement !</string>
+    <string name="celebration_banner_sub_renew_duration">Vous êtes abonné depuis %d mois !</string>
+    <string name="celebration_action_celebrate">Partager</string>
+    <string name="celebration_action_dismiss">Ignorer</string>
+    <string name="celebration_context_title">Partager la célébration d\'abonnement</string>
+    <string name="celebration_context_info_sub">Notifiez que vous vous êtes abonné à %1$s pour %2$d mois</string>
+
+    <!-- Mentions -->
+    <string name="mentions_title">Mentions</string>
+    <string name="mentions_empty">Aucune mention pour l\'instant</string>
+    <string name="mentions_count_format">%d messages</string>
+    <string name="go_to_message">Aller au message</string>
+    <string name="time_ago_just_now">à l\'instant</string>
+    <string name="time_ago_minutes">il y a %d min</string>
+    <string name="time_ago_hours">il y a %d heures</string>
+    <string name="error_generic">Une erreur est survenue</string>
+
+    <!-- Background Audio -->
+    <string name="background_audio_active">Audio en arrière-plan actif</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Accueil</string>
+    <string name="nav_browse">Explorer</string>
+    <string name="nav_following">Abonnements</string>
+    <string name="nav_search">Rechercher</string>
+
+    <!-- Home Screen -->
+    <string name="home_featured_title">Chaînes en Direct</string>
+    <string name="home_top_categories_title">Meilleures Catégories</string>
+    <string name="home_following_title">Vos Chaînes en Direct</string>
+    <string name="home_popular_clips_title">Clips populaires</string>
+
+    <!-- PIP and Notifications -->
+    <string name="pip_action_return_to_live">Retour au direct</string>
+    <string name="pip_action_mute">Muet</string>
+    <string name="pip_action_unmute">Activer le Son</string>
+    <string name="pip_action_audio_only">Mode audio</string>
+    <string name="pip_action_audio_only_desc">Mode audio arrière-plan</string>
+    <string name="notification_action_close">Fermer</string>
+
+    <!-- Loading States -->
+    <string name="history_loading">Chargement...</string>
+    <string name="history_all_loaded">Tout chargé</string>
+
+    <!-- Action Feedback -->
+    <string name="vote_failed">Échec du vote: %s</string>
+    <string name="operation_failed">Échec de l\'opération: %s</string>
+    <string name="login_failed_code">Échec connexion (%d)</string>
+    <string name="operation_failed_code">Opération échouée (Code: %d)</string>
+
+    <!-- Polls -->
+    <string name="poll_header">SONDAGE</string>
+    <string name="poll_option_hint">Option %d</string>
+    <string name="poll_question_required">Veuillez entrer une question</string>
+    <string name="poll_min_options_required">Au moins 2 options requises</string>
+    <string name="poll_create_failed">Échec création sondage: %s</string>
+    <string name="poll_result">Résultat</string>
+    <string name="poll_result_title">RÉSULTAT SONDAGE</string>
+    <string name="poll_label">SONDAGE</string>
+    <string name="poll_result_label">RÉSULTAT SONDAGE</string>
+    <string name="total_votes">Votes Totaux: %d</string>
+    <string name="delete_poll_title">Supprimer sondage</string>
+    <string name="delete_poll_message">Êtes-vous sûr de vouloir terminer ce sondage?</string>
+    <string name="poll_deleted">Sondage supprimé</string>
+    <string name="poll_delete_failed">Impossible de supprimer le sondage</string>
+    <string name="poll_created">Sondage créé !</string>
+    <string name="create_poll">Créer un Sondage</string>
+    <string name="poll_question_label">Question</string>
+    <string name="poll_question_hint">Écrivez question du sondage...</string>
+    <string name="poll_options_label">Options</string>
+    <string name="poll_option_1_hint">Option 1</string>
+    <string name="poll_option_2_hint">Option 2</string>
+    <string name="poll_option_3_hint">Option 3</string>
+    <string name="poll_option_4_hint">Option 4</string>
+    <string name="poll_option_5_hint">Option 5</string>
+    <string name="poll_option_6_hint">Option 6</string>
+    <string name="poll_duration_label">Durée</string>
+    <string name="poll_result_duration_label">Durée affichage résultat</string>
+    <string name="enter_question">Veuillez entrer une question.</string>
+    <string name="min_2_options">Au moins 2 options requises.</string>
+    <string name="creating">Création…</string>
+
+    <!-- Clips -->
+    <string name="check_out_clip">Regardez ce clip !</string>
+    <string name="trim_label">COUPER: </string>
+    <string name="clip_title_label">Titre du clip</string>
+    <string name="popular_clips_header">Clips Populaires</string>
+    <string name="clip_url_copied">URL du clip copiée</string>
+    <string name="share_clip">Partager le Clip</string>
+    <string name="clip_only_live">Les clips ne peuvent être créés que pendant les streams en direct (Slug non trouvé)</string>
+    <string name="clip_login_required">Vous devez vous connecter pour créer des clips</string>
+    <string name="clip_error">Erreur clip: %s</string>
+    <string name="create_clip">Créer un Clip: %s</string>
+    <string name="publishing">Publication…</string>
+    <string name="clip_prepared_info_error">Clip préparé mais info non lisible.</string>
+    <string name="clip_publish_failed">Impossible de publier le clip: %d</string>
+    <string name="untitled_clip">Clip sans titre</string>
+    <string name="clipped_by">Clippé par %s</string>
+
+    <!-- Channel Profile -->
+    <string name="channel_info_title">Info Chaîne</string>
+    <string name="follow">Suivre</string>
+    <string name="unfollow">Ne Plus Suivre</string>
+    <string name="following_status">Abonné</string>
+    <string name="unfollow_confirm_title">Ne plus suivre %s?</string>
+    <string name="unfollow_confirm_message">Voulez-vous vraiment ne plus suivre %s ?</string>
+    <string name="followers_millions">%.1f M followers</string>
+    <string name="followers_thousands">%.1f K followers</string>
+    <string name="followers_count">%d abonnés</string>
+    <string name="category_stream">Stream</string>
+    <string name="uptime_hours_minutes">%1$dh %2$dm</string>
+    <string name="uptime_minutes">%dm</string>
+    <string name="no_channel_info">Aucune information sur cette chaîne.</string>
+    <string name="followed">Suivi</string>
+    <string name="unfollowed">Plus suivi</string>
+
+    <!-- Tabs -->
+    <string name="live_streams_tab">Lives</string>
+    <string name="tab_home">Accueil</string>
+    <string name="tab_live">En Direct</string>
+    <string name="tab_categories">Catégories</string>
+    <string name="tab_about">À Propos</string>
+    <string name="tab_videos">Vidéos</string>
+    <string name="tab_clips">Clips</string>
+
+    <!-- Loyalty Points -->
+    <string name="channel_points">Points de chaîne</string>
+    <string name="default_prediction_title">Prédictions</string>
+    <string name="loyalty_rewards_empty">Aucune récompense de fidélité disponible sur cette chaîne.</string>
+    <string name="loyalty_reward_cost_label">Coût: </string>
+    <string name="loyalty_add_message_label">Ajouter message</string>
+    <string name="loyalty_redeem_action">Échanger</string>
+    <string name="input_message_hint">Écrivez votre message...</string>
+    <string name="points_needed_format">%s points supplémentaires requis pour cette récompense</string>
+    <string name="reward_redeemed">Récompense échangée: %s</string>
+    <string name="reward_redeem_failed">Erreur: Impossible d\'échanger la récompense</string>
+    <string name="enter_message_required">Veuillez entrer un message</string>
+    <string name="processing">Traitement…</string>
+
+    <!-- Predictions -->
+    <string name="prediction_header">PRÉDICTION</string>
+    <string name="prediction_ended_desc">Prédiction terminée / Distribué: </string>
+    <string name="prediction_active">Active</string>
+    <string name="prediction_bet_title_format">Voter pour %s</string>
+    <string name="bet_amount_label">Montant de points</string>
+    <string name="prediction_balance_label">Solde: %s</string>
+    <string name="prediction_max_bet">TOUT MISER</string>
+    <string name="error_prediction_conflict">Vous ne pouvez pas gérer cette prédiction car vous avez voté.</string>
+    <string name="prediction_control">Contrôle prédiction</string>
+    <string name="winner_label">GAGNANT</string>
+    <string name="prediction_status_open">Prédictions ouvertes</string>
+    <string name="prediction_status_open_format">Prédictions ouvertes - %s</string>
+    <string name="prediction_status_locked">Verrouillée</string>
+    <string name="prediction_status_resolved">Résolue</string>
+    <string name="prediction_status_refunded">Remboursée</string>
+    <string name="points_contributed_format">Points contribués - %s</string>
+    <string name="bet_amount_total_format">Vous avez misé un total de %1$s points</string>
+    <string name="bet_on_format">Misé sur %s</string>
+    <string name="new_prediction_start">Démarrer nouvelle prédiction</string>
+    <string name="lock_submissions">Verrouiller soumissions</string>
+    <string name="select_result">Sélectionner résultat</string>
+    <string name="select_winning_result">Sélectionner résultat gagnant</string>
+    <string name="resolve_prediction">Résoudre prédiction</string>
+    <string name="prediction_label">PRÉDICTION</string>
+    <string name="prediction_result_label">RÉSULTAT</string>
+    <string name="points_label">%s Points</string>
+    <string name="delete_prediction_title">Supprimer prédiction</string>
+    <string name="prediction_delete_desc">Cette action supprimera le jeu de prédiction actuel. Les spectateurs ne pourront plus participer, les votes seront annulés et les points de chaîne remboursés automatiquement.</string>
+    <string name="prediction_refund_info_format">Sélectionner \'Supprimer et rembourser\' remboursera %s points de chaîne aux spectateurs participants.</string>
+    <string name="go_back">Retour</string>
+    <string name="delete_and_refund">Supprimer et rembourser points</string>
+    <string name="invalid_amount">Montant invalide</string>
+    <string name="prediction_saved">Prédiction enregistrée!</string>
+    <string name="lock_failed">Échec verrouillage</string>
+    <string name="prediction_locked">Prédiction verrouillée</string>
+    <string name="cancel_failed">Échec annulation</string>
+    <string name="prediction_cancelled">Prédiction annulée</string>
+    <string name="resolve_failed">Échec résolution</string>
+    <string name="prediction_resolved">Prédiction résolue</string>
+    <string name="prediction_login_required">Vous devez vous connecter pour créer des prédictions</string>
+    <string name="fill_all_fields">Veuillez remplir tous les champs</string>
+    <string name="prediction_created">Prédiction créée !</string>
+    <string name="prediction_resolved_title">Résolue</string>
+    <string name="prediction_default_title">Prédiction</string>
+    <string name="prediction_cancelled_desc">Prédiction annulée / Points remboursés</string>
+    <string name="prediction_menu_title">Prédictions</string>
+    <string name="start_prediction">Lancer une Prédiction</string>
+    <string name="prediction_presets_label">Modèles (Historique)</string>
+    <string name="prediction_question_label">Question de prédiction</string>
+    <string name="prediction_question_hint">Ex: Qui gagnera?</string>
+    <string name="prediction_outcomes_label">Résultats</string>
+    <string name="prediction_yes_hint">OUI</string>
+    <string name="prediction_no_hint">NON</string>
+    <string name="prediction_duration_label">Durée</string>
+
+    <!-- Miscellaneous -->
+    <string name="ban_temporary_label">Bannissement temporaire</string>
+    <string name="category_hidden_message">Vous avez masqué cette catégorie.</string>
+    <string name="max_badges_reached">Vous pouvez sélectionner jusqu\'à %d badges</string>
+    <string name="options_title">Options</string>
+    <string name="make_selection">Sélectionner...</string>
+    <string name="gift_sent_label">%s a envoyé</string>
+    <string name="chat_reward_used">utilisé</string>
+    <string name="date_label_format">Date: %s</string>
+    <string name="about_version_format">Version: %s</string>
+    <string name="label_version">Version</string>
+
+    <!-- About Page -->
+    <string name="about_title">À propos</string>
+    <string name="about_developed_by">Développé par</string>
+    <string name="about_repo_label">Code Source</string>
+    <string name="about_github_label">Mon GitHub</string>
+    <string name="about_coffee_label">M\'offrir un café</string>
+
+    <!-- Gift Shop -->
+    <string name="gift_shop_title">Boutique de cadeaux</string>
+    <string name="gift_shop_basic_gifts">Cadeaux basiques</string>
+    <string name="gift_shop_basic_desc">Cadeaux gratuits pour tous</string>
+    <string name="gift_shop_level_up_gifts">Cadeaux niveau supérieur</string>
+    <string name="gift_shop_level_up_desc">Cadeaux premium</string>
+
+    <!-- Custom EQ -->
+    <string name="zero_db">0 dB</string>
+    <string name="custom_eq_title">EQ personnalisé</string>
+    <string name="eq_preset_flat">Plat</string>
+    <string name="eq_preset_bass">Basses</string>
+    <string name="eq_preset_vocal">Voix</string>
+    <string name="eq_preset_pop">Pop</string>
+    <string name="eq_preset_rock">Rock</string>
+    <string name="eq_preset_jazz">Jazz</string>
+    <string name="eq_preset_classical">Classique</string>
+    <string name="eq_preset_metal">Metal</string>
+    <string name="eq_pre_amp">Préamplificateur</string>
+    <string name="eq_reset">Réinitialiser</string>
+
+    <!-- Pinned Messages -->
+    <string name="pinned_message_header">MESSAGE ÉPINGLÉ</string>
+    <string name="pin_removed">Épingle retirée</string>
+    <string name="message_pinned">Message épinglé</string>
+    <string name="unpin_title">Retirer Épingle</string>
+    <string name="unpin_message">Détacher message</string>
+    <string name="message_unpinned">Message détaché</string>
+
+    <!-- Browse -->
+    <string name="streams_load_failed">Échec chargement streams: %s</string>
+    <string name="viewer_count_label">%s Spectateurs</string>
+    <string name="watching_count_label">%s En train de regarder</string>
+    <string name="viewer_follower_format">%1$s spectateurs · %2$s followers</string>
+
+    <!-- VOD/Clip -->
+    <string name="video_url_not_found">URL vidéo non trouvée</string>
+    <string name="clip_url_not_found">URL du clip non trouvée</string>
+    <string name="category_clip">Clip</string>
+    <string name="vod_title">VOD</string>
+    <string name="unknown_category">Catégorie Inconnue</string>
+    <string name="video_default_title">Vidéo</string>
+
+    <!-- DVR/Rewind -->
+    <string name="dvr_mode_activating">Activation mode DVR</string>
+    <string name="returning_to_live">Retour au direct</string>
+    <string name="live_url_not_found">URL de diffusion non trouvée</string>
+    <string name="dvr_not_available">Retour en arrière non disponible pour ce stream</string>
+
+    <!-- Screenshot -->
+    <string name="screenshot_error">Erreur capture: %s</string>
+    <string name="android_version_not_supported">Version Android non supportée</string>
+    <string name="screenshot_failed">Capture échouée</string>
+    <string name="screenshot_saved">Capture enregistrée</string>
+    <string name="save_error">Erreur enregistrement: %s</string>
+
+    <!-- Time Utils -->
+    <string name="daily_filter">Quotidien</string>
+    <string name="time_year_ago">il y a %d an(s)</string>
+    <string name="time_month_ago">il y a %d mois</string>
+    <string name="time_day_ago">il y a %d jour(s)</string>
+    <string name="time_hour_ago">il y a %d heure(s)</string>
+    <string name="time_minute_ago">il y a %d minute(s)</string>
+    <string name="time_just_now">à l\'instant</string>
+
+    <!-- Dialogs -->
+    <string name="link_warning_title">Avertissement de lien</string>
+    <string name="link_warning_message">Vous êtes sur le point de consulter un lien externe.\nVous allez être redirigé en dehors de KCIKTV. Continuez si vous avez confiance en ce lien :\n\n%s</string>
+    <string name="link_warning_message_simple">Vous êtes sur le point de consulter un lien externe. Vous allez être redirigé en dehors de l\'application.</string>
+    <string name="open_in_app">Ouvrir dans l\'application</string>
+    <string name="link_open_error">Impossible d\'ouvrir le lien : %s</string>
+    <string name="visit_site">Aller sur le site</string>
+
+    <!-- Sheets -->
+    <string name="message_history_all">Historique messages (Tous)</string>
+    <string name="message_history_session">Historique messages (Session)</string>
+    <string name="user_id_not_found">ID utilisateur non trouvé</string>
+    <string name="channel_id_error">Erreur ID chaîne</string>
+    <string name="no_messages_in_session">Aucun message dans cette session</string>
+
+    <!-- Channel Videos/Clips -->
+    <string name="go_to_chat">Aller au chat</string>
+    <string name="stream_videos_title">Vidéos</string>
+    <string name="no_videos_found">Aucune vidéo trouvée</string>
+    <string name="popular_clips_title">Clips Populaires</string>
+    <string name="no_clips_found">Aucun clip trouvé</string>
+    <string name="sort_label">Trier</string>
+    <string name="sort_popular">Populaire</string>
+    <string name="sort_newest">Plus récent</string>
+    <string name="time_label">Temps</string>
+    <string name="time_all">Tout</string>
+    <string name="time_24h">Dernières 24h</string>
+    <string name="time_weekly">Hebdomadaire</string>
+    <string name="time_monthly">Mensuel</string>
+
+    <!-- Categories -->
+    <string name="channel_slug_error">Erreur slug chaîne</string>
+    <string name="category_not_found">Catégorie non trouvée</string>
+    <string name="category_updated_success">Catégorie mise à jour</string>
+    <string name="category_update_failed">Échec mise à jour catégorie: %s</string>
+    <string name="popular_categories_label">Catégories Populaires</string>
+    <string name="recent_categories_label">Catégories Récentes</string>
+
+    <!-- Number Suffix -->
+    <string name="number_suffix_thousand">K</string>
+
+    <!-- Clip -->
+    <string name="clip_preparing">Préparation du clip…</string>
+    <string name="clip_title_hint">Ajouter un titre à votre clip (optionnel)</string>
+    <string name="clip_created">Clip créé ! 🎉</string>
+    <string name="clip_url_label">URL du clip</string>
+    <string name="clip_share">Partager</string>
+    <string name="clip_publish">Publier</string>
+
+    <!-- Browse Clips -->
+    <string name="sort_date">Date</string>
+    <string name="sort_views">Vues</string>
+    <string name="clips_load_failed">Impossible de charger les clips: %s</string>
+    <string name="clip_stats_format">%1$s vues • %2$s</string>
+    <string name="open_clip">Ouvrir le Clip</string>
+    <string name="browse_clips_filter_title">Filtre de Clips</string>
+
+    <!-- Stream Feed -->
+    <string name="no_streams_available">Aucun stream disponible</string>
+    <string name="is_live_on_kick">est en direct sur Kick!</string>
+    <string name="share_via">Partager via</string>
+    <string name="live_now">En Direct</string>
+
+    <!-- Theatre Mode -->
+    <string name="theatre_mode_enabled">Mode théâtre activé. Appuyez sur retour pour quitter.</string>
+    <string name="continue_watching">Continuer à regarder</string>
+
+    <!-- Whats New -->
+    <string name="whats_new_title">Nouveautés</string>
+
+    <!-- Clip Feed Filters -->
+    <string name="clip_filter_all">Tout</string>
+    <string name="clip_filter_daily">Quotidien</string>
+    <string name="clip_filter_weekly">Hebdomadaire</string>
+    <string name="clip_filter_monthly">Mensuel</string>
+    <string name="clip_filter_popular">Clips Populaires</string>
+    <string name="clip_filter_newest">Clips les Plus Récents</string>
+    <string name="clip_filter_featured">Clips en Vedette</string>
+    <string name="clip_category_just_chatting">Juste Bavardage</string>
+
+    <!-- Download Messages -->
+    <string name="download_getting_url">Récupération de l\'URL de téléchargement…</string>
+    <string name="download_starting">Démarrage du téléchargement…</string>
+    <string name="download_complete">Téléchargement terminé: %s</string>
+    <string name="download_failed_with_error">Téléchargement échoué: %s</string>
+    <string name="download_url_failed">Impossible d\'obtenir l\'URL de téléchargement: %s</string>
+
+    <!-- Gift Shop -->
+    <string name="gift_sent_success">Cadeau envoyé avec succès!</string>
+    <string name="gift_send_failed">Impossible d\'envoyer le cadeau: %s</string>
+    <string name="gift_unknown_error">Erreur inconnue</string>
+    <string name="gift_sent_format">a envoyé %s</string>
+    <string name="gift_sent_format_pin">%1$s %2$s\nenvoyé</string>
+
+    <!-- VOD/Clip Actions -->
+    <string name="watch_full_vod">Regarder le VOD Complet</string>
+
+    <!-- Link Options -->
+    <string name="add_trusted_domain_preview">Add trusted domain and preview</string>
+
+    <!-- Adapter Items and Time -->
+    <string name="untitled_video">Vidéo sans titre</string>
+    <string name="time_ago_years">il y a %d ans</string>
+    <string name="time_ago_months">il y a %d mois</string>
+    <string name="time_ago_days">il y a %d jours</string>
+    <string name="chat_preview_text">: Ressemble à ça</string>
+    <string name="text_view_contains">Vues</string>
+    <string name="view_count_suffix">Vues</string>
+    <string name="unknown_channel">Inconnu</string>
+    <string name="no_date">Pas de date</string>
+
+
+    <string name="scan_qr_instruction">Scannez le code QR pour vous connecter</string>
+    <string name="qr_scan_success">Code QR scanné</string>
+    <string name="qr_confirm_message">Clé trouvée : %s\nVoulez-vous continuer ?</string>
+    <string name="send_request">Envoyer la demande</string>
+    <string name="request_sent">Demande envoyée avec succès</string>
+    <string name="request_failed">Échec de la demande : %s</string>
+    <string name="invalid_qr_code">Format de code QR invalide</string>
+    <string name="code_label">Code de confirmation</string>
+    <string name="qr_confirm_instruction">Si le code suivant correspond à celui affiché sur votre TV, cliquez sur confirmer pour continuer.</string>
+    <string name="tv_qr_login">Connexion QR pour TV</string>
+</resources>

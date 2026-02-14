@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingVertical="4dp"
+    android:paddingHorizontal="8dp">
+
+    <!-- Badge Placeholder -->
+    <View
+        android:layout_width="16sp"
+        android:layout_height="16sp"
+        android:layout_marginEnd="6dp"
+        android:background="@drawable/bg_shimmer_shape" />
+
+    <!-- Name Placeholder -->
+    <View
+        android:layout_width="80dp"
+        android:layout_height="16sp"
+        android:layout_marginEnd="6dp"
+        android:background="@drawable/bg_shimmer_shape" />
+
+    <!-- Text Message Placeholder (Long) -->
+    <View
+        android:layout_width="180dp"
+        android:layout_height="16sp"
+        android:background="@drawable/bg_shimmer_shape" />
+
+</LinearLayout>

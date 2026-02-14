@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="280dp"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="12dp"
+    android:orientation="vertical"
+    android:background="#1A1A1A">
+
+    <!-- Thumbnail Shimmer (16:9 aspect ratio like real card) -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="158dp"
+        app:cardCornerRadius="8dp"
+        app:cardBackgroundColor="#2A2A2A"
+        app:cardElevation="0dp">
+        <View
+            android:id="@+id/shimmerThumbnail"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#2A2A2A" />
+    </androidx.cardview.widget.CardView>
+
+    <!-- Info Section (matching item_home_channel_card.xml) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="12dp">
+
+        <!-- Avatar Shimmer (36dp like real card) -->
+        <View
+            android:id="@+id/shimmerAvatar"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/circle_shimmer_bg" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- Name Shimmer -->
+            <View
+                android:id="@+id/shimmerName"
+                android:layout_width="100dp"
+                android:layout_height="14dp"
+                android:background="#2A2A2A" />
+
+            <!-- Category Shimmer -->
+            <View
+                android:id="@+id/shimmerCategory"
+                android:layout_width="60dp"
+                android:layout_height="12dp"
+                android:layout_marginTop="6dp"
+                android:background="#2A2A2A" />
+
+            <!-- Title Shimmer -->
+            <View
+                android:id="@+id/shimmerTitle"
+                android:layout_width="80dp"
+                android:layout_height="11dp"
+                android:layout_marginTop="4dp"
+                android:background="#2A2A2A" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Tags Shimmer -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
+        android:paddingBottom="12dp">
+        
+        <View
+            android:layout_width="50dp"
+            android:layout_height="22dp"
+            android:background="#2A2A2A" />
+
+        <View
+            android:layout_width="50dp"
+            android:layout_height="22dp"
+            android:layout_marginStart="6dp"
+            android:background="#2A2A2A" />
+
+        <View
+            android:layout_width="40dp"
+            android:layout_height="22dp"
+            android:layout_marginStart="6dp"
+            android:background="#2A2A2A" />
+    </LinearLayout>
+
+</LinearLayout>

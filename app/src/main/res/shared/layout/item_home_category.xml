@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="120dp"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="12dp"
+    android:foreground="?android:attr/selectableItemBackground"
+    app:cardBackgroundColor="#1A1A1A"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Blurred Background Image -->
+        <ImageView
+            android:id="@+id/categoryBlurredBg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:alpha="0.4" />
+
+        <!-- Dark Scrim over blur -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#80000000" />
+
+        <!-- Content -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Category Banner (Portrait) -->
+            <ImageView
+                android:id="@+id/categoryImage"
+                android:layout_width="match_parent"
+                android:layout_height="160dp"
+                android:background="#2A2A2A"
+                android:scaleType="centerCrop" />
+
+            <!-- Category Name -->
+            <TextView
+                android:id="@+id/categoryName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:paddingHorizontal="4dp"
+                android:paddingTop="8dp"
+                android:gravity="center"
+                android:text="@string/cat_just_chatting"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <!-- Viewers Tag -->
+            <TextView
+                android:id="@+id/categoryViewers"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:paddingBottom="4dp"
+                android:gravity="center"
+                tools:text="categoryViewers"
+                android:textColor="#AAAAAA"
+                android:textSize="11sp" />
+
+        </LinearLayout>
+    </FrameLayout>
+
+</androidx.cardview.widget.CardView>

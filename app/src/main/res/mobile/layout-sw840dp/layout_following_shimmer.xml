@@ -1,0 +1,213 @@
+<dev.xacnio.kciktv.shared.ui.widget.ShimmerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="16dp">
+
+        <!-- Categories Shimmer Section -->
+        <LinearLayout
+            android:id="@+id/shimmerCategoriesSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            
+            <!-- Categories Header -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="16dp"
+                android:layout_marginTop="8dp">
+                <View 
+                    android:layout_width="100dp" 
+                    android:layout_height="20dp" 
+                    android:background="#1A1A1A" />
+            </LinearLayout>
+
+            <!-- Categories Horizontal List -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:layout_marginTop="12dp"
+                android:paddingBottom="8dp">
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="120dp"
+                    android:layout_height="200dp"
+                    android:layout_marginEnd="12dp"
+                    app:cardBackgroundColor="#1A1A1A"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="0dp" />
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="120dp"
+                    android:layout_height="200dp"
+                    android:layout_marginEnd="12dp"
+                    app:cardBackgroundColor="#1A1A1A"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="0dp" />
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="120dp"
+                    android:layout_height="200dp"
+                    android:layout_marginEnd="12dp"
+                    app:cardBackgroundColor="#1A1A1A"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="0dp" />
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="120dp"
+                    android:layout_height="200dp"
+                    android:layout_marginEnd="12dp"
+                    app:cardBackgroundColor="#1A1A1A"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="0dp" />
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="120dp"
+                    android:layout_height="200dp"
+                    android:layout_marginEnd="12dp"
+                    app:cardBackgroundColor="#1A1A1A"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="0dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Header 2: "Live Channels" -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp"
+            android:layout_marginTop="8dp">
+            <View 
+                android:layout_width="140dp" 
+                android:layout_height="22dp" 
+                android:background="#1A1A1A" />
+        </LinearLayout>
+
+        <!-- Robust Shimmer Grid using Nested LinearLayouts for Large Tablet (4 columns) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="12dp">
+            
+            <!-- Row 1 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:baselineAligned="false">
+                <FrameLayout 
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_margin="4dp">
+                    <include layout="@layout/item_shimmer_following_card" />
+                </FrameLayout>
+                <FrameLayout 
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_margin="4dp">
+                    <include layout="@layout/item_shimmer_following_card" />
+                </FrameLayout>
+                <FrameLayout 
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_margin="4dp">
+                    <include layout="@layout/item_shimmer_following_card" />
+                </FrameLayout>
+                <FrameLayout 
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_margin="4dp">
+                    <include layout="@layout/item_shimmer_following_card" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <!-- Row 2 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:baselineAligned="false">
+                <FrameLayout 
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_margin="4dp">
+                    <include layout="@layout/item_shimmer_following_card" />
+                </FrameLayout>
+                <FrameLayout 
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_margin="4dp">
+                    <include layout="@layout/item_shimmer_following_card" />
+                </FrameLayout>
+                <FrameLayout 
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_margin="4dp">
+                    <include layout="@layout/item_shimmer_following_card" />
+                </FrameLayout>
+                <FrameLayout 
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_margin="4dp">
+                    <include layout="@layout/item_shimmer_following_card" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <!-- Row 3 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:baselineAligned="false">
+                <FrameLayout 
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_margin="4dp">
+                    <include layout="@layout/item_shimmer_following_card" />
+                </FrameLayout>
+                <FrameLayout 
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_margin="4dp">
+                    <include layout="@layout/item_shimmer_following_card" />
+                </FrameLayout>
+                <FrameLayout 
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_margin="4dp">
+                    <include layout="@layout/item_shimmer_following_card" />
+                </FrameLayout>
+                <FrameLayout 
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_margin="4dp">
+                    <include layout="@layout/item_shimmer_following_card" />
+                </FrameLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+</dev.xacnio.kciktv.shared.ui.widget.ShimmerLayout>

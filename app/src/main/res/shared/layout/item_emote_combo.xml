@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="4dp"
+    android:layout_gravity="end"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:paddingStart="8dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:paddingEnd="24dp">
+
+    <!-- Glow/Background Effect -->
+    <View
+        android:id="@+id/comboGlow"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_combo_glow"
+        android:alpha="0.5"
+        app:layout_constraintTop_toTopOf="@id/emoteImage"
+        app:layout_constraintBottom_toBottomOf="@id/emoteImage"
+        app:layout_constraintStart_toStartOf="@id/emoteImage"
+        app:layout_constraintEnd_toEndOf="@id/emoteImage"
+        android:layout_margin="-8dp"/>
+
+    <ImageView
+        android:id="@+id/emoteImage"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:scaleType="fitCenter"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:src="@drawable/ic_launcher_background" />
+
+    <TextView
+        android:id="@+id/comboCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="x1"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:textStyle="bold|italic"
+        android:shadowColor="#000000"
+        android:shadowDx="2"
+        android:shadowDy="2"
+        android:shadowRadius="4"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        app:layout_constraintStart_toEndOf="@id/emoteImage"
+        app:layout_constraintTop_toTopOf="@id/emoteImage"
+        app:layout_constraintBottom_toBottomOf="@id/emoteImage" />
+        
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="200dp"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="12dp"
+    android:orientation="vertical"
+    android:background="@drawable/bg_home_card">
+
+    <!-- Thumbnail Container -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="112dp">
+    
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_thumbnail_top_rounded" />
+            
+        <!-- Mature Badge Shimmer (Top|Start) -->
+        <View
+            android:layout_width="18dp"
+            android:layout_height="12dp"
+            android:layout_gravity="top|start"
+            android:layout_margin="6dp"
+            android:background="#444444" />
+            
+        <!-- View Count Img + Text Shimmer (Bottom|Start) -->
+        <View
+            android:layout_width="40dp"
+            android:layout_height="12dp"
+            android:layout_gravity="bottom|start"
+            android:layout_margin="6dp"
+            android:background="#444444" />
+
+        <!-- Duration Badge Shimmer (Bottom|End) -->
+        <View
+            android:layout_width="30dp"
+            android:layout_height="12dp"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="6dp"
+            android:background="#444444" />
+    </FrameLayout>
+
+    <!-- Info Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="10dp"
+        android:gravity="center_vertical">
+
+        <!-- Avatar Shimmer -->
+        <View
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:background="@drawable/bg_circle_placeholder" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:orientation="vertical">
+
+            <!-- Title Shimmer -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:background="#2A2A2A" />
+            
+            <View
+                android:layout_width="100dp"
+                android:layout_height="10dp"
+                android:layout_marginTop="4dp"
+                android:background="#2A2A2A" />
+
+            <!-- Channel Name Shimmer -->
+            <View
+                android:layout_width="60dp"
+                android:layout_height="8dp"
+                android:layout_marginTop="4dp"
+                android:background="#1F1F1F" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

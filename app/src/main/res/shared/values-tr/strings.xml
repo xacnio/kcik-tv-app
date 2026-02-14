@@ -1,0 +1,1106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- General -->
+    <string name="back_label">Geri</string>
+    <string name="arrow_sep"> → </string>
+    <string name="preview_label">Önizleme</string>
+    <string name="celebration_emoji">🎉</string>
+    <string name="arrow_right_symbol">➔</string>
+    <string name="dot_separator"> • </string>
+    <string name="app_name_caps">KCIKTV</string>
+    <string name="loading">Yükleniyor…</string>
+    <string name="loading_channels">Kanallar yükleniyor…</string>
+    <string name="retry">Tekrar Dene</string>
+    <string name="cancel">İptal</string>
+    <string name="confirm">Onayla</string>
+    <string name="close">Kapat</string>
+    <string name="back">Geri</string>
+    <string name="save">Kaydet</string>
+    <string name="delete">Sil</string>
+    <string name="remove">Kaldır</string>
+    <string name="yes">Evet</string>
+    <string name="no">Hayır</string>
+    <string name="on">Açık</string>
+    <string name="off">Kapalı</string>
+    <string name="unknown">Bilinmeyen</string>
+    <string name="gift">Hediye</string>
+    <string name="live">CANLI</string>
+    <string name="channel">Kanal</string>
+    <string name="offline">Çevrimdışı</string>
+    <string name="category">Kategori</string>
+    <string name="email">E-posta</string>
+    <string name="password">Şifre</string>
+    <string name="exit">Çıkış</string>
+    <string name="reply">Yanıtla</string>
+    <string name="pause">Duraklat</string>
+    <string name="play">Oynat</string>
+    <string name="download">İndir</string>
+    <string name="publish">Yayınla</string>
+    <string name="beta">Beta</string>
+    <string name="replying_to">%s kişisine yanıt</string>
+    <string name="language_selected_format">%s seçildi</string>
+
+    <!-- Navigation -->
+    <string name="press_back_to_close">GERİ ile kapat</string>
+    <string name="press_again_to_exit">Çıkmak için tekrar basın</string>
+
+    <!-- Channels -->
+    <string name="channel_name">Kanal Adı</string>
+    <string name="following_channels_header">Takip Edilen Kanallar</string>
+    <string name="offline_channels_title">Çevrimdışı Kanallar</string>
+    <string name="following_empty_state">Henüz takip ettiğiniz kanal yok</string>
+    <string name="category_no_streams">Bu kategoride şu an yayın yok</string>
+
+    <!-- Categories -->
+    <string name="cat_art">Sanat</string>
+    <string name="cat_chess">Satranç</string>
+    <string name="cat_food_drink">Yeme içme</string>
+    <string name="cat_slots">Slotlar &amp; Kumarhane</string>
+    <string name="cat_games_demos">Oyunlar ve Demo Sürümleri</string>
+    <string name="cat_just_chatting">Sadece Sohbet</string>
+    <string name="cat_just_sleeping">Sadece Uyku</string>
+    <string name="cat_music">Müzik</string>
+    <string name="cat_music_production">Müzik Yapımcılığı</string>
+    <string name="cat_pools_hot_tubs">Havuz, Küvet ve Plaj</string>
+    <string name="cat_special_events">Özel Etkinlikler</string>
+    <string name="cat_sports">Spor</string>
+    <string name="cat_video_production">Video Yapımcılığı</string>
+    <string name="cat_gaming">Oyun</string>
+    <string name="cat_creative">Yaratıcı</string>
+    <string name="cat_crypto_trading">Kripto &amp; Ticaret</string>
+    <string name="cat_music_stations">Müzik İstasyonları</string>
+    <string name="cat_news">Haberler</string>
+
+    <!-- Blocked Categories -->
+    <string name="manage_hidden_categories">Gizlenmiş Kategorileri Yönet</string>
+    <string name="blocked_categories_subtitle">Görünür yapmak için yanındaki simgeye dokunun</string>
+    <string name="blocked_categories_empty">Henüz gizlenmiş bir kategori yok</string>
+    <string name="category_hidden_msg">Bu kategoriyi gizlediğiniz için içerikler gösterilmiyor.</string>
+    <string name="category_hide">Gizle</string>
+    <string name="category_hidden">Gizli</string>
+    <string name="category_hidden_toast">Kategori gizlendi</string>
+    <string name="category_unhidden_toast">Kategori görünür yapıldı</string>
+    <string name="category_unblocked_toast">%s artık gizli değil</string>
+    <string name="no_blocked_categories_toast">Gizlenen kategori bulunmuyor</string>
+
+    <!-- Player UI -->
+    <string name="pip_label">PIP</string>
+    <string name="playback_speed_title">Oynatma Hızı</string>
+    <string name="resolution">Çözünürlük</string>
+    <string name="refresh">Yenile</string>
+    <string name="stats">İstatistik</string>
+    <string name="settings">Ayarlar</string>
+    <string name="guest">Misafir</string>
+    <string name="not_logged_in">Giriş yapılmadı</string>
+    <string name="list_sorting">Liste Sıralama</string>
+    <string name="stream_language">Dil Seçenekleri</string>
+    <string name="viewers_high_to_low">İzleyici (Azalan)</string>
+    <string name="viewers_low_to_high">İzleyici (Artan)</string>
+    <string name="recommended_streams">Önerilenler</string>
+    <string name="my_list">KİŞİSEL</string>
+    <string name="my_channel">Kendi Kanalım</string>
+    <string name="search">Arama</string>
+    <string name="following">Takip Edilenler</string>
+    <string name="app_settings">Uygulama Ayarları</string>
+    <string name="stream_title">Yayın Başlığı</string>
+    <string name="view_and_filters">Görünüm ve Filtreler</string>
+    <string name="view_mode">Görünüm Modu</string>
+    <string name="view_list">Liste</string>
+    <string name="view_grid">Izgara</string>
+    <string name="sorting">Sıralama</string>
+    <string name="sort_title_featured">Öne Çıkanlar</string>
+    <string name="sort_title_viewers_desc">En Çok İzlenen Yayınlar</string>
+    <string name="sort_title_viewers_asc">En Az İzlenen Yayınlar</string>
+
+    <!-- Login -->
+    <string name="login_with_kick_account">Kick Hesabınla Giriş Yap</string>
+    <string name="email_or_username_label">E-posta veya Kullanıcı Adı</string>
+    <string name="email_label">E-posta</string>
+    <string name="password_label">Şifre</string>
+    <string name="error_invalid_credentials">Geçersiz kullanıcı adı veya şifre</string>
+    <string name="login_button">Giriş Yap</string>
+    <string name="login_with_webview">WebView ile Giriş Yap</string>
+    <string name="login_data_disclaimer">Kullanıcı verileriniz şifrelenir ve sadece giriş yapmak için kullanılır.</string>
+    <string name="verify_2fa_title">2FA Doğrula</string>
+    <string name="verify_2fa_desc">Lütfen doğrulayıcınızdan 6 haneli kodu girin</string>
+    <string name="login">Giriş Yap</string>
+    <string name="logout">Çıkış Yap</string>
+    <string name="user_default_name">Kullanıcı</string>
+    <string name="logged_out">Çıkış yapıldı</string>
+    <string name="online_status">Çevrimiçi</string>
+    <string name="login_prompt">Hesabınıza giriş yapın</string>
+    <string name="logout_confirm_title">Çıkış Onayı</string>
+    <string name="logout_confirm_message">Çıkış yapmak istediğinizden emin misiniz?</string>
+    <string name="login_success">Hoş geldin, %s</string>
+    <string name="login_required_following">Takip edilenleri görmek için giriş yapmalısınız</string>
+    <string name="manual_login">Manuel Giriş</string>
+    <string name="email_hint">örn: kullanici@mail.com</string>
+    <string name="show_password">Şifreyi Göster</string>
+    <string name="otp_code">OTP Doğrulama Kodu</string>
+    <string name="otp_hint">6 haneli kod</string>
+    <string name="login_action">GİRİŞ YAP</string>
+    <string name="qr_login_title">QR Kod ile Giriş</string>
+    <string name="qr_login_subtitle">Telefonunuzla taratarak hızlıca giriş yapın</string>
+    <string name="ip_not_found">IP adresi bulunamadı. Lütfen ağ bağlantınızı kontrol edin.</string>
+    <string name="server_error">Sunucu başlatılamadı: %s</string>
+    <string name="login_fields_required">E-posta ve şifre gereklidir</string>
+    <string name="two_fa_required">2FA kodu gerekli</string>
+    <string name="login_required">Giriş yapmalısınız</string>
+    <string name="login_required_chat">Sohbet etmek için giriş yapmalısınız</string>
+    <string name="session_expired">Oturum süresi doldu</string>
+    <string name="login_button_label">Giriş Yap</string>
+    <string name="login_success_welcome">Giriş Başarılı! Hoş geldin %s</string>
+    <string name="login_success_cookie">Giriş Başarılı (Çerez)!</string>
+    <string name="twofa_required">2FA Kodu gerekli</string>
+    <string name="enter_6_digit_code">Lütfen 6 haneli kodu girin</string>
+    <string name="verifying">Doğrulanıyor…</string>
+    <string name="logging_in">Giriş yapılıyor…</string>
+    <string name="logging_out_secure">Güvenli çıkış yapılıyor…</string>
+    <string name="otp_required_title">E-posta Kodunu Doğrula</string>
+    <string name="otp_required_desc">Lütfen e-postanıza gönderilen 6 haneli kodu girin</string>
+
+    <!-- Mature Content -->
+    <string name="mature_content_warning">Yetişkin İçerik Uyarısı</string>
+    <string name="mature_content_description">Bu yayın yetişkin izleyiciler için tasarlanmış içerikler barındırmaktadır.</string>
+    <string name="im_plus_18">+18 Yaşındayım</string>
+
+    <!-- Settings -->
+    <string name="setting_option">Ayar Seçeneği</string>
+    <string name="setting_language">Dil Seçimi</string>
+    <string name="setting_app_language">Uygulama Dili</string>
+    <string name="system_default">Sistem Varsayılanı</string>
+    <string name="setting_info_delay">Bilgi Ekranı Süresi</string>
+    <string name="setting_transparency">Saydamlık Ayarı</string>
+    <string name="setting_filter">Kategori Filtrele</string>
+    <string name="setting_theme">Tema Rengi</string>
+    <string name="setting_zap_delay">Kanal Geçiş Hızı</string>
+    <string name="setting_animations">Animasyonlar</string>
+    <string name="setting_chat_animation">Sohbet Mesaj Animasyonu</string>
+    <string name="animation_none">Kapalı</string>
+    <string name="animation_fade_in">Belirme</string>
+    <string name="animation_slide_left">Soldan Kayma</string>
+    <string name="animation_slide_right">Sağdan Kayma</string>
+    <string name="animation_slide_bottom">Alttan Kayma</string>
+    <string name="animation_scale">Büyüme</string>
+    <string name="animation_typewriter">Typewriter</string>
+    <string name="animation_curtain">Curtain</string>
+    <string name="animation_flip">Flip</string>
+    <string name="animation_rotate">Rotate</string>
+    <string name="animation_zoom_out">Zoom Out</string>
+    <string name="animation_swing">Swing</string>
+    <string name="setting_refresh_interval">Güncelleme Sıklığı</string>
+    <string name="setting_update_channel">Güncelleme Kanalı</string>
+    <string name="switch_to_tv_ui">TV Arayüzüne Geç</string>
+    <string name="switch_to_mobile_ui">Mobil Arayüzüne Geç</string>
+    <string name="setting_mobile_quality">Mobil Veri Limiti</string>
+    <string name="setting_dynamic_quality">Dinamik Kalite Geçişi</string>
+    <string name="dynamic_quality_desc">Yayın durdurulmadan kalite değiştirilir. Otomatik moda bağlı kalınır.</string>
+    <string name="setting_catch_up">Yayını Yakalama</string>
+    <string name="setting_auto_update">Otomatik Güncelleme Kontrolü</string>
+    <string name="setting_auto_update_desc">Açılışta yeni sürümleri otomatik olarak denetle</string>
+    <string name="setting_about">Hakkında</string>
+    <string name="support_developer">Geliştiriciye Destek Ol</string>
+    <string name="visit_github">GitHub\'ı Ziyaret Et</string>
+    <string name="setting_background_audio">Arka Planda Oynatma</string>
+    <string name="setting_auto_pip">Otomatik PIP (Home Tuşu)</string>
+    <string name="setting_chat_refresh_title">Sohbet Yenileme Hızı</string>
+    <string name="setting_whats_new">Yenilikler</string>
+
+    <!-- Settings Sidebar Titles -->
+    <string name="sidebar_title_language">Dil Seçimi</string>
+    <string name="sidebar_title_delay">Bilgi Süresi</string>
+    <string name="sidebar_title_transparency">Saydamlık</string>
+    <string name="sidebar_title_theme">Tema Rengi</string>
+    <string name="sidebar_title_zap">Zap Hızı</string>
+    <string name="sidebar_title_refresh">Güncelleme Sıklığı</string>
+    <string name="sidebar_title_update_channel">Güncelleme Kanalı</string>
+    <string name="sidebar_title_mobile_quality">Mobil Veri Limiti</string>
+    <string name="sidebar_title_background_audio">Arka Planda Oynatma</string>
+    <string name="sidebar_title_auto_pip">Otomatik PIP</string>
+    <string name="sidebar_title_auto_update">Otomatik Güncelleme Kontrolü</string>
+    <string name="sidebar_title_catch_up">Yayını Yakalama</string>
+    <string name="sidebar_title_filter_hide">Kategori Gizleme</string>
+    <string name="sidebar_channels">Kanallar</string>
+
+    <!-- Settings Categories -->
+    <string name="blerp_overlay">Blerp Katmanı</string>
+    <string name="settings_category_general">Genel</string>
+    <string name="settings_category_player">Oynatıcı</string>
+    <string name="settings_category_appearance">Görünüm</string>
+    <string name="settings_category_app">Uygulama</string>
+    <string name="settings_category_third_party">Üçüncü Parti Bileşenler</string>
+    <string name="blerp_title">Blerp</string>
+    <string name="blerp_desc">Sesli memeler, efektler ve emote\'lar ile yayını destekleyin</string>
+    <string name="settings_player_desc">Kalite, arka plan ses ve oynatma ayarları</string>
+    <string name="settings_appearance_desc">Dil ve görsel tercihler</string>
+    <string name="settings_third_party_desc">Blerp ve diğer entegrasyonlar</string>
+    <string name="settings_app_desc">Güncellemeler, sürüm bilgisi ve daha fazlası</string>
+    <string name="settings_category_advanced">Gelişmiş</string>
+    <string name="settings_category_advanced_desc">Deneysel özellikler ve araçlar</string>
+    <string name="settings_kick_webview">Kick WebView</string>
+    <string name="settings_kick_webview_desc">Kick.com\'u dahili tarayıcıda aç (Oturum açık)</string>
+    <string name="settings_clear_cache">Önbelleği Temizle</string>
+    <string name="settings_clear_cache_desc">Uygulama önbelleğini ve geçici dosyaları temizle</string>
+    <string name="settings_clear_blerp_auth">Blerp Oturumunu Temizle</string>
+    <string name="settings_clear_blerp_auth_desc">Blerp oturumunu kapat ve kaydedilmiş verileri sil</string>
+    <string name="cache_cleared">Önbellek başarıyla temizlendi</string>
+    <string name="blerp_auth_cleared">Blerp oturumu başarıyla temizlendi</string>
+    <string name="settings_trusted_domains">Güvenilir Alan Adları</string>
+    <string name="privacy_policy">Gizlilik Politikası</string>
+    <string name="settings_trusted_domains_desc">Bağlantı önizlemeleri için alan adlarını yönet</string>
+    <string name="trusted_domains_count">%d alan adı</string>
+    <string name="trusted_domain_add_title">Alan Adı Ekle</string>
+    <string name="trusted_domain_add_hint">örn. reddit.com</string>
+    <string name="trusted_domain_added">Alan adı eklendi: %s</string>
+    <string name="trusted_domain_removed">Alan adı kaldırıldı: %s</string>
+    <string name="trusted_domain_exists">Alan adı zaten mevcut</string>
+    <string name="trusted_domain_invalid">Lütfen geçerli bir alan adı girin</string>
+    <string name="trusted_domains_reset">Varsayılanlara Sıfırla</string>
+    <string name="trusted_domains_reset_confirm">Güvenilir alan adları varsayılanlara sıfırlansın mı?</string>
+    <string name="trusted_domains_reset_done">Güvenilir alan adları sıfırlandı</string>
+    <string name="trusted_domain_remove_confirm">%s, güvenilir alan adlarından kaldırılsın mı?</string>
+    <string name="add">Ekle</string>
+
+    <!-- Settings Options -->
+    <string name="pip_automatic">Otomatik</string>
+    <string name="pip_manual">Sadece Butonla</string>
+    <string name="catch_up_off">Kapalı</string>
+    <string name="catch_up_low">Düşük Seviye</string>
+    <string name="catch_up_high">Yüksek Seviye</string>
+    <string name="quality_unlimited">Sınırsız</string>
+    <string name="only_manual">Sadece Manuel</string>
+    <string name="x_minutes">%1$d Dakika</string>
+    <string name="x_seconds">%1$d Saniye</string>
+    <string name="instant_ms">Anında (0ms)</string>
+    <string name="fast_ms">Hızlı (300ms)</string>
+    <string name="normal_ms">Normal (700ms)</string>
+    <string name="slow_ms">Yavaş (1200ms)</string>
+    <string name="speed_ultra_fast">Ultra Hızlı (100ms)</string>
+    <string name="speed_fast">Hızlı (Default - 200ms)</string>
+    <string name="speed_normal">Normal (500ms)</string>
+    <string name="speed_slow">Yavaş (1000ms)</string>
+
+    <!-- Theme Colors -->
+    <string name="premium_emerald">Zümrüt Yeşili</string>
+    <string name="premium_sapphire">Safir Mavisi</string>
+    <string name="premium_ruby">Yakut Kırmızısı</string>
+    <string name="premium_gold">Kehribar Altın</string>
+    <string name="premium_violet">Ametist Moru</string>
+    <string name="premium_teal">Derin Camgöbeği</string>
+    <string name="premium_rose">Gül Pembesi</string>
+    <string name="kciktv_cyan">Elektrik Mavisi</string>
+    <string name="brand_green">Kick Yeşili</string>
+
+    <!-- Stream Status -->
+    <string name="stream_ended">Yayın Offline</string>
+    <string name="live_stream">Canlı Yayın</string>
+    <string name="stream_offline">Yayın Offline</string>
+    <string name="list_empty">Liste boş</string>
+    <string name="currently_live">Şu an CANLI</string>
+    <string name="currently_offline">Şu anda çevrimdışı</string>
+    <string name="last_stream_time">Son yayın %s</string>
+    <string name="live_badge">CANLI</string>
+    <string name="offline_badge">ÇEVRİMDIŞI</string>
+
+    <!-- Stats -->
+    <string name="stats_nerd_title">Video İstatistikleri (Nerd Stats)</string>
+    <string name="stats_resolution_label">Çözünürlük:</string>
+    <string name="stats_fps_label">FPS:</string>
+    <string name="stats_bitrate_label">Bitrate:</string>
+    <string name="stats_latency_label">Gecikme:</string>
+    <string name="stats_buffer_label">Tampon:</string>
+    <string name="stats_dropped_frames_label">Kayıp Kareler:</string>
+    <string name="stats_playback_rate_label">Oynatma Hızı:</string>
+    <string name="stats_player_state_label">Oyuncu Durumu:</string>
+    <string name="stats_volume_label">Ses:</string>
+    <string name="stat_resolution">Çözünürlük</string>
+    <string name="stat_bitrate">Bit hızı</string>
+    <string name="stat_codec">Kodek</string>
+    <string name="stat_dropped_frames">Kare Kaybı</string>
+    <string name="stat_decoded_frames">Çözülen Kareler</string>
+    <string name="stat_rendered_frames">Çizilen Kareler</string>
+    <string name="stat_buffer_health">Tampon Sağlığı</string>
+    <string name="stat_latency">Gecikme</string>
+    <string name="stat_playback_rate">Oynatma Hızı</string>
+    <string name="stat_ready_state">Hazır Durumu</string>
+    <string name="stat_volume">Ses</string>
+    <string name="stat_muted">Sessiz</string>
+    <string name="player_statistics">Oynatıcı İstatistikleri</string>
+
+    <!-- Updates -->
+    <string name="stable">Kararlı (Stable)</string>
+    <string name="update_available">Yeni güncelleme mevcut: %s</string>
+    <string name="update_now">Şimdi Güncelle</string>
+    <string name="up_to_date">Uygulama güncel</string>
+    <string name="checking_updates">Güncellemeler kontrol ediliyor…</string>
+    <string name="check_update">Güncellemeleri Denetle</string>
+    <string name="download_failed">İndirme başarısız oldu</string>
+    <string name="update_available_title">Yeni Güncelleme Mevcut</string>
+    <string name="update_available_msg">%1$s sürümü mevcut. Güncellemek ister misiniz?</string>
+    <string name="downloading_percent">İndiriliyor… %%%1$d</string>
+    <string name="later">Daha Sonra</string>
+    <string name="no_updates">Uygulama güncel</string>
+    <string name="update_check_failed">Güncelleme kontrolü başarısız</string>
+    <string name="update_message">%1$s sürümü mevcut. İndirmek ister misiniz?</string>
+    <string name="apk_not_found">APK bulunamadı</string>
+    <string name="whats_new">Yenilikler</string>
+    <string name="downloading">İndiriliyor…</string>
+    <string name="update_version_format">%1$s → %2$s</string>
+
+    <!-- Languages Array -->
+    <string-array name="stream_language_names">
+        <item>Türkçe</item>
+        <item>İngilizce</item>
+        <item>Afrikaanca</item>
+        <item>Almanca</item>
+        <item>Arapça</item>
+        <item>Arnavutça</item>
+        <item>Azerice</item>
+        <item>Belarusça</item>
+        <item>Bengalce</item>
+        <item>Boşnakça</item>
+        <item>Bulgarca</item>
+        <item>Çekçe</item>
+        <item>Çince</item>
+        <item>Danca</item>
+        <item>Endonezce</item>
+        <item>Esperanto</item>
+        <item>Estonca</item>
+        <item>Faroece</item>
+        <item>Farsça</item>
+        <item>Felemenkçe</item>
+        <item>Filipince</item>
+        <item>Fince</item>
+        <item>Fransızca</item>
+        <item>Gürcüce</item>
+        <item>Hawaii Dili</item>
+        <item>Hırvatça</item>
+        <item>Hintçe</item>
+        <item>İbranice</item>
+        <item>İnterlingua</item>
+        <item>İspanyolca</item>
+        <item>İsveççe</item>
+        <item>İtalyanca</item>
+        <item>Japonca</item>
+        <item>Katalanca</item>
+        <item>Korece</item>
+        <item>Latince</item>
+        <item>Lehçe</item>
+        <item>Letonca</item>
+        <item>Litvanca</item>
+        <item>Macarca</item>
+        <item>Makedonca</item>
+        <item>Malayalam</item>
+        <item>Malayca</item>
+        <item>Moğolca</item>
+        <item>Norveççe</item>
+        <item>Norveççe (Bokmål)</item>
+        <item>Portekizce</item>
+        <item>Romence</item>
+        <item>Moldovaca</item>
+        <item>Rusça</item>
+        <item>Sırpça</item>
+        <item>Slovakça</item>
+        <item>Slovence</item>
+        <item>Somalice</item>
+        <item>Sundaca</item>
+        <item>Tatarca</item>
+        <item>Tayca</item>
+        <item>Ukraynaca</item>
+        <item>Urduca</item>
+        <item>Vietnamca</item>
+        <item>Yunanca</item>
+        <item>Zuluca</item>
+    </string-array>
+    <string name="app_version_label">Sürüm: %s</string>
+
+    <!-- Quality -->
+    <string name="format_fit">Ekrana Sığdır</string>
+    <string name="load_more">DAHA FAZLA YÜKLE…</string>
+    <string name="auto">OTOMATİK</string>
+    <string name="quality_selection">Kalite</string>
+    <string name="auto_quality">Otomatik</string>
+    <string name="quality_loading">Yükleniyor</string>
+    <string name="quality_auto">Otomatik</string>
+    <string name="quality_auto_description">Bağlantınız için en iyi kalite</string>
+    <string name="quality_audio_only">Sadece Ses</string>
+    <string name="auto_quality_with_limit">Otomatik (%dp)</string>
+    <string name="speed_normal_1x">Normal (1x)</string>
+    <string name="speed_x_format">%sx</string>
+
+    <!-- Connection & Errors -->
+    <string name="connection_failed">Yayın bağlantısı kurulamadı</string>
+    <string name="stream_error_retrying">Yayın hatası, tekrar deneniyor %1$d/%2$d</string>
+    <string name="channel_not_found">Kanal bulunamadı: %1$s</string>
+    <string name="channels_load_failed">Kanallar yüklenemedi</string>
+    <string name="category_load_failed">Kategori yüklenemedi</string>
+    <string name="data_load_failed">Veri yüklenemedi</string>
+    <string name="categories_load_failed">Kategoriler yüklenemedi</string>
+    <string name="channel_load_failed">Kanal yüklenemedi: %s</string>
+    <string name="history_load_failed">Geçmiş yüklenemedi</string>
+    <string name="history_load_failed_web">Geçmiş yüklenemedi (Web)</string>
+    <string name="error_occurred">Bir hata oluştu</string>
+    <string name="error_format">Hata: %s</string>
+    <string name="link_open_failed">Link açılamadı</string>
+    <string name="video_load_failed">Video yüklenemedi</string>
+    <string name="error_open_link">Bağlantı açılırken hata oluştu</string>
+    <string name="error_loading_clip">Klip yüklenirken hata: %s</string>
+    <string name="failed_to_load_streams">Failed to load streams</string>
+    <string name="failed_to_load_clips">Failed to load clips</string>
+    <string name="clip_url_missing">Klip bağlantısı eksik</string>
+
+    <!-- Search -->
+    <string name="search_channel_hint">Kanal adı girin (örn: xqc)</string>
+    <string name="search_no_result">Kanal bulunamadı</string>
+    <string name="search_channels">Kanal ara…</string>
+    <string name="recent_searches">Son Aramalar</string>
+    <string name="clear_all">Tümünü Temizle</string>
+    <string name="no_results_found">Sonuç bulunamadı</string>
+    <string name="search_categories_hint">Kategori ara…</string>
+    <string name="tag_format">Etiket: #%s</string>
+    <string name="type_channel">Kanal</string>
+    <string name="type_category">Kategori</string>
+    <string name="type_tag">Etiket</string>
+
+    <!-- Mobile UI -->
+    <string name="send_message">Mesaj yaz…</string>
+    <string name="no_messages">Henüz mesaj yok</string>
+
+    <!-- Chat Errors -->
+    <string name="chat_system_username">SİSTEM</string>
+    <string name="chat_error_subscribers_only">Bu chat sadece abonelere özeldir.</string>
+    <string name="chat_error_followers_only">Bu chat sadece takipçilere özeldir.</string>
+    <string name="chat_error_slow_mode">Yavaş mod aktif. Lütfen bekleyin.</string>
+    <string name="chat_error_banned">Bu kanaldan yasaklandınız.</string>
+    <string name="chat_error_message_too_long">Mesaj çok uzun.</string>
+    <string name="chat_error_duplicate_message">Aynı mesajı tekrar gönderemezsiniz.</string>
+    <string name="chat_error_generic">Mesaj gönderilemedi: %s</string>
+
+    <!-- Audio Modes -->
+    <string name="audio_mode_custom_eq">Özel EQ</string>
+
+    <!-- Chat Hints -->
+    <string name="chat_hint_subscribers_only">Abonelere özel sohbet</string>
+    <string name="chat_hint_followers_only">Takipçilere özel sohbet</string>
+    <string name="chat_hint_emotes_only">Emote kullanın…</string>
+    <string name="chat_hint_default">Mesaj yaz…</string>
+    <string name="chat_hint_follower_min_duration">Takipçi Özel (%d dk)</string>
+    <string name="chat_hint_follower_remaining">Sohbet için %d dk kaldı</string>
+    <string name="chat_hint_login_required">Sohbet etmek için giriş yap</string>
+    <string name="chat_preview_message">Merhaba Dünya!</string>
+
+    <!-- Chat Status -->
+    <string name="chat_status_slow_mode_on">Yavaş mod aktifleştirildi</string>
+    <string name="chat_status_slow_mode_on_duration">Yavaş mod aktifleştirildi. (%1$s)</string>
+    <string name="chat_status_slow_mode_on_by">Yavaş mod &lt;b&gt;%1$s&lt;/b&gt; tarafından aktifleştirildi.</string>
+    <string name="chat_status_slow_mode_off">Yavaş mod devre dışı bırakıldı</string>
+    <string name="chat_status_slow_mode_off_by">Yavaş mod &lt;b&gt;%1$s&lt;/b&gt; tarafından devre dışı bırakıldı</string>
+    <string name="chat_status_subscribers_mode_on">Sadece aboneler modu aktifleştirildi</string>
+    <string name="chat_status_subscribers_mode_on_by">Sadece aboneler modu &lt;b&gt;%1$s&lt;/b&gt; tarafından aktifleştirildi</string>
+    <string name="chat_status_subscribers_mode_off">Sadece aboneler modu devre dışı bırakıldı</string>
+    <string name="chat_status_subscribers_mode_off_by">Sadece aboneler modu &lt;b&gt;%1$s&lt;/b&gt; tarafından devre dışı bırakıldı</string>
+    <string name="chat_status_emotes_mode_on">Sadece ifadeler modu aktifleştirildi</string>
+    <string name="chat_status_emotes_mode_on_by">Sadece ifadeler modu &lt;b&gt;%1$s&lt;/b&gt; tarafından aktifleştirildi</string>
+    <string name="chat_status_emotes_mode_off">Sadece ifadeler modu devre dışı bırakıldı</string>
+    <string name="chat_status_emotes_mode_off_by">Sadece ifadeler modu &lt;b&gt;%1$s&lt;/b&gt; tarafından devre dışı bırakıldı</string>
+    <string name="chat_status_followers_mode_on">Sadece takipçiler modu aktifleştirildi</string>
+    <string name="chat_status_followers_mode_on_by">Sadece takipçiler modu &lt;b&gt;%1$s&lt;/b&gt; tarafından aktifleştirildi</string>
+    <string name="chat_status_followers_mode_off">Sadece takipçiler modu devre dışı bırakıldı</string>
+    <string name="chat_status_followers_mode_off_by">Sadece takipçiler modu &lt;b&gt;%1$s&lt;/b&gt; tarafından devre dışı bırakıldı</string>
+
+    <!-- Chat User Events -->
+    <string name="chat_user_banned">&lt;b&gt;%2$s&lt;/b&gt;, &lt;b&gt;%1$s&lt;/b&gt; isimli kullanıcıyı %3$s süreliğine sohbetten uzaklaştırdı.</string>
+    <string name="chat_user_banned_permanently">&lt;b&gt;%2$s&lt;/b&gt;, &lt;b&gt;%1$s&lt;/b&gt; isimli kullanıcıyı yasakladı.</string>
+    <string name="chat_user_unbanned">&lt;b&gt;%2$s&lt;/b&gt;, &lt;b&gt;%1$s&lt;/b&gt; isimli kullanıcının yasağını kaldırdı.</string>
+    <string name="pinned_by_format">Sabitleyen: %s</string>
+
+    <!-- Duration -->
+    <string name="duration_days">%1$d gün</string>
+    <string name="duration_hours">%1$d saat</string>
+    <string name="duration_minutes">%1$d dakika</string>
+    <string name="duration_seconds">%1$d saniye</string>
+    <string name="duration_months">%1$d ay</string>
+
+    <!-- Emotes -->
+    <string name="emote_available_only_for_subscribers">Bu ifade sadece aboneler tarafından kullanılabilir</string>
+    <string name="emote_category_subscribers">Abone İfadeleri</string>
+    <string name="emote_section_subscribers_only">Abonelere Özel</string>
+    <string name="emote_subscriber_only_suffix"> (Sadece Aboneler)</string>
+
+    <!-- Moderation Errors -->
+    <string name="error_cannot_ban_moderator">Bir moderatörü yasaklayamazsınız</string>
+    <string name="error_moderation_failed">Moderasyon işlemi başarısız oldu</string>
+    <string name="error_moderation_failed_reason">Moderasyon işlemi başarısız: %s</string>
+    <string name="error_user_not_exists">Kullanıcı mevcut değil</string>
+    <string name="error_cannot_ban_owner">Kanal sahibini yasaklayamazsınız</string>
+
+    <!-- Moderator Actions -->
+    <string name="mod_actions_title">Kanal Eylemleri</string>
+    <string name="mod_slow_mode">Yavaş Mod</string>
+    <string name="mod_followers_only">Takipçilere Özel Sohbet</string>
+    <string name="mod_subscribers_only">Abonelere Özel Sohbet</string>
+    <string name="mod_emotes_only">Yalnızca İfadelerle Sohbet</string>
+    <string name="mod_settings_updated">Sohbet ayarları güncellendi</string>
+    <string name="mod_settings_update_failed">Sohbet ayarları güncellenemedi</string>
+    <string name="mod_preset_options">Hızlı Seçim</string>
+    <string name="mod_custom_duration">Özel Süre</string>
+    <string name="mod_slow_mode_title">Yavaş Mod Süresi</string>
+    <string name="mod_followers_mode_title">Minimum Takip Süresi</string>
+    <string name="mod_unit_seconds">Saniye</string>
+    <string name="mod_unit_minutes">Dakika</string>
+    <string name="mod_unit_hours">Saat</string>
+    <string name="mod_unit_days">Gün</string>
+    <string name="mod_duration_format_seconds">%d sn</string>
+    <string name="mod_duration_format_minutes">%d dk</string>
+    <string name="mod_duration_format_hours">%d saat</string>
+    <string name="mod_duration_format_days">%d gün</string>
+    <string name="mod_followers_any">Tüm takipçiler</string>
+    <string name="mod_error_slow_mode_limit">Yavaş mod süresi 1 ile 300 saniye arasında olmalıdır.</string>
+    <string name="mod_error_followers_limit">Takipçi süresi sınırları aşıldı (maksimum 1 yıl).</string>
+    <string name="mod_error_invalid_input">Lütfen geçerli bir sayı girin.</string>
+    <string name="mod_stream_title">Yayın Başlığı</string>
+    <string name="mod_category">Yayın Kategorisi</string>
+    <string name="mod_search_category">Kategori Ara</string>
+    <string name="mod_error_metadata_offline">Çevrimdışı durumdayken bilgileri sadece kanal sahibi değiştirebilir.</string>
+    <string name="mod_mature_content">Yetişkinlere Yönelik İçerik (+18)</string>
+    <string name="mod_timeout_success">Kullanıcı %s susturuldu</string>
+    <string name="mod_unban_success">Yasak kaldırıldı</string>
+    <string name="mod_unban_failed">Yasak kaldırılamadı</string>
+    <string name="mod_ban_success">%s yasaklandı</string>
+    <string name="mod_ban_confirm_title">Kullanıcıyı Yasakla</string>
+    <string name="mod_ban_confirm_msg">%s kullanıcısını kalıcı olarak yasaklamak istediğinize emin misiniz?</string>
+    <string name="mod_pin_confirm_title">Mesajı Sabitle</string>
+    <string name="mod_pin_confirm_msg">Bu mesajı sabitlemek istediğinize emin misiniz?</string>
+    <string name="mod_delete_success">Mesaj silindi</string>
+    <string name="mod_view_title">Mod İşlemleri</string>
+    <string name="mod_create_poll">Anket Oluştur</string>
+    <string name="mod_edit_stream_title">Yayın Bilgilerini Düzenle</string>
+    <string name="duration_picker_title">Süre Seçin</string>
+
+    <!-- Chat Overlays -->
+    <string name="chat_banned_overlay">Bu kanaldan yasaklandınız!</string>
+    <string name="chat_timed_out_overlay">Bu kanaldan uzaklaştırıldınız!</string>
+    <string name="chat_timeout_remaining_format">Uzaklaştırıldınız. (Kalan: %s)</string>
+
+    <!-- Chat Clear -->
+    <string name="chat_cleared">Sohbet temizlendi</string>
+    <string name="chat_restore_messages">%d mesajı geri getir</string>
+
+    <!-- Ban Status -->
+    <string name="ban_permanent">Kalıcı Yasak</string>
+    <string name="ban_timeout">Uzaklaştırılmış (Time-out)</string>
+    <string name="ban_remaining_format">Kalan: %s</string>
+    <string name="ban_banned_by_format">Yasaklayan: %s</string>
+    <string name="ban_reason_format">Sebep: %s</string>
+    <string name="ban_date_format">Tarih: %s</string>
+    <string name="ban_label_caps">BAN</string>
+    <string name="banned_users">Yasaklı Kullanıcılar</string>
+    <string name="no_banned_users">Yasaklı kullanıcı bulunamadı</string>
+
+    <!-- User Actions -->
+    <string name="action_watch_stream">Yayını İzle</string>
+    <string name="action_go_to_chat">Sohbete Git</string>
+    <string name="action_share_channel">Kanalı Paylaş</string>
+    <string name="save_video">Videoyu Kaydet</string>
+    <string name="send_action">Gönder</string>
+    <string name="clear_action">Temizle</string>
+    <string name="hide_action">Gizle</string>
+    <string name="action_unban">Yasağı Kaldır</string>
+    <string name="action_reply">Yanıtla</string>
+    <string name="action_mention">Bahset</string>
+    <string name="action_pin">Mesajı Sabitle</string>
+    <string name="action_user_info">Kullanıcı İşlemleri</string>
+    <string name="action_timeout">Sustur</string>
+    <string name="action_delete">Sil</string>
+    <string name="action_ban_with_label">Yasakla (Ban)</string>
+    <string name="action_delete_message">Mesajı Sil</string>
+    <string name="action_follow">Takip Et</string>
+    <string name="action_load_all">Tümünü Yükle</string>
+    <string name="action_redeem">Kullan</string>
+    <string name="action_previous">Önceki</string>
+    <string name="action_next">Sonraki</string>
+
+    <!-- Timeout Durations -->
+    <string name="timeout_1m">1 dk</string>
+    <string name="timeout_5m">5 dk</string>
+    <string name="timeout_1h">1 saat</string>
+    <string name="timeout_1d">1 gün</string>
+    <string name="timeout_1w">1 hafta</string>
+
+    <!-- User Info -->
+    <string name="user_history_session">Mesaj Geçmişi (Oturum)</string>
+    <string name="user_history_empty">Henüz mesaj yok</string>
+    <string name="follow_date_format">Takip: %s</string>
+    <string name="date_format_label">Tarih: %s</string>
+    <string name="sub_duration_format">Abone Olundu: %s</string>
+    <string name="subscription_months_format">Abonelik: %d Ay</string>
+    <string name="user_banned_success">Kullanıcı yasaklandı</string>
+    <string name="user_unbanned_success">Yasak kaldırıldı</string>
+    <string name="anonymous_user">Anonim</string>
+
+    <!-- Chat UI -->
+    <string name="chat_login_prompt_prefix">Sohbet etmek için </string>
+    <string name="auto_scroll">Otomatik Kaydır</string>
+    <string name="chat_jump_to_bottom">Yeni Mesajlar / En Alta İn</string>
+    <string name="chat_new_messages_count">%s Yeni Mesaj ↓</string>
+    <string name="chat_replying_to">Yanıtlanıyor: %s</string>
+    <string name="message_copied">Mesaj kopyalandı</string>
+    <string name="delete_message_confirm_msg">Bu mesajı silmek istediğinize emin misiniz?</string>
+    <string name="login_to_chat">Sohbet için giriş yapın</string>
+    <string name="slow_mode_active">Yavaş Mod: %dsn</string>
+    <string name="slow_mode_exempt">Yavaş Mod: %dsn (Etkilenmiyorsunuz)</string>
+    <string name="subscribers_only_mode">Sadece Aboneler</string>
+    <string name="followers_only_mode">Sadece Takipçiler</string>
+    <string name="followers_only_mode_min">Sadece Takipçiler (%ddk+)</string>
+    <string name="emotes_only_mode">Sadece İfadeler</string>
+    <string name="unknown_command">Bilinmeyen komut: /%s</string>
+    <string name="command_failed">Komut başarısız</string>
+    <string name="chat_only_live_msg">Sohbet sadece canlı yayın sırasında aktiftir</string>
+
+    <!-- Chat Settings -->
+    <string name="chat_setting_highlighted">Vurgulanan Mesajlar</string>
+    <string name="chat_setting_highlights">Vurgular</string>
+    <string name="chat_setting_own_messages">Kendi Mesajların</string>
+    <string name="chat_setting_mod_messages">Moderatör Mesajları</string>
+    <string name="chat_setting_vip_messages">VIP Mesajları</string>
+    <string name="chat_setting_name_color">İsim Rengini Kullan</string>
+    <string name="chat_settings_title">Sohbet Ayarları</string>
+    <string name="chat_identity_title">Sohbet Kimliği</string>
+    <string name="chat_appearance_title">Sohbet Görünümü</string>
+    <string name="chat_rules_title">Sohbet Kuralları</string>
+    <string name="chat_identity_preview">Önizleme</string>
+    <string name="chat_identity_badges">Rozetler</string>
+    <string name="chat_identity_color">İsim Rengi</string>
+    <string name="chat_font_size">Yazı Boyutu</string>
+    <string name="chat_emote_size">Emote Boyutu</string>
+    <string name="chat_section_sizes">Boyutlar</string>
+    <string name="chat_section_features">Özellikler</string>
+    <string name="chat_section_advanced">Gelişmiş</string>
+    <string name="chat_timestamps">Zaman Damgası</string>
+    <string name="chat_seconds">Saniye Göster</string>
+    <string name="show_pinned_gifts">Sabitlenmiş Hediyeler</string>
+    <string name="chat_low_battery_mode">Düşük Pil Modu</string>
+    <string name="chat_emote_combo">Emote Kombo</string>
+    <string name="chat_settings_vibrate_on_mention">Bahsedilince Titret</string>
+    <string name="chat_settings_floating_emotes">Uçan Emojiler</string>
+
+    <!-- Chat Connection -->
+    <string name="chat_low_battery_paused">Arka plan modu aktif. Sohbet duraklatıldı (Düşük Pil Modu)</string>
+
+    <!-- Chat Rules -->
+    <string name="chat_rules_not_found">Bu kanal için sohbet kuralları bulunamadı.</string>
+    <string name="chat_rules_load_error">Kurallar yüklenirken bir hata oluştu.</string>
+    <string name="chat_rules_close">Kapat</string>
+    <string name="chat_rules_agree">Kabul Ediyorum</string>
+
+    <!-- Gifted Subs -->
+    <string name="gift_message_hint">Hediye mesajını yazın</string>
+    <string name="chat_gifted_subs_plural">%1$s topluluğa %2$d adet abonelik hediye etti! Bu kanala toplamda %3$d hediye aboneliği mevcut.</string>
+    <string name="chat_gifted_sub_single">%1$s topluluğa bir abonelik hediye etti! Bu kanala toplamda %2$d hediye aboneliği mevcut.</string>
+    <string name="chat_gifted_sub_individual">%1$s, %2$s kullanıcısına abonelik hediye etti!</string>
+    <string name="chat_celebration_sub_renew_title">abonelik yenilemesini kutluyor!</string>
+    <string name="chat_celebration_generic_title">kutluyor!</string>
+    <string name="chat_celebration_sub_renew_duration">Toplam abonelik süresi: %d ay!</string>
+    <string name="celebration_banner_sub_renew_title">Abonelik yenilemeni kutluyorsun!</string>
+    <string name="celebration_banner_sub_renew_duration">%d aydır abonesin!</string>
+    <string name="celebration_action_celebrate">Paylaş</string>
+    <string name="celebration_action_dismiss">Kapat</string>
+    <string name="celebration_context_title">Abone olma kutlamasını paylaş</string>
+    <string name="celebration_context_info_sub">%1$s isimli yayıncıya %2$d aylık abone olduğunuzu bildirin</string>
+
+    <!-- Mentions -->
+    <string name="mentions_title">Bahsedilmeler</string>
+    <string name="mentions_empty">Henüz bahsedilme yok</string>
+    <string name="mentions_count_format">%d mesaj</string>
+    <string name="go_to_message">Mesaja git</string>
+    <string name="time_ago_just_now">az önce</string>
+    <string name="time_ago_minutes">%d dk önce</string>
+    <string name="time_ago_hours">%d saat önce</string>
+    <string name="error_generic">Bir sorun oluştu</string>
+
+    <!-- Background Audio -->
+    <string name="background_audio_active">Arka Plan Ses Modu Aktif</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Ana Sayfa</string>
+    <string name="nav_browse">Gözat</string>
+    <string name="nav_following">Takip</string>
+    <string name="nav_search">Ara</string>
+
+    <!-- Home Screen -->
+    <string name="home_featured_title">Canlı Kanallar</string>
+    <string name="home_top_categories_title">En İyi Canlı Kanal Kategorileri</string>
+    <string name="home_following_title">Takip Ettiğin Canlı Kanallar</string>
+    <string name="home_popular_clips_title">Popüler Klipler</string>
+
+    <!-- PIP and Notifications -->
+    <string name="pip_action_return_to_live">Canlıya Dön</string>
+    <string name="pip_action_mute">Sessize Al</string>
+    <string name="pip_action_unmute">Sesi Aç</string>
+    <string name="pip_action_audio_only">Ses Modu</string>
+    <string name="pip_action_audio_only_desc">Arka Plan Ses Modu</string>
+    <string name="notification_action_close">Kapat</string>
+
+    <!-- Loading States -->
+    <string name="history_loading">Yükleniyor...</string>
+    <string name="history_all_loaded">Tümü Yüklendi</string>
+
+    <!-- Action Feedback -->
+    <string name="vote_failed">Oy verme başarısız: %s</string>
+    <string name="operation_failed">İşlem başarısız: %s</string>
+    <string name="login_failed_code">Giriş başarısız (%d)</string>
+    <string name="operation_failed_code">İşlem başarısız (Kod: %d)</string>
+
+    <!-- Polls -->
+    <string name="poll_header">ANKET</string>
+    <string name="poll_option_hint">Seçenek %d</string>
+    <string name="poll_question_required">Lütfen bir soru girin</string>
+    <string name="poll_min_options_required">En az 2 seçenek gerekli</string>
+    <string name="poll_create_failed">Anket oluşturulamadı: %s</string>
+    <string name="poll_result">Sonuç</string>
+    <string name="poll_result_title">ANKET SONUCU</string>
+    <string name="poll_label">ANKET</string>
+    <string name="poll_result_label">ANKET SONUCU</string>
+    <string name="total_votes">Toplam Oy: %d</string>
+    <string name="delete_poll_title">Anketi Sil</string>
+    <string name="delete_poll_message">Bu anketi sonlandırmak istediğinizden emin misiniz?</string>
+    <string name="poll_deleted">Anket silindi</string>
+    <string name="poll_delete_failed">Anket silinemedi</string>
+    <string name="poll_created">Anket oluşturuldu!</string>
+    <string name="create_poll">Anket Oluştur</string>
+    <string name="poll_question_label">Soru</string>
+    <string name="poll_question_hint">Anket sorusunu yazın...</string>
+    <string name="poll_options_label">Seçenekler</string>
+    <string name="poll_option_1_hint">Seçenek 1</string>
+    <string name="poll_option_2_hint">Seçenek 2</string>
+    <string name="poll_option_3_hint">Seçenek 3</string>
+    <string name="poll_option_4_hint">Seçenek 4</string>
+    <string name="poll_option_5_hint">Seçenek 5</string>
+    <string name="poll_option_6_hint">Seçenek 6</string>
+    <string name="poll_duration_label">Süre</string>
+    <string name="poll_result_duration_label">Sonuç Gösterilme Süresi</string>
+    <string name="enter_question">Lütfen bir soru girin.</string>
+    <string name="min_2_options">En az 2 seçenek gereklidir.</string>
+    <string name="creating">Oluşturuluyor…</string>
+
+    <!-- Clips -->
+    <string name="check_out_clip">Bu klibe göz at!</string>
+    <string name="trim_label">KIRP: </string>
+    <string name="clip_title_label">Klip Başlığı</string>
+    <string name="popular_clips_header">Popüler Klipler</string>
+    <string name="clip_url_copied">Klip URL\'si kopyalandı</string>
+    <string name="share_clip">Klibi Paylaş</string>
+    <string name="clip_only_live">Sadece canlı yayında klip alınabilir (Slug bulunamadı)</string>
+    <string name="clip_login_required">Klip almak için giriş yapmalısınız</string>
+    <string name="clip_error">Klip hatası: %s</string>
+    <string name="create_clip">Klip Oluştur: %s</string>
+    <string name="publishing">Yayınlanıyor…</string>
+    <string name="clip_prepared_info_error">Klip hazırlandı ama bilgiler okunamadı.</string>
+    <string name="clip_publish_failed">Klip yayınlanamadı: %d</string>
+    <string name="untitled_clip">İsimsiz Klip</string>
+    <string name="clipped_by">%s tarafından kliplendi</string>
+
+    <!-- Channel Profile -->
+    <string name="channel_info_title">Kanal Bilgisi</string>
+    <string name="follow">Takip Et</string>
+    <string name="unfollow">Takibi Bırak</string>
+    <string name="following_status">Takip Ediliyor</string>
+    <string name="unfollow_confirm_title">%s takipten çıkarılsın mı?</string>
+    <string name="unfollow_confirm_message">%s kullanıcısını takipten çıkarmak istediğinize emin misiniz?</string>
+    <string name="followers_millions">%.1f M takipçi</string>
+    <string name="followers_thousands">%.1f B takipçi</string>
+    <string name="followers_count">%d takipçi</string>
+    <string name="category_stream">Yayın</string>
+    <string name="uptime_hours_minutes">%1$dh %2$dm</string>
+    <string name="uptime_minutes">%ddk</string>
+    <string name="no_channel_info">Bu kanal hakkında bilgi yok.</string>
+    <string name="followed">Takip edildi</string>
+    <string name="unfollowed">Takipten çıkıldı</string>
+
+    <!-- Tabs -->
+    <string name="live_streams_tab">Canlı Yayınlar</string>
+    <string name="tab_home">Ana Sayfa</string>
+    <string name="tab_live">Canlı</string>
+    <string name="tab_categories">Kategoriler</string>
+    <string name="tab_about">Hakkımda</string>
+    <string name="tab_videos">Videolar</string>
+    <string name="tab_clips">Klipler</string>
+
+    <!-- Loyalty Points -->
+    <string name="channel_points">Kanal Sadakat Puanları</string>
+    <string name="default_prediction_title">Tahminler</string>
+    <string name="loyalty_rewards_empty">Bu kanalda sadakat puanı ödülü bulunmuyor.</string>
+    <string name="loyalty_reward_cost_label">Maliyet: </string>
+    <string name="loyalty_add_message_label">Mesaj ekle</string>
+    <string name="loyalty_redeem_action">Kullan</string>
+    <string name="input_message_hint">Mesajınızı yazın...</string>
+    <string name="points_needed_format">Bu ödül için %s puan daha gerekiyor</string>
+    <string name="reward_redeemed">Ödül kullanıldı: %s</string>
+    <string name="reward_redeem_failed">Hata: Ödül kullanılamadı</string>
+    <string name="enter_message_required">Lütfen bir mesaj girin</string>
+    <string name="processing">İşleniyor…</string>
+
+    <!-- Predictions -->
+    <string name="prediction_header">TAHMİN</string>
+    <string name="prediction_ended_desc">Tahmin sona erdi / Dağıtılan: </string>
+    <string name="prediction_active">Aktif</string>
+    <string name="prediction_bet_title_format">%s için oy ver</string>
+    <string name="bet_amount_label">Puan Miktarı</string>
+    <string name="prediction_balance_label">Bakiye: %s</string>
+    <string name="prediction_max_bet">HEPSİNİ KOY</string>
+    <string name="error_prediction_conflict">Oy verdiğiniz için bu tahmini yönetemezsiniz.</string>
+    <string name="prediction_control">Tahmin Kontrolü</string>
+    <string name="winner_label">KAZANAN</string>
+    <string name="prediction_status_open">Tahminler açık</string>
+    <string name="prediction_status_open_format">Tahminler açık - %s</string>
+    <string name="prediction_status_locked">Kilitli</string>
+    <string name="prediction_status_resolved">Sonuçlandı</string>
+    <string name="prediction_status_refunded">İade Edildi</string>
+    <string name="points_contributed_format">Toplanan puanlar - %s</string>
+    <string name="bet_amount_total_format">Toplam %1$s puan bahis yaptınız</string>
+    <string name="bet_on_format">%s için bahis</string>
+    <string name="new_prediction_start">Yeni Tahmin Başlat</string>
+    <string name="lock_submissions">Oylama Kilitle</string>
+    <string name="select_result">Sonuç Seç</string>
+    <string name="select_winning_result">Kazanan sonucu seçin</string>
+    <string name="resolve_prediction">Tahmini Sonuçlandır</string>
+    <string name="prediction_label">TAHMİN</string>
+    <string name="prediction_result_label">SONUÇ</string>
+    <string name="points_label">%s Puan</string>
+    <string name="delete_prediction_title">Tahmini Sil</string>
+    <string name="prediction_delete_desc">Bu işlem mevcut tahmin oyununu kaldıracaktır. İzleyiciler artık katılamayacak, oylar iptal edilecek ve Kanal Puanları otomatik olarak iade edilecektir.</string>
+    <string name="prediction_refund_info_format">\'Sil ve puanları iade et\' seçeneği, katılan izleyicilere %s Kanal Puanı iade edecektir.</string>
+    <string name="go_back">Geri Dön</string>
+    <string name="delete_and_refund">Sil ve puanları iade et</string>
+    <string name="invalid_amount">Geçersiz miktar</string>
+    <string name="prediction_saved">Tahmininiz kaydedildi!</string>
+    <string name="lock_failed">Kilitleme başarısız</string>
+    <string name="prediction_locked">Tahmin kilitlendi</string>
+    <string name="cancel_failed">İptal başarısız</string>
+    <string name="prediction_cancelled">Tahmin iptal edildi</string>
+    <string name="resolve_failed">Sonuçlandırma başarısız</string>
+    <string name="prediction_resolved">Tahmin sonuçlandırıldı</string>
+    <string name="prediction_login_required">Tahmin oluşturmak için giriş yapmalısınız</string>
+    <string name="fill_all_fields">Lütfen tüm alanları doldurun</string>
+    <string name="prediction_created">Tahmin oluşturuldu!</string>
+    <string name="prediction_resolved_title">Sonuçlandırıldı</string>
+    <string name="prediction_default_title">Tahmin</string>
+    <string name="prediction_cancelled_desc">tahmin iptal edildi / puanlar iade edildi</string>
+    <string name="prediction_menu_title">Tahminler</string>
+    <string name="start_prediction">Tahmin Başlat</string>
+    <string name="prediction_presets_label">Hazır Şablonlar (Geçmiş)</string>
+    <string name="prediction_question_label">Tahmin Sorusu</string>
+    <string name="prediction_question_hint">Örn: Kim kazanacak?</string>
+    <string name="prediction_outcomes_label">Sonuçlar</string>
+    <string name="prediction_yes_hint">EVET</string>
+    <string name="prediction_no_hint">HAYIR</string>
+    <string name="prediction_duration_label">Süre</string>
+
+    <!-- Miscellaneous -->
+    <string name="ban_temporary_label">Geçici Yasak (Zaman Aşımı)</string>
+    <string name="category_hidden_message">Bu kategoriyi gizlediniz.</string>
+    <string name="max_badges_reached">En fazla %d rozet seçebilirsiniz</string>
+    <string name="options_title">Seçenekler</string>
+    <string name="make_selection">Seçim Yapın…</string>
+    <string name="gift_sent_label">%s gönderdi</string>
+    <string name="chat_reward_used">kullandı</string>
+    <string name="date_label_format">Tarih: %s</string>
+    <string name="about_version_format">Sürüm: %s</string>
+    <string name="label_version">Sürüm</string>
+
+    <!-- About Page -->
+    <string name="about_title">Hakkında</string>
+    <string name="about_developed_by">Geliştirici:</string>
+    <string name="about_repo_label">Kaynak Kodları</string>
+    <string name="about_github_label">GitHub Hesabım</string>
+    <string name="about_coffee_label">Bana Bir Kahve Ismarla</string>
+
+    <!-- Gift Shop -->
+    <string name="gift_shop_title">Hediye mağazası</string>
+    <string name="gift_shop_basic_gifts">Basit hediyeler</string>
+    <string name="gift_shop_basic_desc">Hızlı bir hediye bırakın</string>
+    <string name="gift_shop_level_up_gifts">Seviye atlama hediyeleri</string>
+    <string name="gift_shop_level_up_desc">Özel mesajla hediye bırakın</string>
+
+    <!-- Custom EQ -->
+    <string name="zero_db">0 dB</string>
+    <string name="custom_eq_title">Özel EQ Ayarları</string>
+    <string name="eq_preset_flat">Düz</string>
+    <string name="eq_preset_bass">Bas</string>
+    <string name="eq_preset_vocal">Vokal</string>
+    <string name="eq_preset_pop">Pop</string>
+    <string name="eq_preset_rock">Rock</string>
+    <string name="eq_preset_jazz">Caz</string>
+    <string name="eq_preset_classical">Klasik</string>
+    <string name="eq_preset_metal">Metal</string>
+    <string name="eq_pre_amp">Ön Kazanç</string>
+    <string name="eq_reset">Sıfırla</string>
+
+    <!-- Pinned Messages -->
+    <string name="pinned_message_header">SABİTLENMİŞ MESAJ</string>
+    <string name="pin_removed">Sabitleme kaldırıldı</string>
+    <string name="message_pinned">Mesaj sabitlendi</string>
+    <string name="unpin_title">Sabitlemeyi Kaldır</string>
+    <string name="unpin_message">Bu sabitlenmiş mesajı kaldırmak istediğinize emin misiniz?</string>
+    <string name="message_unpinned">Mesaj sabitleme kaldırıldı</string>
+
+    <!-- Browse -->
+    <string name="streams_load_failed">Yayınlar yüklenemedi: %s</string>
+    <string name="viewer_count_label">%s İzleyici</string>
+    <string name="watching_count_label">%s izliyor</string>
+    <string name="viewer_follower_format">%1$s İzleyici • %2$s Takipçi</string>
+
+    <!-- VOD/Clip -->
+    <string name="video_url_not_found">Video URL\'si bulunamadı</string>
+    <string name="clip_url_not_found">Klip URL\'si bulunamadı</string>
+    <string name="category_clip">Klip</string>
+    <string name="vod_title">VOD</string>
+    <string name="unknown_category">Bilinmeyen</string>
+    <string name="video_default_title">Video</string>
+
+    <!-- DVR/Rewind -->
+    <string name="dvr_mode_activating">Geri sarma modu etkinleştiriliyor…</string>
+    <string name="returning_to_live">Canlıya dönülüyor…</string>
+    <string name="live_url_not_found">Canlı yayın URL\'si bulunamadı</string>
+    <string name="dvr_not_available">Bu yayında geri sarma özelliği kullanılamıyor</string>
+
+    <!-- Screenshot -->
+    <string name="screenshot_error">Ekran görüntüsü hatası: %d</string>
+    <string name="android_version_not_supported">Bu Android sürümünde desteklenmiyor.</string>
+    <string name="screenshot_failed">Ekran görüntüsü alınamadı.</string>
+    <string name="screenshot_saved">Ekran görüntüsü galeriye kaydedildi.</string>
+    <string name="save_error">Kaydetme hatası: %s</string>
+
+    <!-- Time Utils -->
+    <string name="daily_filter">Günlük</string>
+    <string name="time_year_ago">%d yıl önce</string>
+    <string name="time_month_ago">%d ay önce</string>
+    <string name="time_day_ago">%d gün önce</string>
+    <string name="time_hour_ago">%d saat önce</string>
+    <string name="time_minute_ago">%d dakika önce</string>
+    <string name="time_just_now">az önce</string>
+
+    <!-- Dialogs -->
+    <string name="link_warning_title">Bağlantı Uyarısı</string>
+    <string name="link_warning_message">Harici bir bağlantıya gitmek üzeresiniz.\nKCIKTV dışına yönlendiriliyorsunuz. Bu bağlantıya güveniyorsanız devam edin:\n\n%s</string>
+    <string name="link_warning_message_simple">Harici bir bağlantıya gitmek üzeresiniz. Uygulamanın dışına yönlendirileceksiniz.</string>
+    <string name="open_in_app">Uygulamada Aç</string>
+    <string name="link_open_error">Bağlantı açılamadı: %s</string>
+    <string name="visit_site">Siteye Git</string>
+
+    <!-- Sheets -->
+    <string name="message_history_all">Mesaj Geçmişi (Tümü)</string>
+    <string name="message_history_session">Mesaj Geçmişi (Oturum)</string>
+    <string name="user_id_not_found">Kullanıcı ID bulunamadı</string>
+    <string name="channel_id_error">Kanal ID hatası</string>
+    <string name="no_messages_in_session">Bu oturumda mesaj yok</string>
+
+    <!-- Channel Videos/Clips -->
+    <string name="go_to_chat">Sohbet</string>
+    <string name="stream_videos_title">Videolar</string>
+    <string name="no_videos_found">Henüz video yok</string>
+    <string name="popular_clips_title">Popüler Klipler</string>
+    <string name="no_clips_found">Henüz klip yok</string>
+    <string name="sort_label">Sırala:</string>
+    <string name="sort_popular">Popüler</string>
+    <string name="sort_newest">En Yeni</string>
+    <string name="time_label">Zaman:</string>
+    <string name="time_all">Tümü</string>
+    <string name="time_24h">24 Saat</string>
+    <string name="time_weekly">Haftalık</string>
+    <string name="time_monthly">Aylık</string>
+
+    <!-- Categories -->
+    <string name="channel_slug_error">Geçersiz veya eksik kanal bilgisi.</string>
+    <string name="category_not_found">Kategori bulunamadı.</string>
+    <string name="category_updated_success">Kategori başarıyla güncellendi.</string>
+    <string name="category_update_failed">Kategori güncellenemedi: %s</string>
+    <string name="popular_categories_label">Popüler Kategoriler</string>
+    <string name="recent_categories_label">Son Kategoriler</string>
+
+    <!-- Number Suffix -->
+    <string name="number_suffix_thousand">B</string>
+
+    <!-- Clip -->
+    <string name="clip_preparing">Klip hazırlanıyor…</string>
+    <string name="clip_title_hint">Klibinize bir başlık ekleyin (opsiyonel)</string>
+    <string name="clip_created">Klip Oluşturuldu! 🎉</string>
+    <string name="clip_url_label">Klip URL</string>
+    <string name="clip_share">Paylaş</string>
+    <string name="clip_publish">Yayınla</string>
+
+    <!-- Browse Clips -->
+    <string name="sort_date">En Yeni</string>
+    <string name="sort_views">Görüntüleme</string>
+    <string name="clips_load_failed">Klipler yüklenemedi: %s</string>
+    <string name="clip_stats_format">%1$s görüntüleme • %2$s</string>
+    <string name="open_clip">Klibi Aç</string>
+    <string name="browse_clips_filter_title">Klip Filtresi</string>
+
+    <!-- Stream Feed -->
+    <string name="no_streams_available">Yayın bulunamadı</string>
+    <string name="is_live_on_kick">Kick\'te canlı yayında!</string>
+    <string name="share_via">Paylaş</string>
+    <string name="live_now">Şu An Canlı</string>
+
+    <!-- Theatre Mode -->
+    <string name="theatre_mode_enabled">Dikey İzleme Modu açıldı. Çıkmak için geri tuşuna basın.</string>
+    <string name="continue_watching">İzlemeye Devam Et</string>
+
+    <!-- Whats New -->
+    <string name="whats_new_title">Yenilikler</string>
+
+    <!-- Clip Feed Filters -->
+    <string name="clip_filter_all">Tümü</string>
+    <string name="clip_filter_daily">Günlük</string>
+    <string name="clip_filter_weekly">Haftalık</string>
+    <string name="clip_filter_monthly">Aylık</string>
+    <string name="clip_filter_popular">Popüler Klipler</string>
+    <string name="clip_filter_newest">En Yeni Klipler</string>
+    <string name="clip_filter_featured">Öne Çıkan Klipler</string>
+    <string name="clip_category_just_chatting">Sadece Sohbet</string>
+
+    <!-- Download Messages -->
+    <string name="download_getting_url">İndirme URL\'si alınıyor...</string>
+    <string name="download_starting">İndirme başlıyor...</string>
+    <string name="download_complete">İndirme tamamlandı: %s</string>
+    <string name="download_failed_with_error">İndirme başarısız: %s</string>
+    <string name="download_url_failed">İndirme URL\'si alınamadı: %s</string>
+
+    <!-- Gift Shop -->
+    <string name="gift_sent_success">Hediye başarıyla gönderildi!</string>
+    <string name="gift_send_failed">Hediye gönderilemedi: %s</string>
+    <string name="gift_unknown_error">Bilinmeyen hata</string>
+    <string name="gift_sent_format">%s gönderdi</string>
+    <string name="gift_sent_format_pin">%1$s %2$s\ngönderdi</string>
+
+    <!-- VOD/Clip Actions -->
+    <string name="watch_full_vod">Tüm Yayını İzle</string>
+
+    <!-- Link Options -->
+    <string name="add_trusted_domain_preview">Add trusted domain and preview</string>
+
+    <!-- Adapter Items and Time -->
+    <string name="untitled_video">Başlıksız Video</string>
+    <string name="time_ago_years">%d yıl önce</string>
+    <string name="time_ago_months">%d ay önce</string>
+    <string name="time_ago_days">%d gün önce</string>
+    <string name="chat_preview_text">: Bu şekilde görünür</string>
+    <string name="text_view_contains">Görünüm</string>
+    <string name="view_count_suffix">Görüntülenme</string>
+    <string name="unknown_channel">Bilinmeyen</string>
+    <string name="no_date">Tarih yok</string>
+
+
+    <string name="scan_qr_instruction">Bağlanmak için QR kodunu tarayın</string>
+    <string name="qr_scan_success">QR Kod Tarandı</string>
+    <string name="qr_confirm_message">Anahtar bulundu: %s\nDevam etmek istiyor musunuz?</string>
+    <string name="send_request">İstek Gönder</string>
+    <string name="request_sent">İstek başarıyla gönderildi</string>
+    <string name="request_failed">İstek başarısız: %s</string>
+    <string name="invalid_qr_code">Geçersiz QR Kod formatı</string>
+    <string name="code_label">Onay Kodu</string>
+    <string name="qr_confirm_instruction">Aşağıdaki kod TV\'nizde gösterilenle eşleşiyorsa, devam etmek için onayla\'ya tıklayın.</string>
+    <string name="tv_qr_login">TV için QR Giriş</string>
+</resources>

@@ -1,0 +1,176 @@
+<resources>
+    <!-- Base Theme for KCIKTV -->
+    <style name="Theme.KCIKTV" parent="Theme.Leanback">
+        <item name="android:colorPrimary">@color/brand_green</item>
+        <item name="android:colorPrimaryDark">@color/brand_green_dark</item>
+        <item name="android:colorAccent">@color/brand_green</item>
+        <item name="colorPrimary">@color/brand_green</item>
+        <item name="colorPrimaryDark">@color/brand_green_dark</item>
+        <item name="colorAccent">@color/brand_green</item>
+    </style>
+
+    <style name="Theme.KCIKTV.Fullscreen" parent="Theme.KCIKTV">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <!-- Mobile Theme -->
+    <style name="Theme.KCIKTV.Mobile" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary brand color -->
+        <item name="colorPrimary">@color/black</item>
+        <item name="colorPrimaryVariant">@color/black</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <!-- Secondary brand color -->
+        <item name="colorSecondary">@color/brand_green</item>
+        <item name="colorSecondaryVariant">@color/brand_green_dark</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color -->
+        <item name="android:statusBarColor">@color/black</item>
+        <!-- Navigation bar - transparent for gradient effect -->
+        <item name="android:navigationBarColor">#80000000</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+        <!-- Background -->
+        <item name="android:windowBackground">@color/black</item>
+        <item name="android:colorBackground">@color/black</item>
+        <item name="postSplashScreenTheme">@style/Theme.KCIKTV.Mobile</item>
+    </style>
+
+    <style name="Theme.KCIKTV.Mobile.Full" parent="Theme.KCIKTV.Mobile">
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
+    <style name="ShapeAppearance.KCIKTV.SmallComponent" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+
+    <style name="ShapeAppearance.KCIKTV.MediumComponent" parent="ShapeAppearance.MaterialComponents.MediumComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
+    
+    <style name="Widget.KCIKTV.Button" parent="Widget.MaterialComponents.Button">
+        <item name="android:textColor">@color/black</item>
+        <item name="backgroundTint">@color/brand_green</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.KCIKTV.SmallComponent</item>
+    </style>
+
+    <style name="Widget.KCIKTV.Button.Outlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:textColor">@color/brand_green</item>
+        <item name="strokeColor">@color/brand_green</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.KCIKTV.SmallComponent</item>
+    </style>
+
+    <style name="Widget.KCIKTV.CardView" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">#121212</item>
+        <item name="cardElevation">0dp</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.KCIKTV.MediumComponent</item>
+    </style>
+
+    <style name="Widget.KCIKTV.TextView.Title" parent="Widget.MaterialComponents.TextView">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="Widget.KCIKTV.TextView.Subtitle" parent="Widget.MaterialComponents.TextView">
+        <item name="android:textColor">#B0B0B0</item>
+    </style>
+
+    <style name="Theme.KCIKTV.Dialog" parent="Theme.MaterialComponents.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackground">@android:color/transparent</item>
+        <item name="colorSurface">@color/black</item>
+    </style>
+
+
+    <!-- Bottom Sheet Dialog Theme -->
+    <style name="BottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/BottomSheetStyle</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="BottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
+    <!-- Full Screen Dialog Theme -->
+    <style name="FullScreenDialog" parent="Theme.AppCompat.Dialog">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+    </style>
+
+    <!-- Dialog Theme for Dark Mode -->
+    <style name="Theme.KcikTV.Dialog" parent="Theme.MaterialComponents.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="colorPrimary">@color/brand_green</item>
+        <item name="colorAccent">@color/brand_green</item>
+    </style>
+
+    <!-- Shape Appearances -->
+    <style name="CircleImage">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="CircleImageView">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="CircleAppearance">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="RoundedImageView">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+
+    <style name="RoundedTopCorners">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">12dp</item>
+        <item name="cornerSizeTopRight">12dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
+    <!-- Transparent AlertDialog for modern update dialog -->
+    <style name="TransparentAlertDialog" parent="Theme.MaterialComponents.Dialog.Alert">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowMinWidthMajor">90%</item>
+        <item name="android:windowMinWidthMinor">90%</item>
+    </style>
+    
+    <!-- Modern Bottom Navigation Styles -->
+    <style name="BottomNavActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">#5053FC18</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.BottomNav.Pill</item>
+        <item name="android:width">56dp</item>
+        <item name="android:height">28dp</item>
+    </style>
+    
+    <style name="ShapeAppearance.BottomNav.Pill" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">14dp</item>
+    </style>
+    
+    <style name="BottomNavTextActive" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textSize">10sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">#53FC18</item>
+    </style>
+    
+    <style name="BottomNavTextInactive" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textSize">10sp</item>
+        <item name="android:textColor">#808080</item>
+    </style>
+</resources>

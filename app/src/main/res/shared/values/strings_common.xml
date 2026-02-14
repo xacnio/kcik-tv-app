@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">KCIKTV</string>
+    <string name="developer_name">Alperen Çetin (xacnio)</string>
+    <string name="url_repo">https://github.com/xacnio/kcik-tv-app</string>
+    <string name="url_github">https://github.com/xacnio</string>
+    <string name="url_coffee">https://www.buymeacoffee.com/xacnio</string>
+
+    <!-- Player Stats -->
+    <string name="stat_fps">FPS</string>
+
+    <!-- Format Strings -->
+    <string name="slow_mode_countdown_format">%ds</string>
+    <string name="video_quality_format">%1$dp%2$d</string>
+    <string name="eq_db_format">%1$s%2$d dB</string>
+    <string name="multiplier_format">1:%s</string>
+    <string name="duration_format">%ds / 60s</string>
+
+    <!-- Predictions -->
+    <string name="vs">vs</string>
+
+    <!-- Categories (International Terms) -->
+    <string name="cat_irl">IRL</string>
+
+    <!-- EQ -->
+    <string name="eq_bass">Bass (60Hz)</string>
+    <string name="eq_low_mid">Low-Mid (230Hz)</string>
+    <string name="eq_mid">Mid (910Hz)</string>
+    <string name="eq_high_mid">High-Mid (4kHz)</string>
+    <string name="eq_treble">Treble (14kHz)</string>
+    <string name="eq_zero_db">0 dB</string>
+
+    <!-- Formatting -->
+    <string name="number_suffix_million">M</string>
+    <string name="rating_18_plus">+18</string>
+    <string name="points_gain_format">+%d</string>
+
+    <!-- Stream Language Arrays -->
+    <string-array name="stream_language_codes">
+        <item>tr</item><item>en</item><item>af</item><item>de</item><item>ar</item><item>sq</item><item>az</item><item>be</item>
+        <item>bn</item><item>bs</item><item>bg</item><item>cs</item><item>zh</item><item>da</item><item>id</item><item>eo</item>
+        <item>et</item><item>fo</item><item>fa</item><item>nl</item><item>fil</item><item>fi</item><item>fr</item><item>ka</item>
+        <item>haw</item><item>hr</item><item>hi</item><item>he</item><item>ia</item><item>es</item><item>sv</item><item>it</item>
+        <item>ja</item><item>ca</item><item>ko</item><item>la</item><item>pl</item><item>lv</item><item>lt</item><item>hu</item>
+        <item>mk</item><item>ml</item><item>ms</item><item>mn</item><item>no</item><item>nb</item><item>pt</item><item>ro</item>
+        <item>mo</item><item>ru</item><item>sr</item><item>sk</item><item>sl</item><item>so</item><item>su</item><item>tt</item>
+        <item>th</item><item>uk</item><item>ur</item><item>vi</item><item>el</item><item>zu</item>
+    </string-array>
+</resources>

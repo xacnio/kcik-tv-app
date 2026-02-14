@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dev.xacnio.kciktv.shared.ui.widget.ShimmerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/clipShimmerContainer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Header Shimmer -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingBottom="16dp">
+
+            <!-- Avatar Shimmer -->
+            <View
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/circle_shimmer_bg" />
+
+            <!-- Channel Name Shimmer -->
+            <View
+                android:layout_width="120dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="8dp"
+                android:background="#2A2A2A" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <!-- Close Button Shimmer -->
+            <View
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="#2A2A2A" />
+        </LinearLayout>
+
+        <!-- Title Input Shimmer -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="#1A1A1A" />
+
+        <!-- Video Preview Shimmer -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardBackgroundColor="#000000">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#1A1A1A" />
+
+                <!-- Center Loading Spinner -->
+                <ProgressBar
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:indeterminateTint="#53FC18" />
+
+                <!-- Loading Text -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="72dp"
+                    android:text="@string/clip_preparing"
+                    android:textColor="#AAAAAA"
+                    android:textSize="14sp" />
+            </FrameLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Range Slider Shimmer -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="16dp">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="24dp"
+                android:background="#1A1A1A" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="end"
+                android:layout_marginTop="8dp">
+
+                <View
+                    android:layout_width="60dp"
+                    android:layout_height="14dp"
+                    android:background="#2A2A2A" />
+
+                <View
+                    android:layout_width="80dp"
+                    android:layout_height="14dp"
+                    android:layout_marginStart="8dp"
+                    android:background="#2A2A2A" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Action Buttons Shimmer -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="24dp"
+            android:gravity="end">
+
+            <View
+                android:layout_width="72dp"
+                android:layout_height="36dp"
+                android:background="#2A2A2A" />
+
+            <View
+                android:layout_width="80dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="8dp"
+                android:background="#333333" />
+        </LinearLayout>
+    </LinearLayout>
+</dev.xacnio.kciktv.shared.ui.widget.ShimmerLayout>

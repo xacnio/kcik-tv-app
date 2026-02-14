@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="clip_range_default_values">
+        <item>60</item>
+        <item>90</item>
+    </array>
+</resources>

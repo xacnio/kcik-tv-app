@@ -1,0 +1,73 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="280dp"
+    android:background="#121212"
+    android:orientation="vertical">
+
+    <!-- Tab Bar (Horizontal Scroll of category icons) -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:scrollbars="none"
+        android:background="#1a1a1a">
+
+        <LinearLayout
+            android:id="@+id/emoteTabContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="8dp" />
+    </HorizontalScrollView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#222222" />
+
+    <!-- Loading State -->
+    <FrameLayout
+        android:id="@+id/emoteLoadingContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="center"
+            android:indeterminateTint="#53FC18" />
+    </FrameLayout>
+
+    <!-- Emote List Area -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <!-- Emote Grid -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/emoteRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:padding="8dp" />
+
+        <!-- Floating Delete Button -->
+        <ImageButton
+            android:id="@+id/btnDeleteEmote"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            android:background="@drawable/bg_circle"
+            android:backgroundTint="#2A2A2A"
+            android:elevation="6dp"
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_backspace"
+            app:tint="#FF4444" />
+    </FrameLayout>
+</LinearLayout>

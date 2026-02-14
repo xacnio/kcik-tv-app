@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <!-- Content -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <!-- Top Tabs -->
+        <LinearLayout
+            android:id="@+id/tabsLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="8dp">
+
+                <LinearLayout
+                    android:id="@+id/tabLiveContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    android:paddingHorizontal="4dp">
+                    
+                    <TextView
+                        android:id="@+id/tabLive"
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:text="@string/tab_live"
+                        android:textColor="#AAAAAA"
+                        android:textSize="15sp"
+                        android:gravity="center"
+                        android:paddingHorizontal="8dp"
+                        android:textStyle="bold"/>
+                        
+                    <View
+                        android:id="@+id/tabLiveIndicator"
+                        android:layout_width="match_parent"
+                        android:layout_height="3dp"
+                        android:background="#53FC18"
+                        android:visibility="invisible"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/tabCategoriesContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    android:paddingHorizontal="4dp">
+                    
+                    <TextView
+                        android:id="@+id/tabCategories"
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:text="@string/tab_categories"
+                        android:textColor="#53FC18"
+                        android:textSize="15sp"
+                        android:gravity="center"
+                        android:paddingHorizontal="8dp"
+                        android:textStyle="bold"/>
+                        
+                    <View
+                        android:id="@+id/tabCategoriesIndicator"
+                        android:layout_width="match_parent"
+                        android:layout_height="3dp"
+                        android:background="#53FC18"
+                        android:visibility="visible"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/tabClipsContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    android:paddingHorizontal="4dp">
+                    
+                    <TextView
+                        android:id="@+id/tabClips"
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:text="@string/tab_clips"
+                        android:textColor="#AAAAAA"
+                        android:textSize="15sp"
+                        android:gravity="center"
+                        android:paddingHorizontal="8dp"
+                        android:textStyle="bold"/>
+                        
+                    <View
+                        android:id="@+id/tabClipsIndicator"
+                        android:layout_width="match_parent"
+                        android:layout_height="3dp"
+                        android:background="#53FC18"
+                        android:visibility="invisible"/>
+                </LinearLayout>
+                
+                <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
+                
+
+                
+                <ImageView
+                     android:id="@+id/browseBlockedManagerBtn"
+                     android:layout_width="24dp"
+                     android:layout_height="24dp"
+                     android:layout_marginEnd="12dp"
+                     android:padding="2dp"
+                     android:src="@drawable/ic_eye_off" 
+                     app:tint="#FFFFFF"
+                     android:visibility="gone"
+                     tools:visibility="visible"/>
+
+                <ImageView
+                     android:id="@+id/browseFilterButton"
+                     android:layout_width="24dp"
+                     android:layout_height="24dp"
+                     android:padding="2dp"
+                     android:src="@drawable/ic_settings" 
+                     app:tint="#FFFFFF"/>
+                     
+            </LinearLayout>
+            
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#222222"/>
+        </LinearLayout>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/browseSwipeRefresh"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/browseCategoriesRecycler"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingBottom="130dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_browse_category"/> 
+                
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/browseLiveChannelsRecycler"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingBottom="130dp"
+                android:visibility="gone"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_mobile_channel"/> 
+                
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/browseClipsRecycler"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingBottom="130dp"
+                android:visibility="gone"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                app:spanCount="2"
+                tools:listitem="@layout/item_browse_clip"/>
+                
+            <LinearLayout
+                android:id="@+id/browseClipsEmptyState"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:visibility="gone">
+                
+                <ImageView
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@drawable/ic_clip"
+                    app:tint="#666666"/>
+                    
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/no_clips_found"
+                    android:textColor="#999999"
+                    android:textSize="14sp"/>
+            </LinearLayout>
+                
+            <include 
+                android:id="@+id/browseShimmerInclude"
+                layout="@layout/layout_browse_shimmer"
+                android:visibility="gone"/>
+        </FrameLayout>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </LinearLayout>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

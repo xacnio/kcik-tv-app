@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="64dp"
+    android:padding="0dp">
+
+    <!-- Text Content -->
+    <LinearLayout
+        android:id="@+id/notification_text_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="4dp"
+        android:layout_toStartOf="@+id/notification_actions"
+        android:orientation="vertical"
+        android:gravity="start">
+
+        <TextView
+            android:id="@+id/notification_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/channel_name"
+            android:textColor="@color/notif_text_primary"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/notification_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/currently_live"
+            android:textColor="@color/notif_text_secondary"
+            android:textSize="13sp"
+            android:maxLines="1" />
+    </LinearLayout>
+
+    <!-- Actions (Pause / Close) -->
+    <LinearLayout
+        android:id="@+id/notification_actions"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/btn_notification_mute"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="4dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_volume"
+            android:scaleType="centerInside"
+            android:tint="@color/notif_text_primary" />
+
+        <ImageButton
+            android:id="@+id/btn_notification_play_pause"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_media_pause"
+            android:scaleType="centerInside"
+            android:tint="@color/notif_text_primary" />
+
+        <ImageButton
+            android:id="@+id/btn_notification_stop"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="4dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_close"
+            android:scaleType="centerInside"
+            android:tint="@color/notif_text_primary" />
+    </LinearLayout>
+
+</RelativeLayout>
