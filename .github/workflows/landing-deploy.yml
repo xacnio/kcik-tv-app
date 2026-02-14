@@ -5,9 +5,7 @@ on:
     branches:
       - master
     paths:
-      - 'docs/v4-landing/**'
-      - 'docs/privacy_policy.md'
-      - 'docs/screenshots/**'
+      - 'docs/**'
 
   workflow_dispatch:
 
@@ -34,27 +32,24 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: docs/v4-landing/package-lock.json
+          cache-dependency-path: docs/package-lock.json
 
       - name: Install Dependencies
-        working-directory: docs/v4-landing
+        working-directory: docs
         run: npm ci
 
       - name: Lint
-        working-directory: docs/v4-landing
+        working-directory: docs
         run: npm run lint || true
 
       - name: Build
-        working-directory: docs/v4-landing
+        working-directory: docs
         run: npm run build
 
       - name: Copy Root Docs Assets
         run: |
-          # Copy root docs files (privacy policy, favicon, etc.) to the build output
-          cp -r docs/screenshots docs/v4-landing/dist/screenshots 2>/dev/null || true
-          cp docs/favicon.ico docs/v4-landing/dist/favicon.ico 2>/dev/null || true
-          cp docs/privacy_policy.md docs/v4-landing/dist/privacy_policy.md 2>/dev/null || true
-          cp docs/robots.txt docs/v4-landing/dist/robots.txt 2>/dev/null || true
+          # Copy extra files if needed (though now everything is inside docs/public ideally)
+          cp docs/privacy_policy.md docs/dist/privacy_policy.md 2>/dev/null || true
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -62,7 +57,7 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/v4-landing/dist
+          path: docs/dist
 
   deploy:
     name: Deploy to GitHub Pages
