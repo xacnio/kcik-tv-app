@@ -2,6 +2,7 @@
 <resources>
     <!-- App -->
     <string name="app_name">KCIKTV</string>
+    <string name="app_name_caps">KCIKTV</string>
     <string name="developer_name">Alperen Çetin (xacnio)</string>
     <string name="url_repo">https://github.com/xacnio/kcik-tv-app</string>
     <string name="url_github">https://github.com/xacnio</string>

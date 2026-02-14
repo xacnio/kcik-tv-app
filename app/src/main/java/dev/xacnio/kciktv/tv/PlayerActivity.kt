@@ -3554,7 +3554,8 @@ class PlayerActivity : FragmentActivity() {
         
         lifecycleScope.launch {
             // Check if update is available via repository
-            if (!prefs.autoUpdateEnabled && !manual) return@launch
+            // Skip auto-checks in Debug mode
+            if ((!prefs.autoUpdateEnabled || BuildConfig.DEBUG) && !manual) return@launch
             
             updateRepository.getLatestRelease(prefs.updateChannel).onSuccess { release ->
                 if (release != null) {

@@ -140,6 +140,9 @@ class WhatsNewSheetManager(
                 withContext(Dispatchers.Main) {
                     if (result.isSuccess) {
                         var releases = result.getOrNull() ?: emptyList()
+                        // Ensure chronological order for display
+                        releases = releases.sortedByDescending { it.publishedAt }
+                        
                         val currentVer = dev.xacnio.kciktv.BuildConfig.VERSION_NAME
                         
                         // User request: Start showing from "My Version" downwards (History)

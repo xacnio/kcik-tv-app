@@ -1,9 +1,23 @@
+import java.io.ByteArrayOutputStream
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-parcelize")
     id("kotlin-kapt")
-    id("com.google.gms.google-services")
+}
+
+fun getGitHash(): String {
+    return try {
+        val stdout = ByteArrayOutputStream()
+        project.exec {
+            commandLine("git", "rev-parse", "--short", "HEAD")
+            standardOutput = stdout
+        }
+        stdout.toString().trim()
+    } catch (e: Exception) {
+        "unknown"
+    }
 }
 
 android {
@@ -15,7 +29,8 @@ android {
         minSdk = 23
         targetSdk = 34
         versionCode = 1
-        versionName = "2.0.0-beta"
+        val baseVersion = "2.0.0-beta"
+        versionName = "$baseVersion-${getGitHash()}"
     }
 
     sourceSets {
@@ -37,6 +52,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+            resValue("string", "app_name", "KCIKTV-TEST")
+            resValue("string", "app_name_caps", "KCIKTV-TEST")
         }
     }
     
@@ -116,4 +137,8 @@ dependencies {
 
     // QR Code Scanning
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+}
+
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
 }
