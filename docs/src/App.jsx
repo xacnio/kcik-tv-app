@@ -6,12 +6,19 @@ import remarkGfm from 'remark-gfm';
 
 // --- Components ---
 
+const getAssetPath = (path) => {
+  const base = import.meta.env.BASE_URL;
+  // Ensure we don't end up with strictly double slashes unless needed, 
+  // though browsers handle it fine.
+  return base + (path.startsWith('/') ? path.slice(1) : path);
+};
+
 const Navbar = () => (
   <nav className="fixed top-0 w-full z-50 glass border-b border-white/5">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex items-center justify-between h-16">
         <div className="flex items-center gap-2">
-          <img src="/logo.svg" alt="KCIKTV" className="w-8 h-8 rounded-full" />
+          <img src={getAssetPath("logo.svg")} alt="KCIKTV" className="w-8 h-8 rounded-full" />
           <span className="font-bold text-xl tracking-tight">KCIKTV</span>
         </div>
         <div className="hidden md:flex items-center space-x-8">
@@ -35,7 +42,7 @@ const Hero = () => (
         transition={{ duration: 0.6 }}
         className="mb-6"
       >
-        <img src="/logo.svg" alt="KCIKTV" className="w-24 h-24 rounded-full mx-auto mb-6 shadow-[0_0_50px_rgba(83,252,24,0.3)]" />
+        <img src={getAssetPath("logo.svg")} alt="KCIKTV" className="w-24 h-24 rounded-full mx-auto mb-6 shadow-[0_0_50px_rgba(83,252,24,0.3)]" />
         <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-4">
           KCIK<span className="text-brand-500">TV</span>
         </h1>
@@ -87,19 +94,19 @@ const Screenshots = () => {
 
   const screenshots = {
     tv: [
-      { src: "/screenshots/tv-chat.png", caption: "Chat Overlay" },
-      { src: "/screenshots/tv-player.png", caption: "Player" },
-      { src: "/screenshots/tv-home.png", caption: "Home Screen" }
+      { src: getAssetPath("screenshots/tv-chat.png"), caption: "Chat Overlay" },
+      { src: getAssetPath("screenshots/tv-player.png"), caption: "Player" },
+      { src: getAssetPath("screenshots/tv-home.png"), caption: "Home Screen" }
     ],
     mobile: [
-      { src: "/screenshots/mobile-feed.png", caption: "Feed" },
-      { src: "/screenshots/mobile-player.png", caption: "Player" },
-      { src: "/screenshots/mobile-settings.png", caption: "Settings" },
-      { src: "/screenshots/mobile-category-view.png", caption: "Category View" }
+      { src: getAssetPath("screenshots/mobile-feed.png"), caption: "Feed" },
+      { src: getAssetPath("screenshots/mobile-player.png"), caption: "Player" },
+      { src: getAssetPath("screenshots/mobile-settings.png"), caption: "Settings" },
+      { src: getAssetPath("screenshots/mobile-category-view.png"), caption: "Category View" }
     ],
     tablet: [
-      { src: "/screenshots/tablet-home.png", caption: "Home Screen" },
-      { src: "/screenshots/tablet-player.png", caption: "Player" }
+      { src: getAssetPath("screenshots/tablet-home.png"), caption: "Home Screen" },
+      { src: getAssetPath("screenshots/tablet-player.png"), caption: "Player" }
     ]
   };
 
@@ -710,7 +717,7 @@ const Footer = () => (
   <footer className="border-t border-white/5 py-12 bg-black/20">
     <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
       <div className="flex items-center gap-2">
-        <img src="/logo.svg" alt="KCIKTV" className="w-6 h-6 rounded-full" />
+        <img src={getAssetPath("logo.svg")} alt="KCIKTV" className="w-6 h-6 rounded-full" />
         <span className="font-semibold text-gray-300">KCIKTV</span>
       </div>
 
