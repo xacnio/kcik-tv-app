@@ -198,6 +198,18 @@ class SettingsPanelManager(
                 prefs.autoUpdateEnabled = isEnabled
             }
 
+            // Update Channel
+            val channelSubtitle = if (prefs.updateChannel == "beta") 
+                activity.getString(R.string.beta) 
+            else 
+                activity.getString(R.string.stable)
+                
+            addSettingItem(container, R.drawable.ic_settings,
+                activity.getString(R.string.setting_update_channel),
+                channelSubtitle) {
+                showUpdateChannelDialog()
+            }
+
             // Check for Updates
             addSettingItem(container, R.drawable.ic_update,
                 activity.getString(R.string.check_update), null) {
@@ -674,6 +686,27 @@ class SettingsPanelManager(
                 
                 // Restart activity to apply language change
                 activity.recreate()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+    
+    private fun showUpdateChannelDialog() {
+        val options = arrayOf(
+            activity.getString(R.string.stable),
+            activity.getString(R.string.beta)
+        )
+        val values = arrayOf("stable", "beta")
+        val currentIndex = values.indexOf(prefs.updateChannel).takeIf { it >= 0 } ?: 0
+
+        AlertDialog.Builder(activity)
+            .setTitle(R.string.setting_update_channel)
+            .setSingleChoiceItems(options, currentIndex) { dialog, which ->
+                prefs.updateChannel = values[which]
+                dialog.dismiss()
+                // Refresh detail sheet
+                detailDialog?.dismiss()
+                showAppSettings()
             }
             .setNegativeButton(R.string.cancel, null)
             .show()

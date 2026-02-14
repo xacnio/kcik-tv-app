@@ -1089,7 +1089,7 @@ class MobilePlayerActivity : FragmentActivity() {
         }
         
         // Auto-update check on startup
-        if (prefs.autoUpdateEnabled) {
+        if (!BuildConfig.DEBUG && prefs.autoUpdateEnabled) {
             settingsPanelManager.checkForUpdates(isSilent = true)
         }
     }

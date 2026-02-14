@@ -21,22 +21,24 @@ class UpdateRepository {
 
     suspend fun getLatestRelease(channel: String): Result<GithubRelease?> = withContext(Dispatchers.IO) {
         try {
-            val response = if (channel == "stable") {
-                githubService.getLatestRelease(owner, repo)
-            } else {
-                // For beta, we take the absolute latest release (whether it is stable or beta)
-                val listResponse = githubService.getReleases(owner, repo)
-                if (listResponse.isSuccessful) {
-                    val releases = listResponse.body() ?: emptyList()
-                    val newestRelease = releases.firstOrNull()
-                    return@withContext Result.success(newestRelease)
-                } else {
-                    return@withContext Result.failure(Exception("API error: ${listResponse.code()}"))
-                }
-            }
-
+            // Fetch list of releases (default page size is 30, sufficient for finding latest)
+            val response = githubService.getReleases(owner, repo)
+            
             if (response.isSuccessful) {
-                Result.success(response.body())
+                var releases = response.body() ?: emptyList()
+                
+                // Explicitly sort by publishedAt descending to ensure we get the chrono-latest
+                releases = releases.sortedByDescending { it.publishedAt }
+
+                if (channel == "stable") {
+                    // For stable, find the first one that is NOT a prerelease
+                    val stableRelease = releases.firstOrNull { !it.prerelease }
+                    Result.success(stableRelease)
+                } else {
+                    // For beta, just take the absolute newest (including prereleases)
+                    val newestRelease = releases.firstOrNull()
+                    Result.success(newestRelease)
+                }
             } else {
                 Result.failure(Exception("API error: ${response.code()}"))
             }

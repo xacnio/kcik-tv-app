@@ -81,7 +81,7 @@ jobs:
       - name: Extract Version Name
         id: version
         run: |
-          VERSION_BASE=$(grep "versionName =" app/build.gradle.kts | head -n 1 | awk -F '"' '{print $2}')
+          VERSION_BASE=$(grep 'val baseVersion =' app/build.gradle.kts | head -n 1 | awk -F '"' '{print $2}')
           SHORT_SHA=$(git rev-parse --short HEAD)
           VERSION="${VERSION_BASE}-${SHORT_SHA}"
           
