@@ -576,7 +576,7 @@ class ChatUiManager(
                  exitCelebrationMode()
                  
                  // Perform generic action with message
-                 val result = repository.performCelebrationAction(slug, celebrationId, "consume", message, token)
+                 val result = repository.performCelebrationAction(chatroomId, celebrationId, "consume", message, token)
                  
                  result.onFailure { _ ->
                      // If failed, restore the message to input so user doesn't lose it
@@ -1505,11 +1505,11 @@ class ChatUiManager(
     }
 
     private fun performCelebrationAction(id: String, action: String) {
-        val slug = currentCelebrationSlug ?: return
+        val chatroomId = chatStateManager.currentChatroomId ?: return
         val token = prefs.authToken ?: return
         
         lifecycleScope.launch {
-            repository.performCelebrationAction(slug, id, action, null, token)
+            repository.performCelebrationAction(chatroomId, id, action, null, token)
             
             if (action == "consume" || action == "dismiss") {
                 hideCelebration(defer = false)
