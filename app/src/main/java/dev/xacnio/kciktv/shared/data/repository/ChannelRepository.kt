@@ -272,7 +272,7 @@ class ChannelRepository {
         }
     }
 
-    suspend fun performCelebrationAction(slug: String, celebrationId: String, action: String, message: String? = null, token: String): Result<Boolean> = withContext(Dispatchers.IO) {
+    suspend fun performCelebrationAction(chatroomId: Long, celebrationId: String, action: String, message: String? = null, token: String): Result<Boolean> = withContext(Dispatchers.IO) {
         try {
             val jsonBody = org.json.JSONObject().apply {
                 put("action", action)
@@ -280,7 +280,7 @@ class ChannelRepository {
             }.toString()
             
             val requestBody = jsonBody.toRequestBody("application/json".toMediaType())
-            val response = channelService.postChannelCelebrationAction(slug.lowercase(), celebrationId, "Bearer $token", requestBody)
+            val response = channelService.postChannelCelebrationAction(chatroomId, celebrationId, "Bearer $token", requestBody)
             
             if (response.isSuccessful) {
                 Result.success(true)
