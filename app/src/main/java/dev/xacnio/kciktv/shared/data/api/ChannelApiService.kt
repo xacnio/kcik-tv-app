@@ -136,9 +136,9 @@ interface ChannelApiService {
     ): Response<dev.xacnio.kciktv.shared.data.model.ChannelUserMeResponse>
 
     @Headers("Content-Type: application/json", "Accept: application/json")
-    @POST("api/v2/channels/{slug}/celebrations/{celebrationId}/action")
+    @POST("api/v2/chatrooms/{chatroomId}/celebrations/{celebrationId}/action")
     suspend fun postChannelCelebrationAction(
-        @Path("slug") slug: String,
+        @Path("chatroomId") chatroomId: Long,
         @Path("celebrationId") celebrationId: String,
         @Header("Authorization") token: String,
         @Body body: okhttp3.RequestBody
