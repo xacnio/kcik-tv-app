@@ -474,7 +474,8 @@
     <string name="chat_error_banned">Du wurdest von diesem Kanal gebannt.</string>
     <string name="chat_error_message_too_long">Nachricht ist zu lang</string>
     <string name="chat_error_duplicate_message">Doppelte Nachricht erkannt</string>
-    <string name="chat_error_generic">Nachricht kann nicht gesendet werden: %s</string>
+    <string name="chat_error_generic">Nachricht konnte nicht gesendet werden: %s</string>
+    <string name="chat_error_timeout">Zeitüberschreitung der Verbindung. Bitte überprüfen Sie Ihr Internet.</string>
 
     <!-- Audio Modes -->
     <string name="audio_mode_custom_eq">Benutzerdefinierter EQ</string>

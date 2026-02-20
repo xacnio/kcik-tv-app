@@ -474,7 +474,8 @@
     <string name="chat_error_banned">Vous êtes banni de cette chaîne.</string>
     <string name="chat_error_message_too_long">Le message est trop long</string>
     <string name="chat_error_duplicate_message">Message en double détecté</string>
-    <string name="chat_error_generic">Impossible d\'envoyer le message: %s</string>
+    <string name="chat_error_generic">Échec de l\'envoi du message : %s</string>
+    <string name="chat_error_timeout">Délai de connexion dépassé. Veuillez vérifier votre connexion internet.</string>
 
     <!-- Audio Modes -->
     <string name="audio_mode_custom_eq">EQ Personnalisé</string>

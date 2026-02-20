@@ -475,6 +475,7 @@
     <string name="chat_error_message_too_long">Mesaj çok uzun.</string>
     <string name="chat_error_duplicate_message">Aynı mesajı tekrar gönderemezsiniz.</string>
     <string name="chat_error_generic">Mesaj gönderilemedi: %s</string>
+    <string name="chat_error_timeout">Bağlantı zaman aşımına uğradı. Lütfen internetinizi kontrol edin.</string>
 
     <!-- Audio Modes -->
     <string name="audio_mode_custom_eq">Özel EQ</string>

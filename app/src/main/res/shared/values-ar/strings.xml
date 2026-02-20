@@ -475,6 +475,7 @@
     <string name="chat_error_message_too_long">الرسالة طويلة جداً.</string>
     <string name="chat_error_duplicate_message">لا يمكنك إرسال نفس الرسالة مرة أخرى.</string>
     <string name="chat_error_generic">فشل إرسال الرسالة: %s</string>
+    <string name="chat_error_timeout">انتهت مهلة الاتصال. يرجى التحقق من الإنترنت الخاص بك.</string>
 
     <!-- Audio Modes -->
     <string name="audio_mode_custom_eq">معادل صوت مخصص</string>

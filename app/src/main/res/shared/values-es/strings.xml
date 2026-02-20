@@ -475,6 +475,7 @@
     <string name="chat_error_message_too_long">El mensaje es demasiado largo</string>
     <string name="chat_error_duplicate_message">Mensaje duplicado detectado</string>
     <string name="chat_error_generic">No se puede enviar el mensaje: %s</string>
+    <string name="chat_error_timeout">Tiempo de conexión agotado. Por favor, comprueba tu internet.</string>
 
     <!-- Audio Modes -->
     <string name="audio_mode_custom_eq">EQ Personalizado</string>
