@@ -1,7 +1,7 @@
 /**
  * File: ChatSettingsSheetManager.kt
  *
- * Description: Controls the Chat Settings bottom sheet, allowing users to customize their chat experience.
+ * Description: Controls the Chat Settings panel, allowing users to customize their chat experience.
  * It manages preferences for message sizing, timestamp display, and animation styles,
  * and provides an interface for users to customize their profile identity and badges for the channel.
  *
@@ -17,16 +17,16 @@ import android.annotation.SuppressLint
 import android.graphics.Color
 import android.util.Log
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.GridLayout
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SwitchCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import dev.xacnio.kciktv.mobile.MobilePlayerActivity
 import dev.xacnio.kciktv.R
 import dev.xacnio.kciktv.shared.data.model.ChatIdentityBadge
@@ -58,130 +58,156 @@ class ChatSettingsSheetManager(
         "#B9D6F6", "#72ACED", "#1475E1", "#BAFEA3", "#75FD46", "#93EBE0", "#31D6C2", "#00CCB3"
     )
 
-    // Helper state for sliders usually kept in sync with prefs
     private var currentTextSize: Float = 14f
     private var currentEmoteScale: Float = 1.0f
     private var showTimestamps = false
     private var showSeconds = false
 
+    private var currentPanelView: View? = null
+    private var pendingRulesChannel: ChannelItem? = null
+
+    private companion object {
+        const val PAGE_ROOT = 0
+        const val PAGE_PROFILE = 1
+        const val PAGE_CHAT_SETTINGS = 2
+        const val PAGE_HIGHLIGHTS = 3
+        const val PAGE_ANIMATIONS = 4
+    }
+
+    fun isPanelShowing(): Boolean = currentPanelView != null
+
+    fun dismissPanel() {
+        val view = currentPanelView ?: return
+        if (hasProfileChanges) saveProfileIdentity()
+        view.animate().alpha(0f).setDuration(150).withEndAction {
+            (view.parent as? android.view.ViewGroup)?.removeView(view)
+            currentPanelView = null
+        }.start()
+        pendingRulesChannel?.let { channel ->
+            chatRulesManager.forceShowRules(channel)
+            pendingRulesChannel = null
+        }
+    }
+
     @SuppressLint("InflateParams")
     internal fun showChatSettingsSheet(startOnProfile: Boolean = false) {
-        val dialog = BottomSheetDialog(activity)
+        if (currentPanelView != null) return
+
         val view = activity.layoutInflater.inflate(R.layout.bottom_sheet_chat_settings, null)
-        
+        currentPanelView = view
+
+        // Header views
+        val panelBackButton = view.findViewById<ImageButton>(R.id.panelBackButton)
+        val panelBackSpacer = view.findViewById<View>(R.id.panelBackSpacer)
+        val panelTitleText = view.findViewById<TextView>(R.id.panelTitleText)
+        val btnDismiss = view.findViewById<View>(R.id.btnDismissSettings)
+
+        // Sub-page containers
         val rootMenu = view.findViewById<View>(R.id.chatSettingsRootMenu)
         val profileView = view.findViewById<View>(R.id.profileViewContainer)
         val chatSettingsView = view.findViewById<View>(R.id.chatSettingsViewContainer)
         val mainScrollView = view.findViewById<View>(R.id.mainSettingsScrollView)
-        
-        // Sync local state with prefs/adapter
+        val highlightContainer = view.findViewById<View>(R.id.highlightSettingsScrollView)
+        val animContainer = view.findViewById<View>(R.id.animationSettingsContainer)
+
+        // Sync prefs
         currentTextSize = prefs.chatTextSize
         currentEmoteScale = prefs.chatEmoteSize
         showTimestamps = prefs.chatShowTimestamps
         showSeconds = prefs.chatShowSeconds
-        
-        if (startOnProfile) {
-            rootMenu.visibility = View.GONE
-            profileView.visibility = View.VISIBLE
-        }
-        
-        // Main Menu Clicks
-        val btnProfile = view.findViewById<View>(R.id.btnMenuProfile)
-        if (!prefs.isLoggedIn) {
-            btnProfile.isEnabled = false
-            btnProfile.alpha = 0.5f
-        } else {
-            btnProfile.isEnabled = true
-            btnProfile.alpha = 1.0f
-            btnProfile.setOnClickListener {
-                rootMenu.visibility = View.GONE
-                profileView.visibility = View.VISIBLE
-            }
-        }
-        
-        view.findViewById<View>(R.id.btnMenuChatSettings).setOnClickListener {
-            rootMenu.visibility = View.GONE
-            chatSettingsView.visibility = View.VISIBLE
-        }
 
-        var pendingRulesChannel: ChannelItem? = null
-        
-        view.findViewById<View>(R.id.btnMenuChatRules).setOnClickListener {
-            pendingRulesChannel = activity.currentChannel
-            dialog.dismiss()
-        }
-        
         hasProfileChanges = false
         isProfileIdentityLoaded = false
         availableProfileBadges.clear()
-        setupProfileSettings(view)
-        
-        // Back Clicks
-        view.findViewById<View>(R.id.btnBackFromProfile).setOnClickListener {
-            if (hasProfileChanges) saveProfileIdentity()
-            profileView.visibility = View.GONE
-            rootMenu.visibility = View.VISIBLE
+
+        var currentPage = PAGE_ROOT
+
+        fun updateHeader(titleRes: Int, showBack: Boolean) {
+            panelTitleText.text = activity.getString(titleRes)
+            panelBackButton.visibility = if (showBack) View.VISIBLE else View.GONE
+            panelBackSpacer.visibility = if (showBack) View.GONE else View.VISIBLE
         }
-        
-        view.findViewById<View>(R.id.btnBackToRootFromChat).setOnClickListener {
-            chatSettingsView.visibility = View.GONE
-            rootMenu.visibility = View.VISIBLE
-        }
-        
-        // Dismiss button
-        view.findViewById<View>(R.id.btnDismissSettings).setOnClickListener {
-            dialog.dismiss()
-        }
-        
-        // --- Tab Switching ---
-        val tabSizes = view.findViewById<TextView>(R.id.tabSizes)
-        val tabFeatures = view.findViewById<TextView>(R.id.tabFeatures)
-        val tabAdvanced = view.findViewById<TextView>(R.id.tabAdvanced)
-        val sectionSizes = view.findViewById<View>(R.id.sectionSizes)
-        val sectionFeatures = view.findViewById<View>(R.id.sectionFeatures)
-        val sectionAdvanced = view.findViewById<View>(R.id.sectionAdvanced)
-        
-        val themeColor = prefs.themeColor
-        
-        fun selectTab(selectedTab: TextView) {
-            val tabs = listOf(tabSizes, tabFeatures, tabAdvanced)
-            val sections = listOf(sectionSizes, sectionFeatures, sectionAdvanced)
-            tabs.forEachIndexed { index, tab ->
-                val isSelected = tab == selectedTab
-                tab.backgroundTintList = android.content.res.ColorStateList.valueOf(
-                    if (isSelected) themeColor else 0xFF2A2A2A.toInt()
-                )
-                tab.setTextColor(if (isSelected) 0xFFFFFFFF.toInt() else 0xFFAAAAAA.toInt())
-                tab.setTypeface(null, if (isSelected) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
-                sections[index].visibility = if (isSelected) View.VISIBLE else View.GONE
+
+        fun navigate(page: Int) {
+            currentPage = page
+            val targetHeight = if (page == PAGE_ROOT) dpToPx(264) else getSubPageHeight()
+            animatePanelToHeight(targetHeight)
+            when (page) {
+                PAGE_ROOT -> {
+                    rootMenu.visibility = View.VISIBLE
+                    profileView.visibility = View.GONE
+                    chatSettingsView.visibility = View.GONE
+                    updateHeader(R.string.chat_settings_title, false)
+                }
+                PAGE_PROFILE -> {
+                    rootMenu.visibility = View.GONE
+                    profileView.visibility = View.VISIBLE
+                    chatSettingsView.visibility = View.GONE
+                    updateHeader(R.string.chat_identity_title, true)
+                }
+                PAGE_CHAT_SETTINGS -> {
+                    rootMenu.visibility = View.GONE
+                    profileView.visibility = View.GONE
+                    chatSettingsView.visibility = View.VISIBLE
+                    mainScrollView.visibility = View.VISIBLE
+                    highlightContainer.visibility = View.GONE
+                    animContainer.visibility = View.GONE
+                    updateHeader(R.string.chat_appearance_title, true)
+                }
+                PAGE_HIGHLIGHTS -> {
+                    mainScrollView.visibility = View.GONE
+                    highlightContainer.visibility = View.VISIBLE
+                    animContainer.visibility = View.GONE
+                    updateHeader(R.string.chat_setting_highlights, true)
+                }
+                PAGE_ANIMATIONS -> {
+                    mainScrollView.visibility = View.GONE
+                    highlightContainer.visibility = View.GONE
+                    animContainer.visibility = View.VISIBLE
+                    updateHeader(R.string.setting_chat_animation, true)
+                    setupAnimationSettings(view)
+                }
             }
         }
-        
-        tabSizes.setOnClickListener { selectTab(tabSizes) }
-        tabFeatures.setOnClickListener { selectTab(tabFeatures) }
-        tabAdvanced.setOnClickListener { selectTab(tabAdvanced) }
-        
-        // Initialize with Sizes tab selected and apply theme color
-        selectTab(tabSizes)
-        
-        // Views
-        val switchTimestamps = view.findViewById<SwitchCompat>(R.id.switchTimestamps)
-        val switchSeconds = view.findViewById<SwitchCompat>(R.id.switchSeconds)
-        val containerSeconds = view.findViewById<View>(R.id.containerSeconds)
-        val textSeconds = view.findViewById<TextView>(R.id.textSeconds)
-        
-        val seekBarMessageSize = view.findViewById<SeekBar>(R.id.seekBarMessageSize)
-        val textValueMessageSize = view.findViewById<TextView>(R.id.textValueMessageSize)
-        
-        val seekBarEmoteSize = view.findViewById<SeekBar>(R.id.seekBarEmoteSize)
-        val textValueEmoteSize = view.findViewById<TextView>(R.id.textValueEmoteSize)
-        
-        val switchPinnedGifts = view.findViewById<SwitchCompat>(R.id.switchPinnedGifts)
-        val switchEmoteCombo = view.findViewById<SwitchCompat>(R.id.switchEmoteCombo)
-        val switchFloatingEmotes = view.findViewById<SwitchCompat>(R.id.switchFloatingEmotes)
-        val switchLowBatteryMode = view.findViewById<SwitchCompat>(R.id.switchLowBatteryMode)
-        
-        // Apply theme color to switches and seekbars
+
+        panelBackButton.setOnClickListener {
+            when (currentPage) {
+                PAGE_PROFILE -> {
+                    if (hasProfileChanges) saveProfileIdentity()
+                    navigate(PAGE_ROOT)
+                }
+                PAGE_CHAT_SETTINGS -> navigate(PAGE_ROOT)
+                PAGE_HIGHLIGHTS -> navigate(PAGE_CHAT_SETTINGS)
+                PAGE_ANIMATIONS -> navigate(PAGE_CHAT_SETTINGS)
+            }
+        }
+
+        btnDismiss.setOnClickListener { dismissPanel() }
+
+        // Root menu navigation
+        val btnProfile = view.findViewById<View>(R.id.btnMenuProfile)
+        if (!prefs.isLoggedIn) {
+            btnProfile.isEnabled = false
+            btnProfile.alpha = 0.4f
+        } else {
+            btnProfile.isEnabled = true
+            btnProfile.alpha = 1.0f
+            btnProfile.setOnClickListener { navigate(PAGE_PROFILE) }
+        }
+
+        view.findViewById<View>(R.id.btnMenuChatSettings).setOnClickListener {
+            navigate(PAGE_CHAT_SETTINGS)
+        }
+
+        view.findViewById<View>(R.id.btnMenuChatRules).setOnClickListener {
+            pendingRulesChannel = activity.currentChannel
+            dismissPanel()
+        }
+
+        setupProfileSettings(view)
+
+        // --- Theme color ---
+        val themeColor = prefs.themeColor
         val themeColorStateList = android.content.res.ColorStateList(
             arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
             intArrayOf(themeColor, 0xFF333333.toInt())
@@ -190,23 +216,36 @@ class ChatSettingsSheetManager(
             arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
             intArrayOf(themeColor, 0xFFFFFFFF.toInt())
         )
-        
+
+        val switchTimestamps = view.findViewById<SwitchCompat>(R.id.switchTimestamps)
+        val switchSeconds = view.findViewById<SwitchCompat>(R.id.switchSeconds)
+        val containerSeconds = view.findViewById<View>(R.id.containerSeconds)
+        val textSeconds = view.findViewById<TextView>(R.id.textSeconds)
+        val seekBarMessageSize = view.findViewById<SeekBar>(R.id.seekBarMessageSize)
+        val textValueMessageSize = view.findViewById<TextView>(R.id.textValueMessageSize)
+        val seekBarEmoteSize = view.findViewById<SeekBar>(R.id.seekBarEmoteSize)
+        val textValueEmoteSize = view.findViewById<TextView>(R.id.textValueEmoteSize)
+        val switchPinnedGifts = view.findViewById<SwitchCompat>(R.id.switchPinnedGifts)
+        val switchEmoteCombo = view.findViewById<SwitchCompat>(R.id.switchEmoteCombo)
+        val switchFloatingEmotes = view.findViewById<SwitchCompat>(R.id.switchFloatingEmotes)
+        val switchLowBatteryMode = view.findViewById<SwitchCompat>(R.id.switchLowBatteryMode)
+
         listOf(switchTimestamps, switchSeconds, switchPinnedGifts, switchEmoteCombo, switchFloatingEmotes, switchLowBatteryMode).forEach { switch ->
             switch.trackTintList = themeColorStateList
             switch.thumbTintList = thumbColorStateList
         }
-        
+
         seekBarMessageSize.progressTintList = android.content.res.ColorStateList.valueOf(themeColor)
         seekBarMessageSize.thumbTintList = android.content.res.ColorStateList.valueOf(themeColor)
         seekBarEmoteSize.progressTintList = android.content.res.ColorStateList.valueOf(themeColor)
         seekBarEmoteSize.thumbTintList = android.content.res.ColorStateList.valueOf(themeColor)
 
-        // --- Setup Message Size Slider (10sp to 30sp) ---
+        // Message Size Slider (10sp to 30sp)
         val minSize = 10
         seekBarMessageSize.max = 20
         seekBarMessageSize.progress = (currentTextSize - minSize).toInt().coerceIn(0, 20)
         textValueMessageSize.text = "${currentTextSize.toInt()}sp"
-        
+
         seekBarMessageSize.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 val size = (minSize + progress).toFloat()
@@ -220,12 +259,12 @@ class ChatSettingsSheetManager(
                 chatUiManager.chatAdapter.setChatTextSize(currentTextSize)
             }
         })
-        
-        // --- Setup Emote Size Slider (1.0x to 3.0x) ---
+
+        // Emote Size Slider (1.0x to 3.0x)
         seekBarEmoteSize.max = 20
         seekBarEmoteSize.progress = ((currentEmoteScale - 1.0f) * 10).toInt().coerceIn(0, 20)
         textValueEmoteSize.text = String.format("%.1fx", currentEmoteScale)
-        
+
         seekBarEmoteSize.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 val scale = 1.0f + (progress / 10.0f)
@@ -240,20 +279,17 @@ class ChatSettingsSheetManager(
             }
         })
 
-        // --- Chat Animation ---
+        // Chat Animation button
         val textChatAnimationValue = view.findViewById<TextView>(R.id.textChatAnimationValue)
         textChatAnimationValue.text = getChatAnimationValue()
-        
         view.findViewById<View>(R.id.btnChatAnimation).setOnClickListener {
-            mainScrollView.visibility = View.GONE
-            view.findViewById<View>(R.id.animationSettingsContainer).visibility = View.VISIBLE
-            setupAnimationSettings(view)
+            navigate(PAGE_ANIMATIONS)
         }
 
-        // --- Timestamps ---
+        // Timestamps
         switchTimestamps.isChecked = showTimestamps
         switchSeconds.isChecked = showSeconds
-        
+
         fun updateSecondsEnabledState() {
             val isEnabled = switchTimestamps.isChecked
             switchSeconds.isEnabled = isEnabled
@@ -275,58 +311,56 @@ class ChatSettingsSheetManager(
             chatUiManager.chatAdapter.setShowSeconds(isChecked)
         }
 
-        // --- Pinned Gifts Toggle ---
+        // Pinned Gifts
         switchPinnedGifts.isChecked = prefs.showPinnedGifts
         switchPinnedGifts.setOnCheckedChangeListener { _, isChecked ->
             prefs.showPinnedGifts = isChecked
-            if (isChecked) {
-                activity.overlayManager.updatePinnedGiftsUI()
-            } else {
-                activity.binding.pinnedGiftsScroll.visibility = View.GONE
-            }
+            if (isChecked) activity.overlayManager.updatePinnedGiftsUI()
+            else activity.binding.pinnedGiftsScroll.visibility = View.GONE
         }
 
-        // --- Emote Combo Toggle ---
+        // Emote Combo
         switchEmoteCombo.isChecked = prefs.emoteComboEnabled
         switchEmoteCombo.setOnCheckedChangeListener { _, isChecked ->
             prefs.emoteComboEnabled = isChecked
             if (!isChecked) activity.emoteComboManager.clear()
         }
 
-        // --- Floating Emotes Toggle ---
+        // Floating Emotes
         switchFloatingEmotes.isChecked = prefs.floatingEmotesEnabled
         switchFloatingEmotes.setOnCheckedChangeListener { _, isChecked ->
             prefs.floatingEmotesEnabled = isChecked
             if (!isChecked) activity.floatingEmoteManager.clear()
         }
 
-        // --- Low Battery Mode Toggle ---
+        // Low Battery Mode
         switchLowBatteryMode.isChecked = prefs.lowBatteryModeEnabled
         switchLowBatteryMode.setOnCheckedChangeListener { _, isChecked ->
             prefs.lowBatteryModeEnabled = isChecked
             chatUiManager.stopFlushing()
             chatUiManager.startFlushing()
+            activity.chatConnectionManager.applyLowBatteryPingInterval()
         }
 
-        // --- Highlight Settings ---
-        val highlightContainer = view.findViewById<View>(R.id.highlightSettingsScrollView)
-        val btnHighlightedMessages = view.findViewById<View>(R.id.btnHighlightedMessages)
-        val btnBackFromHighlights = view.findViewById<View>(R.id.btnBackFromHighlights)
-        
+        // Highlight Settings
+        view.findViewById<View>(R.id.btnHighlightedMessages).setOnClickListener {
+            navigate(PAGE_HIGHLIGHTS)
+        }
+
         val switchHighlightOwn = view.findViewById<SwitchCompat>(R.id.switchHighlightOwn)
         val switchHighlightMentions = view.findViewById<SwitchCompat>(R.id.switchHighlightMentions)
         val switchHighlightMods = view.findViewById<SwitchCompat>(R.id.switchHighlightMods)
         val switchHighlightVips = view.findViewById<SwitchCompat>(R.id.switchHighlightVips)
         val switchHighlightUseNameColor = view.findViewById<SwitchCompat>(R.id.switchHighlightUseNameColor)
         val switchVibrateOnMentions = view.findViewById<SwitchCompat>(R.id.switchVibrateOnMentions)
-        
+
         switchHighlightOwn.isChecked = prefs.highlightOwnMessages
         switchHighlightMentions.isChecked = prefs.highlightMentions
         switchHighlightMods.isChecked = prefs.highlightMods
         switchHighlightVips.isChecked = prefs.highlightVips
         switchHighlightUseNameColor.isChecked = prefs.chatUseNameColorForHighlight
         switchVibrateOnMentions.isChecked = prefs.vibrateOnMentions
-        
+
         listOf(switchHighlightOwn, switchHighlightMentions, switchHighlightMods, switchHighlightVips, switchHighlightUseNameColor, switchVibrateOnMentions).forEach { switch ->
             switch.trackTintList = themeColorStateList
             switch.thumbTintList = thumbColorStateList
@@ -335,29 +369,13 @@ class ChatSettingsSheetManager(
         switchVibrateOnMentions.setOnCheckedChangeListener { _, isChecked ->
             prefs.vibrateOnMentions = isChecked
         }
-        
-        // Theme color for highlight sub-page headers and icons
-        view.findViewById<ImageView>(R.id.chatHighlightBackIcon)?.imageTintList = android.content.res.ColorStateList.valueOf(prefs.themeColor)
-        view.findViewById<TextView>(R.id.chatHighlightBackText)?.setTextColor(prefs.themeColor)
-        view.findViewById<View>(R.id.chatHighlightSelfBar)?.setBackgroundColor(prefs.themeColor)
-        
-        btnHighlightedMessages.setOnClickListener {
-            mainScrollView.visibility = View.GONE
-            highlightContainer.visibility = View.VISIBLE
-        }
-        
-        btnBackFromHighlights.setOnClickListener {
-            highlightContainer.visibility = View.GONE
-            mainScrollView.visibility = View.VISIBLE
-        }
-        
+
         val onHighlightUpdate = {
             prefs.highlightOwnMessages = switchHighlightOwn.isChecked
             prefs.highlightMentions = switchHighlightMentions.isChecked
             prefs.highlightMods = switchHighlightMods.isChecked
             prefs.highlightVips = switchHighlightVips.isChecked
             prefs.chatUseNameColorForHighlight = switchHighlightUseNameColor.isChecked
-            
             chatUiManager.chatAdapter.setHighlightSettings(
                 prefs.highlightOwnMessages,
                 prefs.highlightMentions,
@@ -366,36 +384,62 @@ class ChatSettingsSheetManager(
                 prefs.chatUseNameColorForHighlight
             )
         }
-        
+
         switchHighlightOwn.setOnCheckedChangeListener { _, _ -> onHighlightUpdate() }
         switchHighlightMentions.setOnCheckedChangeListener { _, _ -> onHighlightUpdate() }
         switchHighlightMods.setOnCheckedChangeListener { _, _ -> onHighlightUpdate() }
         switchHighlightVips.setOnCheckedChangeListener { _, _ -> onHighlightUpdate() }
         switchHighlightUseNameColor.setOnCheckedChangeListener { _, _ -> onHighlightUpdate() }
-        
-        dialog.setContentView(view)
-        dialog.setOnDismissListener {
-            if (hasProfileChanges) saveProfileIdentity()
-            pendingRulesChannel?.let { channel ->
-                chatRulesManager.forceShowRules(channel)
+
+        // Add panel to chatContainer (parent of chatListContainer) so it renders above
+        // the pinned message overlay which is a sibling declared later in XML.
+        val container = activity.binding.chatContainer
+        val panelHeight = computePanelHeight()
+        val lp = androidx.constraintlayout.widget.ConstraintLayout.LayoutParams(
+            androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.MATCH_PARENT,
+            panelHeight
+        )
+        lp.topToTop = androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID
+        lp.startToStart = androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID
+        lp.endToEnd = androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID
+        view.layoutParams = lp
+        container.addView(view)
+        view.elevation = dpToPx(16).toFloat()
+
+        // Fade in
+        view.alpha = 0f
+        view.animate().alpha(1f).setDuration(180).start()
+
+        if (startOnProfile) navigate(PAGE_PROFILE)
+        else navigate(PAGE_ROOT)
+    }
+
+    private fun computePanelHeight(): Int = dpToPx(264)
+
+    private fun getSubPageHeight(): Int {
+        val container = activity.binding.chatListContainer
+        val containerHeight = container.height.takeIf { it > 0 }
+            ?: (activity.resources.displayMetrics.heightPixels * 0.55).toInt()
+        return (containerHeight * 0.70).toInt()
+    }
+
+    private fun animatePanelToHeight(targetH: Int) {
+        val view = currentPanelView ?: return
+        val startH = view.layoutParams.height
+        if (startH == targetH) return
+        android.animation.ValueAnimator.ofInt(startH, targetH).apply {
+            duration = 220
+            interpolator = android.view.animation.DecelerateInterpolator()
+            addUpdateListener { anim ->
+                val lp = view.layoutParams
+                lp.height = anim.animatedValue as Int
+                view.layoutParams = lp
             }
-        }
-        dialog.setOnShowListener {
-             (it as? BottomSheetDialog)?.window?.setDimAmount(0f)
-        }
-        dialog.show()
-        
-        // Limit max sheet height so chat stays visible as live preview
-        val bottomSheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
-        bottomSheet?.let {
-            val screenHeight = activity.resources.displayMetrics.heightPixels
-            val maxHeight = (screenHeight * 0.55).toInt()
-            val behavior = com.google.android.material.bottomsheet.BottomSheetBehavior.from(it)
-            behavior.maxHeight = maxHeight
-            behavior.skipCollapsed = true
-            behavior.state = com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
+            start()
         }
     }
+
+    private fun dpToPx(dp: Int): Int = (dp * activity.resources.displayMetrics.density).toInt()
 
     private fun setupProfileSettings(view: View) {
         val rvBadges = view.findViewById<RecyclerView>(R.id.rvProfileBadges)
@@ -406,26 +450,24 @@ class ChatSettingsSheetManager(
         val channelId = activity.currentChannel?.id?.toLongOrNull() ?: 0L
         val userId = prefs.userId
         val token = prefs.authToken
-        
-        if (channelId == 0L || userId == 0L || token == null) {
-            return
-        }
+
+        if (channelId == 0L || userId == 0L || token == null) return
         currentIdentityChannelId = channelId
-        
+
         val viewerUsername = prefs.username ?: "User"
         previewUsername.text = viewerUsername
-        
+
         fun updatePreview() {
             previewUsername.setTextColor(Color.parseColor(profileSelectedColor))
             updatePreviewBadges(previewBadgeLayout, profileSelectedBadges, availableProfileBadges)
         }
-        
-        // Colors
+
+        // Color grid
         gridColors.removeAllViews()
         val density = activity.resources.displayMetrics.density
         val size = (36 * density).toInt()
         val margin = (4 * density).toInt()
-        
+
         profileColors.forEach { color ->
             val frame = android.widget.FrameLayout(activity)
             val params = GridLayout.LayoutParams()
@@ -433,66 +475,65 @@ class ChatSettingsSheetManager(
             params.height = size
             params.setMargins(margin, margin, margin, margin)
             frame.layoutParams = params
-            
+
             val bg = View(activity)
-            bg.layoutParams = android.widget.FrameLayout.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT)
+            bg.layoutParams = android.widget.FrameLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT
+            )
             bg.setBackgroundResource(R.drawable.bg_rounded_circle)
             bg.backgroundTintList = android.content.res.ColorStateList.valueOf(Color.parseColor(color))
             frame.addView(bg)
-            
+
             val check = ImageView(activity)
-            check.layoutParams = android.widget.FrameLayout.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT)
+            check.layoutParams = android.widget.FrameLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT
+            )
             check.setImageResource(R.drawable.ic_check)
             check.imageTintList = android.content.res.ColorStateList.valueOf(Color.WHITE)
             check.setPadding(8, 8, 8, 8)
             check.visibility = View.GONE
             frame.addView(check)
-            
+
             frame.setOnClickListener {
                 profileSelectedColor = color
                 hasProfileChanges = true
                 updatePreview()
-                
-                // Update selection UI
                 for (i in 0 until gridColors.childCount) {
                     val child = gridColors.getChildAt(i) as android.widget.FrameLayout
-                    val childCheck = child.getChildAt(1)
-                    childCheck.visibility = View.GONE
+                    child.getChildAt(1).visibility = View.GONE
                 }
                 check.visibility = View.VISIBLE
             }
-            
+
             gridColors.addView(frame)
         }
 
-        // Badges Adapter
+        // Badges adapter
         val adapter = object : RecyclerView.Adapter<ProfileBadgeViewHolder>() {
             override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): ProfileBadgeViewHolder {
                 val v = activity.layoutInflater.inflate(R.layout.item_profile_badge_selection, parent, false)
                 return ProfileBadgeViewHolder(v)
             }
-            
+
             override fun onBindViewHolder(holder: ProfileBadgeViewHolder, position: Int) {
                 val badge = availableProfileBadges[position]
                 val iv = holder.itemView.findViewById<ImageView>(R.id.ivBadgeIcon)
                 val check = holder.itemView.findViewById<View>(R.id.badgeSelectionOverlay)
-                
-                // Load badge
+
                 val badgeIcon = getBadgeUrl(badge.type, badge.count)
-                if (badgeIcon != null) {
-                    Glide.with(iv).load(badgeIcon).into(iv)
-                }
-                
+                if (badgeIcon != null) Glide.with(iv).load(badgeIcon).into(iv)
+
                 val isSelected = profileSelectedBadges.contains(badge.type)
                 check.visibility = if (isSelected) View.VISIBLE else View.GONE
-                
+
                 holder.itemView.setOnClickListener {
                     if (isSelected) {
                         profileSelectedBadges.remove(badge.type)
                     } else {
-                        // Max 4 badges
                         if (profileSelectedBadges.size < 4) {
-                            badge.type?.let { it1 -> profileSelectedBadges.add(it1) }
+                            badge.type?.let { t -> profileSelectedBadges.add(t) }
                         } else {
                             android.widget.Toast.makeText(activity, activity.getString(R.string.max_badges_reached, 4), android.widget.Toast.LENGTH_SHORT).show()
                         }
@@ -502,14 +543,13 @@ class ChatSettingsSheetManager(
                     updatePreview()
                 }
             }
-            
+
             override fun getItemCount() = availableProfileBadges.size
         }
-        
+
         rvBadges.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(activity, RecyclerView.HORIZONTAL, false)
         rvBadges.adapter = adapter
-        
-        // Fetch Identity
+
         if (!isProfileIdentityLoaded) {
             lifecycleScope.launch {
                 try {
@@ -521,28 +561,21 @@ class ChatSettingsSheetManager(
                             identity?.badges?.forEach { badge: ChatIdentityBadge ->
                                 if (badge.active == true) badge.type?.let { profileSelectedBadges.add(it) }
                             }
-                            
+
                             availableProfileBadges.clear()
                             identity?.badges?.let { availableProfileBadges.addAll(it) }
-                            
+
                             isProfileIdentityLoaded = true
                             adapter.notifyDataSetChanged()
                             updatePreview()
-                            
-                            // Update Color Selection UI
+
                             for (i in 0 until gridColors.childCount) {
                                 val child = gridColors.getChildAt(i) as android.widget.FrameLayout
                                 val childBg = child.getChildAt(0)
                                 val childCheck = child.getChildAt(1)
-                                
                                 val bgColor = childBg.backgroundTintList?.defaultColor
                                 val targetColor = Color.parseColor(profileSelectedColor)
-                                
-                                if (bgColor == targetColor) {
-                                    childCheck.visibility = View.VISIBLE
-                                } else {
-                                    childCheck.visibility = View.GONE
-                                }
+                                childCheck.visibility = if (bgColor == targetColor) View.VISIBLE else View.GONE
                             }
                         }
                     }
@@ -551,25 +584,15 @@ class ChatSettingsSheetManager(
                 }
             }
         } else {
-            // Check UI selection state for color if already loaded
-            // But we recreate views so we need to set them checked based on current vars
-             for (i in 0 until gridColors.childCount) {
-                // val child = gridColors.getChildAt(i) as android.widget.FrameLayout
-                // val childBg = child.getChildAt(0)
-
-                // This is hard to check exact color from background here without tag
-                 // For now, let's just trigger updatePreview to ensure text color is right
-                 // Re-selection visual logic might be skipped if we don't have color index
-             }
-             updatePreview()
+            updatePreview()
         }
     }
-    
+
     private fun updatePreviewBadges(layout: LinearLayout, selectedTypes: List<String>, allBadges: List<ChatIdentityBadge>) {
         layout.removeAllViews()
         val size = (20 * activity.resources.displayMetrics.density).toInt()
         val margin = (2 * activity.resources.displayMetrics.density).toInt()
-        
+
         selectedTypes.forEach { type ->
             val badge = allBadges.find { it.type == type }
             val iv = ImageView(activity)
@@ -608,10 +631,10 @@ class ChatSettingsSheetManager(
         val userId = prefs.userId
         val token = prefs.authToken ?: return
         if (channelId == 0L || userId == 0L) return
-        
+
         val badges = profileSelectedBadges.toList()
         val color = profileSelectedColor
-        
+
         lifecycleScope.launch {
             try {
                 repository.updateChatIdentity(channelId, userId, token, badges, color)
@@ -624,26 +647,13 @@ class ChatSettingsSheetManager(
     }
 
     private fun setupAnimationSettings(view: View) {
-        val container = view.findViewById<View>(R.id.animationSettingsContainer)
         val optionsContainer = view.findViewById<LinearLayout>(R.id.animationOptionsContainer)
-        val previewBox = view.findViewById<View>(R.id.previewAnimationBox)
-        val btnReplay = view.findViewById<View>(R.id.btnReplayAnimation)
         val textChatAnimationValue = view.findViewById<TextView>(R.id.textChatAnimationValue)
-        val mainScrollView = view.findViewById<View>(R.id.mainSettingsScrollView)
 
-        // Back action
-        view.findViewById<View>(R.id.btnBackFromAnimations).setOnClickListener {
-            container.visibility = View.GONE
-            mainScrollView.visibility = View.VISIBLE
-            textChatAnimationValue.text = getChatAnimationValue()
-        }
-        
-        // Theme Colors
-        view.findViewById<ImageView>(R.id.chatAnimationBackIcon)?.imageTintList = android.content.res.ColorStateList.valueOf(prefs.themeColor)
-        view.findViewById<TextView>(R.id.chatAnimationBackText)?.setTextColor(prefs.themeColor)
-        view.findViewById<View>(R.id.chatAnimationSelfBar)?.setBackgroundColor(prefs.themeColor)
-        
-        // Populate List
+        val density = activity.resources.displayMetrics.density
+        val paddingH = (16 * density).toInt()
+        val paddingV = (12 * density).toInt()
+
         optionsContainer.removeAllViews()
         val animations = listOf(
             "none" to R.string.animation_none,
@@ -659,43 +669,38 @@ class ChatSettingsSheetManager(
             "zoom_out" to R.string.animation_zoom_out,
             "swing" to R.string.animation_swing
         )
-        
-        val density = activity.resources.displayMetrics.density
-        val paddingHorizontal = (16 * density).toInt()
-        val paddingVertical = (12 * density).toInt()
 
         animations.forEach { (key, nameRes) ->
-            // Creating a simple text view item programmatically
             val itemLayout = LinearLayout(activity).apply {
                 orientation = LinearLayout.HORIZONTAL
                 layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
                 gravity = android.view.Gravity.CENTER_VERTICAL
-                setPadding(paddingHorizontal, paddingVertical, paddingHorizontal, paddingVertical)
+                setPadding(paddingH, paddingV, paddingH, paddingV)
                 background = activity.getDrawable(R.drawable.bg_ripple_rounded)
             }
 
             val textView = TextView(activity).apply {
                 text = activity.getString(nameRes)
                 textSize = 14f
-                setTextColor(Color.WHITE)
+                setTextColor(if (prefs.chatMessageAnimation == key) Color.WHITE else Color.parseColor("#AAAAAA"))
                 layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
             }
-            
+
             val checkIcon = ImageView(activity).apply {
                 setImageResource(R.drawable.ic_check)
                 imageTintList = android.content.res.ColorStateList.valueOf(prefs.themeColor)
                 layoutParams = LinearLayout.LayoutParams(48, 48)
                 visibility = if (prefs.chatMessageAnimation == key) View.VISIBLE else View.GONE
             }
-            
+
             itemLayout.addView(textView)
             itemLayout.addView(checkIcon)
-            
+
             itemLayout.setOnClickListener {
                 prefs.chatMessageAnimation = key
                 chatUiManager.chatAdapter.setAnimationType(key)
-                
-                // Update checks
+                textChatAnimationValue.text = getChatAnimationValue()
+
                 for (i in 0 until optionsContainer.childCount) {
                     val child = optionsContainer.getChildAt(i) as LinearLayout
                     child.getChildAt(1).visibility = View.GONE
@@ -703,97 +708,9 @@ class ChatSettingsSheetManager(
                 }
                 checkIcon.visibility = View.VISIBLE
                 textView.setTextColor(Color.WHITE)
-                
-                runPreviewAnimation(previewBox, key)
-            }
-            
-            // Set initial state
-            if (prefs.chatMessageAnimation == key) {
-                textView.setTextColor(Color.WHITE)
-            } else {
-                textView.setTextColor(Color.parseColor("#AAAAAA"))
             }
 
             optionsContainer.addView(itemLayout)
-        }
-        
-        btnReplay.setOnClickListener {
-            runPreviewAnimation(previewBox, prefs.chatMessageAnimation)
-        }
-
-        // Initial run
-        runPreviewAnimation(previewBox, prefs.chatMessageAnimation)
-    }
-
-    private fun runPreviewAnimation(view: View, type: String) {
-        view.clearAnimation()
-        view.alpha = 1f
-        view.scaleX = 1f
-        view.scaleY = 1f
-        view.translationX = 0f
-        view.translationY = 0f
-        view.rotation = 0f
-        view.rotationX = 0f
-        view.rotationY = 0f
-
-        when (type) {
-            "fade_in" -> {
-                view.alpha = 0f
-                view.animate().alpha(1f).setDuration(300).start()
-            }
-            "slide_left" -> {
-                val width = view.width.toFloat().takeIf { it != 0f } ?: 500f
-                view.translationX = -width
-                view.animate().translationX(0f).setDuration(300).start()
-            }
-            "slide_right" -> {
-                val width = view.width.toFloat().takeIf { it != 0f } ?: 500f
-                view.translationX = width
-                view.animate().translationX(0f).setDuration(300).start()
-            }
-            "slide_bottom" -> {
-                view.translationY = 100f
-                view.animate().translationY(0f).setDuration(300).start()
-            }
-            "scale" -> {
-                view.scaleX = 0.5f
-                view.scaleY = 0.5f
-                view.alpha = 0f
-                view.animate().scaleX(1f).scaleY(1f).alpha(1f).setDuration(300).start()
-            }
-             "typewriter" -> {
-                 // Simple mock for typewriter: just fade in quickly
-                 view.alpha = 0f
-                 view.animate().alpha(1f).setDuration(150).start()
-             }
-             "curtain" -> {
-                 view.scaleY = 0f
-                 view.pivotY = 0f
-                 view.animate().scaleY(1f).setDuration(300).start()
-             }
-             "flip" -> {
-                 view.rotationX = 90f
-                 view.animate().rotationX(0f).setDuration(400).start()
-             }
-             "rotate" -> {
-                 view.rotation = -90f
-                 view.scaleX = 0.5f
-                 view.scaleY = 0.5f
-                 view.alpha = 0f
-                 view.animate().rotation(0f).scaleX(1f).scaleY(1f).alpha(1f).setDuration(400).start()
-             }
-             "zoom_out" -> {
-                 view.scaleX = 1.5f
-                 view.scaleY = 1.5f
-                 view.alpha = 0f
-                 view.animate().scaleX(1f).scaleY(1f).alpha(1f).setDuration(300).start()
-             }
-             "swing" -> {
-                 view.rotationX = -90f
-                 view.pivotX = 0.5f
-                 view.pivotY = 0f
-                 view.animate().rotationX(0f).setDuration(600).setInterpolator(android.view.animation.OvershootInterpolator()).start()
-             }
         }
     }
 
@@ -815,6 +732,5 @@ class ChatSettingsSheetManager(
         }
     }
 
-    // Internal ViewHolder
     private class ProfileBadgeViewHolder(view: View) : RecyclerView.ViewHolder(view)
 }

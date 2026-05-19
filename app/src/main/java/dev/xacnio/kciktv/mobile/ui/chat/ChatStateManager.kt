@@ -42,6 +42,7 @@ class ChatStateManager(
         private set
     var currentChatroom: ChatroomInfo? = null
         private set
+    var chatSettings: dev.xacnio.kciktv.shared.data.model.ChatSettingsData? = null
     var currentUserSender: ChatSender? = null
     var currentChatErrorMessage: String? = null
     
@@ -119,6 +120,7 @@ class ChatStateManager(
     fun resetForNewChannel() {
         currentChatroomId = null
         currentChatroom = null
+        chatSettings = null
         currentUserSender = null
         isModeratorOrOwner = false
         isChannelOwner = false
