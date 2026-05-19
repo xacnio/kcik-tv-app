@@ -28,8 +28,8 @@ android {
         applicationId = "dev.xacnio.kciktv"
         minSdk = 23
         targetSdk = 34
-        versionCode = 1
-        val baseVersion = "2.0.0-beta"
+        versionCode = 2
+        val baseVersion = "2.1.0-beta"
         versionName = "$baseVersion-${getGitHash()}"
     }
 
