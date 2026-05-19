@@ -455,15 +455,26 @@ class LoginActivity : ComponentActivity() {
                                         // This check is already handled inside the try block for better safety.
                                         // I'll remove the redundant check here which was causing 'Unresolved reference: userRes'.
                                         
-                                        // Sync cookies (Critical for subsequent requests)
+                                        // Sync Set-Cookie from login response into the WebView cookie store first,
+                                        // so the snapshot we take next includes anything fresh from this response
+                                        // (XSRF-TOKEN rotation, kick_session, etc.) plus everything KPSDK accumulated
+                                        // during page navigation. getCookie() returns HttpOnly cookies as well.
                                         val responseCookies = response.headers("Set-Cookie")
                                         for (c in responseCookies) {
                                             cookieManager.setCookie("https://kick.com", c)
-                                            // Persist to encrypted prefs so other WebViews can use them
-                                            prefs.appendCookies("https://kick.com", c)
                                         }
                                         cookieManager.flush()
-                                        
+
+                                        // Persist the COMPLETE cookie state (not just Set-Cookie headers from this
+                                        // response). /follow and other authenticated calls go through the
+                                        // WebView+KPSDK bridge, which needs the full session — without XSRF-TOKEN
+                                        // and the navigation cookies the bridge gets rate-limited (429).
+                                        val fullCookieSnapshot = cookieManager.getCookie("https://kick.com")
+                                        if (!fullCookieSnapshot.isNullOrEmpty()) {
+                                            prefs.savedCookies = fullCookieSnapshot
+                                            Log.d(TAG, "🍪 Saved full cookie snapshot (${fullCookieSnapshot.length} chars)")
+                                        }
+
                                         // Finish Activity
                                         runOnUiThread {
                                             // SECURITY: Clear WebView cookies now that they are saved to encrypted prefs.

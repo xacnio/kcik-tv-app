@@ -122,7 +122,13 @@ class AuthManager(
                     prefs.clearAuth()
                     cookieManager.removeAllCookies(null)
                     cookieManager.flush()
-                    
+
+                    // The auth WebView's KPSDK was fingerprinted while logged in. Without a reset,
+                    // the next anonymous bridge call would still ship the logged-in KPSDK headers
+                    // and trigger 429 on kick.com. Force a reload. webViewManager is guaranteed
+                    // initialized here — the logout button only appears once the activity is set up.
+                    activity.webViewManager.resetForAuthStateChange()
+
                     Toast.makeText(activity, R.string.logged_out, Toast.LENGTH_SHORT).show()
                     activity.updateChatLoginState()
                     activity.updateUserHeaderState()

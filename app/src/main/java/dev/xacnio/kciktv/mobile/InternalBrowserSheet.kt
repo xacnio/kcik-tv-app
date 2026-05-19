@@ -212,19 +212,28 @@ class InternalBrowserSheet : BottomSheetDialogFragment() {
         try {
             val prefs = AppPreferences(requireContext())
             
-            // 1. Saved Cookie Groups
+            // 1. Saved Cookie Groups. Two formats supported (see WebViewManager.restoreSavedCookies
+            //    for the full rationale): legacy `|:|`-separated Set-Cookie headers, vs. the new
+            //    `name=value; name=value` snapshot from CookieManager.getCookie().
             val savedCookies = prefs.savedCookies
             if (savedCookies != null) {
-                val cookieGroups = savedCookies.split("|:|")
-                for (cookieGroup in cookieGroups) {
-                    if (cookieGroup.isNotBlank()) {
-                         val individualCookies = cookieGroup.split(";")
-                         for (cookie in individualCookies) {
-                             val trimmed = cookie.trim()
-                             if (trimmed.isNotEmpty()) {
-                                 cookieManager.setCookie("https://kick.com", "$trimmed; Domain=.kick.com; Path=/; Secure")
-                             }
-                         }
+                if (savedCookies.contains("|:|")) {
+                    val cookieGroups = savedCookies.split("|:|")
+                    for (cookieGroup in cookieGroups) {
+                        if (cookieGroup.isNotBlank()) {
+                            cookieManager.setCookie("https://kick.com", cookieGroup.trim())
+                        }
+                    }
+                } else {
+                    val pairs = savedCookies.split(";")
+                    for (pair in pairs) {
+                        val trimmed = pair.trim()
+                        if (trimmed.contains("=")) {
+                            cookieManager.setCookie(
+                                "https://kick.com",
+                                "$trimmed; Domain=.kick.com; Path=/; Secure"
+                            )
+                        }
                     }
                 }
             }
