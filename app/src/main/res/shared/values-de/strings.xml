@@ -687,6 +687,15 @@
 
     <!-- Chat Connection -->
     <string name="chat_low_battery_paused">Hintergrundmodus aktiviert. Chat pausiert (Energiesparmodus)</string>
+    <string name="chat_battery_saver_subtitle">Begrenzt Qualität auf 720p, reduziert Animationen, verlangsamt Timer &amp; Ping</string>
+
+    <!-- Chat appearance subtitles -->
+    <string name="chat_timestamps_subtitle">Sendezeit neben jeder Nachricht anzeigen</string>
+    <string name="chat_pinned_gifts_subtitle">Geschenk-Banner oben im Chat anheften</string>
+    <string name="chat_emote_combo_subtitle">Wiederholte Emote-Spams hervorheben</string>
+    <string name="chat_floating_emotes_subtitle">Animierte Emote-Bursts schweben über den Bildschirm</string>
+    <string name="chat_setting_highlighted_subtitle">Wähle, welche Nachrichten hervorgehoben werden</string>
+    <string name="chat_anim_subtitle">Einblendanimation für neue Nachrichten</string>
 
     <!-- Chat Rules -->
     <string name="chat_rules_not_found">Keine Chat-Regeln für diesen Kanal gefunden.</string>
@@ -699,6 +708,12 @@
     <string name="chat_gifted_subs_plural">%1$s hat %2$d Abos an die Community verschenkt! Insgesamt %3$d Abos in diesem Kanal verschenkt.</string>
     <string name="chat_gifted_sub_single">%1$s hat ein Abo an die Community verschenkt! Insgesamt %2$d Abos in diesem Kanal verschenkt.</string>
     <string name="chat_gifted_sub_individual">%1$s hat %2$s ein Abo geschenkt!</string>
+    <!-- Stream host -->
+    <string name="chat_stream_hosted">&lt;b&gt;%1$s&lt;/b&gt; hostet den Stream mit %2$d Zuschauern!</string>
+    <string name="chat_stream_hosted_no_count">&lt;b&gt;%1$s&lt;/b&gt; hostet den Stream!</string>
+    <!-- Subscription -->
+    <string name="chat_subscribed_new">&lt;b&gt;%1$s&lt;/b&gt; hat gerade abonniert!</string>
+    <string name="chat_subscribed_resub">&lt;b&gt;%1$s&lt;/b&gt; hat für %2$d Monate verlängert!</string>
     <string name="chat_celebration_sub_renew_title">feiert Abo-Verlängerung!</string>
     <string name="chat_celebration_generic_title">feiert!</string>
     <string name="chat_celebration_sub_renew_duration">Gesamt-Abo-Dauer: %d Monate!</string>
@@ -718,6 +733,26 @@
     <string name="time_ago_minutes">vor %d Min</string>
     <string name="time_ago_hours">vor %d Stunden</string>
     <string name="error_generic">Etwas ist schiefgelaufen</string>
+
+    <!-- Reward Queue (Moderator) -->
+    <string name="reward_queue_title">Belohnungsanfrage-Warteschlange</string>
+    <string name="reward_queue_all">Alle Belohnungen</string>
+    <string name="reward_queue_empty">Keine ausstehenden Anfragen</string>
+    <string name="reward_queue_complete">Abschließen</string>
+    <string name="reward_queue_reject">Ablehnen</string>
+    <string name="reward_queue_complete_all">Alle abschließen</string>
+    <string name="reward_queue_reject_all">Alle ablehnen</string>
+    <string name="reward_queue_action_failed">Aktion fehlgeschlagen, erneut versuchen</string>
+    <string name="reward_queue_just_now">gerade eben</string>
+    <string name="reward_queue_select_all">Alle auswählen</string>
+    <string name="reward_queue_complete_selected">Auswahl abschließen</string>
+    <string name="reward_queue_reject_selected">Auswahl ablehnen</string>
+    <string name="reward_queue_pause_redemptions">Einlösungen pausieren</string>
+    <string name="reward_queue_paused_badge">pausiert</string>
+
+    <!-- Mod Emote Channels -->
+    <string name="mod_emote_channels_title">Mod-Emote-Kanäle</string>
+    <string name="mod_emote_channels_search_hint">Kanäle suchen…</string>
 
     <!-- Background Audio -->
     <string name="background_audio_active">Hintergrund-Audio aktiviert</string>
@@ -751,6 +786,7 @@
     <string name="operation_failed">Vorgang fehlgeschlagen: %s</string>
     <string name="login_failed_code">Anmeldung fehlgeschlagen (%d)</string>
     <string name="operation_failed_code">Vorgang fehlgeschlagen (Code: %d)</string>
+    <string name="follow_rate_limited">Zu viele Anfragen. Bitte einen Moment warten und erneut versuchen.</string>
 
     <!-- Polls -->
     <string name="poll_header">UMFRAGE</string>

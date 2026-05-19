@@ -680,13 +680,22 @@
     <string name="chat_timestamps">Timestamps</string>
     <string name="chat_seconds">Include Seconds</string>
     <string name="show_pinned_gifts">Pinned Gifts</string>
-    <string name="chat_low_battery_mode">Low Battery Mode</string>
+    <string name="chat_low_battery_mode">Battery Saver</string>
     <string name="chat_emote_combo">Emote Combo</string>
     <string name="chat_settings_vibrate_on_mention">Vibrate on Mention</string>
     <string name="chat_settings_floating_emotes">Floating Emotes</string>
 
     <!-- Chat Connection -->
-    <string name="chat_low_battery_paused">Background mode activated. Chat paused (Low Battery Mode)</string>
+    <string name="chat_low_battery_paused">Background mode active. Chat paused (Battery Saver)</string>
+    <string name="chat_battery_saver_subtitle">Limits quality to 720p, reduces animations, slows timers &amp; ping</string>
+
+    <!-- Chat appearance subtitles -->
+    <string name="chat_timestamps_subtitle">Show send time next to each message</string>
+    <string name="chat_pinned_gifts_subtitle">Pin gift banners at top of chat</string>
+    <string name="chat_emote_combo_subtitle">Highlight repeated emote spam in a row</string>
+    <string name="chat_floating_emotes_subtitle">Animated emote bursts float across screen</string>
+    <string name="chat_setting_highlighted_subtitle">Choose which messages stand out visually</string>
+    <string name="chat_anim_subtitle">Entry animation for new messages</string>
 
     <!-- Chat Rules -->
     <string name="chat_rules_not_found">Chat rules not found for this channel.</string>
@@ -699,6 +708,12 @@
     <string name="chat_gifted_subs_plural">%1$s has gifted %2$d subscriptions to the community! They have gifted a total of %3$d subscriptions in this channel.</string>
     <string name="chat_gifted_sub_single">%1$s has gifted a subscription to the community! They have gifted a total of %2$d subscriptions in this channel.</string>
     <string name="chat_gifted_sub_individual">%1$s has gifted a subscription to %2$s!</string>
+    <!-- Stream host -->
+    <string name="chat_stream_hosted">&lt;b&gt;%1$s&lt;/b&gt; is hosting the stream with %2$d viewers!</string>
+    <string name="chat_stream_hosted_no_count">&lt;b&gt;%1$s&lt;/b&gt; is hosting the stream!</string>
+    <!-- Subscription -->
+    <string name="chat_subscribed_new">&lt;b&gt;%1$s&lt;/b&gt; just subscribed!</string>
+    <string name="chat_subscribed_resub">&lt;b&gt;%1$s&lt;/b&gt; resubscribed for %2$d months!</string>
     <string name="chat_celebration_sub_renew_title">is celebrating their subscription renewal!</string>
     <string name="chat_celebration_generic_title">is celebrating!</string>
     <string name="chat_celebration_sub_renew_duration">Total duration of subscription: %d months!</string>
@@ -718,6 +733,26 @@
     <string name="time_ago_minutes">%d min ago</string>
     <string name="time_ago_hours">%d hours ago</string>
     <string name="error_generic">Something went wrong</string>
+
+    <!-- Reward Queue (Moderator) -->
+    <string name="reward_queue_title">Reward Request Queue</string>
+    <string name="reward_queue_all">All rewards</string>
+    <string name="reward_queue_empty">No pending requests</string>
+    <string name="reward_queue_complete">Complete</string>
+    <string name="reward_queue_reject">Reject</string>
+    <string name="reward_queue_complete_all">Complete all</string>
+    <string name="reward_queue_reject_all">Reject all</string>
+    <string name="reward_queue_action_failed">Action failed, try again</string>
+    <string name="reward_queue_just_now">just now</string>
+    <string name="reward_queue_select_all">Select all</string>
+    <string name="reward_queue_complete_selected">Complete selected</string>
+    <string name="reward_queue_reject_selected">Reject selected</string>
+    <string name="reward_queue_pause_redemptions">Pause Redemptions</string>
+    <string name="reward_queue_paused_badge">paused</string>
+
+    <!-- Mod Emote Channels -->
+    <string name="mod_emote_channels_title">Mod Emote Channels</string>
+    <string name="mod_emote_channels_search_hint">Search channels…</string>
 
     <!-- Background Audio -->
     <string name="background_audio_active">Background Audio Mode Active</string>
@@ -751,6 +786,7 @@
     <string name="operation_failed">Operation failed: %s</string>
     <string name="login_failed_code">Login failed (%d)</string>
     <string name="operation_failed_code">Operation failed (Code: %d)</string>
+    <string name="follow_rate_limited">Too many requests. Please wait a moment and try again.</string>
 
     <!-- Polls -->
     <string name="poll_header">POLL</string>

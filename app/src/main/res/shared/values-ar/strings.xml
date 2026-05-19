@@ -680,13 +680,22 @@
     <string name="chat_timestamps">الطوابع الزمنية</string>
     <string name="chat_seconds">تضمين الثواني</string>
     <string name="show_pinned_gifts">الهدايا المثبتة</string>
-    <string name="chat_low_battery_mode">وضع توفير البطارية</string>
+    <string name="chat_low_battery_mode">توفير البطارية</string>
     <string name="chat_emote_combo">كومبو الرموز</string>
     <string name="chat_settings_vibrate_on_mention">اهتزاز عند الإشارة</string>
     <string name="chat_settings_floating_emotes">رموز عائمة</string>
 
     <!-- Chat Connection -->
-    <string name="chat_low_battery_paused">تم تفعيل وضع الخلفية. الدردشة متوقفة (وضع توفير البطارية)</string>
+    <string name="chat_low_battery_paused">تم تفعيل وضع الخلفية. الدردشة متوقفة (توفير البطارية)</string>
+    <string name="chat_battery_saver_subtitle">يحدد الجودة بـ 720p ويقلل الرسوم المتحركة ويبطئ المؤقتات &amp; الـ ping</string>
+
+    <!-- Chat appearance subtitles -->
+    <string name="chat_timestamps_subtitle">عرض وقت الإرسال بجانب كل رسالة</string>
+    <string name="chat_pinned_gifts_subtitle">تثبيت لافتات الهدايا أعلى الدردشة</string>
+    <string name="chat_emote_combo_subtitle">إبراز الإيموتات المتكررة المتتالية</string>
+    <string name="chat_floating_emotes_subtitle">انفجارات إيموت متحركة تطفو على الشاشة</string>
+    <string name="chat_setting_highlighted_subtitle">اختر الرسائل التي تبرز بصرياً</string>
+    <string name="chat_anim_subtitle">رسوم متحركة لدخول الرسائل الجديدة</string>
 
     <!-- Chat Rules -->
     <string name="chat_rules_not_found">لم يتم العثور على قواعد الدردشة لهذه القناة.</string>
@@ -699,6 +708,12 @@
     <string name="chat_gifted_subs_plural">قام %1$s بإهداء %2$d اشتراكات للمجتمع! أهدى إجمالي %3$d اشتراكات في هذه القناة.</string>
     <string name="chat_gifted_sub_single">قام %1$s بإهداء اشتراك للمجتمع! أهدى إجمالي %2$d اشتراكات في هذه القناة.</string>
     <string name="chat_gifted_sub_individual">قام %1$s بإهداء اشتراك لـ %2$s!</string>
+    <!-- Stream host -->
+    <string name="chat_stream_hosted">&lt;b&gt;%1$s&lt;/b&gt; يستضيف البث مع %2$d مشاهداً!</string>
+    <string name="chat_stream_hosted_no_count">&lt;b&gt;%1$s&lt;/b&gt; يستضيف البث!</string>
+    <!-- Subscription -->
+    <string name="chat_subscribed_new">&lt;b&gt;%1$s&lt;/b&gt; اشترك للتو!</string>
+    <string name="chat_subscribed_resub">&lt;b&gt;%1$s&lt;/b&gt; جدّد اشتراكه لمدة %2$d أشهر!</string>
     <string name="chat_celebration_sub_renew_title">يحتفل بتجديد اشتراكه!</string>
     <string name="chat_celebration_generic_title">يحتفل!</string>
     <string name="chat_celebration_sub_renew_duration">إجمالي مدة الاشتراك: %d شهور!</string>
@@ -718,6 +733,26 @@
     <string name="time_ago_minutes">منذ %d دقيقة</string>
     <string name="time_ago_hours">منذ %d ساعات</string>
     <string name="error_generic">حدث خطأ ما</string>
+
+    <!-- Reward Queue (Moderator) -->
+    <string name="reward_queue_title">قائمة انتظار طلبات المكافآت</string>
+    <string name="reward_queue_all">جميع المكافآت</string>
+    <string name="reward_queue_empty">لا توجد طلبات معلقة</string>
+    <string name="reward_queue_complete">إكمال</string>
+    <string name="reward_queue_reject">رفض</string>
+    <string name="reward_queue_complete_all">إكمال الكل</string>
+    <string name="reward_queue_reject_all">رفض الكل</string>
+    <string name="reward_queue_action_failed">فشل الإجراء، حاول مرة أخرى</string>
+    <string name="reward_queue_just_now">الآن</string>
+    <string name="reward_queue_select_all">تحديد الكل</string>
+    <string name="reward_queue_complete_selected">إكمال المحدد</string>
+    <string name="reward_queue_reject_selected">رفض المحدد</string>
+    <string name="reward_queue_pause_redemptions">إيقاف الاسترداد</string>
+    <string name="reward_queue_paused_badge">موقوف</string>
+
+    <!-- Mod Emote Channels -->
+    <string name="mod_emote_channels_title">قنوات إيموت المشرف</string>
+    <string name="mod_emote_channels_search_hint">ابحث عن القنوات…</string>
 
     <!-- Background Audio -->
     <string name="background_audio_active">وضع الصوت في الخلفية مفعّل</string>
@@ -751,6 +786,7 @@
     <string name="operation_failed">فشلت العملية: %s</string>
     <string name="login_failed_code">فشل تسجيل الدخول (%d)</string>
     <string name="operation_failed_code">فشلت العملية (الرمز: %d)</string>
+    <string name="follow_rate_limited">طلبات كثيرة جداً. يرجى الانتظار لحظة والمحاولة مجدداً.</string>
 
     <!-- Polls -->
     <string name="poll_header">استطلاع</string>
