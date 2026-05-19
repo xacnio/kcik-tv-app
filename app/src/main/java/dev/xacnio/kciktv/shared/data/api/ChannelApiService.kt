@@ -400,6 +400,61 @@ interface ChannelApiService {
         @Query("is_enabled") isEnabled: Boolean = true
     ): Response<dev.xacnio.kciktv.shared.data.model.LoyaltyRewardsResponse>
 
+    /** Moderator: fetch all custom rewards (queue management). Requires auth. */
+    @Headers("Accept: application/json")
+    @GET("api/v2/channels/{slug}/rewards")
+    suspend fun getCustomChannelRewards(
+        @Path("slug") slug: String,
+        @Header("Authorization") token: String
+    ): Response<dev.xacnio.kciktv.shared.data.model.ChannelRewardsResponse>
+
+    /** Moderator: fetch pending (or other status) redemptions, optionally filtered by reward. */
+    @Headers("Accept: application/json")
+    @GET("api/v2/channels/{slug}/redemptions")
+    suspend fun getChannelRedemptions(
+        @Path("slug") slug: String,
+        @Header("Authorization") token: String,
+        @Query("status") status: String = "pending",
+        @Query("reward_id") rewardId: String? = null,
+        @Query("next_page_token") nextPageToken: String? = null
+    ): Response<dev.xacnio.kciktv.shared.data.model.RedemptionsListResponse>
+
+    /** Moderator: counts per reward (for chip badges). */
+    @Headers("Accept: application/json")
+    @GET("api/v2/channels/{slug}/redemption-metadata")
+    suspend fun getRedemptionMetadata(
+        @Path("slug") slug: String,
+        @Header("Authorization") token: String
+    ): Response<dev.xacnio.kciktv.shared.data.model.RedemptionMetadataResponse>
+
+    /** Moderator: pause or unpause a reward. */
+    @Headers("Accept: application/json", "Content-Type: application/json")
+    @PATCH("api/v2/channels/{slug}/rewards/{rewardId}")
+    suspend fun patchReward(
+        @Path("slug") slug: String,
+        @Path("rewardId") rewardId: String,
+        @Header("Authorization") token: String,
+        @Body body: dev.xacnio.kciktv.shared.data.model.RewardPatchRequest
+    ): Response<okhttp3.ResponseBody>
+
+    /** Moderator: accept one or more redemptions. */
+    @Headers("Accept: application/json", "Content-Type: application/json")
+    @POST("api/v2/channels/{slug}/redemptions/accept")
+    suspend fun acceptRedemptions(
+        @Path("slug") slug: String,
+        @Header("Authorization") token: String,
+        @Body body: dev.xacnio.kciktv.shared.data.model.RedemptionBatchRequest
+    ): Response<okhttp3.ResponseBody>
+
+    /** Moderator: reject one or more redemptions. */
+    @Headers("Accept: application/json", "Content-Type: application/json")
+    @POST("api/v2/channels/{slug}/redemptions/reject")
+    suspend fun rejectRedemptions(
+        @Path("slug") slug: String,
+        @Header("Authorization") token: String,
+        @Body body: dev.xacnio.kciktv.shared.data.model.RedemptionBatchRequest
+    ): Response<okhttp3.ResponseBody>
+
     /**
      * Redeems a loyalty reward
      */
