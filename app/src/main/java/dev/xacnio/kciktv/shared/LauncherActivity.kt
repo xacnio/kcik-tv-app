@@ -86,6 +86,11 @@ class LauncherActivity : FragmentActivity() {
             // Start background tasks immediately in parallel
             val prefs = AppPreferences(this@LauncherActivity)
             val repository = ChannelRepository()
+
+            // Propagate battery saver flag to shared singletons that can't easily
+            // reach prefs at runtime (EmoteManager.EmoteEntry init runs on bg threads).
+            dev.xacnio.kciktv.shared.ui.utils.EmoteManager.lowBatteryMode =
+                prefs.lowBatteryModeEnabled
             
             // Task 1: Auth & Following Check
             val authJob = async {

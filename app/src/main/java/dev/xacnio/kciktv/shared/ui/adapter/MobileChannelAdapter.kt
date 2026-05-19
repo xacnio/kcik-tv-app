@@ -50,6 +50,10 @@ class MobileChannelAdapter(
     private val VIEW_TYPE_ITEM = 0
     private val VIEW_TYPE_SHIMMER = 1
 
+    // Captured at construction; toggle changes take effect on next list re-creation.
+    private val lowBattery = context.getSharedPreferences("kick_tv_prefs", Context.MODE_PRIVATE)
+        .getBoolean("low_battery_mode_enabled", false)
+
     fun setIsLoading(loading: Boolean) {
         if (this.isLoading != loading) {
             this.isLoading = loading
@@ -138,39 +142,58 @@ class MobileChannelAdapter(
         val avatarUrl = channel.getEffectiveProfilePicUrl()
         if (vh.avatar.tag != avatarUrl) {
             vh.avatar.tag = avatarUrl
-            Glide.with(vh.avatar.context)
+            val avatarRequest = Glide.with(vh.avatar.context)
                 .load(avatarUrl)
                 .circleCrop()
                 .placeholder(ShimmerDrawable())
-                .thumbnail(Glide.with(vh.avatar.context).load(avatarUrl).override(100))
-                .into(vh.avatar)
-        }
-
-        // Load blurred background avatar
-        vh.blurredBackground?.let { bgView ->
-            if (bgView.tag != avatarUrl) {
-                bgView.tag = avatarUrl
-                Glide.with(bgView.context)
-                    .load(avatarUrl)
-                    .centerCrop()
-                    .into(bgView)
+            // Skip the low-res thumbnail prefetch in battery saver — it doubles the
+            // network requests for the same URL just to get a quicker preview.
+            if (!lowBattery) {
+                avatarRequest.thumbnail(
+                    Glide.with(vh.avatar.context).load(avatarUrl).override(100)
+                )
             }
+            avatarRequest.into(vh.avatar)
         }
 
-        // Load thumbnail
+        // Load blurred background avatar.
+        // Image is blurred behind the card, so detail is wasted — heavy downsample fine.
+        // Skip entirely in battery saver: it's purely decorative.
+        if (!lowBattery) {
+            vh.blurredBackground?.let { bgView ->
+                if (bgView.tag != avatarUrl) {
+                    bgView.tag = avatarUrl
+                    Glide.with(bgView.context)
+                        .load(avatarUrl)
+                        .override(400, 400)
+                        .centerCrop()
+                        .into(bgView)
+                }
+            }
+        } else {
+            vh.blurredBackground?.setImageDrawable(null)
+        }
+
+        // Load thumbnail.
+        // 16:9 livestream thumb fits in a card cell. Kick sources are 1280×720+; hint
+        // 720×405 so Glide downsamples at decode time (saves CPU + memory across long
+        // scrollable lists). The .thumbnail(override(50)) chain is preserved for the
+        // pre-pass blurred preview.
         vh.thumbnail?.let { imageView ->
             val thumbnailUrl = channel.thumbnailUrl
             val thumbToLoad = thumbnailUrl ?: Constants.Urls.DEFAULT_LIVESTREAM_THUMBNAIL
-            
+
             if (imageView.tag != thumbToLoad) {
                 imageView.tag = thumbToLoad
                 val defaultThumbnailBuilder = Glide.with(imageView.context)
                     .load(Constants.Urls.DEFAULT_LIVESTREAM_THUMBNAIL)
+                    .override(720, 405)
                     .fitCenter()
 
                 if (!thumbnailUrl.isNullOrEmpty()) {
                     val requestBuilder = Glide.with(imageView.context)
                         .load(thumbnailUrl)
+                        .override(if (lowBattery) 480 else 720, if (lowBattery) 270 else 405)
                         .signature(ThumbnailCacheHelper.getCacheSignature())
                         .placeholder(ShimmerDrawable(isCircle = false))
                         .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
@@ -180,9 +203,14 @@ class MobileChannelAdapter(
                     requestBuilder.fitCenter()
                     imageView.setBackgroundColor(Color.BLACK)
 
-                    requestBuilder
-                        .thumbnail(Glide.with(imageView.context).load(thumbnailUrl).override(50))
-                        .into(imageView)
+                    // Skip the 50px low-res preview in battery saver — it's a second
+                    // network request for the same URL just for a quicker shimmer→image.
+                    if (!lowBattery) {
+                        requestBuilder.thumbnail(
+                            Glide.with(imageView.context).load(thumbnailUrl).override(50)
+                        )
+                    }
+                    requestBuilder.into(imageView)
                 } else {
                     defaultThumbnailBuilder.into(imageView)
                 }

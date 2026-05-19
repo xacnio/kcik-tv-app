@@ -48,6 +48,11 @@ class FloatingEmoteManager(
     fun processMessage(messageContent: String) {
         if (!prefs.floatingEmotesEnabled) return
 
+        // Suppress floating-emote animations under thermal pressure. Floating emotes
+        // are pure cosmetic (no functional information) and create GPU overdraw +
+        // animator ticks at up to 20 Hz — first thing to cut when the device is hot.
+        if (dev.xacnio.kciktv.shared.util.ThermalMonitor.level >= 1) return
+
         // Simple rate limiting globally to prevent explosion
         val now = System.currentTimeMillis()
         if (now - lastSpawnTime < 50) return // Max 20 emotes per second globally from messages

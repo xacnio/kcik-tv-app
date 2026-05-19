@@ -50,7 +50,12 @@ class KcikChatWebSocket(
     }
     
     private val gson = Gson()
-    private val client = OkHttpClient.Builder()
+    // Reuse the app-wide OkHttpClient (RetrofitClient) so we share its connection pool
+    // and dispatcher thread pool. Previously every chat session built a fresh client +
+    // thread pool — switching channels piled up duplicates. newBuilder() inherits the
+    // SSL/cert config and the User-Agent interceptor; we override the timeouts and add
+    // the WS keep-alive ping that Retrofit doesn't need.
+    private val client = dev.xacnio.kciktv.shared.data.api.RetrofitClient.okHttpClient.newBuilder()
         .readTimeout(0, TimeUnit.MILLISECONDS)
         .pingInterval(30, TimeUnit.SECONDS)
         .build()
@@ -78,9 +83,11 @@ class KcikChatWebSocket(
     private var channelPointsUserId: Long? = null
     private var channelPointsAuth: String? = null
     
-    // Ping timer for keepalive (every 2 minutes)
+    // Ping timer for keepalive.
+    // Default: every 2 minutes. Low Battery: every 5 minutes (Pusher server-side
+    // heartbeat makes the app-level ping mostly redundant; 5 min is safe for most NATs).
     private val pingHandler = Handler(Looper.getMainLooper())
-    private val pingIntervalMs = 120_000L // 2 minutes
+    private var pingIntervalMs = 120_000L // 2 minutes (default)
     private val pingRunnable = object : Runnable {
         override fun run() {
             if (isConnected) {
@@ -88,6 +95,11 @@ class KcikChatWebSocket(
                 pingHandler.postDelayed(this, pingIntervalMs)
             }
         }
+    }
+
+    /** Adjust the keepalive ping interval (e.g. low-battery mode → 300 000 ms). */
+    fun setPingInterval(intervalMs: Long) {
+        pingIntervalMs = intervalMs
     }
     
     /**
@@ -597,6 +609,82 @@ class KcikChatWebSocket(
                     event.data?.let { dataString ->
                         onEventReceived("PointsUpdated", dataString)
                     }
+                }
+                "App\\Events\\StreamHostedEvent", "StreamHostedEvent" -> {
+                    // Fired on chatrooms.<id> when another channel hosts the current stream.
+                    // We emit a SYSTEM chat message so users see the host announcement inline.
+                    Log.d(TAG, "Stream Hosted Event: ${event.data}")
+                    event.data?.let { dataString ->
+                        try {
+                            val obj = com.google.gson.JsonParser.parseString(dataString).asJsonObject
+                            val userObj = obj.getAsJsonObject("user")
+                            val messageObj = obj.getAsJsonObject("message")
+                            val hostUsername = userObj?.get("username")?.asString ?: return@let
+                            val viewers = messageObj?.get("numberOfViewers")?.takeIf { !it.isJsonNull }?.asInt ?: 0
+                            val msgId = messageObj?.get("id")?.takeIf { !it.isJsonNull }?.asString
+                                ?: "host_${System.currentTimeMillis()}"
+
+                            val content = if (viewers > 0) {
+                                context.getString(R.string.chat_stream_hosted, hostUsername, viewers)
+                            } else {
+                                context.getString(R.string.chat_stream_hosted_no_count, hostUsername)
+                            }
+
+                            val systemMessage = ChatMessage(
+                                id = "host_$msgId",
+                                content = content,
+                                sender = ChatSender(0, context.getString(R.string.chat_system_username), null, null),
+                                type = dev.xacnio.kciktv.shared.data.model.MessageType.SYSTEM,
+                                iconResId = R.drawable.ic_tv
+                            )
+                            onMessageReceived(systemMessage)
+                            onEventReceived("App\\Events\\StreamHostedEvent", dataString)
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error parsing StreamHostedEvent", e)
+                        }
+                    }
+                }
+                "App\\Events\\StreamHostEvent", "StreamHostEvent" -> {
+                    // Duplicate of StreamHostedEvent delivered on the chatrooms.<id>.v2 channel.
+                    // The .v2 variant has less data (no host user id, no message id) and fires at
+                    // the same time, so we ignore it to avoid showing the system message twice.
+                    Log.d(TAG, "Ignoring duplicate StreamHostEvent (v2) — handled via StreamHostedEvent")
+                }
+                "App\\Events\\SubscriptionEvent", "SubscriptionEvent" -> {
+                    // Fired on chatrooms.<id>.v2 when a user subscribes (new or renewal).
+                    // Has the months count, which lets us distinguish new vs resub.
+                    Log.d(TAG, "Subscription Event: ${event.data}")
+                    event.data?.let { dataString ->
+                        try {
+                            val obj = com.google.gson.JsonParser.parseString(dataString).asJsonObject
+                            val username = obj.get("username")?.takeIf { !it.isJsonNull }?.asString ?: return@let
+                            val months = obj.get("months")?.takeIf { !it.isJsonNull }?.asInt ?: 1
+
+                            val content = if (months <= 1) {
+                                context.getString(R.string.chat_subscribed_new, username)
+                            } else {
+                                context.getString(R.string.chat_subscribed_resub, username, months)
+                            }
+
+                            val systemMessage = ChatMessage(
+                                id = "sub_${username}_${System.currentTimeMillis()}",
+                                content = content,
+                                sender = ChatSender(0, context.getString(R.string.chat_system_username), null, null),
+                                type = dev.xacnio.kciktv.shared.data.model.MessageType.SYSTEM,
+                                iconResId = R.drawable.ic_star
+                            )
+                            onMessageReceived(systemMessage)
+                            onEventReceived("App\\Events\\SubscriptionEvent", dataString)
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error parsing SubscriptionEvent", e)
+                        }
+                    }
+                }
+                "App\\Events\\ChannelSubscriptionEvent", "ChannelSubscriptionEvent" -> {
+                    // Fires on channel.<id> at the same time as SubscriptionEvent but with less
+                    // data (no months count, just user_ids). Ignored to avoid a duplicate chat
+                    // notification; SubscriptionEvent above is the canonical source.
+                    Log.d(TAG, "Ignoring duplicate ChannelSubscriptionEvent — handled via SubscriptionEvent")
                 }
                 "App\\Events\\SetupTvEvent", "SetupTvEvent" -> {
                     event.data?.let { dataString ->

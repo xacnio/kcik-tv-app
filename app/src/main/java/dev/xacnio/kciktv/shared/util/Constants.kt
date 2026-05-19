@@ -48,7 +48,7 @@ object Constants {
         const val DVR_OFFSET_MS = 10_000L // 10 seconds before live edge
         const val CONTROLS_AUTO_HIDE_DELAY_MS = 3_000L // 3 seconds
         const val PROGRESS_UPDATE_INTERVAL_MS = 1_000L // 1 second
-        const val VIEWER_COUNT_POLL_INTERVAL_MS = 30_000L // 30 seconds
+        const val VIEWER_COUNT_POLL_INTERVAL_MS = 60_000L // 60 seconds (matches MobilePlayerActivity)
         const val STREAM_CHECK_MAX_ATTEMPTS = 10
         const val STREAM_CHECK_INTERVAL_MS = 3_000L // 3 seconds
     }
