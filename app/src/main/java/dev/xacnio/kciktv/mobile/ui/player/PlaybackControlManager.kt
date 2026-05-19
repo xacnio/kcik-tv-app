@@ -29,7 +29,14 @@ class PlaybackControlManager(
         override fun run() {
             updateSeekBarProgress()
             if (activity.playerManager.ivsPlayer?.state == Player.State.PLAYING) {
-                mainHandler.postDelayed(this, 1000)
+                // In pure live mode (no DVR, no VOD/Clip) the seekbar is hidden and uptime is
+                // already refreshed by PlaybackStatusManager.uptimeRunnable. Re-running this
+                // every second only re-sets unchanged visibility/padding -> waste CPU & power.
+                val isVodOrClip = activity.isVodPlaying
+                val isDvrActive = activity.dvrPlaybackUrl != null
+                if (isVodOrClip || isDvrActive) {
+                    mainHandler.postDelayed(this, 1000)
+                }
             }
         }
     }

@@ -290,6 +290,9 @@ class MobilePlayerActivity : FragmentActivity() {
     internal lateinit var playerStatsSheetManager: dev.xacnio.kciktv.mobile.ui.player.PlayerStatsSheetManager
     internal lateinit var loyaltyPointsManager: dev.xacnio.kciktv.mobile.ui.player.LoyaltyPointsManager
     internal lateinit var webViewManager: dev.xacnio.kciktv.mobile.ui.player.WebViewManager
+    // Tracks login state across onResume() boundaries. If this flips, the auth WebView's KPSDK
+    // session was initialized for a different identity (or none) — see WebViewManager.resetForAuthStateChange.
+    private var lastKnownLoggedIn: Boolean = false
     internal var isHomeScreenVisible = true // Start with home screen visible
     internal val isSettingsVisible: Boolean
         get() = if (::settingsPanelManager.isInitialized) settingsPanelManager.isSettingsVisible else false
@@ -522,8 +525,6 @@ class MobilePlayerActivity : FragmentActivity() {
         get() = chatStateManager.currentPrediction
         set(value) { chatStateManager.currentPrediction = value }
         
-    private var predictionTimer: java.util.Timer? = null
-
     private lateinit var overlayGestureDetector: android.view.GestureDetector
     
     // Blerp Persistence Cache
@@ -632,6 +633,10 @@ class MobilePlayerActivity : FragmentActivity() {
     internal val mentionsManager by lazy {
         dev.xacnio.kciktv.mobile.ui.chat.MentionsManager(this, binding, prefs)
     }
+
+    internal val rewardQueueManager by lazy {
+        dev.xacnio.kciktv.mobile.ui.chat.RewardQueueManager(this, binding, prefs)
+    }
     
     internal val chatSettingsSheetManager by lazy {
         dev.xacnio.kciktv.mobile.ui.chat.ChatSettingsSheetManager(
@@ -732,6 +737,11 @@ class MobilePlayerActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         prefs = AppPreferences(this)
+
+        // Subscribe to thermal pressure so FloatingEmote/EmoteCombo/chat-flush can
+        // back off auxiliary work when the device gets hot. NOT a quality knob —
+        // stream bitrate/resolution stay untouched.
+        dev.xacnio.kciktv.shared.util.ThermalMonitor.start(this)
         
         // Apply language settings
         applySavedLanguage()
@@ -750,6 +760,17 @@ class MobilePlayerActivity : FragmentActivity() {
         // Enable edge-to-edge display for transparent navigation bar
         androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, false)
         window.navigationBarColor = Color.TRANSPARENT
+
+        // Use a crossfade rotation animation (smoother than the default fade-to-black/rotate)
+        // when the activity rotates between portrait and landscape. Because configChanges
+        // declares "orientation", the activity is not recreated on rotation, but the window
+        // server still plays its system-level rotation transition — this picks the prettier
+        // variant. Set via window attributes so it sticks across configuration changes.
+        try {
+            val lp = window.attributes
+            lp.rotationAnimation = WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE
+            window.attributes = lp
+        } catch (_: Exception) { }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             window.isNavigationBarContrastEnforced = false
         }
@@ -838,6 +859,18 @@ class MobilePlayerActivity : FragmentActivity() {
                 // 1. Emote Panel
                 if (::binding.isInitialized && binding.emotePanelContainer.visibility == View.VISIBLE) {
                     emotePanelManager.toggleEmotePanel(false)
+                    return
+                }
+
+                // 1b. Chat Settings Panel
+                if (chatSettingsSheetManager.isPanelShowing()) {
+                    chatSettingsSheetManager.dismissPanel()
+                    return
+                }
+
+                // 1c. Video Settings Panel
+                if (videoSettingsDialogManager.isPanelShowing()) {
+                    videoSettingsDialogManager.dismissPanel()
                     return
                 }
 
@@ -1010,6 +1043,7 @@ class MobilePlayerActivity : FragmentActivity() {
         playerGestureManager.setupPlayerGestureDetector()
         
         webViewManager.setupWebView()
+        lastKnownLoggedIn = prefs.isLoggedIn
         setupNotifications()
         quickEmoteBarManager.setupQuickEmoteBar()
         
@@ -1696,6 +1730,11 @@ class MobilePlayerActivity : FragmentActivity() {
         // Moderator Actions Menu Button
         binding.modMenuButton.setOnClickListener {
             modActionsManager.showModActionsSheet()
+        }
+
+        // Reward Queue Button (Moderator-only)
+        binding.rewardQueueIcon.setOnClickListener {
+            rewardQueueManager.showSheet()
         }
 
         // Initialize Gesture Detector for ViewFlipper (Pinned/Poll Swipe)
@@ -2479,6 +2518,12 @@ class MobilePlayerActivity : FragmentActivity() {
         chatUiManager.isChatUiPaused = false
         chatUiManager.startFlushing() // Ensure the loop is running (restarts if dead)
         chatUiManager.flushPendingMessages()
+
+        // Resume viewer count polling if we have an active livestream (paired with onStop cancel).
+        if (currentLivestreamId != null) {
+            viewerCountHandler.removeCallbacks(viewerCountRunnable)
+            viewerCountHandler.post(viewerCountRunnable)
+        }
         
         // Resume chat if paused for low battery mode (Legacy/Safety check)
         if (isChatPausedForLowBattery) {
@@ -2502,7 +2547,12 @@ class MobilePlayerActivity : FragmentActivity() {
         }
 
         playbackStatusManager.stopUptimeUpdater()
-        
+
+        // Viewer count badge is not visible when activity is stopped (PIP, background audio
+        // notification, screen off). Cancel the 60s network poll to avoid keeping the radio
+        // warm and doing UI-thread JSON work the user can't see. onStart will re-post it.
+        viewerCountHandler.removeCallbacks(viewerCountRunnable)
+
         // Don't do anything if already in PIP mode
         val isInPip = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) isInPictureInPictureMode else false
         if (isInPip && !isExplicitAudioSwitch) return
@@ -2556,23 +2606,42 @@ class MobilePlayerActivity : FragmentActivity() {
 
     override fun onResume() {
         super.onResume()
-        
+
         // Ensure UI state matches physical orientation (Fix for persistent split-screen bug)
         val isLandscape = resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
-        
-        // 1. Ensure tablets can always rotate (Fix "stuck orientation" bug, respects system lock)
-        setAllowedOrientation()
+
+        // 1. Ensure tablets can always rotate (Fix "stuck orientation" bug, respects system lock).
+        //    BUT: skip when we just exited PIP into a restored fullscreen state. PipStateManager
+        //    already called enterFullscreen() which set SCREEN_ORIENTATION_LANDSCAPE; calling
+        //    setAllowedOrientation() here would switch to SENSOR and let Android snap to the
+        //    portrait orientation cached during PIP, producing the "rotated to portrait but
+        //    still in fullscreen UI" bug. The suppressAutoFullscreen flag is cleared 500 ms
+        //    after PIP exit, after which normal rotation handling resumes.
+        val justExitedPipInFullscreen = ::pipStateManager.isInitialized &&
+            pipStateManager.suppressAutoFullscreen && isFullscreen
+        if (!justExitedPipInFullscreen) {
+            setAllowedOrientation()
+        }
 
         // 2. Cleanup split-screen artifacts if we are physically in portrait
         if (!isLandscape && ::fullscreenToggleManager.isInitialized) {
              if (fullscreenToggleManager.isSideChatVisible || binding.sideChatContainer.visibility == View.VISIBLE) {
                   fullscreenToggleManager.cleanupSideChat()
-                  fullscreenToggleManager.exitFullscreen() 
+                  fullscreenToggleManager.exitFullscreen()
              }
         }
         
         // Reset exit flag in case onStart wasn't called (e.g. from Paused state)
         exitedPipMode = false
+
+        // If the user just logged in (or out) in LoginActivity, the auth WebView's KPSDK
+        // session was bound to the old identity and would 429 on /follow. Reset it so the
+        // next bridge call reloads kick.com/mobile/token with the new cookie set.
+        val currentLoggedIn = prefs.isLoggedIn
+        if (currentLoggedIn != lastKnownLoggedIn && ::webViewManager.isInitialized) {
+            webViewManager.resetForAuthStateChange()
+            lastKnownLoggedIn = currentLoggedIn
+        }
 
         updateUserHeaderState()
         
@@ -2616,7 +2685,11 @@ class MobilePlayerActivity : FragmentActivity() {
     override fun onDestroy() {
         if (::chatUiManager.isInitialized) chatUiManager.stopFlushing()
         super.onDestroy()
-        
+
+        // Unregister thermal listener so the system doesn't keep delivering callbacks
+        // to a torn-down activity context.
+        dev.xacnio.kciktv.shared.util.ThermalMonitor.stop(this)
+
         // Clean up handlers
         viewerCountHandler.removeCallbacks(viewerCountRunnable)
         playbackStatusManager.stopUptimeUpdater()
@@ -2736,6 +2809,16 @@ class MobilePlayerActivity : FragmentActivity() {
                     ::binding.isInitialized && binding.emotePanelContainer.visibility == View.VISIBLE -> {
                         Log.d(TAG, "BACK: Branch -> emotePanelVisible -> close emote panel")
                         emotePanelManager.toggleEmotePanel(false)
+                        return@handleOnBackPressed
+                    }
+                    chatSettingsSheetManager.isPanelShowing() -> {
+                        Log.d(TAG, "BACK: Branch -> chatSettingsPanel -> dismiss")
+                        chatSettingsSheetManager.dismissPanel()
+                        return@handleOnBackPressed
+                    }
+                    videoSettingsDialogManager.isPanelShowing() -> {
+                        Log.d(TAG, "BACK: Branch -> videoSettingsPanel -> dismiss")
+                        videoSettingsDialogManager.dismissPanel()
                         return@handleOnBackPressed
                     }
                     fullscreenToggleManager.isSideChatVisible -> {

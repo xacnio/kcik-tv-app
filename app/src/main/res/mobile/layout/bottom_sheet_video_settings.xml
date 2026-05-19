@@ -1,422 +1,343 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/videoSettingsPanelRoot"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/bg_bottom_sheet"
-    android:paddingBottom="24dp">
+    android:orientation="vertical"
+    android:background="@drawable/bg_chat_settings_panel"
+    android:elevation="20dp">
 
-    <!-- Main Settings View -->
+    <!-- HEADER -->
     <LinearLayout
-        android:id="@+id/mainSettingsView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="52dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="2dp"
+        android:paddingEnd="4dp">
 
-        <!-- Handle Bar -->
+        <ImageButton
+            android:id="@+id/videoPanelBackButton"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_arrow_back"
+            android:padding="10dp"
+            app:tint="#FFFFFF"
+            android:visibility="gone" />
+
         <View
-            android:layout_width="40dp"
-            android:layout_height="4dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/bg_handle_bar" />
+            android:id="@+id/videoPanelBackSpacer"
+            android:layout_width="14dp"
+            android:layout_height="1dp" />
 
-        <!-- Title -->
         <TextView
-            android:layout_width="match_parent"
+            android:id="@+id/videoPanelTitleText"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="20dp"
-            android:paddingTop="16dp"
-            android:paddingBottom="12dp"
             android:text="@string/settings"
             android:textColor="#FFFFFF"
-            android:textSize="18sp"
+            android:textSize="17sp"
             android:textStyle="bold" />
 
-        <!-- Divider -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginHorizontal="16dp"
-            android:background="#2a2a2a" />
+        <ImageButton
+            android:id="@+id/btnDismissVideoSettings"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_close"
+            android:padding="11dp"
+            app:tint="#888888" />
+    </LinearLayout>
 
-        <!-- Quality Option -->
+    <!-- Separator -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#18FFFFFF" />
+
+    <!-- CONTENT AREA -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <!-- MAIN SETTINGS VIEW -->
         <LinearLayout
-            android:id="@+id/videoSettingQuality"
+            android:id="@+id/videoSettingsMainView"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:background="@drawable/bg_item_ripple"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="20dp">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="10dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="10dp">
 
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_hd"
-                app:tint="#888888" />
-
+            <!-- Quality -->
             <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:id="@+id/videoSettingQuality"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_ripple_rounded"
+                android:paddingHorizontal="10dp">
+
+                <FrameLayout
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_settings_card">
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_hd"
+                        app:tint="#AAAAAA" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="12dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/quality_selection"
+                        android:textColor="#FFFFFF"
+                        android:textSize="15sp" />
+                    <TextView
+                        android:id="@+id/videoSettingQualityValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/quality_auto"
+                        android:textColor="#888888"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_chevron_right"
+                    app:tint="#444444" />
+            </LinearLayout>
+
+            <!-- Refresh -->
+            <LinearLayout
+                android:id="@+id/videoSettingRefresh"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_ripple_rounded"
+                android:paddingHorizontal="10dp">
+
+                <FrameLayout
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_settings_card">
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_refresh"
+                        app:tint="#AAAAAA" />
+                </FrameLayout>
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:text="@string/quality_selection"
+                    android:layout_marginStart="12dp"
+                    android:text="@string/refresh"
                     android:textColor="#FFFFFF"
                     android:textSize="15sp" />
 
-                <TextView
-                    android:id="@+id/videoSettingQualityValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/quality_auto"
-                    android:textColor="#888888"
-                    android:textSize="13sp" />
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_chevron_right"
+                    app:tint="#444444" />
             </LinearLayout>
 
-            <ImageView
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:src="@drawable/ic_chevron_right"
-                app:tint="#555555" />
-        </LinearLayout>
-
-        <!-- Refresh Option -->
-        <LinearLayout
-            android:id="@+id/videoSettingRefresh"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:background="@drawable/bg_item_ripple"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="20dp">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_refresh"
-                app:tint="#888888" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_weight="1"
-                android:text="@string/refresh"
-                android:textColor="#FFFFFF"
-                android:textSize="15sp" />
-
-            <ImageView
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:src="@drawable/ic_chevron_right"
-                app:tint="#555555" />
-        </LinearLayout>
-
-        <!-- Player Statistics Option -->
-        <LinearLayout
-            android:id="@+id/videoSettingStats"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:background="@drawable/bg_item_ripple"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="20dp">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_info"
-                app:tint="#888888" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_weight="1"
-                android:text="@string/player_statistics"
-                android:textColor="#FFFFFF"
-                android:textSize="15sp" />
-
-            <ImageView
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:src="@drawable/ic_chevron_right"
-                app:tint="#555555" />
-        </LinearLayout>
-
-        <!-- Playback Speed Option (VOD/Clip Only) -->
-        <LinearLayout
-            android:id="@+id/videoSettingSpeed"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:background="@drawable/bg_item_ripple"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="20dp"
-            android:visibility="gone">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_play_arrow"
-                app:tint="#888888" />
-
+            <!-- Player Stats -->
             <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:id="@+id/videoSettingStats"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_ripple_rounded"
+                android:paddingHorizontal="10dp">
+
+                <FrameLayout
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_settings_card">
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_info"
+                        app:tint="#AAAAAA" />
+                </FrameLayout>
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:text="@string/playback_speed_title"
+                    android:layout_marginStart="12dp"
+                    android:text="@string/player_statistics"
                     android:textColor="#FFFFFF"
                     android:textSize="15sp" />
 
-                <TextView
-                    android:id="@+id/videoSettingSpeedValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/speed_normal_1x"
-                    android:textColor="#888888"
-                    android:textSize="13sp" />
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_chevron_right"
+                    app:tint="#444444" />
             </LinearLayout>
 
-            <ImageView
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:src="@drawable/ic_chevron_right"
-                app:tint="#555555" />
-        </LinearLayout>
-        
-        <!-- Audio Mode Option -->
-        <LinearLayout
-            android:id="@+id/videoSettingAudio"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:background="@drawable/bg_item_ripple"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="20dp">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_volume"
-                app:tint="#888888" />
-
+            <!-- Playback Speed (VOD/Clip only, gone by default) -->
             <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:id="@+id/videoSettingSpeed"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_ripple_rounded"
+                android:paddingHorizontal="10dp"
+                android:visibility="gone">
+
+                <FrameLayout
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_settings_card">
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_play_arrow"
+                        app:tint="#AAAAAA" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="12dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/playback_speed_title"
+                        android:textColor="#FFFFFF"
+                        android:textSize="15sp" />
+                    <TextView
+                        android:id="@+id/videoSettingSpeedValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/speed_normal_1x"
+                        android:textColor="#888888"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_chevron_right"
+                    app:tint="#444444" />
+            </LinearLayout>
+
+            <!-- Audio EQ (API 28+ only, gone by default) -->
+            <LinearLayout
+                android:id="@+id/videoSettingAudio"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_ripple_rounded"
+                android:paddingHorizontal="10dp"
+                android:visibility="gone">
+
+                <FrameLayout
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_settings_card">
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_volume"
+                        app:tint="#AAAAAA" />
+                </FrameLayout>
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
                     android:text="@string/audio_mode_custom_eq"
                     android:textColor="#FFFFFF"
                     android:textSize="15sp" />
-           
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_chevron_right"
+                    app:tint="#444444" />
             </LinearLayout>
 
-            <ImageView
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:src="@drawable/ic_chevron_right"
-                app:tint="#555555" />
         </LinearLayout>
-    </LinearLayout>
 
-    <!-- Audio Selection View -->
-    <LinearLayout
-        android:id="@+id/audioSettingsView"
+        <!-- QUALITY SUB-VIEW -->
+        <LinearLayout
+            android:id="@+id/qualitySettingsView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/qualityRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="8dp"
+                android:clipToPadding="false" />
+        </LinearLayout>
+
+        <!-- SPEED SUB-VIEW -->
+        <LinearLayout
+            android:id="@+id/speedSettingsView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/speedRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="8dp"
+                android:clipToPadding="false" />
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <!-- Bottom handle bar -->
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="gone">
-
-        <!-- Handle Bar -->
+        android:layout_height="20dp">
         <View
             android:layout_width="40dp"
             android:layout_height="4dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/bg_handle_bar" />
+            android:layout_gravity="center"
+            android:background="@drawable/bg_rounded_circle"
+            android:backgroundTint="#282828" />
+    </FrameLayout>
 
-        <!-- Header with Back Button -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="16dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="4dp">
-
-            <ImageButton
-                android:id="@+id/backFromAudioToMain"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/bg_item_ripple"
-                android:src="@drawable/ic_back"
-                app:tint="#FFFFFF" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="@string/audio_mode_custom_eq"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <!-- Divider -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginHorizontal="16dp"
-            android:background="#2a2a2a" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/audioRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:clipToPadding="false"
-            android:paddingHorizontal="8dp" />
-    </LinearLayout>
-
-    <!-- Quality Selection View -->
-    <LinearLayout
-        android:id="@+id/qualitySettingsView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="gone">
-
-        <!-- Handle Bar -->
-        <View
-            android:layout_width="40dp"
-            android:layout_height="4dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/bg_handle_bar" />
-
-        <!-- Header with Back Button -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="16dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="4dp">
-
-            <ImageButton
-                android:id="@+id/backToMainSettings"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/bg_item_ripple"
-                android:src="@drawable/ic_back"
-                app:tint="#FFFFFF" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="@string/quality_selection"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <!-- Divider -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginHorizontal="16dp"
-            android:background="#2a2a2a" />
-
-        <!-- Quality Options RecyclerView -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/qualityRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:clipToPadding="false"
-            android:paddingHorizontal="8dp" />
-    </LinearLayout>
-
-    <!-- Speed Selection View -->
-    <LinearLayout
-        android:id="@+id/speedSettingsView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="gone">
-
-        <!-- Handle Bar -->
-        <View
-            android:layout_width="40dp"
-            android:layout_height="4dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/bg_handle_bar" />
-
-        <!-- Header with Back Button -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="16dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="4dp">
-
-            <ImageButton
-                android:id="@+id/backFromSpeedToMain"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/bg_item_ripple"
-                android:src="@drawable/ic_back"
-                app:tint="#FFFFFF" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="@string/playback_speed_title"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <!-- Divider -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginHorizontal="16dp"
-            android:background="#2a2a2a" />
-
-        <!-- Speed Options RecyclerView -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/speedRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:clipToPadding="false"
-            android:paddingHorizontal="8dp" />
-    </LinearLayout>
-
-</FrameLayout>
+</LinearLayout>

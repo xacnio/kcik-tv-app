@@ -101,6 +101,8 @@ class OverlayControlManager(private val activity: MobilePlayerActivity) {
         binding.infoStreamTitle.isSelected = false
         binding.infoStreamTitle.removeCallbacks(startMarqueeRunnable)
         binding.infoStreamTitle.postDelayed(startMarqueeRunnable, 1500)
+        // Re-enable tags marquee whenever overlay becomes visible (paired with hideOverlay disable).
+        binding.infoTagsText.isSelected = true
 
         mainHandler.removeCallbacks(hideOverlayRunnable)
         mainHandler.postDelayed(hideOverlayRunnable, 3000)
@@ -130,9 +132,11 @@ class OverlayControlManager(private val activity: MobilePlayerActivity) {
         val shouldKeepInfoVisible = isTablet && (isPortrait || isSideChatVisible) && !isTheatreMode
         val shouldKeepActionVisible = isTablet && isSideChatVisible
 
-        // Stop marquee
+        // Stop marquees. TextView marquee posts a frame callback every ~50ms via Choreographer
+        // regardless of visibility, so leaving isSelected=true on a GONE overlay keeps burning CPU.
         binding.infoStreamTitle.isSelected = false
         binding.infoStreamTitle.removeCallbacks(startMarqueeRunnable)
+        binding.infoTagsText.isSelected = false
 
         // Animate both panels out together as one smooth retraction
         activity.channelUiManager.animatePanelsOut(
