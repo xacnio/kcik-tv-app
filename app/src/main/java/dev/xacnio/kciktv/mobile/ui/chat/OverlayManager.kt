@@ -2431,7 +2431,14 @@ class OverlayManager(
         params.setMargins(0, 0, margin, 0)
         iv.layoutParams = params
         container.addView(iv)
-        Glide.with(activity).load(url).into(iv)
+        dev.xacnio.kciktv.shared.ui.utils.ApngBadgeManager.loadBadge(url, size, iv) { drawable ->
+            if (drawable != null) {
+                iv.setImageDrawable(drawable)
+                (drawable as? android.graphics.drawable.Animatable)?.start()
+            } else {
+                Glide.with(activity).load(url).into(iv)
+            }
+        }
     }
     private object NonScrollableLinkMovementMethod : android.text.method.LinkMovementMethod() {
         override fun onTouchEvent(widget: android.widget.TextView, buffer: android.text.Spannable, event: android.view.MotionEvent): Boolean {

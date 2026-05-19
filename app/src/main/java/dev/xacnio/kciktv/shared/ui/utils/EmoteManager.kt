@@ -23,6 +23,7 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
 import com.bumptech.glide.signature.ObjectKey
+import com.github.penfeizhou.animation.apng.APNGDrawable
 import java.lang.ref.WeakReference
 import java.util.Collections
 import java.util.WeakHashMap
@@ -371,6 +372,12 @@ object EmoteManager {
         size: Int,
         @Suppress("UNUSED_PARAMETER") onReady: (Drawable) -> Unit
     ) {
+        // PNG URL'leri için APNGDrawable kullan (animasyonlu abone rozetleri)
+        if (url.contains(".png", ignoreCase = true)) {
+            loadInternalApng(url, key, size)
+            return
+        }
+
         val target = object : CustomTarget<Drawable>(size, size) {
             override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
                 android.util.Log.d("EmoteManager", "✅ Loaded emote: $url")
@@ -415,6 +422,75 @@ object EmoteManager {
             .diskCacheStrategy(DiskCacheStrategy.DATA)
             .disallowHardwareConfig() // Important for BitmapShader and Span operations
             .into(target)
+    }
+
+    /**
+     * APNG animasyonlu rozetleri yükler. Glide PNG'yi statik bitmap'e indirger;
+     * penfeizhou APNGDrawable ise APNG animasyon çerçevelerini doğru oynatır.
+     */
+    private fun loadInternalApng(url: String, key: String, size: Int) {
+        val targetView = pendingCallbacks[key]?.firstOrNull()?.first?.get()
+        if (targetView == null) {
+            android.util.Log.e("EmoteManager", "❌ Failed to load APNG badge: targetView is null for key $key")
+            pendingCallbacks.remove(key)
+            return
+        }
+
+        ApngBadgeManager.loadBadge(url, size, targetView) { apngDrawable ->
+            if (apngDrawable != null) {
+                (apngDrawable as? APNGDrawable)?.setAutoPlay(true)
+                android.util.Log.d("EmoteManager", "✅ Loaded APNG badge via ApngBadgeManager: $url")
+
+                Handler(Looper.getMainLooper()).post {
+                    val newEntry = EmoteEntry(key, apngDrawable, size)
+                    emoteEntries[key] = newEntry
+
+                    val callbacks = pendingCallbacks.remove(key) ?: return@post
+                    for ((viewRef, callback) in callbacks) {
+                        val view = viewRef.get() ?: continue
+                        val proxy = ProxyDrawable(newEntry, view)
+                        newEntry.attachViewer(proxy)
+                        proxy.setBounds(0, 0, size, size)
+                        callback(proxy)
+                    }
+                }
+            } else {
+                android.util.Log.e("EmoteManager", "❌ Failed to load APNG badge: $url")
+                pendingCallbacks.remove(key)
+            }
+        }
+    }
+
+    /**
+     * Shared loading function specifically for Badges (subscriber badges, etc).
+     * Bypasses PNG URL check and directly attempts APNG load.
+     */
+    fun loadBadgeSynchronized(
+        context: Context,
+        url: String,
+        size: Int,
+        targetView: View,
+        onReady: (Drawable) -> Unit
+    ) {
+        val key = "v6_$url"
+
+        val callbacks = pendingCallbacks[key]
+        if (callbacks != null) {
+            callbacks.add(Pair(WeakReference(targetView), onReady))
+            return
+        }
+
+        val entry = emoteEntries[key]
+        if (entry != null) {
+            val proxy = ProxyDrawable(entry, targetView)
+            entry.attachViewer(proxy)
+            proxy.setBounds(0, 0, size, size)
+            onReady(proxy)
+            return
+        }
+
+        pendingCallbacks[key] = mutableListOf(Pair(WeakReference(targetView), onReady))
+        loadInternalApng(url, key, size)
     }
 
     /**

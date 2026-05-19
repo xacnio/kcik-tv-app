@@ -1067,7 +1067,7 @@ class ChatAdapter(
     }
 
     private fun loadBadgeImageInternal(textView: TextView, scheduleLayoutUpdate: () -> Unit, position: Int, url: String, size: Int) {
-        dev.xacnio.kciktv.shared.ui.utils.EmoteManager.loadSynchronizedImage(
+        dev.xacnio.kciktv.shared.ui.utils.EmoteManager.loadBadgeSynchronized(
             textView.context, url, size, textView
         ) { drawable ->
             try {
@@ -2041,7 +2041,7 @@ class ChatAdapter(
     
     private fun loadBadgeImage(holder: ChatViewHolder, position: Int, url: String, size: Int) {
         val textView = holder.messageText
-        dev.xacnio.kciktv.shared.ui.utils.EmoteManager.loadSynchronizedImage(
+        dev.xacnio.kciktv.shared.ui.utils.EmoteManager.loadBadgeSynchronized(
             textView.context, url, size, textView
         ) { drawable ->
             try {

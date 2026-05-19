@@ -16,6 +16,7 @@ import android.widget.LinearLayout
 import com.bumptech.glide.Glide
 import dev.xacnio.kciktv.R
 import dev.xacnio.kciktv.shared.data.model.ChannelUserBadge
+import dev.xacnio.kciktv.shared.ui.utils.ApngBadgeManager
 
 /**
  * Utility object for rendering chat badges into views
@@ -77,7 +78,15 @@ object BadgeRenderUtils {
                     .maxOrNull()?.let { subscriberBadges[it] }
                 
                 if (badgeUrl != null) {
-                    Glide.with(context).load(badgeUrl).into(imageView)
+                    ApngBadgeManager.loadBadge(badgeUrl, size, imageView) { drawable ->
+                        if (drawable != null) {
+                            imageView.setImageDrawable(drawable)
+                            (drawable as? android.graphics.drawable.Animatable)?.start()
+                        } else {
+                            // APNG başarısız olduysa Glide statik fallback
+                            Glide.with(context).load(badgeUrl).into(imageView)
+                        }
+                    }
                 } else {
                     imageView.setImageResource(R.drawable.ic_badge_subscriber_default)
                 }
