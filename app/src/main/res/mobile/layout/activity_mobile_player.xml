@@ -1021,6 +1021,35 @@
 
 
 
+        <!-- Pinned Gifts Container -->
+        <FrameLayout
+            android:id="@+id/pinnedGiftsBlur"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:elevation="0dp"
+            android:background="#CC0f0f0f"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible">
+
+            <HorizontalScrollView
+                android:id="@+id/pinnedGiftsScroll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:paddingVertical="8dp"
+                android:paddingHorizontal="12dp">
+
+                <LinearLayout
+                    android:id="@+id/pinnedGiftsLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
+        </FrameLayout>
+
         <!-- Pinned Message & Poll Stack Area -->
         <FrameLayout
             android:id="@+id/chatOverlayContainer"
@@ -2542,34 +2571,7 @@
 
     </LinearLayout>
 
-    <!-- Pinned Gifts Container (Move to end of XML to draw on TOP) -->
-    <FrameLayout
-        android:id="@+id/pinnedGiftsBlur"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:elevation="10dp"
-        android:background="#CC0f0f0f"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/actionBar"
-        tools:visibility="visible">
 
-        <HorizontalScrollView
-            android:id="@+id/pinnedGiftsScroll"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:scrollbars="none"
-            android:paddingVertical="8dp"
-            android:paddingHorizontal="12dp">
-
-            <LinearLayout
-                android:id="@+id/pinnedGiftsLayout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal" />
-        </HorizontalScrollView>
-    </FrameLayout>
         <!-- Full Screen Side Chat Container (Tablet Split View) -->
         <LinearLayout
             android:id="@+id/sideChatContainer"
