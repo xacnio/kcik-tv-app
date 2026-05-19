@@ -529,6 +529,20 @@ class ChannelRepository {
         }
     }
 
+    /** Fetches accurate chatroom settings (slow mode, follow mode, etc.) by channel ID. */
+    suspend fun getChatSettings(channelId: Long): Result<dev.xacnio.kciktv.shared.data.model.ChatSettingsData> = withContext(Dispatchers.IO) {
+        try {
+            val response = liveStreamsService.getChatSettings(channelId)
+            if (response.isSuccessful && response.body()?.data != null) {
+                Result.success(response.body()!!.data!!)
+            } else {
+                Result.failure(Exception("API error: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     /**
      * Fetches following live streams (v1 and v2 merged)
      * Thumbnails from v1, offline channels from v2.
@@ -985,6 +999,91 @@ class ChannelRepository {
             }
         } catch (e: Exception) {
             Log.e(TAG, "Get latest prediction Exception: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+
+    /** Fetch all custom rewards for the mod queue (auth required). */
+    suspend fun getCustomRewards(slug: String, token: String): Result<List<dev.xacnio.kciktv.shared.data.model.ChannelReward>> = withContext(Dispatchers.IO) {
+        try {
+            val response = channelService.getCustomChannelRewards(slug.lowercase(), "Bearer $token")
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!.data)
+            } else {
+                Result.failure(Exception("API error: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /** Fetch pending redemptions for the mod queue, optionally filtered by reward and paginated. */
+    suspend fun getPendingRedemptions(
+        slug: String,
+        token: String,
+        rewardId: String? = null,
+        nextPageToken: String? = null
+    ): Result<dev.xacnio.kciktv.shared.data.model.RedemptionsListData> = withContext(Dispatchers.IO) {
+        try {
+            val response = channelService.getChannelRedemptions(slug.lowercase(), "Bearer $token", "pending", rewardId, nextPageToken)
+            if (response.isSuccessful && response.body() != null) {
+                val data = response.body()!!.data ?: dev.xacnio.kciktv.shared.data.model.RedemptionsListData(emptyList(), null)
+                Result.success(data)
+            } else {
+                Result.failure(Exception("API error: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /** Fetch per-reward pending counts for the chip badges. */
+    suspend fun getRedemptionMetadata(slug: String, token: String): Result<dev.xacnio.kciktv.shared.data.model.RedemptionMetadataData> = withContext(Dispatchers.IO) {
+        try {
+            val response = channelService.getRedemptionMetadata(slug.lowercase(), "Bearer $token")
+            if (response.isSuccessful && response.body()?.data != null) {
+                Result.success(response.body()!!.data!!)
+            } else {
+                Result.failure(Exception("API error: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /** Mark a redemption as completed. */
+    /** Pause or unpause a reward. */
+    suspend fun setRewardPaused(slug: String, rewardId: String, paused: Boolean, token: String): Result<Boolean> = withContext(Dispatchers.IO) {
+        try {
+            val body = dev.xacnio.kciktv.shared.data.model.RewardPatchRequest(paused)
+            val response = channelService.patchReward(slug.lowercase(), rewardId, "Bearer $token", body)
+            if (response.isSuccessful) Result.success(true)
+            else Result.failure(Exception("API error: ${response.code()}"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /** Accept one or more redemptions. */
+    suspend fun acceptRedemptions(slug: String, ids: List<String>, token: String): Result<Boolean> = withContext(Dispatchers.IO) {
+        try {
+            val body = dev.xacnio.kciktv.shared.data.model.RedemptionBatchRequest(ids)
+            val response = channelService.acceptRedemptions(slug.lowercase(), "Bearer $token", body)
+            if (response.isSuccessful) Result.success(true)
+            else Result.failure(Exception("API error: ${response.code()}"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /** Reject one or more redemptions. */
+    suspend fun rejectRedemptions(slug: String, ids: List<String>, token: String): Result<Boolean> = withContext(Dispatchers.IO) {
+        try {
+            val body = dev.xacnio.kciktv.shared.data.model.RedemptionBatchRequest(ids)
+            val response = channelService.rejectRedemptions(slug.lowercase(), "Bearer $token", body)
+            if (response.isSuccessful) Result.success(true)
+            else Result.failure(Exception("API error: ${response.code()}"))
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }

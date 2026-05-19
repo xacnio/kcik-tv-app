@@ -19,6 +19,8 @@ import dev.xacnio.kciktv.mobile.MobilePlayerActivity
 import dev.xacnio.kciktv.R
 import dev.xacnio.kciktv.shared.data.prefs.AppPreferences
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
 
 /**
  * Manages all WebView-based operations including:
@@ -41,7 +43,12 @@ class WebViewManager(
         const val TAG = "WebViewManager"
         const val USER_AGENT = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36 OPR/94.0.0.0"
         const val CLIENT_TOKEN = "e1393935a959b4020a4491574f6490129f678acdaa92760471263db43487f823"
-        const val KICK_TOKEN_URL = "https://kick.com/mobile/token"
+        // The page that KPSDK actually hooks fetch() on. `/mobile/token` is a POST endpoint —
+        // GET'ing it gave us a stub page where KPSDK loaded the SDK object but never bound its
+        // fetch hook to `/api/v2/*` requests (the bridge fetch went out with x-kpsdk-ct=null and
+        // kick.com replied 429). LoginActivity uses the homepage and KPSDK works there, so we
+        // use the same URL.
+        const val KICK_TOKEN_URL = "https://kick.com/"
         // Note: Session cookies are persisted between operations to maintain XSRF tokens
         // and session continuity. Only clear cookies on explicit logout or deep resets.
         const val KPSDK_POLL_INTERVAL_MS = 100L
@@ -111,6 +118,38 @@ class WebViewManager(
     }
 
     /**
+     * Forces a full reset of the authWebView so KPSDK re-initializes from scratch.
+     *
+     * KPSDK fingerprints the page once at page-load and signs subsequent fetch() requests
+     * using that fingerprint. If the WebView was loaded while logged-out and the user then
+     * logs in, the kick_session cookie now belongs to a real user but KPSDK keeps signing
+     * with the anonymous fingerprint — kick.com sees the mismatch and returns 429 for /follow
+     * and other authenticated endpoints. The same trap applies on logout.
+     *
+     * Call this whenever the login state changes; the next operation will reload
+     * kick.com/mobile/token with the up-to-date cookie set and rebuild the bridge.
+     */
+    fun resetForAuthStateChange() {
+        // Cancel any pending deep-suspend so we don't trip over ourselves.
+        deepSuspendHandler.removeCallbacks(deepSuspendRunnable)
+        try {
+            val webView = activity.binding.authWebView
+            // onResume first so loadUrl actually progresses if we were light-suspended.
+            if (isAuthWebViewSuspended && !isDeepSuspended) {
+                try { webView.onResume() } catch (_: Exception) {}
+            }
+            webView.loadUrl("about:blank")
+            isDeepSuspended = true
+            isAuthWebViewSuspended = true
+            isBridgeInjected = false
+            isAuthWebViewReady = false
+            Log.d(TAG, "authWebView reset for auth state change — KPSDK will re-init on next use")
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to reset authWebView for auth change", e)
+        }
+    }
+
+    /**
      * Deep suspends the authWebView by loading about:blank.
      * This frees the DOM tree, JavaScript heap, and GPU textures (~50MB).
      * The bridge and KPSDK state are lost and will be re-initialized on next use.
@@ -154,6 +193,11 @@ class WebViewManager(
 
             var pageFinishedHandled = false
             webView.webViewClient = object : android.webkit.WebViewClient() {
+                override fun shouldInterceptRequest(
+                    view: android.webkit.WebView?,
+                    request: android.webkit.WebResourceRequest?
+                ): android.webkit.WebResourceResponse? = interceptFollowRequest(request)
+
                 override fun onPageFinished(view: android.webkit.WebView?, url: String?) {
                     super.onPageFinished(view, url)
                     if (pageFinishedHandled) return
@@ -376,6 +420,11 @@ class WebViewManager(
 
         var pageFinishedHandled = false
         webView.webViewClient = object : android.webkit.WebViewClient() {
+            override fun shouldInterceptRequest(
+                view: android.webkit.WebView?,
+                request: android.webkit.WebResourceRequest?
+            ): android.webkit.WebResourceResponse? = interceptFollowRequest(request)
+
             override fun onPageFinished(view: android.webkit.WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 if (pageFinishedHandled) return
@@ -404,27 +453,160 @@ class WebViewManager(
     }
 
     /**
-     * Restores saved cookies from AppPreferences to CookieManager
-     * This makes WebView "logged in" using cookies from the login flow
+     * Intercepts the bridge's follow/unfollow fetch and re-sends it via OkHttp using the
+     * KPSDK headers that KPSDK injected into the in-flight WebView request.
+     *
+     * This mirrors how login works in [LoginActivity.shouldInterceptRequest]: the WebView
+     * fetch carries valid KPSDK headers, but the actual round-trip to kick.com is performed
+     * by OkHttp so the server sees a single, well-formed authenticated request. Letting the
+     * WebView fetch hit kick.com directly was returning 429 — interception is the proven
+     * path the rest of the app already uses.
+     *
+     * Returns null for any request that isn't a follow/unfollow so the WebView keeps its
+     * normal behaviour for KPSDK loaders, page resources, etc.
+     */
+    private fun interceptFollowRequest(
+        request: android.webkit.WebResourceRequest?
+    ): android.webkit.WebResourceResponse? {
+        if (request == null) return null
+        val url = request.url.toString()
+        val method = request.method.uppercase()
+
+        val isFollowEndpoint = url.contains("/api/v2/channels/") && url.endsWith("/follow")
+        if (!isFollowEndpoint) return null
+        if (method != "POST" && method != "DELETE") return null
+
+        Log.d(TAG, "🎯 Intercepting follow: $method $url")
+
+        val headers = request.requestHeaders ?: emptyMap()
+        fun h(name: String): String? = headers.entries
+            .firstOrNull { it.key.equals(name, ignoreCase = true) }?.value
+
+        val kpsdkCd = h("x-kpsdk-cd")
+        val kpsdkCt = h("x-kpsdk-ct")
+        val kpsdkH = h("x-kpsdk-h")
+        val kpsdkV = h("x-kpsdk-v")
+        val xsrf = h("x-xsrf-token")
+        val auth = h("authorization")
+        val referer = h("referer")
+        val contentType = h("content-type") ?: "application/json"
+        val cookieStr = cookieManager.getCookie("https://kick.com")
+
+        Log.d(TAG, "  KPSDK ct=${kpsdkCt?.take(20)}… cd=${kpsdkCd?.take(20)}… xsrf=${xsrf?.take(10)}…")
+
+        return try {
+            val client = okhttp3.OkHttpClient.Builder()
+                .connectionSpecs(listOf(okhttp3.ConnectionSpec.RESTRICTED_TLS, okhttp3.ConnectionSpec.CLEARTEXT))
+                .protocols(listOf(okhttp3.Protocol.HTTP_2, okhttp3.Protocol.HTTP_1_1))
+                .followRedirects(true)
+                .followSslRedirects(true)
+                .cookieJar(okhttp3.CookieJar.NO_COOKIES)
+                .connectTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
+                .readTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
+                .build()
+
+            val rb = okhttp3.Request.Builder().url(url)
+            when (method) {
+                "POST" -> rb.post("{}".toRequestBody(contentType.toMediaTypeOrNull()))
+                "DELETE" -> rb.delete()
+            }
+
+            rb.header("Content-Type", contentType)
+            rb.header("Accept", "application/json")
+            rb.header("Origin", "https://kick.com")
+            rb.header("User-Agent", USER_AGENT)
+            rb.header("Sec-Fetch-Site", "same-origin")
+            rb.header("Sec-Fetch-Mode", "cors")
+            rb.header("Sec-Fetch-Dest", "empty")
+            rb.header("Sec-Ch-Ua", "\"Chromium\";v=\"132\", \"Android WebView\";v=\"132\", \"Not-A.Brand\";v=\"24\"")
+            rb.header("Sec-Ch-Ua-Mobile", "?1")
+            rb.header("Sec-Ch-Ua-Platform", "\"Android\"")
+            rb.header("Accept-Encoding", "gzip, deflate")
+            rb.header("Accept-Language", "en-US,en;q=0.9")
+            rb.header("Referer", referer ?: "https://kick.com/")
+
+            kpsdkCd?.let { rb.header("x-kpsdk-cd", it) }
+            kpsdkCt?.let { rb.header("x-kpsdk-ct", it) }
+            kpsdkH?.let { rb.header("x-kpsdk-h", it) }
+            kpsdkV?.let { rb.header("x-kpsdk-v", it) }
+            xsrf?.let { rb.header("X-XSRF-TOKEN", it) }
+            auth?.let { rb.header("Authorization", it) }
+            cookieStr?.let { rb.header("Cookie", it) }
+
+            val response = client.newCall(rb.build()).execute()
+            var bodyBytes = response.body?.bytes() ?: ByteArray(0)
+
+            // We disabled OkHttp's transparent gzip by setting Accept-Encoding ourselves;
+            // decode here so the WebView sees plain JSON.
+            if (response.header("Content-Encoding")?.equals("gzip", ignoreCase = true) == true) {
+                try {
+                    bodyBytes = java.util.zip.GZIPInputStream(java.io.ByteArrayInputStream(bodyBytes))
+                        .use { it.readBytes() }
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to decode gzip follow response", e)
+                }
+            }
+
+            Log.d(TAG, "Follow intercept response: ${response.code} (${bodyBytes.size}B)")
+
+            android.webkit.WebResourceResponse(
+                "application/json",
+                "UTF-8",
+                response.code,
+                response.message.ifEmpty { "OK" },
+                mapOf(
+                    "Content-Type" to "application/json",
+                    "Access-Control-Allow-Origin" to "*",
+                    "Access-Control-Allow-Credentials" to "true"
+                ),
+                java.io.ByteArrayInputStream(bodyBytes)
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Follow intercept failed — falling back to WebView fetch", e)
+            null
+        }
+    }
+
+    /**
+     * Restores saved cookies from AppPreferences to CookieManager.
+     * Handles two on-disk formats:
+     *   - New (LoginActivity ≥ this fix): a single CookieManager.getCookie() snapshot
+     *     `name1=value1; name2=value2; ...` — each pair is a cookie name/value.
+     *   - Legacy: `<Set-Cookie>|:|<Set-Cookie>` — each segment is a full Set-Cookie value
+     *     with attributes preserved.
+     * The legacy code path split a Set-Cookie value by `;` and re-set each fragment as a
+     * cookie, which turned attributes like `Path=/` or `HttpOnly` into bogus cookies and
+     * dropped the real ones. /follow then went out without XSRF-TOKEN and KPSDK 429'd.
      */
     fun restoreSavedCookies() {
         val savedCookies = prefs.savedCookies ?: return
 
-        // Cookies are stored separated by "|:|"
-        val cookieGroups = savedCookies.split("|:|")
-        for (cookieGroup in cookieGroups) {
-            if (cookieGroup.isNotBlank()) {
-                val individualCookies = cookieGroup.split(";")
-                for (cookie in individualCookies) {
-                    val trimmed = cookie.trim()
-                    if (trimmed.isNotEmpty()) {
-                        cookieManager.setCookie("https://kick.com", "$trimmed; Domain=.kick.com; Path=/; Secure")
-                    }
+        if (savedCookies.contains("|:|")) {
+            // Legacy format: each group is one Set-Cookie header — pass straight through.
+            val cookieGroups = savedCookies.split("|:|")
+            for (cookieGroup in cookieGroups) {
+                if (cookieGroup.isNotBlank()) {
+                    cookieManager.setCookie("https://kick.com", cookieGroup.trim())
                 }
             }
+            Log.d(TAG, "Restored ${cookieGroups.size} legacy cookie groups from preferences")
+        } else {
+            // New format: snapshot of `name=value; name=value; ...` from getCookie().
+            val pairs = savedCookies.split(";")
+            var count = 0
+            for (pair in pairs) {
+                val trimmed = pair.trim()
+                if (trimmed.contains("=")) {
+                    cookieManager.setCookie(
+                        "https://kick.com",
+                        "$trimmed; Domain=.kick.com; Path=/; Secure"
+                    )
+                    count++
+                }
+            }
+            Log.d(TAG, "Restored $count cookies from snapshot")
         }
         cookieManager.flush()
-        Log.d(TAG, "Restored ${cookieGroups.size} cookie groups from preferences")
     }
 
     /**
@@ -507,6 +689,7 @@ class WebViewManager(
         activity.runOnUiThread {
             if (activity.isFinishing || activity.isDestroyed) return@runOnUiThread
             ensureAuthWebViewReady {
+                restoreSavedCookies()
                 try {
                     // Use bridge if available, otherwise fallback to inline script
                     if (isBridgeInjected) {
@@ -555,10 +738,11 @@ class WebViewManager(
     ) {
         activity.runOnUiThread {
             ensureAuthWebViewReady {
-                // Inject session cookie so the fetch request includes it
+                // Ensure all saved cookies are restored so KPSDK has the complete session state
+                restoreSavedCookies()
+                
                 val cookieStr = "session_token=$token; Domain=.kick.com; Path=/; Secure"
                 cookieManager.setCookie("https://kick.com", cookieStr)
-                cookieManager.setCookie(".kick.com", cookieStr)
                 cookieManager.flush()
 
                 val method = if (isFollow) "POST" else "DELETE"
@@ -689,7 +873,12 @@ class WebViewManager(
                 if (isCustomCallback) {
                     onError?.invoke("API Error: $code")
                 } else {
-                    Toast.makeText(activity, activity.getString(R.string.operation_failed_code, code), Toast.LENGTH_SHORT).show()
+                    val msg = if (code == 429) {
+                        activity.getString(R.string.follow_rate_limited)
+                    } else {
+                        activity.getString(R.string.operation_failed_code, code)
+                    }
+                    Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show()
                     activity.channelProfileManager.updateChannelProfileFollowButton(activity.currentIsFollowing)
                 }
                 suspendAuthWebView()
@@ -744,8 +933,12 @@ class WebViewManager(
             }
             
             try {
+                // Only treat KPSDK as ready when the SDK object actually exists. The previous
+                // check also returned true on the mere presence of a `<script src*="kpsdk">` tag,
+                // which fires before the script has loaded — the bridge then ran and KPSDK hadn't
+                // hooked fetch() yet, so x-kpsdk-ct came back null and follow 429'd.
                 view?.evaluateJavascript(
-                    "(typeof window._kpsdk !== 'undefined' || typeof window.KPSDK !== 'undefined' || document.querySelector('script[src*=\"kpsdk\"]') !== null).toString()"
+                    "(typeof window.KPSDK !== 'undefined' || typeof window._kpsdk !== 'undefined').toString()"
                 ) { result ->
                     if (!isWebViewValid() || activity.isFinishing || activity.isDestroyed) return@evaluateJavascript
                     
@@ -777,6 +970,10 @@ class WebViewManager(
                 activity.overlayManager.connectViewerWebSocket(token, channelId, livestreamId)
             } else {
                 Log.e(TAG, "Failed to fetch viewer token for WebSocket")
+                activity.runOnUiThread {
+                    activity.binding.viewerConnectionContainer.visibility = View.GONE
+                    activity.binding.viewerConnectionProgress.visibility = View.GONE
+                }
             }
         }
     }
@@ -805,6 +1002,7 @@ class WebViewManager(
                 }
 
                 ensureAuthWebViewReady {
+                    restoreSavedCookies()
                     Log.d(TAG, "Fetching viewer token via bridge")
                     
                     // Set callback
@@ -909,6 +1107,7 @@ class WebViewManager(
     fun createClip(url: String, body: String, token: String, callback: (Result<String>) -> Unit) {
         activity.runOnUiThread {
             ensureAuthWebViewReady {
+                restoreSavedCookies()
                 // Set callbacks
                 clipCreateCallback = { result ->
                     activity.runOnUiThread {
@@ -968,6 +1167,7 @@ class WebViewManager(
     fun finalizeClip(url: String, body: String, token: String, callback: (Result<String>) -> Unit) {
         activity.runOnUiThread {
             ensureAuthWebViewReady {
+                restoreSavedCookies()
                 // Set callbacks
                 clipFinalizeCallback = { result ->
                     activity.runOnUiThread {

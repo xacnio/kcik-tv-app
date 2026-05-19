@@ -77,19 +77,7 @@ object BadgeRenderUtils {
                     .maxOrNull()?.let { subscriberBadges[it] }
                 
                 if (badgeUrl != null) {
-                    // Use ApngBadgeManager for animated APNG badges
-                    ApngBadgeManager.loadBadge(
-                        badgeUrl,
-                        size,
-                        imageView
-                    ) { drawable ->
-                        if (drawable != null) {
-                            imageView.setImageDrawable(drawable)
-                        } else {
-                            // Fallback to Glide if APNG fails
-                            Glide.with(context).load(badgeUrl).into(imageView)
-                        }
-                    }
+                    Glide.with(context).load(badgeUrl).into(imageView)
                 } else {
                     imageView.setImageResource(R.drawable.ic_badge_subscriber_default)
                 }

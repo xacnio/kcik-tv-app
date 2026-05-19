@@ -12,9 +12,13 @@ package dev.xacnio.kciktv.mobile.ui.player
 
 import android.content.pm.ActivityInfo
 import android.graphics.Color
+import android.transition.AutoTransition
+import android.transition.TransitionManager
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
@@ -1490,6 +1494,29 @@ class FullscreenToggleManager(private val activity: MobilePlayerActivity) {
     }
 
     /**
+     * Schedule a TransitionManager pass on the root layout so that the next layout-affecting
+     * changes (visibility toggles, ConstraintLayout bounds) animate smoothly instead of
+     * snapping. Skips while the activity is mid-rotation — Android already runs the window
+     * rotation animation then and stacking another auto-transition causes jitter.
+     */
+    private fun runFullscreenLayoutTransition(entering: Boolean) {
+        try {
+            val root = binding.root as? ViewGroup ?: return
+            if (!root.isAttachedToWindow) return
+            val transition = AutoTransition().apply {
+                duration = if (entering) 260L else 220L
+                interpolator = AccelerateDecelerateInterpolator()
+                // Avoid animating the surface-view container's children — IVS player surface
+                // doesn't react well to bounds animation while decoding.
+                excludeChildren(binding.playerView, true)
+            }
+            TransitionManager.beginDelayedTransition(root, transition)
+        } catch (e: Exception) {
+            Log.w("FullscreenToggleManager", "transition setup failed: ${e.message}")
+        }
+    }
+
+    /**
      * Enters fullscreen (landscape) mode.
      */
     fun enterFullscreen() {
@@ -1498,8 +1525,14 @@ class FullscreenToggleManager(private val activity: MobilePlayerActivity) {
             exitTheatreMode()
         }
 
+        // Animate the in-app layout transition (chat fade out, video container expand,
+        // info panel collapse). configChanges declares orientation so Android does not
+        // recreate the activity on rotation, which means no default transition fires —
+        // we have to schedule the animation manually.
+        runFullscreenLayoutTransition(entering = true)
+
         val isTablet = activity.isTabletOrLargeWindow()
-        
+
         // For phones: allow 180° landscape flip if system auto-rotate is ON
         // For tablets: allow full sensor rotation
         if (isTablet) {
@@ -1568,6 +1601,13 @@ class FullscreenToggleManager(private val activity: MobilePlayerActivity) {
         if (isTheatreMode) {
             exitTheatreMode()
             return
+        }
+
+        // Smooth animation for the reverse transition (chat slide back, video container
+        // shrinks to 16:9, info panel restored). Skipped for forceCleanReset because that
+        // path is used during channel-switch where instant layout reset is required.
+        if (!forceCleanReset) {
+            runFullscreenLayoutTransition(entering = false)
         }
 
         val isTablet = activity.isTabletOrLargeWindow()

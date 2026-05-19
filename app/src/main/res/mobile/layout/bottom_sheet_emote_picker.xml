@@ -6,20 +6,38 @@
     android:orientation="vertical">
 
     <!-- Tab Bar (Horizontal Scroll of category icons) -->
-    <HorizontalScrollView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:scrollbars="none"
+        android:orientation="horizontal"
         android:background="#1a1a1a">
 
-        <LinearLayout
-            android:id="@+id/emoteTabContainer"
-            android:layout_width="wrap_content"
+        <HorizontalScrollView
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="8dp" />
-    </HorizontalScrollView>
+            android:layout_weight="1"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/emoteTabContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="8dp" />
+        </HorizontalScrollView>
+
+        <ImageButton
+            android:id="@+id/modEmoteSettingsButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_settings"
+            android:visibility="gone"
+            app:tint="#AAAAAA" />
+    </LinearLayout>
 
     <View
         android:layout_width="match_parent"

@@ -63,7 +63,10 @@ class OverlayManager(
     private val lifecycleScope = activity.lifecycleScope
 
     private var pollTimer: Timer? = null
-    private var predictionTimer: Timer? = null
+    // Prediction countdown is scheduled on the main looper (1 Hz update for mm:ss text).
+    // Replaces a java.util.Timer that ran a background thread just to call runOnUiThread.
+    private val predictionHandler = Handler(Looper.getMainLooper())
+    private var predictionTickRunnable: Runnable? = null
     private var predictionBottomSheet: BottomSheetDialog? = null
     private var createPredictionDialog: Dialog? = null
     private var resolveDialog: Dialog? = null
@@ -75,8 +78,16 @@ class OverlayManager(
     private val pinnedGiftsTimerHandler = Handler(Looper.getMainLooper())
     private val pinnedGiftsTimerRunnable = object : Runnable {
         override fun run() {
+            // Low Battery: skip tick if the pinned gifts overlay is not on screen.
+            // restartPinnedGiftsTimer() re-posts when a new gift arrives or overlay becomes visible.
+            if (binding.pinnedGiftsBlur.visibility != View.VISIBLE) return
             updatePinnedGiftsTimers()
-            pinnedGiftsTimerHandler.postDelayed(this, 1000)
+            // Stop ticking when there are no gifts left to expire. restartPinnedGiftsTimer()
+            // re-posts this when a new gift arrives. Avoids a 1 Hz main-thread wakeup that
+            // would otherwise run forever even on channels that never receive gifts.
+            if (pinnedGifts.isNotEmpty()) {
+                pinnedGiftsTimerHandler.postDelayed(this, 1000)
+            }
         }
     }
 
@@ -106,12 +117,16 @@ class OverlayManager(
         giftsMetadata.clear()
         binding.pinnedGiftsLayout.removeAllViews()
         binding.pinnedGiftsBlur.visibility = View.GONE
-        
+
         binding.pinnedMessageContainer.visibility = View.GONE
         binding.pollContainer.visibility = View.GONE
         binding.predictionContainer.visibility = View.GONE
         binding.restorePinnedMessage.visibility = View.GONE
         binding.restorePoll.visibility = View.GONE
+
+        overlayNavDots?.visibility = View.GONE
+        overlayNavDots?.removeAllViews()
+
         updateChatOverlayState()
     }
     
@@ -162,105 +177,209 @@ class OverlayManager(
     var lastOverlayHideTime: Long = 0
     var lastHiddenViewType: String = ""
 
-    fun updateChatOverlayState() {
-        updateChatOverlayMargin()
+    private var overlayNavDots: android.widget.LinearLayout? = null
+
+    private fun buildActiveItems(): List<String> {
         val hasPinned = activity.chatStateManager.isPinnedMessageActive && !activity.chatStateManager.isPinnedMessageHiddenByManual
         val hasPoll = activity.chatStateManager.currentPoll != null && !activity.chatStateManager.isPollHiddenManually
         val hasPrediction = activity.chatStateManager.currentPrediction != null && !activity.chatStateManager.isPredictionHiddenManually
-        
-        val shouldShow = hasPinned || hasPoll || hasPrediction
-        
-        if (!shouldShow && binding.chatOverlayContainer.visibility == View.VISIBLE) {
+        return buildList {
+            if (hasPinned) add("pinned")
+            if (hasPoll) add("poll")
+            if (hasPrediction) add("prediction")
+        }
+    }
+
+    private fun viewForOverlay(key: String): View? = when (key) {
+        "pinned" -> binding.pinnedMessageContainer
+        "poll" -> binding.pollContainer
+        "prediction" -> binding.predictionContainer
+        else -> null
+    }
+
+    private fun resetViewTransforms(view: View) {
+        view.translationX = 0f
+        view.translationY = 0f
+        view.translationZ = 0f
+        view.scaleX = 1f
+        view.scaleY = 1f
+        view.alpha = 1f
+    }
+
+    fun updateChatOverlayState() {
+        updateChatOverlayMargin()
+        val activeItems = buildActiveItems()
+
+        if (activeItems.isEmpty() && binding.chatOverlayContainer.visibility == View.VISIBLE) {
             lastOverlayHideTime = System.currentTimeMillis()
             lastHiddenViewType = "chat_overlay"
         }
-        
-        binding.chatOverlayContainer.visibility = if (shouldShow) View.VISIBLE else View.GONE
-        
-        if (hasPinned) {
-            if (binding.pinnedMessageContainer.visibility != View.VISIBLE) showOverlayView(binding.pinnedMessageContainer)
-        } else if (binding.pinnedMessageContainer.translationX == 0f) {
-            binding.pinnedMessageContainer.visibility = View.GONE
-        }
-        
-        if (hasPoll) {
-            if (binding.pollContainer.visibility != View.VISIBLE) showOverlayView(binding.pollContainer)
-        } else if (binding.pollContainer.translationX == 0f) {
-            binding.pollContainer.visibility = View.GONE
-        }
-        
-        if (hasPrediction) {
-            if (binding.predictionContainer.visibility != View.VISIBLE) showOverlayView(binding.predictionContainer)
-        } else if (binding.predictionContainer.translationX == 0f) {
-            binding.predictionContainer.visibility = View.GONE
+
+        binding.chatOverlayContainer.visibility = if (activeItems.isNotEmpty()) View.VISIBLE else View.GONE
+
+        // If current primary is no longer active, pick first available
+        if (!activeItems.contains(activity.chatStateManager.primaryOverlayItem) && activeItems.isNotEmpty()) {
+            activity.chatStateManager.primaryOverlayItem = activeItems.first()
         }
 
-        // Restore Buttons Logic
+        val primary = activity.chatStateManager.primaryOverlayItem
+
+        // Show only primary card, hide others — clean single-card view
+        listOf("pinned", "poll", "prediction").forEach { key ->
+            val view = viewForOverlay(key) ?: return@forEach
+            val shouldBeVisible = key in activeItems && key == primary
+            if (shouldBeVisible) {
+                if (view.visibility != View.VISIBLE) {
+                    resetViewTransforms(view)
+                    view.visibility = View.VISIBLE
+                }
+            } else {
+                resetViewTransforms(view)
+                view.visibility = View.GONE
+            }
+        }
+
+        // Restore buttons
         binding.restorePinnedMessage.visibility = if (activity.chatStateManager.isPinnedMessageActive && activity.chatStateManager.isPinnedMessageHiddenByManual) View.VISIBLE else View.GONE
         binding.restorePoll.visibility = if (activity.chatStateManager.currentPoll != null && activity.chatStateManager.isPollHiddenManually) View.VISIBLE else View.GONE
         binding.restorePrediction.visibility = if (activity.chatStateManager.currentPrediction != null && activity.chatStateManager.isPredictionHiddenManually) View.VISIBLE else View.GONE
 
-        // Z-Ordering logic for 3 elements
-        val overlays = mutableListOf<Pair<String, View>>()
-        if (hasPinned) overlays.add("pinned" to binding.pinnedMessageContainer)
-        if (hasPoll) overlays.add("poll" to binding.pollContainer)
-        if (hasPrediction) overlays.add("prediction" to binding.predictionContainer)
-
-        if (overlays.size >= 2) {
-            val primary = overlays.find { it.first == activity.chatStateManager.primaryOverlayItem } ?: overlays.first()
-            val secondaries = overlays.filter { it.first != primary.first }
-
-            primary.second.bringToFront()
-            primary.second.translationZ = 12f * activity.resources.displayMetrics.density
-            primary.second.animate()
-                .translationY(0f)
-                .scaleX(1.0f)
-                .scaleY(1.0f)
-                .alpha(1.0f)
-                .setDuration(300)
-                .start()
-
-            secondaries.forEachIndexed { index, pair ->
-                pair.second.translationZ = (index * 4f) * activity.resources.displayMetrics.density
-                pair.second.animate()
-                    .translationY(-(25f * (index + 1)) * activity.resources.displayMetrics.density)
-                    .scaleX(0.95f - (index * 0.05f))
-                    .scaleY(0.95f - (index * 0.05f))
-                    .alpha(0.8f - (index * 0.2f))
-                    .setDuration(300)
-                    .start()
-            }
-        } else if (overlays.size == 1) {
-            val single = overlays.first().second
-            single.bringToFront()
-            single.animate()
-                .translationY(0f)
-                .scaleX(1.0f)
-                .scaleY(1.0f)
-                .alpha(1.0f)
-                .setDuration(300)
-                .start()
-        }
+        updateOverlayDots(activeItems, primary)
     }
 
     fun swapOverlayStack() {
-        val hasPinned = activity.chatStateManager.isPinnedMessageActive && !activity.chatStateManager.isPinnedMessageHiddenByManual
-        val hasPoll = activity.chatStateManager.currentPoll != null && !activity.chatStateManager.isPollHiddenManually
-        val hasPrediction = activity.chatStateManager.currentPrediction != null && !activity.chatStateManager.isPredictionHiddenManually
-        
-        val activeItems = mutableListOf<String>()
-        if (hasPinned) activeItems.add("pinned")
-        if (hasPoll) activeItems.add("poll")
-        if (hasPrediction) activeItems.add("prediction")
-        
-        if (activeItems.size > 1) {
-            val currentIndex = activeItems.indexOf(activity.chatStateManager.primaryOverlayItem)
-            val nextIndex = (currentIndex + 1) % activeItems.size
-            activity.chatStateManager.primaryOverlayItem = activeItems[nextIndex]
-            
-            activity.runOnUiThread {
-                updateChatOverlayState()
+        val activeItems = buildActiveItems()
+        if (activeItems.size <= 1) return
+        val currentIndex = activeItems.indexOf(activity.chatStateManager.primaryOverlayItem).coerceAtLeast(0)
+        val nextIndex = (currentIndex + 1) % activeItems.size
+        val newKey = activeItems[nextIndex]
+        activity.runOnUiThread { navigateToOverlay(newKey, fromRight = true) }
+    }
+
+    private fun navigateToOverlay(newKey: String, fromRight: Boolean) {
+        val activeItems = buildActiveItems()
+        if (newKey !in activeItems) return
+        val oldKey = activity.chatStateManager.primaryOverlayItem
+        activity.chatStateManager.primaryOverlayItem = newKey
+        if (oldKey == newKey) {
+            updateChatOverlayState()
+            return
+        }
+
+        val dp = activity.resources.displayMetrics.density
+        val slideOffset = (36 * dp)
+        val outDir = if (fromRight) -slideOffset else slideOffset
+        val inDir = if (fromRight) slideOffset else -slideOffset
+
+        val outView = viewForOverlay(oldKey)
+        val inView = viewForOverlay(newKey)
+
+        if (inView != null) {
+            inView.translationX = inDir
+            inView.alpha = 0f
+            inView.visibility = View.VISIBLE
+        }
+
+        outView?.animate()
+            ?.translationX(outDir)
+            ?.alpha(0f)
+            ?.setDuration(180)
+            ?.setInterpolator(android.view.animation.AccelerateInterpolator(1.5f))
+            ?.withEndAction {
+                outView.visibility = View.GONE
+                outView.translationX = 0f
+                outView.alpha = 1f
             }
+            ?.start()
+
+        inView?.animate()
+            ?.translationX(0f)
+            ?.alpha(1f)
+            ?.setDuration(200)
+            ?.setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
+            ?.start()
+
+        updateOverlayDots(activeItems, newKey)
+
+        // Restore button state
+        binding.restorePinnedMessage.visibility = if (activity.chatStateManager.isPinnedMessageActive && activity.chatStateManager.isPinnedMessageHiddenByManual) View.VISIBLE else View.GONE
+        binding.restorePoll.visibility = if (activity.chatStateManager.currentPoll != null && activity.chatStateManager.isPollHiddenManually) View.VISIBLE else View.GONE
+        binding.restorePrediction.visibility = if (activity.chatStateManager.currentPrediction != null && activity.chatStateManager.isPredictionHiddenManually) View.VISIBLE else View.GONE
+    }
+
+    private fun updateOverlayDots(activeItems: List<String>, primaryKey: String) {
+        if (activeItems.size <= 1) {
+            overlayNavDots?.visibility = View.GONE
+            return
+        }
+
+        val dp = activity.resources.displayMetrics.density
+        val container = binding.chatOverlayContainer
+
+        val dots = overlayNavDots ?: run {
+            val ll = android.widget.LinearLayout(activity)
+            ll.orientation = android.widget.LinearLayout.HORIZONTAL
+            ll.gravity = android.view.Gravity.CENTER_VERTICAL
+            // Dark pill background so dots are always visible against any card color
+            val pill = android.graphics.drawable.GradientDrawable().apply {
+                shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                cornerRadius = (12 * dp)
+                setColor(android.graphics.Color.parseColor("#CC000000"))
+            }
+            ll.background = pill
+            ll.setPadding((7 * dp).toInt(), (5 * dp).toInt(), (7 * dp).toInt(), (5 * dp).toInt())
+            ll.elevation = (4 * dp)
+
+            val lp = android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.WRAP_CONTENT,
+                android.widget.FrameLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                // Top-right corner of the card, slightly inset
+                gravity = android.view.Gravity.TOP or android.view.Gravity.END
+                topMargin = (8 * dp).toInt()
+                rightMargin = (8 * dp).toInt()
+            }
+            container.addView(ll, lp)
+            overlayNavDots = ll
+            ll
+        }
+
+        dots.visibility = View.VISIBLE
+        dots.removeAllViews()
+
+        activeItems.forEachIndexed { index, key ->
+            val isActive = key == primaryKey
+            val dotSize = (7 * dp).toInt()
+            val dot = View(activity)
+            val lp = android.widget.LinearLayout.LayoutParams(dotSize, dotSize).apply {
+                if (index > 0) leftMargin = (5 * dp).toInt()
+            }
+            dot.layoutParams = lp
+
+            val color = when (key) {
+                "pinned" -> android.graphics.Color.parseColor("#53FC18")
+                "poll" -> android.graphics.Color.WHITE
+                "prediction" -> android.graphics.Color.parseColor("#FF9800")
+                else -> android.graphics.Color.WHITE
+            }
+            val drawable = android.graphics.drawable.GradientDrawable().apply {
+                shape = android.graphics.drawable.GradientDrawable.OVAL
+                setColor(color)
+            }
+            dot.background = drawable
+            dot.alpha = if (isActive) 1f else 0.30f
+            dot.scaleX = if (isActive) 1f else 0.85f
+            dot.scaleY = if (isActive) 1f else 0.85f
+
+            dot.setOnClickListener {
+                val activeNow = buildActiveItems()
+                val currentIdx = activeNow.indexOf(activity.chatStateManager.primaryOverlayItem)
+                val targetIdx = activeNow.indexOf(key)
+                if (key != activity.chatStateManager.primaryOverlayItem) {
+                    navigateToOverlay(key, fromRight = targetIdx > currentIdx)
+                }
+            }
+            dots.addView(dot)
         }
     }
 
@@ -889,34 +1008,36 @@ class OverlayManager(
              binding.predictionDurationProgress.progress = initialRemMillis
         }
         
-        predictionTimer = Timer()
-        predictionTimer?.scheduleAtFixedRate(object : TimerTask() {
+        predictionTickRunnable?.let { predictionHandler.removeCallbacks(it) }
+        val tick = object : Runnable {
             override fun run() {
-                val now = System.currentTimeMillis()
-                val remMillis = (endTime - now).toInt()
-                activity.runOnUiThread {
-                    if (remMillis <= 0) {
-                        stopPredictionTimer()
-                        return@runOnUiThread
-                    }
-                    val mins = (remMillis / 1000) / 60
-                    val secs = (remMillis / 1000) % 60
-                    binding.predictionTimerText.text = String.format(Locale.US, "%02d:%02d", mins, secs)
-                    binding.predictionDurationProgress.progress = remMillis
-                    
-                    if (predictionBottomSheet?.isShowing == true) {
-                        val sheetTimerText = predictionBottomSheet?.findViewById<TextView>(R.id.timerText)
-                        sheetTimerText?.text = activity.getString(R.string.prediction_status_open_format, String.format(Locale.US, "%02d:%02d", mins, secs))
-                    }
+                val remMillis = (endTime - System.currentTimeMillis()).toInt()
+                if (remMillis <= 0) {
+                    stopPredictionTimer()
+                    return
                 }
+                val mins = (remMillis / 1000) / 60
+                val secs = (remMillis / 1000) % 60
+                binding.predictionTimerText.text = String.format(Locale.US, "%02d:%02d", mins, secs)
+                binding.predictionDurationProgress.progress = remMillis
+
+                if (predictionBottomSheet?.isShowing == true) {
+                    val sheetTimerText = predictionBottomSheet?.findViewById<TextView>(R.id.timerText)
+                    sheetTimerText?.text = activity.getString(R.string.prediction_status_open_format, String.format(Locale.US, "%02d:%02d", mins, secs))
+                }
+                // Low Battery: prediction shows mm:ss — 2 s tick is visually indistinguishable.
+                val predTickMs = if (prefs.lowBatteryModeEnabled) 2000L else 1000L
+                predictionHandler.postDelayed(this, predTickMs)
             }
-        }, 0, 1000)
+        }
+        predictionTickRunnable = tick
+        predictionHandler.post(tick)
     }
 
     private fun stopPredictionTimer() {
-        predictionTimer?.cancel()
-        predictionTimer = null
-        
+        predictionTickRunnable?.let { predictionHandler.removeCallbacks(it) }
+        predictionTickRunnable = null
+
         try {
             val runnable = binding.predictionContainer.tag as? Runnable
             if (runnable != null) {
@@ -1879,13 +2000,14 @@ class OverlayManager(
     fun connectViewerWebSocket(token: String, channelId: String, livestreamId: String?) {
         viewerWebSocket?.disconnect()
         
-        // Show connecting state immediately
         activity.binding.viewerConnectionContainer.visibility = View.VISIBLE
         activity.binding.viewerConnectionProgress.visibility = View.VISIBLE
         
         Log.d(TAG, "Connecting to viewer websocket for channel: $channelId")
+        // Reuse the shared OkHttp client (connection pool + dispatcher) instead of
+        // spinning up a fresh one per channel switch.
         viewerWebSocket = dev.xacnio.kciktv.shared.data.chat.KickViewerWebSocket(
-            client = okhttp3.OkHttpClient() 
+            client = dev.xacnio.kciktv.shared.data.api.RetrofitClient.okHttpClient
         ).apply {
             // Connection state callback for system messages
             onConnectionStateChanged = { connected, isFirstConnect ->
@@ -1894,13 +2016,8 @@ class OverlayManager(
                         activity.binding.viewerConnectionContainer.visibility = View.GONE
                         activity.binding.viewerConnectionProgress.visibility = View.GONE
                     } else {
-                        // User requested "automatic spinner", so show progress immediately along with container
                         activity.binding.viewerConnectionContainer.visibility = View.VISIBLE
                         activity.binding.viewerConnectionProgress.visibility = View.VISIBLE
-                        // WebSocket auto-reconnects, so just show spinning state
-                        activity.binding.viewerConnectionContainer.setOnClickListener {
-                            // Optional: Could force immediate reconnect or show detailed error
-                        }
                     }
                 }
             }
@@ -1957,6 +2074,10 @@ class OverlayManager(
     fun disconnectViewerWebSocket() {
         viewerWebSocket?.disconnect()
         viewerWebSocket = null
+        activity.runOnUiThread {
+            activity.binding.viewerConnectionContainer.visibility = View.GONE
+            activity.binding.viewerConnectionProgress.visibility = View.GONE
+        }
     }
 
     private fun showDeleteConfirmationDialog() {
@@ -2008,34 +2129,46 @@ class OverlayManager(
 
     fun showOverlayView(view: View) {
         if (view.visibility == View.VISIBLE) return
-        
-        view.visibility = View.VISIBLE
-        view.post {
-            val width = view.width.toFloat().takeIf { it > 0 } ?: (activity.resources.displayMetrics.widthPixels.toFloat() / 2)
-            view.translationX = width
-            view.alpha = 0f
-            
-            view.animate()
-                .translationX(0f)
-                .alpha(1f)
-                .setDuration(300)
-                .setInterpolator(android.view.animation.DecelerateInterpolator())
-                .start()
+        // Respect single-card model: only make visible if this is the primary or there's no primary yet
+        val key = when (view.id) {
+            R.id.pinnedMessageContainer -> "pinned"
+            R.id.pollContainer -> "poll"
+            R.id.predictionContainer -> "prediction"
+            else -> null
         }
+        if (key != null && activity.chatStateManager.primaryOverlayItem != key) {
+            // A new overlay arrived while another is primary — promote it if nothing else is showing
+            val activeItems = buildActiveItems()
+            if (activeItems.isEmpty()) {
+                activity.chatStateManager.primaryOverlayItem = key
+            } else {
+                // Let updateChatOverlayState handle visibility; dots will pick up new item
+                updateChatOverlayState()
+                return
+            }
+        }
+        view.alpha = 0f
+        view.translationX = (32 * activity.resources.displayMetrics.density)
+        view.visibility = View.VISIBLE
+        view.animate()
+            .translationX(0f)
+            .alpha(1f)
+            .setDuration(220)
+            .setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
+            .start()
     }
 
     fun hideOverlayView(view: View) {
         if (view.visibility != View.VISIBLE) {
-             view.visibility = View.GONE
-             updateChatOverlayState()
-             return
+            view.visibility = View.GONE
+            updateChatOverlayState()
+            return
         }
-        
         view.animate()
-            .translationX(view.width.toFloat())
+            .translationX((view.width.toFloat().takeIf { it > 0 } ?: 300f))
             .alpha(0f)
-            .setDuration(300)
-            .setInterpolator(android.view.animation.AccelerateInterpolator())
+            .setDuration(220)
+            .setInterpolator(android.view.animation.AccelerateInterpolator(1.5f))
             .withEndAction {
                 view.visibility = View.GONE
                 view.translationX = 0f
@@ -2047,22 +2180,39 @@ class OverlayManager(
             }
             .start()
     }
-    
+
     private fun createGestureDetector(view: View): android.view.GestureDetector {
         return android.view.GestureDetector(activity, object : android.view.GestureDetector.SimpleOnGestureListener() {
-             override fun onDown(e: android.view.MotionEvent): Boolean = true
-             
-             override fun onLongPress(e: android.view.MotionEvent) {
+            override fun onDown(e: android.view.MotionEvent): Boolean = true
+
+            override fun onLongPress(e: android.view.MotionEvent) {
                 if (view == binding.pinnedMessageContainer && activity.isModeratorOrOwner) {
-                     showUnpinConfirmationDialog()
+                    showUnpinConfirmationDialog()
                 }
-             }
-             
-             override fun onFling(e1: android.view.MotionEvent?, e2: android.view.MotionEvent, velocityX: Float, velocityY: Float): Boolean {
+            }
+
+            override fun onFling(e1: android.view.MotionEvent?, e2: android.view.MotionEvent, velocityX: Float, velocityY: Float): Boolean {
                 if (e1 == null) return false
+                val deltaX = e2.x - e1.x
                 val deltaY = e2.y - e1.y
-                if (kotlin.math.abs(deltaY) > 50 && kotlin.math.abs(velocityY) > 50) {
-                    swapOverlayStack()
+                // Horizontal swipe: navigate between overlays
+                if (kotlin.math.abs(deltaX) > kotlin.math.abs(deltaY) &&
+                    kotlin.math.abs(deltaX) > 60 && kotlin.math.abs(velocityX) > 80) {
+                    val activeItems = buildActiveItems()
+                    if (activeItems.size <= 1) return false
+                    val currentIdx = activeItems.indexOf(activity.chatStateManager.primaryOverlayItem).coerceAtLeast(0)
+                    if (deltaX < 0) { // swipe left → next
+                        val next = activeItems[(currentIdx + 1) % activeItems.size]
+                        activity.runOnUiThread { navigateToOverlay(next, fromRight = true) }
+                    } else { // swipe right → previous
+                        val prev = activeItems[(currentIdx - 1 + activeItems.size) % activeItems.size]
+                        activity.runOnUiThread { navigateToOverlay(prev, fromRight = false) }
+                    }
+                    return true
+                }
+                // Vertical swipe up → dismiss (hide manually)
+                if (deltaY < -80 && kotlin.math.abs(deltaY) > kotlin.math.abs(deltaX) && kotlin.math.abs(velocityY) > 80) {
+                    hideOverlayView(view)
                     return true
                 }
                 return false

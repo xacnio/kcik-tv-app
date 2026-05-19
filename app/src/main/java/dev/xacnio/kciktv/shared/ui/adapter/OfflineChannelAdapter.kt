@@ -93,9 +93,13 @@ class OfflineChannelAdapter(
         fun bind(channel: ChannelItem, themeColor: Int) {
             username.text = channel.username
 
-            // Load Profile Picture
+            // Load Profile Picture.
+            // Avatar slot is fixed 56dp (~168 px @ 3x). Without an .override() hint Glide
+            // decodes the full source bitmap (Kick avatars are typically 600 px+) and only
+            // then downsamples — paying decode CPU + memory for pixels we throw away.
             Glide.with(itemView.context)
                 .load(channel.getEffectiveProfilePicUrl())
+                .override(200, 200)
                 .transform(CircleCrop())
                 .placeholder(R.drawable.default_avatar)
                 .into(profilePic)

@@ -47,6 +47,9 @@ class ShimmerLayout @JvmOverloads constructor(
 
     fun startShimmer() {
         if (isShimmering) return
+        // Battery saver: render the placeholder children flat (no sweeping highlight).
+        // Saves a Choreographer-driven invalidate loop and a saveLayer per frame.
+        if (dev.xacnio.kciktv.shared.ui.utils.EmoteManager.lowBatteryMode) return
         animator = ValueAnimator.ofFloat(-1f, 2f).apply {
             duration = 1500
             repeatCount = ValueAnimator.INFINITE
@@ -69,12 +72,24 @@ class ShimmerLayout @JvmOverloads constructor(
     
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        if (autoStart && !isShimmering) startShimmer()
+        if (autoStart && !isShimmering && visibility == VISIBLE) startShimmer()
     }
-    
+
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         stopShimmer()
+    }
+
+    // Stop the animator when the view (or any ancestor) becomes invisible/gone.
+    // Otherwise the ValueAnimator keeps posting Choreographer frame callbacks every ~16ms
+    // and calling invalidate(), even though dispatchDraw is skipped by the framework.
+    override fun onVisibilityChanged(changedView: android.view.View, visibility: Int) {
+        super.onVisibilityChanged(changedView, visibility)
+        if (visibility == VISIBLE) {
+            if (autoStart && !isShimmering && isAttachedToWindow) startShimmer()
+        } else {
+            if (isShimmering) stopShimmer()
+        }
     }
 
     override fun dispatchDraw(canvas: Canvas) {

@@ -23,8 +23,6 @@ import dev.xacnio.kciktv.databinding.ActivityMobilePlayerBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.util.Locale
-import java.util.Timer
-import java.util.TimerTask
 
 /**
  * Manages poll timer logic including starting, stopping, and handling poll completion.
@@ -39,8 +37,19 @@ class PollTimerManager(
     private val chatStateManager: ChatStateManager,
     private val mainHandler: Handler
 ) {
-    private var pollTimer: Timer? = null
+    // The poll countdown displays mm:ss; visually 5 Hz is indistinguishable from 20 Hz,
+    // so use 200 ms ticks instead of 50 ms. In Low Battery mode we drop to 500 ms —
+    // still imperceptible on a mm:ss display, but halves Choreographer wakeups.
+    // Backed by the main looper Handler (no extra thread + no per-tick runOnUiThread
+    // post compared to java.util.Timer).
+    private val TICK_MS: Long get() = if (prefs.lowBatteryModeEnabled) 500L else 200L
+    private var activeTickRunnable: Runnable? = null
     private var pollAutoHideRunnable: Runnable? = null
+
+    private fun cancelActiveTick() {
+        activeTickRunnable?.let { mainHandler.removeCallbacks(it) }
+        activeTickRunnable = null
+    }
 
     /**
      * Start the poll countdown timer
@@ -60,25 +69,22 @@ class PollTimerManager(
         binding.pollDurationProgress.max = totalDuration * 1000
         val endTime = System.currentTimeMillis() + (remaining * 1000L)
 
-        pollTimer = Timer()
-        pollTimer?.scheduleAtFixedRate(object : TimerTask() {
+        val tick = object : Runnable {
             override fun run() {
-                val now = System.currentTimeMillis()
-                val remMillis = (endTime - now).toInt()
-
-                activity.runOnUiThread {
-                    if (remMillis <= 0) {
-                        handlePollCompletion(poll)
-                        return@runOnUiThread
-                    }
-
-                    val mins = (remMillis / 1000) / 60
-                    val secs = (remMillis / 1000) % 60
-                    binding.pollTimerText.text = String.format(Locale.US, "%02d:%02d", mins, secs)
-                    binding.pollDurationProgress.progress = remMillis
+                val remMillis = (endTime - System.currentTimeMillis()).toInt()
+                if (remMillis <= 0) {
+                    handlePollCompletion(poll)
+                    return
                 }
+                val mins = (remMillis / 1000) / 60
+                val secs = (remMillis / 1000) % 60
+                binding.pollTimerText.text = String.format(Locale.US, "%02d:%02d", mins, secs)
+                binding.pollDurationProgress.progress = remMillis
+                mainHandler.postDelayed(this, TICK_MS)
             }
-        }, 0, 50)
+        }
+        activeTickRunnable = tick
+        mainHandler.post(tick)
     }
 
     /**
@@ -87,54 +93,46 @@ class PollTimerManager(
     fun handlePollCompletion(poll: PollData) {
         if (chatStateManager.isPollCompleting) return
         chatStateManager.isPollCompleting = true
-        stopPollTimer()
+        cancelActiveTick()
 
-        activity.runOnUiThread {
-            binding.pollTimerText.text = activity.getString(R.string.poll_result)
-            binding.pollStatusText.text = activity.getString(R.string.poll_result_title)
-            binding.pollDurationProgress.visibility = View.VISIBLE
+        binding.pollTimerText.text = activity.getString(R.string.poll_result)
+        binding.pollStatusText.text = activity.getString(R.string.poll_result_title)
+        binding.pollDurationProgress.visibility = View.VISIBLE
 
-            // Re-render UI to hide non-winners (Winners only)
-            val resultPoll = poll.copy(remaining = 0)
-            activity.updatePollUI(resultPoll)
+        // Re-render UI to hide non-winners (Winners only)
+        val resultPoll = poll.copy(remaining = 0)
+        activity.updatePollUI(resultPoll)
 
-            val displayDuration = poll.resultDisplayDuration ?: 10
-            binding.pollDurationProgress.max = displayDuration * 1000
-            val hideTime = System.currentTimeMillis() + (displayDuration * 1000L)
+        val displayDuration = poll.resultDisplayDuration ?: 10
+        binding.pollDurationProgress.max = displayDuration * 1000
+        val hideTime = System.currentTimeMillis() + (displayDuration * 1000L)
 
-            pollTimer = Timer()
-            pollTimer?.scheduleAtFixedRate(object : TimerTask() {
-                override fun run() {
-                    val now = System.currentTimeMillis()
-                    val remMillis = (hideTime - now).toInt()
-
-                    if (remMillis <= 0) {
-                        activity.runOnUiThread {
-                            chatStateManager.currentPoll = null
-                            chatStateManager.isPollCompleting = false
-                            activity.updateChatOverlayState()
-                            stopPollTimer()
-                        }
-                        return
-                    }
-
-                    activity.runOnUiThread {
-                        val mins = (remMillis / 1000) / 60
-                        val secs = (remMillis / 1000) % 60
-                        binding.pollTimerText.text = String.format(Locale.US, "%02d:%02d", mins, secs)
-                        binding.pollDurationProgress.progress = remMillis
-                    }
+        val tick = object : Runnable {
+            override fun run() {
+                val remMillis = (hideTime - System.currentTimeMillis()).toInt()
+                if (remMillis <= 0) {
+                    chatStateManager.currentPoll = null
+                    chatStateManager.isPollCompleting = false
+                    activity.updateChatOverlayState()
+                    cancelActiveTick()
+                    return
                 }
-            }, 0, 50)
+                val mins = (remMillis / 1000) / 60
+                val secs = (remMillis / 1000) % 60
+                binding.pollTimerText.text = String.format(Locale.US, "%02d:%02d", mins, secs)
+                binding.pollDurationProgress.progress = remMillis
+                mainHandler.postDelayed(this, TICK_MS)
+            }
         }
+        activeTickRunnable = tick
+        mainHandler.post(tick)
     }
 
     /**
      * Stop the poll timer
      */
     fun stopPollTimer() {
-        pollTimer?.cancel()
-        pollTimer = null
+        cancelActiveTick()
         pollAutoHideRunnable?.let { mainHandler.removeCallbacks(it) }
     }
 

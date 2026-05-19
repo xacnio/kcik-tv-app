@@ -40,6 +40,7 @@ class EmotePanelManager(
     private var currentEmoteCategoryIndex = 0
     private var emoteNameToId: Map<String, Long> = emptyMap() // For quick emote name lookup
     private var isEmotePanelInitialized = false
+    private var modEmoteChannelsManager: ModEmoteChannelsManager? = null
 
     fun toggleEmotePanel(showKeyboardOnClose: Boolean = true) {
         val panel = binding.emotePanelContainer
@@ -235,14 +236,19 @@ class EmotePanelManager(
             }
             emoteNameToId = nameMap
             Log.d(TAG, "Emote map built with ${nameMap.size} entries")
-            
+
             // Pass emote map to ChatUiManager for manual typing support
             try {
                 activity.chatUiManager.setEmoteMap(nameMap.mapValues { it.value.toString() })
             } catch (e: Exception) {
                 Log.e(TAG, "Error setting emote map to ChatUiManager", e)
             }
-            
+
+            // Load mod emote channels if moderator
+            if (activity.chatStateManager.isModeratorOrOwner) {
+                loadModEmoteChannels()
+            }
+
             // Update UI if panel is initialized
             if (isEmotePanelInitialized) {
                 activity.runOnUiThread {
@@ -258,18 +264,95 @@ class EmotePanelManager(
         }
     }
 
+    suspend fun loadModEmoteChannels() {
+        val savedSlugs = activity.prefs.modEmoteChannelSlugs
+        if (savedSlugs.isEmpty()) return
+
+        // Collect slugs already in panel (from channel categories that have profile pics / are channel-based)
+        val existingSlugs = emoteCategories
+            .filter { it.isChannelEmotes && !it.isModEmoteOnly }
+            .mapNotNull { it.slug }
+            .toSet()
+
+        val modCategories = mutableListOf<dev.xacnio.kciktv.shared.data.model.EmoteCategory>()
+
+        for (slug in savedSlugs) {
+            if (slug in existingSlugs) continue
+            try {
+                repository.getEmotes(slug, activity.prefs.authToken).onSuccess { cats ->
+                    cats.filter { it.isChannelEmotes }.forEach { cat ->
+                        val subscriberEmotes = cat.emotes.filter { it.subscribersOnly }
+                        if (subscriberEmotes.isNotEmpty()) {
+                            modCategories.add(cat.copy(emotes = subscriberEmotes, isModEmoteOnly = true))
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to load mod emote channel: $slug", e)
+            }
+        }
+
+        if (modCategories.isNotEmpty()) {
+            // Merge: base categories + mod-only categories (no duplicates by slug)
+            val base = emoteCategories.filter { !it.isModEmoteOnly }
+            val existingModSlugs = base.mapNotNull { it.slug }.toSet()
+            val filtered = modCategories.filter { it.slug !in existingModSlugs }
+            emoteCategories = base + filtered
+
+            // Add mod emote names to the replacement map
+            val updatedMap = emoteNameToId.toMutableMap()
+            filtered.forEach { cat ->
+                cat.emotes.forEach { emote -> updatedMap[emote.name] = emote.id }
+            }
+            emoteNameToId = updatedMap
+            try {
+                activity.chatUiManager.setEmoteMap(updatedMap.mapValues { it.value.toString() })
+            } catch (e: Exception) {
+                Log.e(TAG, "Error updating emote map with mod channels", e)
+            }
+
+            if (isEmotePanelInitialized) {
+                activity.runOnUiThread { populateEmotePanel() }
+            }
+        }
+    }
+
     private fun populateEmotePanel() {
         Log.d(TAG, "populateEmotePanel called with ${emoteCategories.size} categories")
         val panel = binding.emotePanelContainer
         val loadingContainer = panel.findViewById<View>(R.id.emoteLoadingContainer)
         val recyclerView = panel.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.emoteRecyclerView)
         val tabContainer = panel.findViewById<android.widget.LinearLayout>(R.id.emoteTabContainer)
-        
+        val settingsButton = panel.findViewById<android.widget.ImageButton>(R.id.modEmoteSettingsButton)
+
         if (loadingContainer != null) loadingContainer.visibility = View.GONE
         if (recyclerView != null) recyclerView.visibility = View.VISIBLE
         if (tabContainer == null) {
             Log.e(TAG, "tabContainer is null in populateEmotePanel")
             return
+        }
+
+        // Show settings button only for mods
+        if (settingsButton != null) {
+            val isMod = activity.chatStateManager.isModeratorOrOwner
+            settingsButton.visibility = if (isMod) View.VISIBLE else View.GONE
+            settingsButton.setOnClickListener {
+                val existingSlugs = emoteCategories
+                    .filter { it.isChannelEmotes && !it.isModEmoteOnly }
+                    .mapNotNull { it.slug }
+                    .toSet()
+                if (modEmoteChannelsManager == null) {
+                    modEmoteChannelsManager = ModEmoteChannelsManager(
+                        activity = activity,
+                        repository = repository,
+                        lifecycleScope = lifecycleScope,
+                        onChannelsChanged = {
+                            lifecycleScope.launch { loadModEmoteChannels() }
+                        }
+                    )
+                }
+                modEmoteChannelsManager!!.show(existingSlugs)
+            }
         }
         
         tabContainer.removeAllViews()

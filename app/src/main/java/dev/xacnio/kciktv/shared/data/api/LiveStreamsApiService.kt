@@ -65,4 +65,13 @@ interface LiveStreamsApiService {
     @GET("api/v2/kicks/gifts")
     suspend fun getGifts(): Response<dev.xacnio.kciktv.shared.data.model.GiftsListResponse>
 
+    /**
+     * Returns accurate chat settings (slow mode, followers mode, emotes mode, etc.) by channel ID.
+     */
+    @retrofit2.http.Headers("Accept: application/json")
+    @GET("api/v1/channels/{channelId}/chat/settings")
+    suspend fun getChatSettings(
+        @Path("channelId") channelId: Long
+    ): Response<dev.xacnio.kciktv.shared.data.model.ChatSettingsResponse>
+
 }

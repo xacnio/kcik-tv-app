@@ -1225,6 +1225,19 @@ class ChatUiManager(
     }
 
     fun handleIncomingMessage(message: ChatMessage) {
+        // Drop messages when chat UI cannot be seen by the user.
+        // - Mini player: flushRunnable returns early, buffer would grow unbounded.
+        // - PIP: chat container is not on screen, per-message work (emote combo, floating
+        //   emote, mention regex) is wasted.
+        // - isChatUiPaused: set in onStop background-audio path. Without a drop, a long
+        //   background session accumulates thousands of messages that flush in one batch
+        //   on resume (UI hiccup + memory spike), and the user can't see them in the
+        //   meantime anyway.
+        val isPip = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
+            activity.isInPictureInPictureMode else false
+        if (activity.miniPlayerManager.isMiniPlayerMode || isPip || isChatUiPaused) {
+            return
+        }
         incomingMessageBuffer.add(message)
         updateBufferCount(incomingMessageBuffer.size)
     }
@@ -1240,23 +1253,27 @@ class ChatUiManager(
 
     private val flushMessagesRunnable = object : Runnable {
         override fun run() {
-            // If in mini player mode, don't reschedule - flushing will be restarted when needed
-            if (activity.miniPlayerManager.isMiniPlayerMode) {
+            val isPip = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
+                activity.isInPictureInPictureMode else false
+
+            // No chat surface is visible (mini player, PIP, or background-audio pause).
+            // handleIncomingMessage already drops incoming messages in these states, so
+            // there is nothing to flush and re-posting the runnable is pure timer work.
+            // startFlushing() is called again on resume (onStart) to bring it back.
+            if (activity.miniPlayerManager.isMiniPlayerMode || isPip || isChatUiPaused) {
                 return
             }
-            
-            if (!isChatUiPaused) {
-                flushPendingMessages()
-            }
+
+            flushPendingMessages()
             updateBufferCount(incomingMessageBuffer.size)
 
-            val isPip = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) activity.isInPictureInPictureMode else false
-            val isBackground = isChatUiPaused
-
-            val useSlowInterval = isPip || isBackground
-            val baseInterval = if (useSlowInterval) 1000L else prefs.chatRefreshRate
-
-            val interval = if (prefs.lowBatteryModeEnabled) 1500L else baseInterval
+            val baseInterval = prefs.chatRefreshRate
+            // Under severe thermal pressure (THERMAL_STATUS_SEVERE+) bump the flush
+            // floor so we batch more messages per UI rebind. Quality of the rendered
+            // chat is unchanged — only the cadence.
+            val thermalFloor = if (dev.xacnio.kciktv.shared.util.ThermalMonitor.level >= 2) 700L else 0L
+            val interval = if (prefs.lowBatteryModeEnabled) 1500L
+                else maxOf(baseInterval, thermalFloor)
             mainHandler.postDelayed(this, interval)
         }
     }
@@ -1417,6 +1434,7 @@ class ChatUiManager(
     private var pendingCelebrations: MutableList<ChannelCelebration> = mutableListOf()
     private var currentCelebration: ChannelCelebration? = null
     private var currentCelebrationSlug: String? = null
+    private var celebrationAnimatorSet: android.animation.AnimatorSet? = null
 
     fun handleCelebrations(celebrations: List<ChannelCelebration>, slug: String) {
         pendingCelebrations.clear()
@@ -1476,12 +1494,12 @@ class ChatUiManager(
              interpolator = android.view.animation.AccelerateDecelerateInterpolator()
         }
         
+        // Cancel any previously running celebration animation before starting a new one
+        celebrationAnimatorSet?.cancel()
         val animatorSet = android.animation.AnimatorSet()
         animatorSet.playTogether(rotationAnim, scaleXAnim, scaleYAnim)
+        celebrationAnimatorSet = animatorSet
         animatorSet.start()
-        
-        // Store animator to cancel later if needed (e.g. in hideCelebration)
-        // For now, view.clearAnimation() or standard lifecycle handling is usually enough for simple UI.
 
         container.celebrationBannerShare.setOnClickListener {
              // Instead of direct consume, enter context mode
@@ -1495,6 +1513,9 @@ class ChatUiManager(
     }
     
     fun hideCelebration(defer: Boolean = false) {
+        celebrationAnimatorSet?.cancel()
+        celebrationAnimatorSet = null
+        binding.celebrationContainer.celebrationBannerIcon.clearAnimation()
         binding.celebrationContainer.root.visibility = View.GONE
         if (defer && currentCelebration != null) {
             binding.chatInputCelebrationButton.visibility = View.VISIBLE

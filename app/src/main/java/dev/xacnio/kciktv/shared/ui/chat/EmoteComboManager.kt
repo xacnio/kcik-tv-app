@@ -59,6 +59,11 @@ class EmoteComboManager(
     fun processMessage(messageContent: String) {
         if (!prefs.emoteComboEnabled) return
 
+        // Under thermal pressure, drop the combo system entirely. It runs scale/bump
+        // animations + creates inflated views on every Nth duplicate — pure cosmetic
+        // overhead that's safe to suspend until the device cools.
+        if (dev.xacnio.kciktv.shared.util.ThermalMonitor.level >= 1) return
+
         // Clean up message
         val trimmed = messageContent.trim()
         

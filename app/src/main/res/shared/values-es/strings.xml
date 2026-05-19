@@ -475,6 +475,7 @@
     <string name="chat_error_message_too_long">El mensaje es demasiado largo</string>
     <string name="chat_error_duplicate_message">Mensaje duplicado detectado</string>
     <string name="chat_error_generic">No se puede enviar el mensaje: %s</string>
+    <string name="chat_error_timeout">Tiempo de conexión agotado. Por favor, comprueba tu internet.</string>
 
     <!-- Audio Modes -->
     <string name="audio_mode_custom_eq">EQ Personalizado</string>
@@ -679,13 +680,22 @@
     <string name="chat_timestamps">Marcas de tiempo</string>
     <string name="chat_seconds">Incluir segundos</string>
     <string name="show_pinned_gifts">Regalos fijados</string>
-    <string name="chat_low_battery_mode">Modo ahorro de batería</string>
+    <string name="chat_low_battery_mode">Ahorro de batería</string>
     <string name="chat_emote_combo">Combo de emotes</string>
     <string name="chat_settings_vibrate_on_mention">Vibrar al mencionar</string>
     <string name="chat_settings_floating_emotes">Emotes flotantes</string>
 
     <!-- Chat Connection -->
-    <string name="chat_low_battery_paused">Modo segundo plano activado. Chat pausado (Modo ahorro)</string>
+    <string name="chat_low_battery_paused">Modo segundo plano activado. Chat pausado (Ahorro de batería)</string>
+    <string name="chat_battery_saver_subtitle">Limita la calidad a 720p, reduce animaciones, ralentiza temporizadores &amp; ping</string>
+
+    <!-- Chat appearance subtitles -->
+    <string name="chat_timestamps_subtitle">Mostrar hora de envío junto a cada mensaje</string>
+    <string name="chat_pinned_gifts_subtitle">Fija pancartas de regalo en la parte superior</string>
+    <string name="chat_emote_combo_subtitle">Resalta emotes repetidos en cadena</string>
+    <string name="chat_floating_emotes_subtitle">Ráfagas animadas de emotes flotan en pantalla</string>
+    <string name="chat_setting_highlighted_subtitle">Elige qué mensajes destacan visualmente</string>
+    <string name="chat_anim_subtitle">Animación de entrada para mensajes nuevos</string>
 
     <!-- Chat Rules -->
     <string name="chat_rules_not_found">No se encontraron reglas del chat para este canal.</string>
@@ -698,6 +708,12 @@
     <string name="chat_gifted_subs_plural">%1$s ha regalado %2$d suscripciones a la comunidad. Ha regalado un total de %3$d suscripciones en este canal.</string>
     <string name="chat_gifted_sub_single">%1$s ha regalado una suscripción a la comunidad. Ha regalado un total de %2$d suscripciones en este canal.</string>
     <string name="chat_gifted_sub_individual">%1$s ha regalado una suscripción a %2$s!</string>
+    <!-- Stream host -->
+    <string name="chat_stream_hosted">¡&lt;b&gt;%1$s&lt;/b&gt; está haciendo host al stream con %2$d espectadores!</string>
+    <string name="chat_stream_hosted_no_count">¡&lt;b&gt;%1$s&lt;/b&gt; está haciendo host al stream!</string>
+    <!-- Subscription -->
+    <string name="chat_subscribed_new">¡&lt;b&gt;%1$s&lt;/b&gt; se acaba de suscribir!</string>
+    <string name="chat_subscribed_resub">¡&lt;b&gt;%1$s&lt;/b&gt; ha renovado su suscripción por %2$d meses!</string>
     <string name="chat_celebration_sub_renew_title">¡está celebrando la renovación de su suscripción!</string>
     <string name="chat_celebration_generic_title">¡está celebrando!</string>
     <string name="chat_celebration_sub_renew_duration">Duración total de la suscripción: %d meses</string>
@@ -717,6 +733,26 @@
     <string name="time_ago_minutes">hace %d min</string>
     <string name="time_ago_hours">hace %d horas</string>
     <string name="error_generic">Algo salió mal</string>
+
+    <!-- Reward Queue (Moderator) -->
+    <string name="reward_queue_title">Cola de solicitudes de recompensa</string>
+    <string name="reward_queue_all">Todas las recompensas</string>
+    <string name="reward_queue_empty">Sin solicitudes pendientes</string>
+    <string name="reward_queue_complete">Completar</string>
+    <string name="reward_queue_reject">Rechazar</string>
+    <string name="reward_queue_complete_all">Completar todo</string>
+    <string name="reward_queue_reject_all">Rechazar todo</string>
+    <string name="reward_queue_action_failed">Acción fallida, inténtalo de nuevo</string>
+    <string name="reward_queue_just_now">ahora mismo</string>
+    <string name="reward_queue_select_all">Seleccionar todo</string>
+    <string name="reward_queue_complete_selected">Completar seleccionados</string>
+    <string name="reward_queue_reject_selected">Rechazar seleccionados</string>
+    <string name="reward_queue_pause_redemptions">Pausar canjes</string>
+    <string name="reward_queue_paused_badge">pausado</string>
+
+    <!-- Mod Emote Channels -->
+    <string name="mod_emote_channels_title">Canales de emotes de mod</string>
+    <string name="mod_emote_channels_search_hint">Buscar canales…</string>
 
     <!-- Background Audio -->
     <string name="background_audio_active">Audio en segundo plano activo</string>
@@ -750,6 +786,7 @@
     <string name="operation_failed">Error en la operación: %s</string>
     <string name="login_failed_code">Error de inicio de sesión (%d)</string>
     <string name="operation_failed_code">Operación fallida (Código: %d)</string>
+    <string name="follow_rate_limited">Demasiadas solicitudes. Por favor, espera un momento e inténtalo de nuevo.</string>
 
     <!-- Polls -->
     <string name="poll_header">ENCUESTA</string>

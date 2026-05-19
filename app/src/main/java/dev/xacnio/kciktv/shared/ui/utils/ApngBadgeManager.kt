@@ -8,130 +8,116 @@
  */
 package dev.xacnio.kciktv.shared.ui.utils
 
-import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.os.Looper
 import android.view.View
-import java.io.File
 import java.lang.ref.WeakReference
+import java.nio.ByteBuffer
 import java.util.concurrent.ConcurrentHashMap
-import dev.xacnio.kciktv.shared.util.Constants
 
 /**
  * Manager for loading and caching APNG badges.
- * Uses the same ProxyDrawable pattern as EmoteManager to share single APNGDrawable instance across all views.
- * This prevents OutOfMemoryError by ensuring only ONE instance per badge URL.
+ *
+ * Caches raw bytes per URL. Each ImageView gets its own APNGDrawable instance created
+ * from the cached bytes — no ProxyDrawable needed because ImageView implements
+ * Drawable.Callback and handles animation scheduling directly.
  */
 object ApngBadgeManager {
-    private val badgeCache = ConcurrentHashMap<String, EmoteManager.EmoteEntry>()
+    private const val MAX_CACHED_ENTRIES = 64
+
+    private val bytesCache = object : java.util.LinkedHashMap<String, ByteArray>(
+        MAX_CACHED_ENTRIES, 0.75f, true
+    ) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, ByteArray>?): Boolean =
+            size > MAX_CACHED_ENTRIES
+    }
+
     private val pendingLoads = ConcurrentHashMap<String, MutableList<Pair<WeakReference<View>, (Drawable?) -> Unit>>>()
     private val mainHandler = Handler(Looper.getMainLooper())
-    
+
     private val client by lazy {
         okhttp3.OkHttpClient.Builder()
             .connectTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
             .readTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
             .build()
     }
-    
+
     fun loadBadge(
         url: String,
         size: Int,
         targetView: View,
         onReady: (Drawable?) -> Unit
     ) {
-        val key = "apng_${url.hashCode()}_$size"
-        
-        // 1. Check cache - return existing instance
-        badgeCache[key]?.let { entry ->
-            val proxy = EmoteManager.ProxyDrawable(entry, targetView)
-            entry.viewers.add(proxy)
-            proxy.setBounds(0, 0, size, size)
-            onReady(proxy)
+        // 1. Cache hit — build a fresh drawable from cached bytes (no re-download)
+        val cachedBytes = synchronized(bytesCache) { bytesCache[url] }
+        if (cachedBytes != null) {
+            onReady(buildDrawable(cachedBytes, size))
             return
         }
-        
-        // 2. Check if loading - add to queue
+
+        // 2. Already loading — queue up
         synchronized(pendingLoads) {
-            val pending = pendingLoads[key]
+            val pending = pendingLoads[url]
             if (pending != null) {
                 pending.add(Pair(WeakReference(targetView), onReady))
                 return
             }
-            pendingLoads[key] = mutableListOf(Pair(WeakReference(targetView), onReady))
+            pendingLoads[url] = mutableListOf(Pair(WeakReference(targetView), onReady))
         }
-        
-        // 3. Load APNG in background
+
+        // 3. Download in background
         Thread {
             try {
                 val request = okhttp3.Request.Builder()
                     .url(url)
                     .header("User-Agent", dev.xacnio.kciktv.shared.util.Constants.USER_AGENT)
                     .build()
-                
                 val response = client.newCall(request).execute()
-                
                 if (response.isSuccessful) {
                     val bytes = response.body?.bytes()
                     if (bytes != null) {
-                        // Use ByteBufferLoader subclass to properly implement the Loader interface from bytes
-                        val loader: com.github.penfeizhou.animation.loader.Loader = object : com.github.penfeizhou.animation.loader.ByteBufferLoader() {
-                            override fun getByteBuffer(): java.nio.ByteBuffer {
-                                return java.nio.ByteBuffer.wrap(bytes)
-                            }
-                        }
-                        val apngDrawable = com.github.penfeizhou.animation.apng.APNGDrawable(loader)
-                        
-                        android.util.Log.d("ApngBadgeManager", "APNG loaded from bytes: $url")
-                        
-                        // Create shared entry (same pattern as EmoteManager)
+                        synchronized(bytesCache) { bytesCache[url] = bytes }
                         mainHandler.post {
-                            // Verify bytes are actually an APNG or at least a valid image
-                            // (BinaryLoader with APNGDrawable will try to parse it)
-                            val entry = EmoteManager.EmoteEntry(key, apngDrawable, size)
-                            badgeCache[key] = entry
-                            
-                            // Animation will be started by EmoteEntry.init
-                            
-                            // Notify all pending
-                            val callbacks = synchronized(pendingLoads) {
-                                pendingLoads.remove(key)
-                            } ?: return@post
-                            
+                            val callbacks = synchronized(pendingLoads) { pendingLoads.remove(url) } ?: return@post
                             for ((viewRef, callback) in callbacks) {
-                                viewRef.get()?.let { view ->
-                                    val proxy = EmoteManager.ProxyDrawable(entry, view)
-                                    entry.viewers.add(proxy)
-                                    proxy.setBounds(0, 0, size, size)
-                                    callback(proxy)
-                                }
+                                if (viewRef.get() != null) callback(buildDrawable(bytes, size))
                             }
                         }
                         return@Thread
                     }
                 }
-                android.util.Log.e("ApngBadgeManager", "Response unsuccessful for $url: ${response.code}")
+                android.util.Log.e("ApngBadgeManager", "Response failed for $url: ${response.code}")
             } catch (e: Exception) {
                 android.util.Log.e("ApngBadgeManager", "Load failed: ${e.message}", e)
             }
-            
-            // Failed - notify callbacks with null
             mainHandler.post {
-                val callbacks = synchronized(pendingLoads) {
-                    pendingLoads.remove(key)
-                }
-                
-                android.util.Log.d("ApngBadgeManager", "Load failed for $url, notifying ${callbacks?.size ?: 0} callbacks with null")
-                
-                callbacks?.forEach { (_, callback) ->
-                    callback(null)
-                }
+                val callbacks = synchronized(pendingLoads) { pendingLoads.remove(url) }
+                callbacks?.forEach { (_, callback) -> callback(null) }
             }
         }.start()
     }
-    
+
+    /**
+     * Creates an APNGDrawable from bytes without starting it.
+     * The caller must call (drawable as Animatable).start() AFTER setImageDrawable()
+     * so the ImageView is already the drawable's callback when animation begins.
+     */
+    private fun buildDrawable(bytes: ByteArray, size: Int): Drawable? {
+        return try {
+            val loader = object : com.github.penfeizhou.animation.loader.ByteBufferLoader() {
+                override fun getByteBuffer(): ByteBuffer = ByteBuffer.wrap(bytes)
+            }
+            com.github.penfeizhou.animation.apng.APNGDrawable(loader).also { apng ->
+                apng.setBounds(0, 0, size, size)
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("ApngBadgeManager", "Failed to build APNGDrawable: ${e.message}")
+            null
+        }
+    }
+
     fun clearCache() {
-        badgeCache.clear()
+        synchronized(bytesCache) { bytesCache.clear() }
     }
 }

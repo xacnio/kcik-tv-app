@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="reward_queue_minutes_ago">
+        <item quantity="one">منذ %d دقيقة</item>
+        <item quantity="other">منذ %d دقائق</item>
+    </plurals>
+    <plurals name="reward_queue_hours_ago">
+        <item quantity="one">منذ %d ساعة</item>
+        <item quantity="other">منذ %d ساعات</item>
+    </plurals>
+    <plurals name="reward_queue_days_ago">
+        <item quantity="one">منذ %d يوم</item>
+        <item quantity="other">منذ %d أيام</item>
+    </plurals>
+</resources>

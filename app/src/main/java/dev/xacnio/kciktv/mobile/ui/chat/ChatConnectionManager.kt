@@ -40,18 +40,30 @@ class ChatConnectionManager(private val activity: MobilePlayerActivity) {
              chatWebSocket = KcikChatWebSocket(
                  activity.applicationContext,
                  onMessageReceived = chatListener@{ message ->
-                     // Update identity cache
+                     // Update identity cache (cheap — prefs.username is in-memory cached)
                      if (message.sender.username == prefs.username) {
                          chatStateManager.currentUserSender = message.sender
                      }
 
-                     // Check for message confirmation
+                     // Check for message confirmation (own sent messages — always handle so UI
+                     // reconciles regardless of chat visibility)
                      val ref = message.messageRef
                      if (ref != null && chatStateManager.shouldConfirmSentMessage(ref)) {
                          chatStateManager.confirmSentMessage(ref)
                          activity.runOnUiThread {
                              chatUiManager.chatAdapter.confirmSentMessage(ref, message)
                          }
+                         return@chatListener
+                     }
+
+                     // Short-circuit on the WS reader thread when chat is not visible.
+                     // Skips the runOnUiThread allocation + main-looper Message dispatch per
+                     // message; ChatUiManager.handleIncomingMessage would have dropped it
+                     // anyway, this just avoids the cross-thread hop. On a busy channel this
+                     // saves dozens of main-thread wakeups per second while in PIP/mini.
+                     val isPip = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
+                         activity.isInPictureInPictureMode else false
+                     if (activity.miniPlayerManager.isMiniPlayerMode || isPip || chatUiManager.isChatUiPaused) {
                          return@chatListener
                      }
 
@@ -166,5 +178,15 @@ class ChatConnectionManager(private val activity: MobilePlayerActivity) {
             }
         }
         chatWebSocket?.subscribeToOnlyChat()
+    }
+
+    /**
+     * Adjust WebSocket ping interval based on Low Battery setting.
+     * Low Battery ON: 5 min (300 s) — Pusher server-side heartbeat is sufficient.
+     * Low Battery OFF: 2 min (120 s) — restore default.
+     */
+    fun applyLowBatteryPingInterval() {
+        val intervalMs = if (prefs.lowBatteryModeEnabled) 300_000L else 120_000L
+        chatWebSocket?.setPingInterval(intervalMs)
     }
 }

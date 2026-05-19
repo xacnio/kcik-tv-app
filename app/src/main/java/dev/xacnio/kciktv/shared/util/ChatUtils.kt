@@ -19,6 +19,7 @@ fun Context.getLocalizedChatError(errorCode: String): String {
         "BANNED_USER_ERROR" -> getString(R.string.chat_error_banned)
         "MESSAGE_TOO_LONG" -> getString(R.string.chat_error_message_too_long)
         "DUPLICATE_MESSAGE_ERROR" -> getString(R.string.chat_error_duplicate_message)
+        "timeout" -> getString(R.string.chat_error_timeout)
         else -> getString(R.string.chat_error_generic, errorCode)
     }
 }

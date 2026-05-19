@@ -20,27 +20,59 @@ class AppPreferences(private val context: Context) {
     private val prefs: SharedPreferences = context.getSharedPreferences("kick_tv_prefs", Context.MODE_PRIVATE)
     private val cryptoManager = CryptoManager()
 
+    // Shared process-wide cache for decrypted values. Each AES-GCM decrypt involves a KeyStore
+    // lookup, Cipher.getInstance/init, and two Base64 decodes — expensive in hot paths like the
+    // chat flush loop that reads prefs.username every ~200ms. Sentinel for "key absent" avoids
+    // repeated SharedPreferences lookups for missing keys.
+    //
+    // CRITICAL: This cache MUST be process-wide (companion object), not per-instance. Activities
+    // create their own AppPreferences instance; if the cache were per-instance, a write from
+    // LoginActivity (e.g. saveAuth) would not invalidate MobilePlayerActivity's cached ABSENT
+    // sentinel, leaving the UI stuck showing "Log in" after a successful login.
+    private companion object {
+        private val decryptCache = java.util.concurrent.ConcurrentHashMap<String, String>()
+        private const val ABSENT = "__kick_tv_absent__"
+    }
+
     // Helper to encrypt data transparently
     private fun putStringSafe(key: String, value: String?) {
         if (value == null) {
             prefs.edit().remove(key).apply()
+            decryptCache[key] = ABSENT
             return
         }
         val encrypted = cryptoManager.encrypt(value)
         prefs.edit().putString(key, encrypted).apply()
+        decryptCache[key] = value
     }
 
     // Helper to decrypt data transparently (with auto-migration)
     private fun getStringSafe(key: String, defValue: String?): String? {
-        val storedValue = prefs.getString(key, null) ?: return defValue
-        
+        decryptCache[key]?.let { cached ->
+            return if (cached === ABSENT) defValue else cached
+        }
+
+        val storedValue = prefs.getString(key, null)
+        if (storedValue == null) {
+            decryptCache[key] = ABSENT
+            return defValue
+        }
+
         // Check if value looks encrypted (contains our separator)
-        return if (storedValue.contains("|||")) {
-             cryptoManager.decrypt(storedValue) ?: defValue // Return default if decryption fails
+        val resolved = if (storedValue.contains("|||")) {
+            cryptoManager.decrypt(storedValue)
         } else {
-             // It's plain text (old version), migrate it to encrypted
-             putStringSafe(key, storedValue)
-             storedValue
+            // It's plain text (old version), migrate it to encrypted
+            putStringSafe(key, storedValue)
+            storedValue
+        }
+
+        return if (resolved != null) {
+            decryptCache[key] = resolved
+            resolved
+        } else {
+            decryptCache[key] = ABSENT
+            defValue
         }
     }
 
@@ -297,10 +329,16 @@ class AppPreferences(private val context: Context) {
             .remove("logged_in_profile_pic")
             .remove("logged_in_user_id")
             .remove("logged_in_chat_color")
-            .remove("saved_cookies") 
+            .remove("saved_cookies")
             .remove("xsrf_token")
             .remove("user_json")
             .apply()
+        // Invalidate decrypted cache entries that bypass putStringSafe.
+        listOf(
+            "auth_token", "logged_in_username", "logged_in_profile_pic",
+            "logged_in_chat_color", "saved_cookies", "xsrf_token", "user_json",
+            "logged_in_slug"
+        ).forEach { decryptCache[it] = ABSENT }
     }
     
     var xsrfToken: String?
@@ -369,6 +407,10 @@ class AppPreferences(private val context: Context) {
         get() = prefs.getStringSet("last_known_live_channels", emptySet()) ?: emptySet()
         set(value) = prefs.edit().putStringSet("last_known_live_channels", value).apply()
 
+    var modEmoteChannelSlugs: Set<String>
+        get() = prefs.getStringSet("mod_emote_channels", emptySet()) ?: emptySet()
+        set(value) = prefs.edit().putStringSet("mod_emote_channels", value).apply()
+
     var recentEmoteIds: String?
         get() = prefs.getString("recent_emote_ids", null)
         set(value) = prefs.edit().putString("recent_emote_ids", value).apply()
@@ -429,7 +471,10 @@ class AppPreferences(private val context: Context) {
         set(value) = prefs.edit().putBoolean("analytics_enabled", value).apply()
 
     var chatRefreshRate: Long
-        get() = prefs.getLong("chat_refresh_rate", 200L)
+        // Default 300 ms (~3.3 Hz flush). Visually indistinguishable from 200 ms but ~33%
+        // less main-thread work per second (adapter notify + emote/combo/mention processing).
+        // User-customised values are preserved; this only affects fresh installs.
+        get() = prefs.getLong("chat_refresh_rate", 300L)
         set(value) = prefs.edit().putLong("chat_refresh_rate", value).apply()
 
     var recentCategoriesRaw: String?

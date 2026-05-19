@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_reward_chip_row"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="top"
+    android:orientation="horizontal"
+    android:paddingHorizontal="14dp"
+    android:paddingVertical="10dp">
+
+    <!-- Checkbox -->
+    <CheckBox
+        android:id="@+id/redemptionCheckbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="2dp"
+        android:buttonTint="@color/brand_green"
+        android:clickable="false"
+        android:focusable="false" />
+
+    <!-- Content area -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- Row 1: reward title + time ago -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/redemptionRewardTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                tools:text="test2" />
+
+            <TextView
+                android:id="@+id/redemptionTimeAgo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:textColor="#888888"
+                android:textSize="11sp"
+                tools:text="3 dk önce" />
+        </LinearLayout>
+
+        <!-- Row 2: username -->
+        <TextView
+            android:id="@+id/redemptionUsername"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/brand_green"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            tools:text="overyet" />
+
+        <!-- Row 3: user input (full width, multiline) -->
+        <TextView
+            android:id="@+id/redemptionUserInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:background="#1F1F1F"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="5dp"
+            android:textColor="#DDDDDD"
+            android:textSize="13sp"
+            android:visibility="gone"
+            tools:text="Kullanıcının yazdığı metin buraya gelir ve uzun olursa alt satıra geçer"
+            tools:visibility="visible" />
+    </LinearLayout>
+
+    <!-- Action buttons -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/redemptionAcceptButton"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_item_ripple"
+            android:contentDescription="@string/reward_queue_complete"
+            android:padding="8dp"
+            android:src="@drawable/ic_check"
+            app:tint="#53fc18" />
+
+        <ImageButton
+            android:id="@+id/redemptionRejectButton"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="2dp"
+            android:background="@drawable/bg_item_ripple"
+            android:contentDescription="@string/reward_queue_reject"
+            android:padding="8dp"
+            android:src="@drawable/ic_close"
+            app:tint="#FF5555" />
+    </LinearLayout>
+</LinearLayout>

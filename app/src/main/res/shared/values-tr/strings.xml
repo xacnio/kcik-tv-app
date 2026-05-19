@@ -475,6 +475,7 @@
     <string name="chat_error_message_too_long">Mesaj çok uzun.</string>
     <string name="chat_error_duplicate_message">Aynı mesajı tekrar gönderemezsiniz.</string>
     <string name="chat_error_generic">Mesaj gönderilemedi: %s</string>
+    <string name="chat_error_timeout">Bağlantı zaman aşımına uğradı. Lütfen internetinizi kontrol edin.</string>
 
     <!-- Audio Modes -->
     <string name="audio_mode_custom_eq">Özel EQ</string>
@@ -679,13 +680,22 @@
     <string name="chat_timestamps">Zaman Damgası</string>
     <string name="chat_seconds">Saniye Göster</string>
     <string name="show_pinned_gifts">Sabitlenmiş Hediyeler</string>
-    <string name="chat_low_battery_mode">Düşük Pil Modu</string>
+    <string name="chat_low_battery_mode">Pil Tasarrufu</string>
     <string name="chat_emote_combo">Emote Kombo</string>
     <string name="chat_settings_vibrate_on_mention">Bahsedilince Titret</string>
     <string name="chat_settings_floating_emotes">Uçan Emojiler</string>
 
     <!-- Chat Connection -->
-    <string name="chat_low_battery_paused">Arka plan modu aktif. Sohbet duraklatıldı (Düşük Pil Modu)</string>
+    <string name="chat_low_battery_paused">Arka plan modu aktif. Sohbet duraklatıldı (Pil Tasarrufu)</string>
+    <string name="chat_battery_saver_subtitle">Kaliteyi 720p ile sınırlar, animasyonları azaltır, zamanlayıcı &amp; ping yavaşlar</string>
+
+    <!-- Chat appearance subtitles -->
+    <string name="chat_timestamps_subtitle">Her mesajın yanında gönderim saatini göster</string>
+    <string name="chat_pinned_gifts_subtitle">Hediye banner\'larını sohbetin üstüne sabitle</string>
+    <string name="chat_emote_combo_subtitle">Arka arkaya gelen aynı emoteları vurgula</string>
+    <string name="chat_floating_emotes_subtitle">Animasyonlu emote patlamaları ekranda uçar</string>
+    <string name="chat_setting_highlighted_subtitle">Hangi mesajların öne çıkacağını seç</string>
+    <string name="chat_anim_subtitle">Yeni mesajlar için giriş animasyonu</string>
 
     <!-- Chat Rules -->
     <string name="chat_rules_not_found">Bu kanal için sohbet kuralları bulunamadı.</string>
@@ -698,6 +708,12 @@
     <string name="chat_gifted_subs_plural">%1$s topluluğa %2$d adet abonelik hediye etti! Bu kanala toplamda %3$d hediye aboneliği mevcut.</string>
     <string name="chat_gifted_sub_single">%1$s topluluğa bir abonelik hediye etti! Bu kanala toplamda %2$d hediye aboneliği mevcut.</string>
     <string name="chat_gifted_sub_individual">%1$s, %2$s kullanıcısına abonelik hediye etti!</string>
+    <!-- Stream host -->
+    <string name="chat_stream_hosted">&lt;b&gt;%1$s&lt;/b&gt; %2$d izleyiciyle yayını host etti!</string>
+    <string name="chat_stream_hosted_no_count">&lt;b&gt;%1$s&lt;/b&gt; yayını host etti!</string>
+    <!-- Subscription -->
+    <string name="chat_subscribed_new">&lt;b&gt;%1$s&lt;/b&gt; abone oldu!</string>
+    <string name="chat_subscribed_resub">&lt;b&gt;%1$s&lt;/b&gt; %2$d aydır abone!</string>
     <string name="chat_celebration_sub_renew_title">abonelik yenilemesini kutluyor!</string>
     <string name="chat_celebration_generic_title">kutluyor!</string>
     <string name="chat_celebration_sub_renew_duration">Toplam abonelik süresi: %d ay!</string>
@@ -717,6 +733,26 @@
     <string name="time_ago_minutes">%d dk önce</string>
     <string name="time_ago_hours">%d saat önce</string>
     <string name="error_generic">Bir sorun oluştu</string>
+
+    <!-- Reward Queue (Moderator) -->
+    <string name="reward_queue_title">Ödül istek sırası</string>
+    <string name="reward_queue_all">Tüm ödül istekleri</string>
+    <string name="reward_queue_empty">Bekleyen istek yok</string>
+    <string name="reward_queue_complete">Tamamla</string>
+    <string name="reward_queue_reject">Reddet</string>
+    <string name="reward_queue_complete_all">Tümünü tamamla</string>
+    <string name="reward_queue_reject_all">Tümünü reddet</string>
+    <string name="reward_queue_action_failed">İşlem başarısız, tekrar deneyin</string>
+    <string name="reward_queue_just_now">az önce</string>
+    <string name="reward_queue_select_all">Tümünü seç</string>
+    <string name="reward_queue_complete_selected">Seçilenleri tamamla</string>
+    <string name="reward_queue_reject_selected">Seçilenleri reddet</string>
+    <string name="reward_queue_pause_redemptions">Alımları Duraklat</string>
+    <string name="reward_queue_paused_badge">duraklatıldı</string>
+
+    <!-- Mod Emote Channels -->
+    <string name="mod_emote_channels_title">Mod İfade Kanalları</string>
+    <string name="mod_emote_channels_search_hint">Kanal ara…</string>
 
     <!-- Background Audio -->
     <string name="background_audio_active">Arka Plan Ses Modu Aktif</string>
@@ -750,6 +786,7 @@
     <string name="operation_failed">İşlem başarısız: %s</string>
     <string name="login_failed_code">Giriş başarısız (%d)</string>
     <string name="operation_failed_code">İşlem başarısız (Kod: %d)</string>
+    <string name="follow_rate_limited">Çok fazla istek gönderildi. Lütfen bir süre bekleyip tekrar deneyin.</string>
 
     <!-- Polls -->
     <string name="poll_header">ANKET</string>

@@ -34,7 +34,6 @@ import dev.xacnio.kciktv.shared.data.model.ChatMessage
 import java.util.regex.Pattern
 import dev.xacnio.kciktv.shared.util.Constants
 import dev.xacnio.kciktv.shared.ui.widget.ShimmerLayout
-import dev.xacnio.kciktv.shared.ui.utils.ApngBadgeManager
 import dev.xacnio.kciktv.shared.ui.utils.EmoteManager
 import dev.xacnio.kciktv.mobile.util.DialogUtils
 import dev.xacnio.kciktv.shared.util.FormatUtils
@@ -74,12 +73,21 @@ class ChatAdapter(
     fun setAnimationType(type: String) {
         this.animationType = type
     }
+
+    /**
+     * Returns true when message enter animations should run. Battery saver
+     * forces this off regardless of the user's animation pref so we don't
+     * spend frames on transient effects.
+     */
+    private fun animationsActive(): Boolean =
+        animationType != "none" &&
+            !dev.xacnio.kciktv.shared.ui.utils.EmoteManager.lowBatteryMode
     
     // Removed resetAnimationDelay as it's no longer needed without staggered batching
 
 
     private fun runEnterAnimation(view: View, position: Int) {
-        if (animationType == "none") return
+        if (!animationsActive()) return
 
         // Track this view as actively animating
         animatingViews.add(view)
@@ -523,7 +531,7 @@ class ChatAdapter(
         // Check if this message needs enter animation
         // Use contains (not remove) — ID is only cleared when animation completes or view is recycled
         val needsAnimation = pendingAnimationIds.contains(message.id)
-        if (needsAnimation && animationType != "none") {
+        if (needsAnimation && animationsActive()) {
             // Set initial hidden state — animation will fire in onViewAttachedToWindow
             holder.itemView.animate().cancel()
             holder.itemView.alpha = 0f
@@ -1059,17 +1067,17 @@ class ChatAdapter(
     }
 
     private fun loadBadgeImageInternal(textView: TextView, scheduleLayoutUpdate: () -> Unit, position: Int, url: String, size: Int) {
-        dev.xacnio.kciktv.shared.ui.utils.ApngBadgeManager.loadBadge(url, size, textView) { drawable ->
-            if (drawable != null) {
-                try {
-                    val currentText = textView.text
-                    if (currentText is Spannable && position < currentText.length) {
-                        currentText.getSpans(position, position + 1, CenterImageSpan::class.java).forEach { currentText.removeSpan(it) }
-                        currentText.setSpan(CenterImageSpan(drawable), position, position + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-                        scheduleLayoutUpdate()
-                    }
-                } catch (e: Exception) {}
-            }
+        dev.xacnio.kciktv.shared.ui.utils.EmoteManager.loadSynchronizedImage(
+            textView.context, url, size, textView
+        ) { drawable ->
+            try {
+                val currentText = textView.text
+                if (currentText is Spannable && position < currentText.length) {
+                    currentText.getSpans(position, position + 1, CenterImageSpan::class.java).forEach { currentText.removeSpan(it) }
+                    currentText.setSpan(CenterImageSpan(drawable), position, position + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    scheduleLayoutUpdate()
+                }
+            } catch (e: Exception) {}
         }
     }
 
@@ -2033,65 +2041,25 @@ class ChatAdapter(
     
     private fun loadBadgeImage(holder: ChatViewHolder, position: Int, url: String, size: Int) {
         val textView = holder.messageText
-        
-        // Always try APNG first (badge URLs don't have extensions)
-        // ApngBadgeManager will fallback if it's not an APNG
-        dev.xacnio.kciktv.shared.ui.utils.ApngBadgeManager.loadBadge(
-            url,
-            size,
-            textView
+        dev.xacnio.kciktv.shared.ui.utils.EmoteManager.loadSynchronizedImage(
+            textView.context, url, size, textView
         ) { drawable ->
-            if (drawable != null) {
-                // Successfully loaded (APNG or fallback)
-                try {
-                    val currentText = textView.text
-                    if (currentText is Spannable && position < currentText.length) {
-                        currentText.getSpans(position, position + 1, CenterImageSpan::class.java).forEach {
-                            currentText.removeSpan(it)
-                        }
-                        
-                        currentText.setSpan(
-                            CenterImageSpan(drawable),
-                            position,
-                            position + 1,
-                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                        )
-                        
-                        holder.scheduleLayoutUpdate()
+            try {
+                val currentText = textView.text
+                if (currentText is Spannable && position < currentText.length) {
+                    currentText.getSpans(position, position + 1, CenterImageSpan::class.java).forEach {
+                        currentText.removeSpan(it)
                     }
-                    Unit
-                } catch (e: Exception) {
-                    android.util.Log.e("ChatAdapter", "Badge error: ${e.message}")
+                    currentText.setSpan(
+                        CenterImageSpan(drawable),
+                        position,
+                        position + 1,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                    holder.scheduleLayoutUpdate()
                 }
-            } else {
-                // ApngBadgeManager failed, use EmoteManager as final fallback
-                dev.xacnio.kciktv.shared.ui.utils.EmoteManager.loadSynchronizedImage(
-                    textView.context,
-                    url,
-                    size,
-                    textView
-                ) { sharedDrawable ->
-                    try {
-                        val currentText = textView.text
-                        if (currentText is Spannable && position < currentText.length) {
-                            currentText.getSpans(position, position + 1, CenterImageSpan::class.java).forEach {
-                                currentText.removeSpan(it)
-                            }
-                            
-                            currentText.setSpan(
-                                CenterImageSpan(sharedDrawable),
-                                position,
-                                position + 1,
-                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                            )
-                            
-                            holder.scheduleLayoutUpdate()
-                        }
-                        Unit
-                    } catch (e: Exception) {
-                        android.util.Log.e("ChatAdapter", "Badge fallback error: ${e.message}")
-                    }
-                }
+            } catch (e: Exception) {
+                android.util.Log.e("ChatAdapter", "Badge error: ${e.message}")
             }
         }
     }
@@ -2295,7 +2263,7 @@ class ChatAdapter(
         if (newMessages.isEmpty()) return
         
         // Mark new messages for animation (only non-deduplicated, i.e. truly new messages)
-        if (!deduplicate && animate && animationType != "none") {
+        if (!deduplicate && animate && animationsActive()) {
             for (msg in newMessages) {
                 pendingAnimationIds.add(msg.id)
             }
@@ -2304,25 +2272,30 @@ class ChatAdapter(
         val finalList: List<ChatMessage>
         
         synchronized(messageCache) {
+            // Hard cap when user is at bottom; 2x soft cap when scrolled up
+            // to preserve reading context without allowing unbounded growth.
+            val effectiveLimit = if (isAutoScrollEnabled) {
+                Constants.Chat.MESSAGE_LIMIT
+            } else {
+                Constants.Chat.MESSAGE_LIMIT * 2
+            }
+
             // Fast path for single message append (most common case)
             if (newMessages.size == 1 && !deduplicate) {
                 val newMsg = newMessages[0]
                 // Insert maintaining sort order
                 val insertIndex = messageCache.indexOfLast { it.createdAt <= newMsg.createdAt } + 1
                 messageCache.add(insertIndex, newMsg)
-                
-                // Trim only if auto scroll is enabled (user is at bottom)
-                if (isAutoScrollEnabled) {
-                    while (messageCache.size > Constants.Chat.MESSAGE_LIMIT) {
-                        messageCache.removeAt(0)
-                    }
+
+                while (messageCache.size > effectiveLimit) {
+                    messageCache.removeAt(0)
                 }
-                
+
                 finalList = ArrayList(messageCache)
             } else {
                 // Batch path for multiple messages or history loading
                 messageCache.addAll(newMessages)
-                
+
                 // Only deduplicate when loading history
                 val workingList = if (deduplicate) {
                     val seen = HashSet<String>(messageCache.size)
@@ -2330,17 +2303,16 @@ class ChatAdapter(
                 } else {
                     messageCache.toList()
                 }
-                
+
                 // Sort by createdAt
                 //val sortedList = workingList.sortedBy { it.createdAt }
-                
-                // Trim to limit only if auto scroll is enabled
-                val trimmedList = if (isAutoScrollEnabled && workingList.size > Constants.Chat.MESSAGE_LIMIT) {
-                    workingList.subList(workingList.size - Constants.Chat.MESSAGE_LIMIT, workingList.size)
+
+                val trimmedList = if (workingList.size > effectiveLimit) {
+                    workingList.subList(workingList.size - effectiveLimit, workingList.size)
                 } else {
                     workingList
                 }
-                
+
                 messageCache.clear()
                 messageCache.addAll(trimmedList)
                 finalList = ArrayList(messageCache)

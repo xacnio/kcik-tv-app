@@ -18,7 +18,8 @@ data class EmoteCategory(
     @SerializedName("slug") val slug: String? = null,
     @SerializedName("name") val name: String? = null,
     @SerializedName("emotes") val emotes: List<Emote> = emptyList(),
-    @SerializedName("user") val user: EmoteUser? = null
+    @SerializedName("user") val user: EmoteUser? = null,
+    val isModEmoteOnly: Boolean = false
 ) {
     val displayName: String
         get() = when {

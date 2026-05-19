@@ -43,6 +43,7 @@ class ChannelSessionManager(private val activity: MobilePlayerActivity) {
         // Activity-level poll field
         activity.currentPoll = null 
         activity.overlayManager.resetForNewChannel()
+        activity.rewardQueueManager.resetForChannel(channel.slug)
         
         binding.pinnedMessageContainer.visibility = View.GONE
         binding.pollContainer.visibility = View.GONE
@@ -85,6 +86,33 @@ class ChannelSessionManager(private val activity: MobilePlayerActivity) {
                     activity.runOnUiThread {
                         activity.updateChatroomHint(chatInfo.chatroomInfo)
                     }
+
+                    // Fetch accurate chat settings from web.kick.com and override stale values
+                    val channelId = chatInfo.channelId
+                    if (channelId != null && channelId > 0) {
+                        try {
+                            activity.repository.getChatSettings(channelId).onSuccess { settings ->
+                                state.chatSettings = settings
+                                val patched = state.currentChatroom?.copy(
+                                    slowMode = settings.slowMode?.enabled,
+                                    slowModeInterval = settings.slowMode?.durationSeconds,
+                                    followersMode = settings.followersOnlyMode?.enabled,
+                                    followersMinDuration = settings.followersOnlyMode
+                                        ?.durationSeconds?.let { (it / 60).coerceAtLeast(0) },
+                                    subscribersMode = settings.subscribersOnlyMode?.enabled,
+                                    emotesMode = settings.emotesOnlyMode?.enabled
+                                )
+                                activity.runOnUiThread {
+                                    if (patched != null) {
+                                        state.updateChatroom(patched)
+                                        activity.updateChatroomHint(patched)
+                                    }
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Log.w(TAG, "Chat settings fetch failed", e)
+                        }
+                    }
                     
                     // Update uptime from chatInfo if available
                     chatInfo.startTimeMillis?.let {
@@ -99,8 +127,10 @@ class ChannelSessionManager(private val activity: MobilePlayerActivity) {
                     activity.isChannelOwner = false
                     activity.isBannedFromCurrentChannel = false
                     activity.isCheckingBanStatus = prefs.isLoggedIn // Start check if logged in
-                    activity.runOnUiThread { 
-                        binding.modMenuButton.visibility = View.GONE 
+                    activity.runOnUiThread {
+                        binding.modMenuButton.visibility = View.GONE
+                        binding.rewardQueueButton.visibility = View.GONE
+                        activity.rewardQueueManager.resetForChannel(channel.slug)
                         binding.chatBannedOverlay.visibility = View.GONE
                         // Initial update to hide input if checking
                         activity.updateChatLoginState()
@@ -145,7 +175,9 @@ class ChannelSessionManager(private val activity: MobilePlayerActivity) {
                                     activity.runOnUiThread {
                                         activity.updateFollowButtonState()
                                         // Update moderator menu button visibility
-                                        binding.modMenuButton.visibility = if (activity.isModeratorOrOwner && prefs.isLoggedIn) View.VISIBLE else View.GONE
+                                        val isMod = activity.isModeratorOrOwner && prefs.isLoggedIn
+                                        binding.modMenuButton.visibility = if (isMod) View.VISIBLE else View.GONE
+                                        binding.rewardQueueButton.visibility = if (isMod) View.VISIBLE else View.GONE
                                         
                                         // Update prediction UI to reflect new mod status
                                         state.currentPrediction?.let { activity.overlayManager.updatePredictionUI(it) }

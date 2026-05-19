@@ -98,8 +98,12 @@ class ChannelClipAdapter(
                 .load(Constants.Urls.DEFAULT_LIVESTREAM_THUMBNAIL)
                 .transform(CenterCrop())
 
+            // 16:9 thumbnail inside a card-sized cell (~half-screen wide). Kick source
+            // thumbs are 1280×720+; hinting 640×360 lets Glide downsample at decode time
+            // instead of after — meaningful CPU + memory savings on long lists.
             Glide.with(itemView.context)
                 .load(thumbUrl)
+                .override(640, 360)
                 .transform(CenterCrop())
                 .placeholder(shimmerPlaceholder)
                 .error(defaultThumbnailBuilder)
