@@ -29,7 +29,7 @@ android {
         minSdk = 23
         targetSdk = 34
         versionCode = 2
-        val baseVersion = "2.1.0-beta"
+        val baseVersion = "2.1.1-beta"
         versionName = "$baseVersion-${getGitHash()}"
     }
 

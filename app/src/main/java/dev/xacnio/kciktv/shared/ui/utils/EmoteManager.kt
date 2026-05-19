@@ -93,6 +93,7 @@ object EmoteManager {
         // Track last invalidation dispatch time for throttling
         @Volatile private var lastInvalidationTime: Long = 0
 
+        @androidx.annotation.Keep
         private val callback = object : Drawable.Callback {
             override fun invalidateDrawable(who: Drawable) {
                 // Throttle invalidation dispatches to avoid spamming views every GIF frame

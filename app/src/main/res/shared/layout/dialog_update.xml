@@ -91,7 +91,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:maxHeight="180dp"
+                android:maxHeight="120dp"
                 android:fadingEdge="vertical"
                 android:fadingEdgeLength="24dp"
                 android:requiresFadingEdge="vertical">
