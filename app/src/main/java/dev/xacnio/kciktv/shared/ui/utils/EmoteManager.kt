@@ -42,6 +42,15 @@ object EmoteManager {
     // Batch invalidation interval
     private const val INVALIDATION_BATCH_MS = 16L
     
+    /**
+     * When true, EmoteEntry will skip starting animated drawables on init and
+     * ensureRunning() becomes a no-op. The first decoded frame is still rendered
+     * (so badges/emotes remain visible as static images). LauncherActivity wires
+     * this from prefs.lowBatteryModeEnabled at startup; toggle changes take
+     * effect on next app launch (existing entries keep their state).
+     */
+    @Volatile var lowBatteryMode: Boolean = false
+
     private val emoteEntries = mutableMapOf<String, EmoteEntry>()
     private val activeTargets = mutableMapOf<String, Target<*>>()
     
@@ -90,9 +99,12 @@ object EmoteManager {
                 val now = SystemClock.uptimeMillis()
                 if (now - lastInvalidationTime < MIN_FRAME_INTERVAL_MS) return
                 lastInvalidationTime = now
-                
-                // Iterate with pruning: remove dead/detached viewers in the same pass
-                // Avoids toTypedArray() copy and keeps viewer set small
+
+                // Only remove viewers whose view is garbage-collected (viewRef == null).
+                // Views that are temporarily off-screen (!isAttachedToWindow) are kept so
+                // the animation resumes automatically when the view re-attaches — no need
+                // to re-call loadSynchronizedEmote. pauseMaster only when ALL viewers are GC'd.
+                var hasAnyViewer = false
                 synchronized(viewers) {
                     val iterator = viewers.iterator()
                     while (iterator.hasNext()) {
@@ -105,16 +117,22 @@ object EmoteManager {
                                 is ProxyDrawable -> proxy.viewRef.get()
                                 else -> null
                             }
-                            if (v == null || !v.isAttachedToWindow) {
+                            if (v == null) {
                                 iterator.remove()
                             } else {
-                                when (proxy) {
-                                    is ScalingProxyDrawable -> proxy.triggerInvalidation()
-                                    is ProxyDrawable -> proxy.triggerInvalidation()
+                                hasAnyViewer = true
+                                if (v.isAttachedToWindow) {
+                                    when (proxy) {
+                                        is ScalingProxyDrawable -> proxy.triggerInvalidation()
+                                        is ProxyDrawable -> proxy.triggerInvalidation()
+                                    }
                                 }
                             }
                         }
                     }
+                }
+                if (!hasAnyViewer) {
+                    pauseMaster()
                 }
             }
 
@@ -134,12 +152,39 @@ object EmoteManager {
         init {
             master.callback = callback
             master.setBounds(0, 0, size, size)
-            if (master is Animatable) {
+            if (master is Animatable && !lowBatteryMode) {
                 if (master is GifDrawable) {
                     master.setLoopCount(GifDrawable.LOOP_FOREVER)
                 }
                 master.start()
             }
+        }
+
+        /** Add a proxy and ensure master animation is running. */
+        fun attachViewer(proxy: Drawable) {
+            viewers.add(proxy)
+            ensureRunning()
+        }
+
+        /** Restart master animation if it was paused while idle. */
+        fun ensureRunning() {
+            if (lowBatteryMode) return
+            try {
+                val d = master
+                if (d is Animatable && !d.isRunning) {
+                    d.start()
+                }
+            } catch (_: Exception) { }
+        }
+
+        /** Stop master animation so the APNG/GIF decoder thread stops scheduling frames. */
+        fun pauseMaster() {
+            try {
+                val d = master
+                if (d is Animatable && d.isRunning) {
+                    d.stop()
+                }
+            } catch (_: Exception) { }
         }
 
         fun captureFrame() {
@@ -257,28 +302,28 @@ object EmoteManager {
         val entry = emoteEntries[key]
         if (entry != null) {
             val proxy = ScalingProxyDrawable(entry, targetView, size)
-            entry.viewers.add(proxy)
+            entry.attachViewer(proxy)
             proxy.setBounds(0, 0, size, size)
             onReady(proxy)
             return
         }
-        
+
         // 2. Check if currently loading - add to shared pending queue
         val pending = sharedPendingCallbacks[key]
         if (pending != null) {
             pending.add(Pair(WeakReference(targetView), { loadedEntry: EmoteEntry ->
                 val proxy = ScalingProxyDrawable(loadedEntry, targetView, size)
-                loadedEntry.viewers.add(proxy)
+                loadedEntry.attachViewer(proxy)
                 proxy.setBounds(0, 0, size, size)
                 onReady(proxy)
             }))
             return
         }
-        
+
         // 3. Start new load
         sharedPendingCallbacks[key] = mutableListOf(Pair(WeakReference(targetView), { loadedEntry: EmoteEntry ->
             val proxy = ScalingProxyDrawable(loadedEntry, targetView, size)
-            loadedEntry.viewers.add(proxy)
+            loadedEntry.attachViewer(proxy)
             proxy.setBounds(0, 0, size, size)
             onReady(proxy)
         }))
@@ -300,7 +345,7 @@ object EmoteManager {
         val entry = emoteEntries[key]
         if (entry != null) {
             val proxy = ProxyDrawable(entry, targetView)
-            entry.viewers.add(proxy)
+            entry.attachViewer(proxy)
             proxy.setBounds(0, 0, size, size)
             onReady(proxy)
             return
@@ -336,7 +381,7 @@ object EmoteManager {
                 for ((viewRef, callback) in callbacks) {
                     val view = viewRef.get() ?: continue
                     val proxy = ProxyDrawable(newEntry, view)
-                    newEntry.viewers.add(proxy)
+                    newEntry.attachViewer(proxy)
                     proxy.setBounds(0, 0, size, size)
                     callback(proxy)
                 }
