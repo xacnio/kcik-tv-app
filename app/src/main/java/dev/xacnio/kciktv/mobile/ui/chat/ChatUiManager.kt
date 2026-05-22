@@ -133,13 +133,15 @@ class ChatUiManager(
             override fun onScrollStateChanged(recyclerView: androidx.recyclerview.widget.RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_DRAGGING) {
-                    if (isChatAutoScrollEnabled) {
-                        // Just started scrolling up - reset counter
-                        newMessageCount = 0
+                    if (recyclerView.canScrollVertically(1)) {
+                        if (isChatAutoScrollEnabled) {
+                            // Just started scrolling up - reset counter
+                            newMessageCount = 0
+                        }
+                        isChatAutoScrollEnabled = false
+                        chatAdapter.isAutoScrollEnabled = false
+                        updateJumpToBottomButton()
                     }
-                    isChatAutoScrollEnabled = false
-                    chatAdapter.isAutoScrollEnabled = false
-                    updateJumpToBottomButton()
                 }
             }
 
