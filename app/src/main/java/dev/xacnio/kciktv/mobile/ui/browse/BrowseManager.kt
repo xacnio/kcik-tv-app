@@ -358,7 +358,11 @@ class BrowseManager(private val activity: MobilePlayerActivity) {
                 
                 withContext(Dispatchers.Main) {
                     binding.categoryDetailsContainer.categoryDetailsShimmer.root.visibility = View.GONE
-                    binding.categoryDetailsContainer.categoryDetailsContent.visibility = View.VISIBLE
+                    if (binding.categoryDetailsContainer.categoryDetailsContent.visibility != View.VISIBLE) {
+                        binding.categoryDetailsContainer.categoryDetailsContent.alpha = 0f
+                        binding.categoryDetailsContainer.categoryDetailsContent.visibility = View.VISIBLE
+                        binding.categoryDetailsContainer.categoryDetailsContent.animate().alpha(1f).setDuration(400).start()
+                    }
                     binding.categoryDetailsContainer.categoryStreamsRecycler.visibility = View.VISIBLE
                     
                     if (!isLoadMore) {
@@ -716,9 +720,17 @@ class BrowseManager(private val activity: MobilePlayerActivity) {
             shimmerInclude.root.visibility = View.GONE
             // Restore recycler visibility based on current tab
             if (currentBrowseTab == 0) {
-                binding.browseScreenContainer.browseLiveChannelsRecycler.visibility = View.VISIBLE
+                if (binding.browseScreenContainer.browseLiveChannelsRecycler.visibility != View.VISIBLE) {
+                    binding.browseScreenContainer.browseLiveChannelsRecycler.alpha = 0f
+                    binding.browseScreenContainer.browseLiveChannelsRecycler.visibility = View.VISIBLE
+                    binding.browseScreenContainer.browseLiveChannelsRecycler.animate().alpha(1f).setDuration(400).start()
+                }
             } else if (currentBrowseTab == 1) {
-                binding.browseScreenContainer.browseCategoriesRecycler.visibility = View.VISIBLE
+                if (binding.browseScreenContainer.browseCategoriesRecycler.visibility != View.VISIBLE) {
+                    binding.browseScreenContainer.browseCategoriesRecycler.alpha = 0f
+                    binding.browseScreenContainer.browseCategoriesRecycler.visibility = View.VISIBLE
+                    binding.browseScreenContainer.browseCategoriesRecycler.animate().alpha(1f).setDuration(400).start()
+                }
             }
         }
     }
@@ -1077,10 +1089,12 @@ class BrowseManager(private val activity: MobilePlayerActivity) {
                 // Only reload if URL changed
                 if (holder.thumbnail.tag != thumbnailUrl) {
                     holder.thumbnail.tag = thumbnailUrl
+                    val factory = com.bumptech.glide.request.transition.DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build()
                     Glide.with(holder.itemView.context)
                         .load(thumbnailUrl)
                         .signature(ThumbnailCacheHelper.getCacheSignature())
                         .placeholder(ShimmerDrawable(isCircle = false))
+                        .transition(com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade(factory))
                         .error(Glide.with(holder.itemView.context).load(defaultThumb))
                         .into(holder.thumbnail)
                 }
@@ -1844,7 +1858,11 @@ class BrowseManager(private val activity: MobilePlayerActivity) {
                             container.categoryEmptyState.visibility = View.VISIBLE
                             container.emptyStateText.text = activity.getString(R.string.no_clips_found)
                         } else {
-                            container.categoryClipsRecycler.visibility = View.VISIBLE
+                            if (container.categoryClipsRecycler.visibility != View.VISIBLE) {
+                                container.categoryClipsRecycler.alpha = 0f
+                                container.categoryClipsRecycler.visibility = View.VISIBLE
+                                container.categoryClipsRecycler.animate().alpha(1f).setDuration(400).start()
+                            }
                             container.categoryEmptyState.visibility = View.GONE
                         }
                     }.onFailure {

@@ -155,7 +155,11 @@ class BrowseClipsManager(private val activity: MobilePlayerActivity) {
                         binding.browseScreenContainer.browseClipsRecycler.visibility = View.GONE
                     } else {
                         binding.browseScreenContainer.browseClipsEmptyState.visibility = View.GONE
-                        binding.browseScreenContainer.browseClipsRecycler.visibility = View.VISIBLE
+                        if (binding.browseScreenContainer.browseClipsRecycler.visibility != View.VISIBLE) {
+                            binding.browseScreenContainer.browseClipsRecycler.alpha = 0f
+                            binding.browseScreenContainer.browseClipsRecycler.visibility = View.VISIBLE
+                            binding.browseScreenContainer.browseClipsRecycler.animate().alpha(1f).setDuration(400).start()
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -290,10 +294,12 @@ class BrowseClipsManager(private val activity: MobilePlayerActivity) {
                 val thumbUrl = clip.thumbnailUrl
                 if (holder.thumbnail.tag != thumbUrl) {
                     holder.thumbnail.tag = thumbUrl
+                    val factory = com.bumptech.glide.request.transition.DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build()
                     Glide.with(holder.itemView.context)
                         .load(thumbUrl)
                         .signature(ThumbnailCacheHelper.getCacheSignature())
                         .placeholder(ShimmerDrawable(isCircle = false))
+                        .transition(com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade(factory))
                         .error(R.color.placeholder_grey)
                         .into(holder.thumbnail)
                 }

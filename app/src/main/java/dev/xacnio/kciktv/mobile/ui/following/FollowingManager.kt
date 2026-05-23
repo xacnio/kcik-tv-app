@@ -219,7 +219,11 @@ class FollowingManager(private val activity: MobilePlayerActivity) {
                             
                             // Live channels section
                             if (followingLiveChannelsList.isNotEmpty()) {
-                                container.followingLiveSection.visibility = View.VISIBLE
+                                if (container.followingLiveSection.visibility != View.VISIBLE) {
+                                    container.followingLiveSection.alpha = 0f
+                                    container.followingLiveSection.visibility = View.VISIBLE
+                                    container.followingLiveSection.animate().alpha(1f).setDuration(400).start()
+                                }
                                 setupFollowingLiveAdapter(container.followingLiveRecycler)
                                 followingLiveAdapter?.notifyDataSetChanged()
                             } else {
@@ -227,9 +231,12 @@ class FollowingManager(private val activity: MobilePlayerActivity) {
                             }
                             
                             // Offline channels section
-                            // Offline channels section
                             if (followingOfflineChannelsList.isNotEmpty()) {
-                                container.followingOfflineSection.visibility = View.VISIBLE
+                                if (container.followingOfflineSection.visibility != View.VISIBLE) {
+                                    container.followingOfflineSection.alpha = 0f
+                                    container.followingOfflineSection.visibility = View.VISIBLE
+                                    container.followingOfflineSection.animate().alpha(1f).setDuration(400).start()
+                                }
                                 setupFollowingOfflineAdapter(container.followingOfflineRecycler)
                                 
                                 // Force DiffUtil to detect changes
@@ -352,10 +359,12 @@ class FollowingManager(private val activity: MobilePlayerActivity) {
                     // Only reload if URL changed
                     if (holder.thumbnail.tag != thumbToLoad) {
                         holder.thumbnail.tag = thumbToLoad
+                        val factory = com.bumptech.glide.request.transition.DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build()
                         Glide.with(activity)
                             .load(thumbToLoad)
                             .signature(ThumbnailCacheHelper.getCacheSignature())
                             .placeholder(ShimmerDrawable(isCircle = false))
+                            .transition(com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade(factory))
                             .error(
                                 Glide.with(activity)
                                     .load(defaultThumb)
@@ -487,7 +496,11 @@ class FollowingManager(private val activity: MobilePlayerActivity) {
                     container.followingShimmerLayout.shimmerCategoriesSection.visibility = View.GONE
                     
                     if (categories != null && categories.isNotEmpty()) {
-                        container.followingCategoriesSection.visibility = View.VISIBLE
+                        if (container.followingCategoriesSection.visibility != View.VISIBLE) {
+                            container.followingCategoriesSection.alpha = 0f
+                            container.followingCategoriesSection.visibility = View.VISIBLE
+                            container.followingCategoriesSection.animate().alpha(1f).setDuration(400).start()
+                        }
                         setupFollowingCategoriesAdapter(container.followingCategoriesRecycler, categories)
                     } else {
                         container.followingCategoriesSection.visibility = View.GONE
