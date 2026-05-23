@@ -93,6 +93,7 @@ class ChannelVideoAdapter(
             if (!thumbUrl.isNullOrEmpty()) {
                 Glide.with(itemView.context)
                     .load(thumbUrl)
+                    .transition(com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade(250))
                     .transform(CenterCrop())
                     .error(defaultThumbnailBuilder)
                     .into(thumbnail)

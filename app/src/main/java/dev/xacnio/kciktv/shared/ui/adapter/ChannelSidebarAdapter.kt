@@ -135,6 +135,7 @@ class ChannelSidebarAdapter(
 
 
             glideRequest
+                .transition(com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade(250))
                 .transform(com.bumptech.glide.load.resource.bitmap.CenterCrop(), RoundedCorners(8))
                 .into(holder.thumbnailImage)
 

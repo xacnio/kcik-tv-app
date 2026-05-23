@@ -238,6 +238,15 @@ class PlayerGestureManager(private val activity: MobilePlayerActivity) {
                       }
                       // Portrait swipe-down is handled by DragToMiniPlayerManager via touch events
                   }
+
+                 // Swipe Up (portrait) → enter fullscreen
+                 if (kotlin.math.abs(deltaY) > kotlin.math.abs(deltaX) && deltaY < -150 && kotlin.math.abs(velocityY) > 100) {
+                     if (!effectiveLandscape && !activity.isFullscreen && !activity.fullscreenToggleManager.isTheatreMode) {
+                         activity.fullscreenToggleManager.enterFullscreen()
+                         return true
+                     }
+                 }
+
                  return false
             }
 

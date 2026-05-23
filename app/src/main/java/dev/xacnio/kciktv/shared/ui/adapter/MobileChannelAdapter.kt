@@ -203,13 +203,11 @@ class MobileChannelAdapter(
                     requestBuilder.fitCenter()
                     imageView.setBackgroundColor(Color.BLACK)
 
-                    // Skip the 50px low-res preview in battery saver — it's a second
-                    // network request for the same URL just for a quicker shimmer→image.
-                    if (!lowBattery) {
-                        requestBuilder.thumbnail(
-                            Glide.with(imageView.context).load(thumbnailUrl).override(50)
-                        )
-                    }
+                    // Use a CrossFadeFactory to ensure the crossfade works perfectly over the ShimmerDrawable
+                    // without causing the shimmer background to peek through transparent images.
+                    val factory = com.bumptech.glide.request.transition.DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build()
+                    requestBuilder.transition(com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade(factory))
+
                     requestBuilder.into(imageView)
                 } else {
                     defaultThumbnailBuilder.into(imageView)
