@@ -62,7 +62,7 @@ class FullscreenManager(private val activity: MobilePlayerActivity) {
         
         // Restore video ratio
         val params = activity.binding.videoContainer.layoutParams as androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
-        params.dimensionRatio = "16:9"
+        params.dimensionRatio = "H,16:9"
         params.height = 0
         activity.binding.videoContainer.layoutParams = params
 

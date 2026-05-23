@@ -643,7 +643,7 @@
             android:background="@drawable/gradient_bottom_dark"
             android:paddingBottom="0dp"
             android:paddingHorizontal="0dp"
-            android:paddingTop="8dp"
+            android:paddingTop="2dp"
             android:orientation="vertical"
             android:visibility="visible">
             
@@ -675,7 +675,7 @@
                         android:focusable="true"
                         android:elevation="4dp"
                         android:minWidth="48dp"
-                        android:minHeight="48dp">
+                        android:minHeight="36dp">
     
                         <View
                             android:id="@+id/liveDot"
@@ -760,7 +760,7 @@
                         android:scaleType="fitCenter"
                         android:src="@drawable/ic_theatre_mode"
                         app:tint="#FFFFFF" />
-    
+
                     <ImageButton
                         android:id="@+id/fullscreenButton"
                         android:layout_width="36dp"
@@ -779,7 +779,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="0dp"
-                android:paddingTop="12dp"
+                android:paddingTop="4dp"
                 android:paddingBottom="0dp"
                 android:paddingHorizontal="0dp"
                 android:thumb="@drawable/bg_seekbar_thumb"

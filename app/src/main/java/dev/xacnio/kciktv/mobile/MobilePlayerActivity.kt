@@ -432,31 +432,8 @@ class MobilePlayerActivity : FragmentActivity() {
      * NOTE: We don't use R.bool.is_tablet because it fails when window is portrait on Windows.
      */
     internal fun isTabletOrLargeWindow(): Boolean {
-        // Get real screen dimensions (not window)
-        val realMetrics = android.util.DisplayMetrics()
-        @Suppress("DEPRECATION")
-        windowManager.defaultDisplay.getRealMetrics(realMetrics)
-        
-        val widthPixels = realMetrics.widthPixels.toDouble()
-        val heightPixels = realMetrics.heightPixels.toDouble()
-        val xdpi = realMetrics.xdpi.toDouble()
-        val ydpi = realMetrics.ydpi.toDouble()
-        
-        // Avoid division by zero
-        if (xdpi <= 0 || ydpi <= 0) {
-            Log.d(TAG, "isTabletOrLargeWindow: Invalid DPI (xdpi=$xdpi, ydpi=$ydpi)")
-            return false
-        }
-        
-        val widthInches = widthPixels / xdpi
-        val heightInches = heightPixels / ydpi
-        val diagonalInches = kotlin.math.sqrt(widthInches * widthInches + heightInches * heightInches)
-        
-        val isTablet = diagonalInches >= 7.0
-        Log.d(TAG, "isTabletOrLargeWindow: ${widthPixels}x${heightPixels}px, ${xdpi}x${ydpi}dpi, diagonal=${String.format("%.2f", diagonalInches)}in, isTablet=$isTablet")
-        
-        // 7 inches or larger is typically a tablet
-        return isTablet
+        // Use strict sw720dp to distinguish real tablets from high-DPI phones
+        return resources.configuration.smallestScreenWidthDp >= 720
     }
 
     /**
@@ -761,14 +738,13 @@ class MobilePlayerActivity : FragmentActivity() {
         androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, false)
         window.navigationBarColor = Color.TRANSPARENT
 
-        // Use a crossfade rotation animation (smoother than the default fade-to-black/rotate)
+        // Use a physical spinning rotation animation (like YouTube)
         // when the activity rotates between portrait and landscape. Because configChanges
         // declares "orientation", the activity is not recreated on rotation, but the window
-        // server still plays its system-level rotation transition — this picks the prettier
-        // variant. Set via window attributes so it sticks across configuration changes.
+        // server still plays its system-level rotation transition.
         try {
             val lp = window.attributes
-            lp.rotationAnimation = WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE
+            lp.rotationAnimation = WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE
             window.attributes = lp
         } catch (_: Exception) { }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -1096,12 +1072,16 @@ class MobilePlayerActivity : FragmentActivity() {
         // MiniPlayer Controls
         binding.miniPlayerCloseButton.setOnClickListener {
             miniPlayerManager.closeMiniPlayer()
-            
+
             // If profile is visible, keep profile state - user is still on profile page
             // If profile is NOT visible (e.g. on home screen), reset everything
             if (!channelProfileManager.isChannelProfileVisible) {
                 returnToProfileSlug = null
             }
+
+            // Mini player is gone — if home is visible, resume hero video (was held back to avoid
+            // running two IVS decoders simultaneously while mini player was active)
+            if (isHomeScreenVisible) homeScreenManager.onHomeShown()
         }
 
         binding.miniPlayerMaximizeArea.setOnClickListener {
@@ -1307,65 +1287,60 @@ class MobilePlayerActivity : FragmentActivity() {
             }
             return
         }
+
+
+        // Use a post to run AFTER the layout pass so any view-dimension checks are accurate.
+        // NOTE: We use newConfig.orientation (not binding.root.width/height) for the
+        // landscape/portrait decision because view dimensions inside post() can still reflect
+        // the PRE-rotation layout pass on some devices, causing a false isActuallyLandscape=true
+        // which would erroneously call enterFullscreen() right after the user exited it.
+        val configIsLandscape = newConfig.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
         
-        // Use a post to ensure we get updated root dimensions after configuration change
         binding.root.post {
-            // Double-check flags inside post in case they changed during the queue wait
+            // Double-check flags in case they changed during the queue wait
             if (::pipStateManager.isInitialized && (pipStateManager.suppressAutoFullscreen || pipStateManager.exitedPipMode)) {
                 Log.d(TAG, "onConfigurationChanged POST: Suppressing auto-fullscreen after PiP exit")
                 pipStateManager.exitedPipMode = false
-                return@post
-            }
-            
-            val rootWidth = binding.root.width
-            val rootHeight = binding.root.height
-            val isActuallyLandscape = rootWidth > rootHeight
-            
-            Log.d(TAG, "onConfigurationChanged: isActuallyLandscape=$isActuallyLandscape, root=${rootWidth}x${rootHeight}, config=${newConfig.orientation}")
-            
-            if (isActuallyLandscape) {
-                // Only auto-switch for player-related modes if the player screen is visible
-                if (binding.playerScreenContainer.visibility == View.VISIBLE) {
-                    if (isTabletLike) {
-                        // Tablet: Auto split-screen
-                        if (::fullscreenToggleManager.isInitialized && !fullscreenToggleManager.isSideChatVisible && !fullscreenToggleManager.isTheatreMode) {
-                            fullscreenToggleManager.showSideChat(skipAnimation = true)
-                        }
-                    } else {
-                        // Phone: Auto full-screen
-                        if (::fullscreenToggleManager.isInitialized && !isFullscreen && !fullscreenToggleManager.isTheatreMode) {
-                            fullscreenToggleManager.enterFullscreen()
-                        }
-                    }
-                }
             } else {
-                // Portrait mode
-                // 1. Unlock tablet orientation to prevent "Stuck" rotation state (respects system lock)
-                setAllowedOrientation()
+                if (configIsLandscape) {
+                    // Only auto-switch for player-related modes if the player screen is visible
+                    if (binding.playerScreenContainer.visibility == View.VISIBLE) {
+                        if (isTabletLike) {
+                            // Tablet: Auto split-screen
+                            if (::fullscreenToggleManager.isInitialized && !fullscreenToggleManager.isSideChatVisible && !fullscreenToggleManager.isTheatreMode) {
+                                fullscreenToggleManager.showSideChat(skipAnimation = true)
+                            }
+                        } else {
+                            // Phone: Auto full-screen
+                            if (::fullscreenToggleManager.isInitialized && !isFullscreen && !fullscreenToggleManager.isTheatreMode) {
+                                fullscreenToggleManager.enterFullscreen()
+                            }
+                        }
+                    }
+                } else {
+                    // Portrait mode
+                    if (::fullscreenToggleManager.isInitialized) {
 
-                if (::fullscreenToggleManager.isInitialized) {
-                    // Always return to standard portrait layout when rotating back to portrait
-                    // Check boolean flags OR if container is physically visible (to catch de-syncs)
-                    val isSideChatPhysicallyVisible = binding.sideChatContainer.visibility == View.VISIBLE
-                    
-                    if (fullscreenToggleManager.isSideChatVisible || isSideChatPhysicallyVisible || isFullscreen || fullscreenToggleManager.isTheatreMode) {
-                        fullscreenToggleManager.exitFullscreen()
-                        
-                        // Double check cleanup if side chat was somehow stuck
-                        if (isSideChatPhysicallyVisible) {
-                            fullscreenToggleManager.cleanupSideChat()
+                        val isSideChatPhysicallyVisible = binding.sideChatContainer.visibility == View.VISIBLE
+                        if (fullscreenToggleManager.isSideChatVisible || isSideChatPhysicallyVisible || isFullscreen || fullscreenToggleManager.isTheatreMode) {
+                            fullscreenToggleManager.exitFullscreen()
+
+
+                            if (isSideChatPhysicallyVisible) {
+                                fullscreenToggleManager.cleanupSideChat()
+                            }
                         }
                     }
                 }
             }
-        }
-        
-        // Update layout managers at the end (outside of early return paths)
-        if (::followingManager.isInitialized) {
-            followingManager.updateLayout(newConfig)
-        }
-        if (::browseManager.isInitialized) {
-            browseManager.updateLayout(newConfig)
+            
+
+            if (::followingManager.isInitialized) {
+                followingManager.updateLayout(newConfig)
+            }
+            if (::browseManager.isInitialized) {
+                browseManager.updateLayout(newConfig)
+            }
         }
         if (::streamFeedManager.isInitialized) {
             streamFeedManager.updateLayout(newConfig)
@@ -1410,6 +1385,7 @@ class MobilePlayerActivity : FragmentActivity() {
     
     override fun onPause() {
         super.onPause()
+        homeScreenManager.onPause()
         // Pause feed videos when app goes to background
         if (::clipFeedManager.isInitialized) {
             clipFeedManager.onPause()
@@ -1949,16 +1925,20 @@ class MobilePlayerActivity : FragmentActivity() {
              fullscreenToggleManager.exitFullscreen(forceCleanReset = true)
              
              // STEP 2: Force portrait constraints - onConfigurationChanged handles landscape
-             val params = binding.videoContainer.layoutParams as ConstraintLayout.LayoutParams
-             params.dimensionRatio = "16:9"
-             params.width = 0 
-             params.height = 0
-             params.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
-             params.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
-             params.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
-             params.bottomToBottom = ConstraintLayout.LayoutParams.UNSET
-             params.endToStart = ConstraintLayout.LayoutParams.UNSET
-             binding.videoContainer.layoutParams = params
+             // ONLY do this if we are not already in side chat mode (which exitFullscreen might have just set up)
+             if (!fullscreenToggleManager.isSideChatVisible) {
+                 val params = binding.videoContainer.layoutParams as ConstraintLayout.LayoutParams
+                 params.dimensionRatio = "H,16:9"
+                 params.width = 0 
+                 params.height = 0
+                 params.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+                 params.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+                 params.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
+                 params.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+                 params.verticalBias = 0.0f
+                 params.endToStart = ConstraintLayout.LayoutParams.UNSET
+                 binding.videoContainer.layoutParams = params
+             }
              
              // STEP 3: Check REAL orientation after layout completes
              if (isTabletOrLargeWindow()) {
@@ -2606,6 +2586,7 @@ class MobilePlayerActivity : FragmentActivity() {
 
     override fun onResume() {
         super.onResume()
+        homeScreenManager.onResume()
 
         // Ensure UI state matches physical orientation (Fix for persistent split-screen bug)
         val isLandscape = resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
@@ -2619,7 +2600,9 @@ class MobilePlayerActivity : FragmentActivity() {
         //    after PIP exit, after which normal rotation handling resumes.
         val justExitedPipInFullscreen = ::pipStateManager.isInitialized &&
             pipStateManager.suppressAutoFullscreen && isFullscreen
-        if (!justExitedPipInFullscreen) {
+        
+
+        if (!justExitedPipInFullscreen && !isFullscreen) {
             setAllowedOrientation()
         }
 
@@ -2684,6 +2667,7 @@ class MobilePlayerActivity : FragmentActivity() {
 
     override fun onDestroy() {
         if (::chatUiManager.isInitialized) chatUiManager.stopFlushing()
+        homeScreenManager.onDestroy()
         super.onDestroy()
 
         // Unregister thermal listener so the system doesn't keep delivering callbacks
@@ -2974,10 +2958,6 @@ class MobilePlayerActivity : FragmentActivity() {
         }
         
         // Navigation from home headers
-        binding.homeScreenContainer.homeFeaturedHeader.setOnClickListener {
-            browseManager.showBrowseScreen()
-        }
-        
         binding.homeScreenContainer.homeCategoriesHeader.setOnClickListener {
             browseManager.showBrowseScreen(1) // 1 is Categories - open directly
         }
@@ -2996,6 +2976,7 @@ class MobilePlayerActivity : FragmentActivity() {
     internal fun openChannel(channel: ChannelItem) {
         Log.d(TAG, "openChannel() called: slug=${channel.slug}, isLive=${channel.isLive}")
         Log.d(TAG, "  before: returnToProfileSlug=$returnToProfileSlug, isChannelProfileVisible=${channelProfileManager.isChannelProfileVisible}")
+        homeScreenManager.onHomeHidden()
         
         // Only set returnToProfileSlug if coming from profile screen
         // For other screens (Home, Browse, etc.), we don't want to return to profile
@@ -3154,20 +3135,21 @@ class MobilePlayerActivity : FragmentActivity() {
             }
             else -> {
                 Log.d(TAG, "  returning to home screen (default)")
-                
+
                 // Hide other screens first to prevent multiple visible screens
                 binding.followingScreenContainer.root.visibility = View.GONE
                 binding.browseScreenContainer.root.visibility = View.GONE
                 binding.searchContainer.visibility = View.GONE
                 binding.channelProfileContainer.root.visibility = View.GONE
-                
+
                 // Show home screen
                 binding.mobileHeader.visibility = View.VISIBLE
                 binding.homeScreenContainer.root.visibility = View.VISIBLE
                 isHomeScreenVisible = true
                 binding.playerScreenContainer.bringToFront()
-                
+
                 setCurrentScreen(AppScreen.HOME)
+                homeScreenManager.onHomeShown()
             }
         }
     }
@@ -3213,9 +3195,11 @@ class MobilePlayerActivity : FragmentActivity() {
         // Only load data if not already loaded (pull-to-refresh still works)
         if (!homeDataLoaded) {
             loadHomeScreenData()
+        } else {
+            homeScreenManager.onHomeShown()
         }
     }
-    
+
     private fun Int.dpToPx(): Int {
         return (this * resources.displayMetrics.density).toInt()
     }
@@ -3256,14 +3240,17 @@ class MobilePlayerActivity : FragmentActivity() {
                 true
             }
             R.id.nav_browse -> {
+                if (isHomeScreenVisible) homeScreenManager.onHomeHidden()
                 browseManager.showBrowseScreen()
                 true
             }
             R.id.nav_following -> {
+                if (isHomeScreenVisible) homeScreenManager.onHomeHidden()
                 followingManager.showFollowingScreen()
                 true
             }
             R.id.nav_search -> {
+                if (isHomeScreenVisible) homeScreenManager.onHomeHidden()
                 searchUiManager.showSearchScreen()
                 true
             }

@@ -42,7 +42,7 @@ class FullscreenToggleManager(private val activity: MobilePlayerActivity) {
         private set
 
     var hasAutoEnteredTheatreMode = false
-        
+
     // Saved state for PiP transition
     private var savedVideoParams: ConstraintLayout.LayoutParams? = null
     private var savedResizeMode: com.amazonaws.ivs.player.ResizeMode? = null
@@ -1044,11 +1044,18 @@ class FullscreenToggleManager(private val activity: MobilePlayerActivity) {
         isTheatreMode = false
 
         // Respect system rotation setting when exiting theatre mode
-        if (activity.isRotationAllowed()) {
-            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
-        } else {
-            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        }
+        // Always force portrait to guarantee the rotation fires even if the device is held
+        // in landscape (SENSOR would leave the window in landscape, breaking the layout).
+        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
+        // After layout settles, restore SENSOR so the user can freely rotate again.
+        binding.root.postDelayed({
+            if (activity.isRotationAllowed()) {
+                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
+            } else {
+                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            }
+        }, 1000)
         // activity.window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
 
         // --- Restore Video ---
@@ -1346,9 +1353,10 @@ class FullscreenToggleManager(private val activity: MobilePlayerActivity) {
         val videoParams = binding.videoContainer.layoutParams as ConstraintLayout.LayoutParams
         videoParams.width = 0
         videoParams.height = 0
-        videoParams.dimensionRatio = "16:9"
+        videoParams.dimensionRatio = "H,16:9"
         videoParams.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
-        videoParams.bottomToBottom = ConstraintLayout.LayoutParams.UNSET
+        videoParams.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+        videoParams.verticalBias = 0.0f
         videoParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
         videoParams.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
         videoParams.topMargin = 0
@@ -1516,6 +1524,7 @@ class FullscreenToggleManager(private val activity: MobilePlayerActivity) {
         }
     }
 
+
     /**
      * Enters fullscreen (landscape) mode.
      */
@@ -1525,13 +1534,15 @@ class FullscreenToggleManager(private val activity: MobilePlayerActivity) {
             exitTheatreMode()
         }
 
-        // Animate the in-app layout transition (chat fade out, video container expand,
-        // info panel collapse). configChanges declares orientation so Android does not
-        // recreate the activity on rotation, which means no default transition fires —
-        // we have to schedule the animation manually.
-        runFullscreenLayoutTransition(entering = true)
 
         val isTablet = activity.isTabletOrLargeWindow()
+
+
+        val isCurrentlyLandscape = activity.resources.configuration.orientation ==
+                android.content.res.Configuration.ORIENTATION_LANDSCAPE
+        if (isTablet || isCurrentlyLandscape) {
+            runFullscreenLayoutTransition(entering = true)
+        }
 
         // For phones: allow 180° landscape flip if system auto-rotate is ON
         // For tablets: allow full sensor rotation
@@ -1597,94 +1608,86 @@ class FullscreenToggleManager(private val activity: MobilePlayerActivity) {
      *                         Used during playChannel to ensure clean state before re-applying layout.
      */
     fun exitFullscreen(forceCleanReset: Boolean = false) {
-        // Check if we're in theatre mode and exit that instead
         if (isTheatreMode) {
             exitTheatreMode()
             return
         }
 
-        // Smooth animation for the reverse transition (chat slide back, video container
-        // shrinks to 16:9, info panel restored). Skipped for forceCleanReset because that
-        // path is used during channel-switch where instant layout reset is required.
-        if (!forceCleanReset) {
-            runFullscreenLayoutTransition(entering = false)
-        }
+        val isTablet = activity.resources.configuration.smallestScreenWidthDp >= 720
+        
+        val isVisuallyLandscape = binding.root.width > binding.root.height
+        val needsPhysicalRotation = !isTablet && isVisuallyLandscape && !forceCleanReset
 
-        val isTablet = activity.isTabletOrLargeWindow()
-        val isLandscape = activity.resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
-
-        // Only apply tablet landscape special handling if NOT doing a force reset
-        if (isTablet && isLandscape && !forceCleanReset) {
-            // On tablets in landscape, exiting fullscreen should just show system bars
-            // but keep the split-screen (side chat) layout.
+        if (needsPhysicalRotation) {
             WindowInsetsControllerCompat(activity.window, activity.window.decorView).show(WindowInsetsCompat.Type.systemBars())
             
-            // Request insets reapplication for playerScreenContainer padding
-            ViewCompat.requestApplyInsets(binding.playerScreenContainer)
-            
-            // CRITICAL: Unlock orientation so user can rotate back to portrait manually (respects system lock)
+            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
+            if (activity.isRotationAllowed()) {
+                binding.root.postDelayed({
+                    activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
+                }, 2000)
+            }
+            return // EARLY RETURN: Let onConfigurationChanged trigger the second pass for layout!
+        } else if (isTablet) {
             activity.setAllowedOrientation()
-            
-            fullscreenManager.isFullscreen = false
-            updateFullscreenButtonState()
-            
-            // Ensure side chat is shown (it should be already, but safety first)
-            if (!isSideChatVisible && !isTheatreMode) {
+            if (isVisuallyLandscape && !isSideChatVisible && !isTheatreMode) {
                 showSideChat(skipAnimation = true)
             }
-            return
+            fullscreenManager.isFullscreen = false
+            updateFullscreenButtonState()
+            return // EARLY RETURN FOR TABLETS!
         }
 
-        // For phones, stay in portrait; for tablets, allow sensor rotation (respects system lock)
-        if (isTablet) {
-            activity.setAllowedOrientation()
-        } else {
-            // For phones, respect system rotation setting
-            if (activity.isRotationAllowed()) {
-                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
-            } else {
-                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-            }
-        }
-        // FULLSCREEN flag cleared via systemBars() show below
-        
-        // Show system bars
-        WindowInsetsControllerCompat(activity.window, activity.window.decorView).show(WindowInsetsCompat.Type.systemBars())
+        val transitionTargets = listOf(
+            binding.root,
+            binding.playerScreenContainer,
+            binding.actionBar,
+            binding.chatContainer,
+            binding.infoPanel
+        )
+        val savedTransitions = transitionTargets.map { it.layoutTransition }
+        transitionTargets.forEach { it.layoutTransition = null }
 
-        // Request insets reapplication for playerScreenContainer padding
-        ViewCompat.requestApplyInsets(binding.playerScreenContainer)
-
-        // Force cleanup side chat without animation if visible
+        applyPortraitLayout()
         cleanupSideChat()
-
-        // Show chat and other UI
+        WindowInsetsControllerCompat(activity.window, activity.window.decorView).show(WindowInsetsCompat.Type.systemBars())
+        ViewCompat.requestApplyInsets(binding.playerScreenContainer)
         binding.chatContainer.visibility = View.VISIBLE
         binding.actionBar.visibility = if (vodManager.currentPlaybackMode != dev.xacnio.kciktv.mobile.ui.player.VodManager.PlaybackMode.LIVE) View.GONE else View.VISIBLE
         binding.infoPanel.visibility = View.VISIBLE
         binding.theatreModeButton.visibility = View.VISIBLE
+        activity.channelUiManager.updateChatPaddingForPanels(false)
+        fullscreenManager.isFullscreen = false
+        updateFullscreenButtonState()
 
-        // Reset player layout params for Portrait (16:9, Top of screen)
+        binding.root.post {
+            transitionTargets.forEachIndexed { i, v -> v.layoutTransition = savedTransitions[i] }
+        }
+    }
+
+    fun applyPortraitLayout() {
         val params = binding.videoContainer.layoutParams as ConstraintLayout.LayoutParams
-        params.dimensionRatio = "16:9"
-        params.width = 0 // MATCH_CONSTRAINT
-        params.height = 0 // MATCH_CONSTRAINT
-        
-        // Restore Standard Constraints
+        params.dimensionRatio = "H,16:9"
+        params.width = 0
+        params.height = 0
         params.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
         params.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
         params.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
-        
-        // Clear Fullscreen Constraints
-        params.bottomToBottom = ConstraintLayout.LayoutParams.UNSET
+        params.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+        params.verticalBias = 0.0f
         params.endToStart = ConstraintLayout.LayoutParams.UNSET
-        
         binding.videoContainer.layoutParams = params
+    }
 
-        fullscreenManager.isFullscreen = false
-        updateFullscreenButtonState()
-        
-        // Update chat padding to account for restored panels
-        activity.channelUiManager.updateChatPaddingForPanels(false)
+    fun restoreRotationAnimation() {
+        try {
+            val attrs = activity.window.attributes
+            attrs.rotationAnimation = WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE
+            activity.window.attributes = attrs
+        } catch (e: Exception) {
+            Log.w("FullscreenToggleManager", "restoreRotationAnimation: ${e.message}")
+        }
     }
 
     /**
@@ -1828,13 +1831,15 @@ class FullscreenToggleManager(private val activity: MobilePlayerActivity) {
         
         if (isTablet) {
             // For tablets, we maintain 16:9 ratio so info bar is visible below on the left
-            videoParams.dimensionRatio = "16:9"
+            videoParams.dimensionRatio = "H,16:9"
             videoParams.height = 0 // MATCH_CONSTRAINT
-            videoParams.bottomToBottom = ConstraintLayout.LayoutParams.UNSET
+            videoParams.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+            videoParams.verticalBias = 0.0f
         } else {
             videoParams.dimensionRatio = null
             videoParams.height = 0 // MATCH_CONSTRAINT (Fill height)
             videoParams.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+            videoParams.verticalBias = 0.5f
         }
         
         videoParams.width = rootWidth // Start full width
@@ -1848,7 +1853,11 @@ class FullscreenToggleManager(private val activity: MobilePlayerActivity) {
         if (skipAnimation) {
             binding.sideChatContainer.translationX = 0f
             // Use constraints for skipped animation
-            videoParams.width = 0 // MATCH_CONSTRAINT
+            if (isTablet) {
+                videoParams.width = rootWidth - chatWidth
+            } else {
+                videoParams.width = 0 // MATCH_CONSTRAINT
+            }
             videoParams.endToStart = R.id.sideChatContainer
             videoParams.endToEnd = ConstraintLayout.LayoutParams.UNSET
             binding.videoContainer.layoutParams = videoParams
@@ -1871,7 +1880,7 @@ class FullscreenToggleManager(private val activity: MobilePlayerActivity) {
             if (vParams.width != newWidth) {
                 vParams.width = newWidth
                 if (isTablet) {
-                    vParams.dimensionRatio = "16:9"
+                    vParams.dimensionRatio = "H,16:9"
                     vParams.height = 0
                 } else {
                     vParams.dimensionRatio = null
@@ -1890,7 +1899,11 @@ class FullscreenToggleManager(private val activity: MobilePlayerActivity) {
             override fun onAnimationEnd(animation: android.animation.Animator) {
                 // Finalize constraints to ensure child views (InfoPanel) resize correctly
                 val vParams = binding.videoContainer.layoutParams as ConstraintLayout.LayoutParams
-                vParams.width = 0 // MATCH_CONSTRAINT
+                if (isTablet) {
+                    vParams.width = rootWidth - chatWidth
+                } else {
+                    vParams.width = 0 // MATCH_CONSTRAINT
+                }
                 vParams.endToStart = R.id.sideChatContainer
                 vParams.endToEnd = ConstraintLayout.LayoutParams.UNSET
                 
@@ -1946,7 +1959,7 @@ class FullscreenToggleManager(private val activity: MobilePlayerActivity) {
             if (params.width != newWidth) {
                 params.width = newWidth
                 if (isTablet) {
-                    params.dimensionRatio = "16:9"
+                    params.dimensionRatio = "H,16:9"
                     params.height = 0
                 } else {
                     params.dimensionRatio = null
@@ -1979,7 +1992,9 @@ class FullscreenToggleManager(private val activity: MobilePlayerActivity) {
                 } else {
                     // Portrait -> 16:9 Video at top
                     params.height = 0
-                    params.dimensionRatio = "16:9"
+                    params.dimensionRatio = "H,16:9"
+                    params.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+                    params.verticalBias = 0.0f
                 }
                 
                 params.endToStart = ConstraintLayout.LayoutParams.UNSET
