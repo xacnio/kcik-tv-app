@@ -36,20 +36,27 @@ import dev.xacnio.kciktv.shared.util.ThumbnailCacheHelper
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.lifecycle.lifecycleScope
 import dev.xacnio.kciktv.shared.data.util.PreloadCache
+import dev.xacnio.kciktv.mobile.ui.home.featured.FeaturedHeroController
 
 /**
  * Manages Home Screen data loading, adapters, and dynamic sections.
  */
 class HomeScreenManager(private val activity: MobilePlayerActivity) {
-    
+
     private val binding get() = activity.binding
     private val prefs get() = activity.prefs
     private val repository get() = activity.repository
     private val TAG = "HomeScreenManager"
+
+    private var featuredHero: FeaturedHeroController? = null
+    private var isHomeVisible = false
+    private var isHeroScrollVisible = true
+    private var scrollListenerAttached = false
 
     fun loadHomeScreenData() {
         val isSwipeRefreshing = binding.homeScreenContainer.homeSwipeRefresh.isRefreshing
@@ -138,14 +145,18 @@ class HomeScreenManager(private val activity: MobilePlayerActivity) {
                 val channels = featuredResult.getOrNull()?.channels ?: emptyList()
                 val blocked = prefs.blockedCategories
                 val filteredFeatured = channels.filter { !blocked.contains(it.categoryName) }.take(12)
-                
+                val topFeatured = filteredFeatured.take(6)
+
                 withContext(Dispatchers.Main) {
-                    if (filteredFeatured.isNotEmpty()) {
-                        setupHomeChannelAdapter(binding.homeScreenContainer.homeLiveChannelsRecycler, filteredFeatured)
+                    if (topFeatured.isNotEmpty()) {
+                        setupFeaturedHero(topFeatured)
+                        binding.homeScreenContainer.homeFeaturedHero.root.visibility = View.VISIBLE
+                    } else {
+                        binding.homeScreenContainer.homeFeaturedHero.root.visibility = View.GONE
                     }
                 }
 
-                // Process following - only show LIVE channels on home screen
+
                 followingTask?.await()?.let { followingChannels ->
                     val liveFollowingChannels = followingChannels.filter { it.isLive && !blocked.contains(it.categoryName) }
                     withContext(Dispatchers.Main) {
@@ -154,6 +165,27 @@ class HomeScreenManager(private val activity: MobilePlayerActivity) {
                             setupHomeChannelAdapter(binding.homeScreenContainer.homeFollowingRecycler, liveFollowingChannels)
                         } else {
                             binding.homeScreenContainer.homeFollowingSection.visibility = View.GONE
+                        }
+                    }
+                }
+
+
+                if (topFeatured.isNotEmpty()) {
+                    val enriched = topFeatured.map { ch ->
+                        async(Dispatchers.IO) {
+                            val detail = try { repository.getChannelDetails(ch.slug).getOrNull() } catch (_: Exception) { null }
+                            if (detail != null) ch.copy(playbackUrl = detail.playbackUrl, chatroomId = detail.chatroom?.id)
+                            else ch
+                        }
+                    }.awaitAll()
+                    withContext(Dispatchers.Main) {
+
+                        if (isHomeVisible) {
+                            featuredHero?.updateChannels(enriched)
+                            featuredHero?.retriggerCurrentPage(forceChat = true)
+                        } else {
+
+                            featuredHero?.updateChannels(enriched)
                         }
                     }
                 }
@@ -195,6 +227,65 @@ class HomeScreenManager(private val activity: MobilePlayerActivity) {
                 }
             }
         }
+    }
+
+    private fun setupFeaturedHero(channels: List<ChannelItem>) {
+        val heroRoot = binding.homeScreenContainer.homeFeaturedHero.root
+        isHomeVisible = true
+        if (featuredHero == null) {
+            featuredHero = FeaturedHeroController(activity)
+            featuredHero!!.bind(heroRoot, channels)
+        } else {
+            featuredHero!!.updateChannels(channels)
+        }
+        attachHeroScrollListener(heroRoot)
+    }
+
+    private fun attachHeroScrollListener(heroRoot: android.view.View) {
+        if (scrollListenerAttached) return
+        scrollListenerAttached = true
+        val scrollView = binding.homeScreenContainer.homeScrollView
+        scrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
+
+            val heroVisible = scrollY < heroRoot.height
+            if (heroVisible) onHeroScrolledBack() else onHeroScrolledOff()
+        }
+    }
+
+    fun onHomeHidden() {
+        isHomeVisible = false
+        featuredHero?.onPause()
+    }
+
+    fun onHomeShown() {
+        isHomeVisible = true
+        if (isHeroScrollVisible) featuredHero?.onResume()
+    }
+
+    fun onPause() {
+        featuredHero?.onPause()
+    }
+
+    fun onResume() {
+        if (isHomeVisible && isHeroScrollVisible) featuredHero?.onResume()
+    }
+
+    fun onHeroScrolledOff() {
+        if (!isHeroScrollVisible) return
+        isHeroScrollVisible = false
+        featuredHero?.onPause()
+    }
+
+    fun onHeroScrolledBack() {
+        if (isHeroScrollVisible) return
+        isHeroScrollVisible = true
+        if (isHomeVisible) featuredHero?.onScrollResume()
+    }
+
+    fun onDestroy() {
+        featuredHero?.onDestroy()
+        featuredHero = null
+        scrollListenerAttached = false
     }
 
     private fun setupHomeChannelAdapter(recyclerView: RecyclerView?, channels: List<ChannelItem>) {

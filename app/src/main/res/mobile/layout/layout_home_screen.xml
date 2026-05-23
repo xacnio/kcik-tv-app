@@ -35,16 +35,27 @@
 
 
 
-            <!-- Live Channels Section -->
+            <!-- Featured Hero Carousel -->
+            <include
+                android:id="@+id/homeFeaturedHero"
+                layout="@layout/layout_featured_hero"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" />
+
+            <!-- Following Channels Section -->
             <LinearLayout
+                android:id="@+id/homeFollowingSection"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="8dp">
+                android:layout_marginTop="24dp"
+                android:visibility="gone"
+                tools:visibility="visible">
 
-                <!-- Section Header -->
+                <!-- Section Header (Clickable) -->
                 <LinearLayout
-                    android:id="@+id/homeFeaturedHeader"
+                    android:id="@+id/homeFollowingHeader"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
@@ -59,7 +70,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="@string/home_featured_title"
+                        android:text="@string/home_following_title"
                         android:textColor="#FFFFFF"
                         android:textSize="18sp"
                         android:textStyle="bold" />
@@ -71,16 +82,15 @@
                         app:tint="#808080" />
                 </LinearLayout>
 
-                <!-- Horizontal Scroll Live Channels -->
+                <!-- Horizontal Scroll Following Channels -->
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/homeLiveChannelsRecycler"
+                    android:id="@+id/homeFollowingRecycler"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:clipToPadding="false"
                     android:orientation="horizontal"
                     android:paddingHorizontal="16dp"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    tools:listitem="@layout/item_home_channel_card" />
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
             </LinearLayout>
 
             <!-- Trending Channels Section -->
@@ -132,56 +142,6 @@
                     android:paddingHorizontal="16dp"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     tools:listitem="@layout/item_home_category" />
-            </LinearLayout>
-
-            <!-- Following Channels Section -->
-            <LinearLayout
-                android:id="@+id/homeFollowingSection"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="24dp"
-                android:visibility="gone"
-                tools:visibility="visible">
-
-                <!-- Section Header (Clickable) -->
-                <LinearLayout
-                    android:id="@+id/homeFollowingHeader"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="16dp"
-                    android:paddingVertical="8dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/home_following_title"
-                        android:textColor="#FFFFFF"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_chevron_right"
-                        app:tint="#808080" />
-                </LinearLayout>
-
-                <!-- Horizontal Scroll Following Channels -->
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/homeFollowingRecycler"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:clipToPadding="false"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="16dp"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
             </LinearLayout>
 
             <!-- Popular Clips Section -->

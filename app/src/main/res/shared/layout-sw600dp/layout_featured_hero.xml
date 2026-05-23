@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:baselineAligned="false">
+
+    <!-- Left side: Pager (weight 1) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1">
+
+        <!-- 16:9 ViewPager2 -->
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/heroPager"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="H,16:9"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Prev arrow (hidden on phone, shown on tablet) -->
+        <ImageButton
+            android:id="@+id/heroPrevBtn"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_pill_dark"
+            android:src="@drawable/ic_chevron_left"
+            android:padding="8dp"
+            android:visibility="gone"
+            app:tint="#FFFFFF"
+            app:layout_constraintTop_toTopOf="@id/heroPager"
+            app:layout_constraintBottom_toBottomOf="@id/heroPager"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="12dp" />
+
+        <!-- Next arrow (hidden on phone, shown on tablet) -->
+        <ImageButton
+            android:id="@+id/heroNextBtn"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_pill_dark"
+            android:src="@drawable/ic_chevron_right"
+            android:padding="8dp"
+            android:visibility="gone"
+            app:tint="#FFFFFF"
+            app:layout_constraintTop_toTopOf="@id/heroPager"
+            app:layout_constraintBottom_toBottomOf="@id/heroPager"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="12dp" />
+
+        <!-- Dot indicator row -->
+        <LinearLayout
+            android:id="@+id/heroIndicators"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="@id/heroPager"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Right side: Chat Container (tablet variant overrides bottom strip with side panel) -->
+    <FrameLayout
+        android:id="@+id/heroChatContainer"
+        android:layout_width="320dp"
+        android:layout_height="match_parent"
+        android:background="#0D0D0D"
+        android:visibility="gone" />
+
+</LinearLayout>

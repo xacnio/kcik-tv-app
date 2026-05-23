@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <dev.xacnio.kciktv.shared.ui.widget.ShimmerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -15,12 +16,52 @@
             android:orientation="vertical"
             android:paddingBottom="100dp">
 
-            <!-- Section 1: Live Channels -->
+            <!-- Section 1: Featured Hero skeleton (16:9 placeholder + chat strip) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginTop="8dp">
+
+                <!-- 16:9 big card placeholder -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:background="#1A1A1A"
+                        app:layout_constraintDimensionRatio="16:9"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <!-- Mini chat strip placeholder -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="64dp"
+                    android:orientation="vertical"
+                    android:background="#0D0D0D"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="10dp"
+                    android:gravity="center_vertical">
+
+                    <View android:layout_width="220dp" android:layout_height="10dp" android:background="#1A1A1A" android:layout_marginBottom="8dp" />
+                    <View android:layout_width="160dp" android:layout_height="10dp" android:background="#1A1A1A" />
+
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Section 2: Following Live Channels -->
+            <LinearLayout
+                android:id="@+id/shimmerFollowingSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="24dp">
 
                 <!-- Section Header -->
                 <LinearLayout
@@ -31,9 +72,9 @@
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="8dp">
 
-                    <View 
-                        android:layout_width="120dp" 
-                        android:layout_height="18dp" 
+                    <View
+                        android:layout_width="180dp"
+                        android:layout_height="18dp"
                         android:background="#1A1A1A" />
                 </LinearLayout>
 
@@ -59,7 +100,7 @@
                 </HorizontalScrollView>
             </LinearLayout>
 
-            <!-- Section 2: Trending Channels -->
+            <!-- Section 3: Trending Channels -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -75,9 +116,9 @@
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="8dp">
 
-                    <View 
-                        android:layout_width="200dp" 
-                        android:layout_height="18dp" 
+                    <View
+                        android:layout_width="200dp"
+                        android:layout_height="18dp"
                         android:background="#1A1A1A" />
                 </LinearLayout>
 
@@ -106,51 +147,6 @@
                         <include layout="@layout/item_shimmer_mobile_category" />
                         <include layout="@layout/item_shimmer_mobile_category" />
                         <include layout="@layout/item_shimmer_mobile_category" />
-                    </LinearLayout>
-                </HorizontalScrollView>
-            </LinearLayout>
-            
-            <!-- Section 3: Following Live Channels (Restored with ID) -->
-            <LinearLayout
-                android:id="@+id/shimmerFollowingSection"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="24dp">
-
-                <!-- Section Header -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="16dp"
-                    android:paddingVertical="8dp">
-
-                    <View 
-                        android:layout_width="180dp" 
-                        android:layout_height="18dp" 
-                        android:background="#1A1A1A" />
-                </LinearLayout>
-
-                <!-- Horizontal Channel Cards -->
-                <HorizontalScrollView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:scrollbars="none"
-                    android:clipToPadding="false"
-                    android:paddingHorizontal="16dp">
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <include layout="@layout/item_shimmer_mobile_channel" />
-                        <include layout="@layout/item_shimmer_mobile_channel" />
-                        <include layout="@layout/item_shimmer_mobile_channel" />
-                        <include layout="@layout/item_shimmer_mobile_channel" />
-                        <include layout="@layout/item_shimmer_mobile_channel" />
                     </LinearLayout>
                 </HorizontalScrollView>
             </LinearLayout>
