@@ -768,6 +768,9 @@
     <string name="home_top_categories_title">أفضل الفئات</string>
     <string name="home_following_title">قنواتك المباشرة</string>
     <string name="home_popular_clips_title">مقاطع فيديو شائعة</string>
+    <string name="featured_watch_now_cta">شاهد الآن</string>
+    <string name="featured_no_live">لا توجد بثوث مباشرة الآن</string>
+    <string name="chat_title">الدردشة المباشرة</string>
 
     <!-- PIP and Notifications -->
     <string name="pip_action_return_to_live">العودة للمباشر</string>

@@ -768,6 +768,9 @@
     <string name="home_top_categories_title">En İyi Canlı Kanal Kategorileri</string>
     <string name="home_following_title">Takip Ettiğin Canlı Kanallar</string>
     <string name="home_popular_clips_title">Popüler Klipler</string>
+    <string name="featured_watch_now_cta">Şimdi İzle</string>
+    <string name="featured_no_live">Şu an canlı yayın yok</string>
+    <string name="chat_title">Canlı Sohbet</string>
 
     <!-- PIP and Notifications -->
     <string name="pip_action_return_to_live">Canlıya Dön</string>

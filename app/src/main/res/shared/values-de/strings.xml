@@ -768,6 +768,9 @@
     <string name="home_top_categories_title">Top-Kategorien</string>
     <string name="home_following_title">Deine Live-Kanäle</string>
     <string name="home_popular_clips_title">Beliebte Clips</string>
+    <string name="featured_watch_now_cta">Jetzt ansehen</string>
+    <string name="featured_no_live">Derzeit keine Live-Streams</string>
+    <string name="chat_title">Live-Chat</string>
 
     <!-- PIP and Notifications -->
     <string name="pip_action_return_to_live">Zurück zu Live</string>

@@ -768,6 +768,9 @@
     <string name="home_top_categories_title">Meilleures Catégories</string>
     <string name="home_following_title">Vos Chaînes en Direct</string>
     <string name="home_popular_clips_title">Clips populaires</string>
+    <string name="featured_watch_now_cta">Regarder maintenant</string>
+    <string name="featured_no_live">Aucun stream en direct pour le moment</string>
+    <string name="chat_title">Chat en direct</string>
 
     <!-- PIP and Notifications -->
     <string name="pip_action_return_to_live">Retour au direct</string>

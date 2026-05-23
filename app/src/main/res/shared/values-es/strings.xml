@@ -768,6 +768,9 @@
     <string name="home_top_categories_title">Mejores Categorías en Vivo</string>
     <string name="home_following_title">Canales que Sigues en Vivo</string>
     <string name="home_popular_clips_title">Clips populares</string>
+    <string name="featured_watch_now_cta">Ver ahora</string>
+    <string name="featured_no_live">No hay transmisiones en vivo ahora</string>
+    <string name="chat_title">Chat en vivo</string>
 
     <!-- PIP and Notifications -->
     <string name="pip_action_return_to_live">Volver a en vivo</string>
