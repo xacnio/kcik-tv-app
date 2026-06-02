@@ -105,7 +105,7 @@ class ChatConnectionManager(private val activity: MobilePlayerActivity) {
                                  )
                                  if (authRes.isSuccessful && authRes.body() != null) {
                                      val auth = authRes.body()!!.auth
-                                     chatWebSocket?.subscribeToPrivateChatroom(chatroomId, auth)
+                                     chatWebSocket?.subscribeToPrivateChatroom(socketId, chatroomId, auth)
                                  }
                                  
                                  val userId = prefs.userId
@@ -118,7 +118,7 @@ class ChatConnectionManager(private val activity: MobilePlayerActivity) {
                                      )
                                      if (pointsAuthRes.isSuccessful && pointsAuthRes.body() != null) {
                                          val auth = pointsAuthRes.body()!!.auth
-                                         chatWebSocket?.subscribeToChannelPoints(userId, auth)
+                                         chatWebSocket?.subscribeToChannelPoints(socketId, userId, auth)
                                      }
                                  }
                              } catch (e: Exception) {

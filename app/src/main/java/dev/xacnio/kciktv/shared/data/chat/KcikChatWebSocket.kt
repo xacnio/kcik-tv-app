@@ -23,10 +23,13 @@ import dev.xacnio.kciktv.shared.data.model.PusherEvent
 import dev.xacnio.kciktv.shared.util.TimeUtils
 import okhttp3.*
 import java.util.concurrent.TimeUnit
-import dev.xacnio.kciktv.shared.data.chat.KcikChatWebSocket
 
 /**
- * Kick Chat WebSocket client using Pusher protocol
+ * Kick Chat WebSocket client using the Pusher protocol.
+ *
+ * Connects to all three Pusher clusters and mirrors every subscription onto each, since a
+ * channel may live on any of them. Duplicate frames are filtered by [seenPayloads]. Reports
+ * "connected" while at least one cluster is up.
  */
 class KcikChatWebSocket(
     private val context: Context,
@@ -39,16 +42,25 @@ class KcikChatWebSocket(
 ) {
     companion object {
         private const val TAG = "KcikChatWebSocket"
-        private const val PUSHER_APP_KEY = "32cbd69e4b950bf97679"
-        private const val PUSHER_CLUSTER = "us2"
-        private const val PUSHER_VERSION = "8.4.0"
-        
-        private fun buildWebSocketUrl(): String {
-            return "wss://ws-$PUSHER_CLUSTER.pusher.com/app/$PUSHER_APP_KEY" +
-                   "?protocol=7&client=js&version=$PUSHER_VERSION&flash=false"
+
+        private data class ClusterConfig(val base: String, val version: String)
+
+        private val CLUSTERS = listOf(
+            ClusterConfig("wss://ws-us3.pusher.com/app/dd11c46dae0376080879", "8.5.0"),
+            ClusterConfig("wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679", "8.4.0-rc2"),
+            ClusterConfig("wss://ws-mt1.pusher.com/app/73aa60a071d0943a6b3e", "8.5.0")
+        )
+
+        private fun buildWebSocketUrl(cfg: ClusterConfig): String {
+            return "${cfg.base}?protocol=7&client=js&version=${cfg.version}&flash=false"
         }
+
+        private const val MAX_RECONNECT_ATTEMPTS = 10
+        private const val BASE_RECONNECT_DELAY_MS = 1000L
+        private const val MAX_RECONNECT_DELAY_MS = 8000L
+        private const val DEDUP_MAX_ENTRIES = 400
     }
-    
+
     private val gson = Gson()
     // Reuse the app-wide OkHttpClient (RetrofitClient) so we share its connection pool
     // and dispatcher thread pool. Previously every chat session built a fresh client +
@@ -59,345 +71,377 @@ class KcikChatWebSocket(
         .readTimeout(0, TimeUnit.MILLISECONDS)
         .pingInterval(30, TimeUnit.SECONDS)
         .build()
-    
-    private var webSocket: WebSocket? = null
+
+    // Desired subscription state, replayed onto every cluster connection when it (re)opens.
     private var currentChatroomId: Long? = null
     private var currentChannelId: Long? = null
-    private var isConnected = false
-    private var socketId: String? = null
-    
-    // Auto-reconnect state
+    private var currentTvSetupUuid: String? = null
+
+    // Cleared by disconnect() to stop all reconnect loops and drop late in-flight frames.
     private val shouldReconnect = AtomicBoolean(true)
-    private var reconnectAttempt = 0
-    private val maxReconnectAttempts = 10
-    private val baseReconnectDelayMs = 1000L
-    private val maxReconnectDelayMs = 8000L
-    private val reconnectHandler = Handler(Looper.getMainLooper())
-    private var reconnectRunnable: Runnable? = null
-    
-    // One-shot callback for when chat re-subscription succeeds (used by low battery resume)
+    private val aggregateConnected = AtomicBoolean(false)
+
+    // Keepalive ping interval (default 2 min; low-battery mode raises it to 5 min).
+    private var pingIntervalMs = 120_000L
+
+    // One-shot callback for when chat re-subscription succeeds (used by low battery resume).
     var onChatResubscribed: (() -> Unit)? = null
-    
-    // Store private channel auth for re-subscription
-    private var privateChatroomAuth: String? = null
-    private var channelPointsUserId: Long? = null
-    private var channelPointsAuth: String? = null
-    
-    // Ping timer for keepalive.
-    // Default: every 2 minutes. Low Battery: every 5 minutes (Pusher server-side
-    // heartbeat makes the app-level ping mostly redundant; 5 min is safe for most NATs).
-    private val pingHandler = Handler(Looper.getMainLooper())
-    private var pingIntervalMs = 120_000L // 2 minutes (default)
-    private val pingRunnable = object : Runnable {
-        override fun run() {
-            if (isConnected) {
-                sendPing()
-                pingHandler.postDelayed(this, pingIntervalMs)
+
+    // LRU of recently seen data-frame payloads, used to drop duplicates across clusters.
+    private val seenPayloads = java.util.Collections.synchronizedMap(
+        object : LinkedHashMap<String, Boolean>(DEDUP_MAX_ENTRIES, 0.75f, true) {
+            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Boolean>): Boolean {
+                return size > DEDUP_MAX_ENTRIES
             }
         }
-    }
+    )
+
+    private val connections: List<Connection> = CLUSTERS.map { Connection(it) }
 
     /** Adjust the keepalive ping interval (e.g. low-battery mode → 300 000 ms). */
     fun setPingInterval(intervalMs: Long) {
         pingIntervalMs = intervalMs
     }
-    
+
+    /** A single WebSocket connection to one Pusher cluster, with its own socket id, backoff and ping. */
+    private inner class Connection(val config: ClusterConfig) {
+        private var webSocket: WebSocket? = null
+        @Volatile var isConnected = false
+        @Volatile var socketId: String? = null
+        @Volatile var gaveUp = false
+
+        private var reconnectAttempt = 0
+        private val handler = Handler(Looper.getMainLooper())
+        private var reconnectRunnable: Runnable? = null
+
+        private val pingRunnable = object : Runnable {
+            override fun run() {
+                if (isConnected) {
+                    sendPing()
+                    handler.postDelayed(this, pingIntervalMs)
+                }
+            }
+        }
+
+        fun connect() {
+            if (isConnected) return
+            cancelReconnect()
+
+            val request = Request.Builder()
+                .url(buildWebSocketUrl(config))
+                .build()
+
+            webSocket = client.newWebSocket(request, object : WebSocketListener() {
+                override fun onOpen(ws: WebSocket, response: Response) {
+                    Log.d(TAG, "[${config.base}] WebSocket connected")
+                    isConnected = true
+                    reconnectAttempt = 0
+                    gaveUp = false
+
+                    handler.removeCallbacks(pingRunnable)
+                    handler.postDelayed(pingRunnable, pingIntervalMs)
+
+                    // Public channels are replayed here; private (auth'd) channels re-subscribe
+                    // via the fresh socket id from the connection_established frame.
+                    resubscribePublic(this@Connection)
+
+                    onAnyConnected()
+                }
+
+                override fun onMessage(ws: WebSocket, text: String) {
+                    handleMessage(this@Connection, text)
+                }
+
+                override fun onClosing(ws: WebSocket, code: Int, reason: String) {
+                    Log.d(TAG, "[${config.base}] WebSocket closing: $reason")
+                }
+
+                override fun onClosed(ws: WebSocket, code: Int, reason: String) {
+                    Log.d(TAG, "[${config.base}] WebSocket closed: $reason")
+                    handleDown()
+                }
+
+                override fun onFailure(ws: WebSocket, t: Throwable, response: Response?) {
+                    Log.e(TAG, "[${config.base}] WebSocket error: ${t.message}")
+                    handleDown()
+                }
+            })
+        }
+
+        private fun handleDown() {
+            handler.removeCallbacks(pingRunnable)
+            isConnected = false
+            socketId = null
+            onAnyDisconnected()
+            scheduleReconnect()
+        }
+
+        private fun scheduleReconnect() {
+            if (!shouldReconnect.get()) {
+                Log.d(TAG, "[${config.base}] Reconnect disabled, not scheduling")
+                return
+            }
+
+            if (reconnectAttempt >= MAX_RECONNECT_ATTEMPTS) {
+                Log.w(TAG, "[${config.base}] Max reconnect attempts reached, giving up")
+                gaveUp = true
+                onConnectionGaveUp()
+                return
+            }
+
+            val delay = minOf(BASE_RECONNECT_DELAY_MS * (1 shl reconnectAttempt), MAX_RECONNECT_DELAY_MS)
+            reconnectAttempt++
+
+            Log.d(TAG, "[${config.base}] Scheduling reconnect attempt $reconnectAttempt in ${delay}ms")
+            onConnectionReconnecting(reconnectAttempt)
+
+            reconnectRunnable = Runnable {
+                if (shouldReconnect.get() && !isConnected) {
+                    Log.d(TAG, "[${config.base}] Attempting reconnect ($reconnectAttempt/$MAX_RECONNECT_ATTEMPTS)")
+                    connect()
+                }
+            }
+            handler.postDelayed(reconnectRunnable!!, delay)
+        }
+
+        fun cancelReconnect() {
+            reconnectRunnable?.let { handler.removeCallbacks(it) }
+            reconnectRunnable = null
+        }
+
+        /** Reset backoff so a user-triggered reconnect starts fresh. */
+        fun resetBackoff() {
+            reconnectAttempt = 0
+            gaveUp = false
+        }
+
+        private fun sendPing() {
+            if (!isConnected) return
+            webSocket?.send("""{"event":"pusher:ping","data":{}}""")
+            Log.d(TAG, "[${config.base}] Sent ping")
+        }
+
+        fun send(text: String) {
+            webSocket?.send(text)
+        }
+
+        fun close() {
+            cancelReconnect()
+            handler.removeCallbacks(pingRunnable)
+            isConnected = false
+            socketId = null
+            try {
+                webSocket?.cancel() // Immediate termination to prevent late messages
+            } catch (e: Exception) {
+                // Ignore
+            }
+            webSocket = null
+        }
+    }
+
+    private fun anyConnected(): Boolean = connections.any { it.isConnected }
+
+    private fun onAnyConnected() {
+        if (aggregateConnected.compareAndSet(false, true)) {
+            onConnectionStateChanged(true)
+        }
+    }
+
+    private fun onAnyDisconnected() {
+        if (!anyConnected() && aggregateConnected.compareAndSet(true, false)) {
+            onConnectionStateChanged(false)
+        }
+    }
+
+    private fun onConnectionReconnecting(attempt: Int) {
+        // Only show the reconnect UI when no cluster is up; a single flaky one shouldn't.
+        if (!anyConnected()) {
+            onReconnecting?.invoke(attempt, MAX_RECONNECT_ATTEMPTS)
+        }
+    }
+
+    private fun onConnectionGaveUp() {
+        // Report a hard failure only when every cluster has exhausted its retries.
+        if (!anyConnected() && connections.all { it.gaveUp }) {
+            onMaxRetriesReached?.invoke()
+        }
+    }
+
     /**
-     * Connect to Pusher WebSocket
+     * Connect to all Pusher clusters.
      */
     fun connect() {
-        if (isConnected) return
-        
         shouldReconnect.set(true)
-        cancelReconnect()
-        
-        val request = Request.Builder()
-            .url(buildWebSocketUrl())
-            .build()
-        
-        webSocket = client.newWebSocket(request, object : WebSocketListener() {
-            override fun onOpen(webSocket: WebSocket, response: Response) {
-                Log.d(TAG, "WebSocket connected")
-                isConnected = true
-                reconnectAttempt = 0 // Reset on successful connect
-                
-                // Start ping timer
-                pingHandler.removeCallbacks(pingRunnable)
-                pingHandler.postDelayed(pingRunnable, pingIntervalMs)
-                
-                // Re-subscribe to pending requests
-                currentChatroomId?.let { subscribeToChat(it) }
-                currentChannelId?.let { 
-                    subscribeToChannelEvents(it)
-                    subscribeToPredictions(it) 
-                }
-                
-                onConnectionStateChanged(true)
-            }
-            
-            override fun onMessage(webSocket: WebSocket, text: String) {
-                handleMessage(text)
-            }
-            
-            override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-                Log.d(TAG, "WebSocket closing: $reason")
-            }
-            
-            override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-                Log.d(TAG, "WebSocket closed: $reason")
-                pingHandler.removeCallbacks(pingRunnable)
-                isConnected = false
-                onConnectionStateChanged(false)
-                scheduleReconnect()
-            }
-            
-            override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                Log.e(TAG, "WebSocket error: ${t.message}")
-                pingHandler.removeCallbacks(pingRunnable)
-                isConnected = false
-                onConnectionStateChanged(false)
-                scheduleReconnect()
-            }
-        })
+        connections.forEach { it.connect() }
     }
-    
+
     /**
-     * Schedule a reconnection attempt with exponential backoff
-     */
-    private fun scheduleReconnect() {
-        if (!shouldReconnect.get()) {
-            Log.d(TAG, "Reconnect disabled, not scheduling")
-            return
-        }
-        
-        if (reconnectAttempt >= maxReconnectAttempts) {
-            Log.w(TAG, "Max reconnect attempts ($maxReconnectAttempts) reached, giving up")
-            onMaxRetriesReached?.invoke()
-            return
-        }
-        
-        val delay = minOf(baseReconnectDelayMs * (1 shl reconnectAttempt), maxReconnectDelayMs)
-        reconnectAttempt++
-        
-        Log.d(TAG, "Scheduling reconnect attempt $reconnectAttempt in ${delay}ms")
-        
-        // Notify UI about reconnection attempt
-        onReconnecting?.invoke(reconnectAttempt, maxReconnectAttempts)
-        
-        reconnectRunnable = Runnable {
-            if (shouldReconnect.get() && !isConnected) {
-                Log.d(TAG, "Attempting reconnect ($reconnectAttempt/$maxReconnectAttempts)")
-                connect()
-            }
-        }
-        reconnectHandler.postDelayed(reconnectRunnable!!, delay)
-    }
-    
-    /**
-     * Cancel any pending reconnect
-     */
-    private fun cancelReconnect() {
-        reconnectRunnable?.let { reconnectHandler.removeCallbacks(it) }
-        reconnectRunnable = null
-    }
-    
-    /**
-     * Manual reconnect triggered by user (e.g., retry button)
-     * Resets retry counter and attempts immediate connection
+     * Manual reconnect triggered by user (e.g., retry button). Resets retry counters and
+     * attempts an immediate connection on every cluster.
      */
     fun manualReconnect() {
-        reconnectAttempt = 0
         shouldReconnect.set(true)
-        cancelReconnect()
-        connect()
+        connections.forEach {
+            it.resetBackoff()
+            it.cancelReconnect()
+            it.connect()
+        }
     }
-    
+
+    private fun chatSubscribeMessages(chatroomId: Long) = listOf(
+        """{"event":"pusher:subscribe","data":{"auth":"","channel":"chatrooms.$chatroomId.v2"}}""",
+        """{"event":"pusher:subscribe","data":{"auth":"","channel":"chatrooms.$chatroomId"}}""",
+        """{"event":"pusher:subscribe","data":{"auth":"","channel":"chatroom_$chatroomId"}}"""
+    )
+
+    private fun channelEventMessages(channelId: Long) = listOf(
+        """{"event":"pusher:subscribe","data":{"auth":"","channel":"channel.$channelId"}}""",
+        """{"event":"pusher:subscribe","data":{"auth":"","channel":"channel_$channelId"}}"""
+    )
+
+    private fun predictionMessages(channelId: Long) = listOf(
+        """{"event":"pusher:subscribe","data":{"auth":"","channel":"predictions-channel-$channelId"}}"""
+    )
+
+    private fun tvSetupMessage(uuid: String) =
+        """{"event":"pusher:subscribe","data":{"channel":"tv-setup-$uuid"}}"""
+
+    /** Send a message to every currently-connected cluster. */
+    private fun sendToAll(message: String) {
+        connections.forEach { if (it.isConnected) it.send(message) }
+    }
+
+    /** Replay the desired public subscriptions onto a single (freshly opened) connection. */
+    private fun resubscribePublic(conn: Connection) {
+        currentChatroomId?.let { id -> chatSubscribeMessages(id).forEach { conn.send(it) } }
+        currentChannelId?.let { id ->
+            channelEventMessages(id).forEach { conn.send(it) }
+            predictionMessages(id).forEach { conn.send(it) }
+        }
+        currentTvSetupUuid?.let { conn.send(tvSetupMessage(it)) }
+    }
+
     fun subscribeToChat(chatroomId: Long) {
         currentChatroomId = chatroomId
-        if (!isConnected) {
-            Log.d(TAG, "Postponing chat subscription until connected")
-            return
-        }
-        val subscribe = """{"event":"pusher:subscribe","data":{"auth":"","channel":"chatrooms.$chatroomId.v2"}}"""
-        webSocket?.send(subscribe)
-        
-        // Also subscribe to the non-v2 chatrooms channel for mode events
-        val subscribeMode = """{"event":"pusher:subscribe","data":{"auth":"","channel":"chatrooms.$chatroomId"}}"""
-        webSocket?.send(subscribeMode)
-        
-        // Also subscribe to chatroom_{id} as requested (potential reward event channel)
-        val subscribeReward = """{"event":"pusher:subscribe","data":{"auth":"","channel":"chatroom_$chatroomId"}}"""
-        webSocket?.send(subscribeReward)
-        
+        chatSubscribeMessages(chatroomId).forEach { sendToAll(it) }
         Log.d(TAG, "Requested subscription to chatroom: $chatroomId (v2, meta, and reward)")
     }
 
     fun subscribeToChannelEvents(channelId: Long) {
         currentChannelId = channelId
-        if (!isConnected) {
-            Log.d(TAG, "Postponing channel events subscription until connected")
-            return
-        }
-        val subscribe = """{"event":"pusher:subscribe","data":{"auth":"","channel":"channel.$channelId"}}"""
-        webSocket?.send(subscribe)
-        
-        // Also subscribe to underscore format channel_{id}
-        val subscribeUnderscore = """{"event":"pusher:subscribe","data":{"auth":"","channel":"channel_$channelId"}}"""
-        webSocket?.send(subscribeUnderscore)
-        
+        channelEventMessages(channelId).forEach { sendToAll(it) }
         Log.d(TAG, "Requested subscription to channel events: $channelId (dot and underscore)")
-    }
-
-    fun subscribeToPrivateChatroom(chatroomId: Long, auth: String) {
-        // Store for re-subscription on reconnect
-        privateChatroomAuth = auth
-        
-        if (!isConnected) {
-            Log.d(TAG, "Postponing private chatroom subscription until connected")
-            return
-        }
-        val subscribe = """{"event":"pusher:subscribe","data":{"auth":"$auth","channel":"private-chatroom_$chatroomId"}}"""
-        webSocket?.send(subscribe)
-        Log.d(TAG, "Requested subscription to private-chatroom: $chatroomId")
-    }
-
-    fun subscribeToChannelPoints(userId: Long, auth: String) {
-        // Store for re-subscription on reconnect
-        channelPointsUserId = userId
-        channelPointsAuth = auth
-        
-        if (!isConnected) {
-            Log.d(TAG, "Postponing channel points subscription until connected")
-            return
-        }
-        val subscribe = """{"event":"pusher:subscribe","data":{"auth":"$auth","channel":"private-channelpoints-$userId"}}"""
-        webSocket?.send(subscribe)
-        Log.d(TAG, "Requested subscription to channel points: $userId")
     }
 
     fun subscribeToPredictions(channelId: Long) {
         currentChannelId = channelId
-        if (!isConnected) {
-            Log.d(TAG, "Postponing predictions subscription until connected")
-            return
-        }
-        val subscribe = """{"event":"pusher:subscribe","data":{"auth":"","channel":"predictions-channel-$channelId"}}"""
-        webSocket?.send(subscribe)
+        predictionMessages(channelId).forEach { sendToAll(it) }
         Log.d(TAG, "Requested subscription to predictions: $channelId")
+    }
+
+    /**
+     * Subscribe to a private chatroom channel. The [auth] token is socket-id-bound, so it is
+     * routed only to the cluster connection that owns [socketId].
+     */
+    fun subscribeToPrivateChatroom(socketId: String, chatroomId: Long, auth: String) {
+        val conn = connections.firstOrNull { it.socketId == socketId && it.isConnected } ?: return
+        conn.send("""{"event":"pusher:subscribe","data":{"auth":"$auth","channel":"private-chatroom_$chatroomId"}}""")
+        Log.d(TAG, "Requested subscription to private-chatroom: $chatroomId on ${conn.config.base}")
+    }
+
+    /** Subscribe to the private channel-points channel, routed by [socketId]. */
+    fun subscribeToChannelPoints(socketId: String, userId: Long, auth: String) {
+        val conn = connections.firstOrNull { it.socketId == socketId && it.isConnected } ?: return
+        conn.send("""{"event":"pusher:subscribe","data":{"auth":"$auth","channel":"private-channelpoints-$userId"}}""")
+        Log.d(TAG, "Requested subscription to channel points: $userId on ${conn.config.base}")
+    }
+
+    fun subscribeToTvSetup(uuid: String) {
+        currentTvSetupUuid = uuid
+        sendToAll(tvSetupMessage(uuid))
+        Log.d(TAG, "Requested subscription to tv-setup: $uuid")
+    }
+
+    fun unsubscribeFromTvSetup(uuid: String) {
+        sendToAll("""{"event":"pusher:unsubscribe","data":{"channel":"tv-setup-$uuid"}}""")
+        if (currentTvSetupUuid == uuid) currentTvSetupUuid = null
     }
 
     fun unsubscribeFromOnlyChat() {
         currentChatroomId?.let { id ->
-            val unsubscribe = """{"event":"pusher:unsubscribe","data":{"channel":"chatrooms.$id.v2"}}"""
-            webSocket?.send(unsubscribe)
+            sendToAll("""{"event":"pusher:unsubscribe","data":{"channel":"chatrooms.$id.v2"}}""")
         }
     }
 
     fun subscribeToOnlyChat() {
         currentChatroomId?.let { id ->
-            val subscribe = """{"event":"pusher:subscribe","data":{"auth":"","channel":"chatrooms.$id.v2"}}"""
-            webSocket?.send(subscribe)
+            sendToAll("""{"event":"pusher:subscribe","data":{"auth":"","channel":"chatrooms.$id.v2"}}""")
         }
     }
 
     fun unsubscribeFromChat() {
         currentChatroomId?.let { id ->
-            val unsubscribe = """{"event":"pusher:unsubscribe","data":{"channel":"chatrooms.$id.v2"}}"""
-            webSocket?.send(unsubscribe)
-            
-            val unsubscribeMode = """{"event":"pusher:unsubscribe","data":{"channel":"chatrooms.$id"}}"""
-            webSocket?.send(unsubscribeMode)
-            
-            val unsubscribeReward = """{"event":"pusher:unsubscribe","data":{"channel":"chatroom_$id"}}"""
-            webSocket?.send(unsubscribeReward)
-            
-            val unsubscribePrivate = """{"event":"pusher:unsubscribe","data":{"channel":"private-chatroom_$id"}}"""
-            webSocket?.send(unsubscribePrivate)
-            
+            sendToAll("""{"event":"pusher:unsubscribe","data":{"channel":"chatrooms.$id.v2"}}""")
+            sendToAll("""{"event":"pusher:unsubscribe","data":{"channel":"chatrooms.$id"}}""")
+            sendToAll("""{"event":"pusher:unsubscribe","data":{"channel":"chatroom_$id"}}""")
+            sendToAll("""{"event":"pusher:unsubscribe","data":{"channel":"private-chatroom_$id"}}""")
             currentChatroomId = null
         }
     }
 
     fun unsubscribeFromChannelEvents() {
         currentChannelId?.let { id ->
-            val unsubscribe = """{"event":"pusher:unsubscribe","data":{"channel":"channel.$id"}}"""
-            webSocket?.send(unsubscribe)
-            
-            val unsubscribeUnderscore = """{"event":"pusher:unsubscribe","data":{"channel":"channel_$id"}}"""
-            webSocket?.send(unsubscribeUnderscore)
-            
-            val unsubscribePred = """{"event":"pusher:unsubscribe","data":{"channel":"predictions-channel-$id"}}"""
-            webSocket?.send(unsubscribePred)
-            
+            sendToAll("""{"event":"pusher:unsubscribe","data":{"channel":"channel.$id"}}""")
+            sendToAll("""{"event":"pusher:unsubscribe","data":{"channel":"channel_$id"}}""")
+            sendToAll("""{"event":"pusher:unsubscribe","data":{"channel":"predictions-channel-$id"}}""")
             currentChannelId = null
         }
     }
-    
+
     /**
-     * Fully disconnect and close WebSocket. Disables auto-reconnect.
+     * Fully disconnect and close every WebSocket. Disables auto-reconnect.
      */
     fun disconnect() {
         shouldReconnect.set(false)
-        cancelReconnect()
-        
-        // Stop ping timer
-        pingHandler.removeCallbacks(pingRunnable)
-        
-        isConnected = false
-        
+
         unsubscribeFromChat()
         unsubscribeFromChannelEvents()
-        
-        try {
-            webSocket?.cancel() // Immediate termination to prevent late messages
-        } catch (e: Exception) {
-            // Ignore
-        }
-        
-        webSocket = null
-        socketId = null
-        
-        // Clear stored auth
-        privateChatroomAuth = null
-        channelPointsUserId = null
-        channelPointsAuth = null
+
+        connections.forEach { it.close() }
+        aggregateConnected.set(false)
+        seenPayloads.clear()
     }
-    
-    /**
-     * Send a ping to keep connection alive
-     */
-    private fun sendPing() {
-        if (!isConnected) return
-        val ping = """{"event":"pusher:ping","data":{}}"""
-        webSocket?.send(ping)
-        Log.d(TAG, "Sent ping")
-    }
-    
-    private fun subscribeToChannel(chatroomId: Long) {
-        val subscribe = """{"event":"pusher:subscribe","data":{"auth":"","channel":"chatrooms.$chatroomId.v2"}}"""
-        webSocket?.send(subscribe)
-        Log.d(TAG, "Subscribed to chatroom: $chatroomId")
-    }
-    
-    private fun handleMessage(text: String) {
-        if (!isConnected) return
-        
+
+    private fun handleMessage(conn: Connection, text: String) {
+        // Drop any late in-flight frames after a full disconnect().
+        if (!shouldReconnect.get()) return
+
         try {
             val event = gson.fromJson(text, PusherEvent::class.java)
-            
-            if (event.event?.contains("ChatMessageEvent") != true && event.event?.contains("pusher:") != true) {
-                 Log.d(TAG, "WS Msg: ${event.event} Data: ${event.data}")
+            val eventName = event.event
+
+            // Control frames are per-connection (each socket has its own connection_established),
+            // so never de-dup them; de-dup only data frames mirrored across clusters.
+            val isControl = eventName != null &&
+                (eventName.startsWith("pusher:") || eventName.startsWith("pusher_internal:"))
+
+            if (!isControl && seenPayloads.put(text, true) != null) {
+                return
             }
-            
-            when (event.event) {
+
+            if (eventName?.contains("ChatMessageEvent") != true && !isControl) {
+                 Log.d(TAG, "WS Msg: $eventName Data: ${event.data}")
+            }
+
+            when (eventName) {
                 "pusher:connection_established" -> {
-                    Log.d(TAG, "Pusher connection established")
+                    Log.d(TAG, "[${conn.config.base}] Pusher connection established")
                     try {
                         val data = gson.fromJson(event.data, Map::class.java)
                         val id = data["socket_id"] as? String
                         if (id != null) {
-                            socketId = id
-                            Log.d(TAG, "Socket ID received: $socketId")
+                            conn.socketId = id
+                            Log.d(TAG, "[${conn.config.base}] Socket ID received: $id")
                             onSocketIdReceived?.invoke(id)
                         }
                     } catch (e: Exception) {
@@ -407,9 +451,11 @@ class KcikChatWebSocket(
                 "pusher_internal:subscription_succeeded" -> {
                     Log.d(TAG, "Subscription succeeded to channel: ${event.channel}")
                     // Fire one-shot callback when chatroom v2 subscription succeeds
-                    if (event.channel?.contains(".v2") == true && onChatResubscribed != null) {
-                        onChatResubscribed?.invoke()
-                        onChatResubscribed = null
+                    if (event.channel?.contains(".v2") == true) {
+                        onChatResubscribed?.let { cb ->
+                            onChatResubscribed = null
+                            cb()
+                        }
                     }
                 }
                 "pusher:pong" -> {
@@ -442,7 +488,7 @@ class KcikChatWebSocket(
                 "PredictionCreated",
                 "PredictionUpdated" -> {
                     event.data?.let { dataString ->
-                        onEventReceived(event.event, dataString)
+                        onEventReceived(eventName, dataString)
                     }
                 }
                 "App\\Events\\MessageDeletedEvent", "MessageDeletedEvent" -> {
@@ -461,21 +507,21 @@ class KcikChatWebSocket(
                             val banData = gson.fromJson(dataString, dev.xacnio.kciktv.shared.data.model.UserBannedEventData::class.java)
                             val user = banData.user?.username ?: "Unknown"
                             val moderator = banData.bannedBy?.username ?: "Moderator"
-                            
+
                             val typeText = if (banData.permanent == true) {
                                 context.getString(R.string.chat_status_slow_mode_on) // Wait, this is not right, I should use the permanent string
                                 // I added chat_user_banned_permanently which is a full template
-                                "" 
+                                ""
                             } else {
                                 TimeUtils.formatDuration(context, (banData.duration ?: 0))
                             }
-                            
+
                             val content = if (banData.permanent == true) {
                                 context.getString(R.string.chat_user_banned_permanently, user, moderator)
                             } else {
                                 context.getString(R.string.chat_user_banned, user, moderator, typeText)
                             }
-                            
+
                             val systemMessage = ChatMessage(
                                 id = "ban_${banData.id ?: System.currentTimeMillis()}",
                                 content = content,
@@ -499,7 +545,7 @@ class KcikChatWebSocket(
                             val user = unbanData.user?.username ?: "Unknown"
                             val moderator = unbanData.unbannedBy?.username ?: "Moderator"
                             val content = context.getString(R.string.chat_user_unbanned, user, moderator)
-                            
+
                             val systemMessage = ChatMessage(
                                 id = "unban_${unbanData.id ?: System.currentTimeMillis()}",
                                 content = content,
@@ -522,11 +568,11 @@ class KcikChatWebSocket(
                     event.data?.let { dataString ->
                         try {
                             val rewardData = gson.fromJson(dataString, dev.xacnio.kciktv.shared.data.model.RewardRedeemedEventData::class.java)
-                            
+
                             // Create a chat message mimicking the user with reward styling
                             val chatMessage = ChatMessage(
                                 id = "reward_${System.currentTimeMillis()}",
-                                content = rewardData.userInput ?: "", 
+                                content = rewardData.userInput ?: "",
                                 sender = ChatSender(
                                     id = rewardData.userId ?: 0,
                                     username = rewardData.username ?: "Unknown",
@@ -550,9 +596,9 @@ class KcikChatWebSocket(
                          try {
                              gson.fromJson(dataString, dev.xacnio.kciktv.shared.data.model.KicksGiftedEventData::class.java)
 
-                             
+
                               /* ChatSender parsing removed as it was unused */
-                             
+
                              onEventReceived("KicksGifted", dataString)
                          } catch (e: Exception) {
                              Log.e(TAG, "Error parsing KicksGifted", e)
@@ -567,14 +613,14 @@ class KcikChatWebSocket(
                             val gifter = giftData.gifterUsername ?: "An Anonymous Gifter"
                             val total = giftData.giftedUsernames?.size ?: 0
                             val gifterTotal = giftData.gifterTotal ?: total
-                            
+
                             // 1. Send main summary message
                             val mainContent = if (total > 1) {
                                 context.getString(R.string.chat_gifted_subs_plural, gifter, total, gifterTotal)
                             } else {
                                 context.getString(R.string.chat_gifted_sub_single, gifter, gifterTotal)
                             }
-                            
+
                             val mainMessage = ChatMessage(
                                 id = "gift_main_${System.currentTimeMillis()}",
                                 content = mainContent,
@@ -596,7 +642,7 @@ class KcikChatWebSocket(
                                 )
                                 onMessageReceived(individualMessage)
                             }
-                            
+
                             onEventReceived("GiftedSubscriptionsEvent", dataString)
                         } catch (e: Exception) {
                             Log.e(TAG, "Error parsing GiftedSubscriptionsEvent", e)
@@ -693,7 +739,7 @@ class KcikChatWebSocket(
                 }
                 else -> {
                     // Try flexible matching for events with different backslash escaping
-                    val rawEventName = event.event ?: ""
+                    val rawEventName = eventName ?: ""
                     if (rawEventName.contains("StreamerIsLive")) {
                         event.data?.let { dataString ->
                             Log.d(TAG, "Matched StreamerIsLive event (flexible match: $rawEventName)")
@@ -718,26 +764,11 @@ class KcikChatWebSocket(
         }
     }
 
-    fun subscribeToTvSetup(uuid: String) {
-        if (!isConnected) {
-            Log.d(TAG, "Postponing TV setup subscription until connected")
-            return
-        }
-        val subscribe = """{"event":"pusher:subscribe","data":{"channel":"tv-setup-$uuid"}}"""
-        webSocket?.send(subscribe)
-        Log.d(TAG, "Requested subscription to tv-setup: $uuid")
-    }
-
-    fun unsubscribeFromTvSetup(uuid: String) {
-        val unsubscribe = """{"event":"pusher:unsubscribe","data":{"channel":"tv-setup-$uuid"}}"""
-            webSocket?.send(unsubscribe)
-    }
-    
     private fun parseChatMessage(event: PusherChatEvent): ChatMessage? {
         val sender = event.sender ?: return null
         val content = event.content?.replace(Regex("[\\r\\n]+"), " ") ?: return null
         val id = event.id ?: return null
-        
+
         val messageRef = event.metadata?.messageRef
 
         val metadata = event.metadata?.let { meta ->
@@ -761,7 +792,7 @@ class KcikChatWebSocket(
                 )
             } else null
         }
-        
+
         val typeValue = event.type ?: ""
         val messageType = when (typeValue) {
             "celebration" -> dev.xacnio.kciktv.shared.data.model.MessageType.CELEBRATION
@@ -789,6 +820,6 @@ class KcikChatWebSocket(
             celebrationData = event.metadata?.celebration
         )
     }
-    
-    fun isConnected(): Boolean = isConnected
+
+    fun isConnected(): Boolean = anyConnected()
 }
