@@ -270,24 +270,135 @@
                             android:text=": Hello world!" />
                     </LinearLayout>
 
-                    <!-- Badges label -->
+                    <!-- Level progress (hidden until data loads) -->
+                    <LinearLayout
+                        android:id="@+id/profileLevelCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/bg_settings_card"
+                        android:padding="10dp"
+                        android:gravity="center_vertical"
+                        android:visibility="gone">
+
+                        <ImageView
+                            android:id="@+id/profileLevelBadge"
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:scaleType="fitCenter"/>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginStart="10dp">
+
+                            <TextView
+                                android:id="@+id/profileLevelText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="#FFFFFF"
+                                android:textSize="12sp"
+                                android:textStyle="bold"/>
+
+                            <ProgressBar
+                                android:id="@+id/profileLevelProgress"
+                                style="?android:attr/progressBarStyleHorizontal"
+                                android:layout_width="match_parent"
+                                android:layout_height="3dp"
+                                android:progressTint="#53FC18"
+                                android:max="100"
+                                android:layout_marginTop="4dp"/>
+
+                            <TextView
+                                android:id="@+id/profileLevelProgressText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="#53FC18"
+                                android:textSize="10sp"
+                                android:layout_marginTop="2dp"/>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Badges section header -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/chat_identity_badges"
-                        android:textColor="#666666"
-                        android:textSize="11sp"
+                        android:text="@string/chat_identity_badges_section"
+                        android:textColor="#FFFFFF"
+                        android:textSize="13sp"
                         android:textStyle="bold"
-                        android:textAllCaps="true"
-                        android:letterSpacing="0.08"
                         android:paddingStart="2dp"
                         android:layout_marginTop="20dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/chat_identity_badges_max"
+                        android:textColor="#888888"
+                        android:textSize="12sp"
+                        android:paddingStart="2dp"
+                        android:layout_marginTop="2dp" />
+
+                    <!-- Global badges sub-label + list (hidden until data loads) -->
+                    <TextView
+                        android:id="@+id/labelGlobalBadges"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/chat_identity_global_badges"
+                        android:textColor="#888888"
+                        android:textSize="12sp"
+                        android:paddingStart="2dp"
+                        android:layout_marginTop="12dp"
+                        android:visibility="gone"/>
+
+                    <LinearLayout
+                        android:id="@+id/globalBadgesContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="6dp"
+                        android:visibility="gone"/>
+
+                    <TextView
+                        android:id="@+id/emptyGlobalBadges"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/chat_identity_no_badges"
+                        android:textColor="#555555"
+                        android:textSize="12sp"
+                        android:paddingStart="2dp"
+                        android:layout_marginTop="6dp"
+                        android:visibility="gone"/>
+
+                    <!-- Channel badges sub-label -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/chat_identity_channel_badges"
+                        android:textColor="#888888"
+                        android:textSize="12sp"
+                        android:paddingStart="2dp"
+                        android:layout_marginTop="12dp" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rvProfileBadges"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp" />
+                        android:layout_marginTop="6dp" />
+
+                    <TextView
+                        android:id="@+id/emptyChannelBadges"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/chat_identity_no_badges"
+                        android:textColor="#555555"
+                        android:textSize="12sp"
+                        android:paddingStart="2dp"
+                        android:layout_marginTop="6dp"
+                        android:visibility="gone"/>
 
                     <!-- Colors label -->
                     <TextView

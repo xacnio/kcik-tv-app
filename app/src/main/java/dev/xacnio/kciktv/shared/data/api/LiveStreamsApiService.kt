@@ -10,8 +10,10 @@ package dev.xacnio.kciktv.shared.data.api
 
 import dev.xacnio.kciktv.shared.data.model.ChatHistoryResponse
 import dev.xacnio.kciktv.shared.data.model.LiveStreamsResponse
+import dev.xacnio.kciktv.shared.data.model.UserLevelResponse
 import retrofit2.Response
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.Path
 import retrofit2.http.Query
 import dev.xacnio.kciktv.shared.data.api.LiveStreamsApiService
@@ -73,5 +75,14 @@ interface LiveStreamsApiService {
     suspend fun getChatSettings(
         @Path("channelId") channelId: Long
     ): Response<dev.xacnio.kciktv.shared.data.model.ChatSettingsResponse>
+
+    /**
+     * Returns the authenticated user's global level and XP progress.
+     */
+    @retrofit2.http.Headers("Accept: application/json")
+    @GET("api/v1/gamification/user/level")
+    suspend fun getUserLevel(
+        @Header("Authorization") token: String
+    ): Response<UserLevelResponse>
 
 }

@@ -462,11 +462,14 @@ class UserActionsSheetManager(private val activity: MobilePlayerActivity) {
                         badgesContainer.removeAllViews()
                         val bSize = (16 * activity.resources.displayMetrics.density).toInt()
                         val m = (4 * activity.resources.displayMetrics.density).toInt()
-                        u.badges?.forEach { badge ->
+                        u.badges?.sortedBy { it.sortOrder ?: Int.MAX_VALUE }?.forEach { badge ->
                             BadgeRenderUtils.renderSingleBadgeIntoSheet(
                                 activity, badgesContainer, badge, bSize, m, chatStateManager.subscriberBadges
                             )
                         }
+                        BadgeRenderUtils.renderBadgesV2IntoSheet(
+                            activity, badgesContainer, sender.badgesV2, bSize, m
+                        )
 
                         // Dates
                         val followText = sheetView.findViewById<TextView>(R.id.followDateSheet)

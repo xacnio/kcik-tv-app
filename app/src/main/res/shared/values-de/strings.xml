@@ -99,6 +99,8 @@
     <string name="recommended_streams">Empfohlen</string>
     <string name="my_list">PERSÖNLICH</string>
     <string name="my_channel">Mein Kanal</string>
+    <string name="level_format">Level %d</string>
+    <string name="level_towards_next_format">%1$d%% bis Level %2$d</string>
     <string name="search">Suchen</string>
     <string name="following">Gefolgt</string>
     <string name="app_settings">App-Einstellungen</string>
@@ -670,6 +672,11 @@
     <string name="chat_appearance_title">Chat-Aussehen</string>
     <string name="chat_rules_title">Chat-Regeln</string>
     <string name="chat_identity_preview">Vorschau</string>
+    <string name="chat_identity_badges_section">Abzeichen</string>
+    <string name="chat_identity_badges_max">Maximal 4 Abzeichen können angezeigt werden</string>
+    <string name="chat_identity_global_badges">Globale Abzeichen: auf allen Kanälen sichtbar</string>
+    <string name="chat_identity_channel_badges">Kanalabzeichen: im Kanal des Streamers sichtbar</string>
+    <string name="chat_identity_no_badges">Keine Abzeichen verfügbar</string>
     <string name="chat_identity_badges">Abzeichen</string>
     <string name="chat_identity_color">Namensfarbe</string>
     <string name="chat_font_size">Schriftgröße</string>

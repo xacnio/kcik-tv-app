@@ -126,13 +126,16 @@ data class BannedByInfo(
 data class ChannelUserBadge(
     @SerializedName("type")
     val type: String?,
-    
+
     @SerializedName("text")
     val text: String?,
-    
+
     @SerializedName("count")
     val count: Int?,
-    
+
     @SerializedName("active")
-    val active: Boolean?
+    val active: Boolean?,
+
+    @SerializedName("sort_order")
+    val sortOrder: Int? = null
 )

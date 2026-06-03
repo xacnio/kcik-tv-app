@@ -16,6 +16,7 @@ import android.widget.LinearLayout
 import com.bumptech.glide.Glide
 import dev.xacnio.kciktv.R
 import dev.xacnio.kciktv.shared.data.model.ChannelUserBadge
+import dev.xacnio.kciktv.shared.data.model.ChatBadgeV2
 import dev.xacnio.kciktv.shared.ui.utils.ApngBadgeManager
 
 /**
@@ -95,5 +96,43 @@ object BadgeRenderUtils {
                 container.removeView(imageView)
             }
         }
+    }
+
+    fun renderBadgesV2IntoSheet(
+        context: Context,
+        container: LinearLayout?,
+        badgesV2: List<ChatBadgeV2>?,
+        size: Int,
+        margin: Int
+    ) {
+        if (container == null) return
+        badgesV2
+            ?.filter { it.selected == true }
+            ?.sortedBy { it.sortOrder ?: Int.MAX_VALUE }
+            ?.forEach { badge ->
+                val iv = ImageView(context)
+                val params = LinearLayout.LayoutParams(size, size)
+                params.setMargins(0, 0, margin, 0)
+                iv.layoutParams = params
+                iv.scaleType = ImageView.ScaleType.FIT_CENTER
+                container.addView(iv)
+
+                val drawableRes = when (badge.name) {
+                    "verified"   -> R.drawable.ic_badge_verified
+                    "staff"      -> R.drawable.ic_badge_staff
+                    "og"         -> R.drawable.ic_badge_og
+                    "sub_gifter" -> R.drawable.ic_badge_sub_gifter
+                    "sidekick"   -> R.drawable.ic_badge_sidekick
+                    "bot"        -> R.drawable.ic_badge_bot
+                    else         -> null
+                }
+                if (drawableRes != null) {
+                    iv.setImageResource(drawableRes)
+                } else if (!badge.imageUrl.isNullOrEmpty()) {
+                    Glide.with(context).load(badge.imageUrl).into(iv)
+                } else {
+                    container.removeView(iv)
+                }
+            }
     }
 }

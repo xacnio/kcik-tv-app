@@ -47,6 +47,8 @@ class ChatSettingsSheetManager(
 ) {
     // Profile Identity State
     private var profileSelectedBadges = mutableListOf<String>()
+    private var profileSelectedBadgesV2 = mutableListOf<String>()
+    private var availableBadgesV2 = mutableListOf<dev.xacnio.kciktv.shared.data.model.ChatIdentityBadgeV2>()
     private var profileSelectedColor: String = "#53fc18"
     internal var hasProfileChanges: Boolean = false
     private var currentIdentityChannelId: Long = 0L
@@ -119,6 +121,8 @@ class ChatSettingsSheetManager(
         hasProfileChanges = false
         isProfileIdentityLoaded = false
         availableProfileBadges.clear()
+        availableBadgesV2.clear()
+        profileSelectedBadgesV2.clear()
 
         var currentPage = PAGE_ROOT
 
@@ -130,7 +134,11 @@ class ChatSettingsSheetManager(
 
         fun navigate(page: Int) {
             currentPage = page
-            val targetHeight = if (page == PAGE_ROOT) dpToPx(264) else getSubPageHeight()
+            val targetHeight = when (page) {
+                PAGE_ROOT    -> dpToPx(264)
+                PAGE_PROFILE -> getSubPageHeight(0.88f)
+                else         -> getSubPageHeight()
+            }
             animatePanelToHeight(targetHeight)
             when (page) {
                 PAGE_ROOT -> {
@@ -416,11 +424,11 @@ class ChatSettingsSheetManager(
 
     private fun computePanelHeight(): Int = dpToPx(264)
 
-    private fun getSubPageHeight(): Int {
+    private fun getSubPageHeight(ratio: Float = 0.70f): Int {
         val container = activity.binding.chatListContainer
         val containerHeight = container.height.takeIf { it > 0 }
             ?: (activity.resources.displayMetrics.heightPixels * 0.55).toInt()
-        return (containerHeight * 0.70).toInt()
+        return (containerHeight * ratio).toInt()
     }
 
     private fun animatePanelToHeight(targetH: Int) {
@@ -446,6 +454,15 @@ class ChatSettingsSheetManager(
         val gridColors = view.findViewById<GridLayout>(R.id.gridNameColors)
         val previewUsername = view.findViewById<TextView>(R.id.previewUsername)
         val previewBadgeLayout = view.findViewById<LinearLayout>(R.id.previewBadgeLayout)
+        val labelGlobalBadges = view.findViewById<TextView>(R.id.labelGlobalBadges)
+        val globalBadgesContainer = view.findViewById<LinearLayout>(R.id.globalBadgesContainer)
+        val emptyGlobalBadges = view.findViewById<TextView>(R.id.emptyGlobalBadges)
+        val emptyChannelBadges = view.findViewById<TextView>(R.id.emptyChannelBadges)
+        val profileLevelCard = view.findViewById<View>(R.id.profileLevelCard)
+        val profileLevelBadge = view.findViewById<android.widget.ImageView>(R.id.profileLevelBadge)
+        val profileLevelText = view.findViewById<TextView>(R.id.profileLevelText)
+        val profileLevelProgress = view.findViewById<android.widget.ProgressBar>(R.id.profileLevelProgress)
+        val profileLevelProgressText = view.findViewById<TextView>(R.id.profileLevelProgressText)
 
         val channelId = activity.currentChannel?.id?.toLongOrNull() ?: 0L
         val userId = prefs.userId
@@ -459,7 +476,7 @@ class ChatSettingsSheetManager(
 
         fun updatePreview() {
             previewUsername.setTextColor(Color.parseColor(profileSelectedColor))
-            updatePreviewBadges(previewBadgeLayout, profileSelectedBadges, availableProfileBadges)
+            updatePreviewBadges(previewBadgeLayout, profileSelectedBadges, availableProfileBadges, profileSelectedBadgesV2, availableBadgesV2)
         }
 
         // Color grid
@@ -528,11 +545,16 @@ class ChatSettingsSheetManager(
                 val isSelected = profileSelectedBadges.contains(badge.type)
                 check.visibility = if (isSelected) View.VISIBLE else View.GONE
 
+                val isLocked = badge.type == "broadcaster" || badge.type == "moderator"
+                holder.itemView.alpha = if (isLocked) 0.5f else 1.0f
+
                 holder.itemView.setOnClickListener {
+                    if (isLocked) return@setOnClickListener
                     if (isSelected) {
                         profileSelectedBadges.remove(badge.type)
                     } else {
-                        if (profileSelectedBadges.size < 4) {
+                        val total = profileSelectedBadges.size + profileSelectedBadgesV2.size
+                        if (total < 4) {
                             badge.type?.let { t -> profileSelectedBadges.add(t) }
                         } else {
                             android.widget.Toast.makeText(activity, activity.getString(R.string.max_badges_reached, 4), android.widget.Toast.LENGTH_SHORT).show()
@@ -565,8 +587,89 @@ class ChatSettingsSheetManager(
                             availableProfileBadges.clear()
                             identity?.badges?.let { availableProfileBadges.addAll(it) }
 
+                            // Populate selectable global badges from badges_v2
+                            val allBadgesV2 = identity?.badgesV2
+                                ?.sortedBy { it.sortOrder ?: Int.MAX_VALUE }
+                                ?: emptyList()
+
+                            if (allBadgesV2.isNotEmpty()) {
+                                availableBadgesV2.clear()
+                                availableBadgesV2.addAll(allBadgesV2)
+                                profileSelectedBadgesV2.clear()
+                                allBadgesV2.filter { it.selected == true }
+                                    .mapNotNull { it.name }
+                                    .forEach { profileSelectedBadgesV2.add(it) }
+
+                                globalBadgesContainer.removeAllViews()
+
+                                fun refreshGlobalBadgeOverlays() {
+                                    for (i in 0 until globalBadgesContainer.childCount) {
+                                        val frame = globalBadgesContainer.getChildAt(i) as? FrameLayout ?: continue
+                                        val name = frame.tag as? String ?: continue
+                                        frame.findViewById<View>(R.id.badgeSelectionOverlay)?.visibility =
+                                            if (profileSelectedBadgesV2.contains(name)) View.VISIBLE else View.GONE
+                                    }
+                                }
+
+                                allBadgesV2.forEach { badge ->
+                                    val name = badge.name ?: return@forEach
+
+                                    val item = activity.layoutInflater.inflate(
+                                        R.layout.item_profile_badge_selection,
+                                        globalBadgesContainer,
+                                        false
+                                    ) as FrameLayout
+                                    item.tag = name
+
+                                    val iv = item.findViewById<ImageView>(R.id.ivBadgeIcon)
+                                    val overlay = item.findViewById<View>(R.id.badgeSelectionOverlay)
+                                    overlay.visibility = if (profileSelectedBadgesV2.contains(name)) View.VISIBLE else View.GONE
+
+                                    when (name) {
+                                        "verified"   -> iv.setImageResource(R.drawable.ic_badge_verified)
+                                        "staff"      -> iv.setImageResource(R.drawable.ic_badge_staff)
+                                        "og"         -> iv.setImageResource(R.drawable.ic_badge_og)
+                                        "sub_gifter" -> iv.setImageResource(R.drawable.ic_badge_sub_gifter)
+                                        "sidekick"   -> iv.setImageResource(R.drawable.ic_badge_sidekick)
+                                        "bot"        -> iv.setImageResource(R.drawable.ic_badge_bot)
+                                        else         -> {
+                                            if (!badge.imageUrl.isNullOrEmpty()) {
+                                                Glide.with(activity).load(badge.imageUrl).into(iv)
+                                            }
+                                        }
+                                    }
+
+                                    item.setOnClickListener {
+                                        if (profileSelectedBadgesV2.contains(name)) {
+                                            profileSelectedBadgesV2.remove(name)
+                                        } else {
+                                            val total = profileSelectedBadges.size + profileSelectedBadgesV2.size
+                                            if (total < 4) {
+                                                profileSelectedBadgesV2.add(name)
+                                            } else {
+                                                android.widget.Toast.makeText(activity, activity.getString(R.string.max_badges_reached, 4), android.widget.Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+                                        hasProfileChanges = true
+                                        refreshGlobalBadgeOverlays()
+                                        updatePreview()
+                                    }
+
+                                    globalBadgesContainer.addView(item)
+                                }
+
+                                labelGlobalBadges.visibility = View.VISIBLE
+                                globalBadgesContainer.visibility = View.VISIBLE
+                                emptyGlobalBadges.visibility = View.GONE
+                            } else {
+                                labelGlobalBadges.visibility = View.VISIBLE
+                                emptyGlobalBadges.visibility = View.VISIBLE
+                            }
+
                             isProfileIdentityLoaded = true
                             adapter.notifyDataSetChanged()
+                            emptyChannelBadges.visibility =
+                                if (availableProfileBadges.isEmpty()) View.VISIBLE else View.GONE
                             updatePreview()
 
                             for (i in 0 until gridColors.childCount) {
@@ -586,23 +689,87 @@ class ChatSettingsSheetManager(
         } else {
             updatePreview()
         }
+
+        // Load level progress
+        if (!token.isNullOrEmpty()) {
+            lifecycleScope.launch {
+                repository.getUserLevel(token).onSuccess { levelData ->
+                    activity.runOnUiThread {
+                        profileLevelText.text = activity.getString(R.string.level_format, levelData.level)
+                        profileLevelProgress.progress = levelData.progressPercent
+                        profileLevelProgressText.text = activity.getString(
+                            R.string.level_towards_next_format,
+                            levelData.progressPercent,
+                            levelData.level + 1
+                        )
+                        val badgeUrl = levelData.badge?.imageUrl
+                        if (!badgeUrl.isNullOrEmpty()) {
+                            Glide.with(activity).load(badgeUrl).into(profileLevelBadge)
+                        }
+                        profileLevelCard.visibility = View.VISIBLE
+                    }
+                }
+            }
+        }
     }
 
-    private fun updatePreviewBadges(layout: LinearLayout, selectedTypes: List<String>, allBadges: List<ChatIdentityBadge>) {
+    private fun updatePreviewBadges(
+        layout: LinearLayout,
+        selectedTypes: List<String>,
+        allBadges: List<ChatIdentityBadge>,
+        selectedV2Names: List<String> = emptyList(),
+        allBadgesV2: List<dev.xacnio.kciktv.shared.data.model.ChatIdentityBadgeV2> = emptyList()
+    ) {
         layout.removeAllViews()
         val size = (20 * activity.resources.displayMetrics.density).toInt()
         val margin = (2 * activity.resources.displayMetrics.density).toInt()
 
+        // Build a unified list of (sortOrder, render lambda) and sort together
+        val entries = mutableListOf<Pair<Int, () -> Unit>>()
+
+        allBadgesV2
+            .filter { it.name != null && selectedV2Names.contains(it.name) }
+            .forEach { badge ->
+                entries.add(Pair(badge.sortOrder ?: Int.MAX_VALUE) {
+                    val iv = ImageView(activity)
+                    val params = LinearLayout.LayoutParams(size, size)
+                    params.setMargins(0, 0, margin, 0)
+                    iv.layoutParams = params
+                    iv.scaleType = ImageView.ScaleType.FIT_CENTER
+                    val drawableRes = when (badge.name) {
+                        "verified"   -> R.drawable.ic_badge_verified
+                        "staff"      -> R.drawable.ic_badge_staff
+                        "og"         -> R.drawable.ic_badge_og
+                        "sub_gifter" -> R.drawable.ic_badge_sub_gifter
+                        "sidekick"   -> R.drawable.ic_badge_sidekick
+                        "bot"        -> R.drawable.ic_badge_bot
+                        else         -> null
+                    }
+                    if (drawableRes != null) {
+                        iv.setImageResource(drawableRes)
+                        layout.addView(iv)
+                    } else if (!badge.imageUrl.isNullOrEmpty()) {
+                        Glide.with(iv).load(badge.imageUrl).into(iv)
+                        layout.addView(iv)
+                    }
+                })
+            }
+
         selectedTypes.forEach { type ->
             val badge = allBadges.find { it.type == type }
-            val iv = ImageView(activity)
-            val params = LinearLayout.LayoutParams(size, size)
-            params.setMargins(0, 0, margin, 0)
-            iv.layoutParams = params
-            val badgeIcon = getBadgeUrl(type, badge?.count)
-            Glide.with(iv).load(badgeIcon).into(iv)
-            layout.addView(iv)
+            entries.add(Pair(badge?.sortOrder ?: Int.MAX_VALUE) {
+                val iv = ImageView(activity)
+                val params = LinearLayout.LayoutParams(size, size)
+                params.setMargins(0, 0, margin, 0)
+                iv.layoutParams = params
+                val badgeIcon = getBadgeUrl(type, badge?.count)
+                Glide.with(iv).load(badgeIcon).into(iv)
+                layout.addView(iv)
+            })
         }
+
+        entries.sortBy { it.first }
+        entries.forEach { it.second() }
     }
 
     private fun getBadgeUrl(type: String?, count: Int?): Any? {
@@ -633,11 +800,12 @@ class ChatSettingsSheetManager(
         if (channelId == 0L || userId == 0L) return
 
         val badges = profileSelectedBadges.toList()
+        val badgesV2 = profileSelectedBadgesV2.toList()
         val color = profileSelectedColor
 
         lifecycleScope.launch {
             try {
-                repository.updateChatIdentity(channelId, userId, token, badges, color)
+                repository.updateChatIdentity(channelId, userId, token, badges, badgesV2, color)
                 hasProfileChanges = false
                 Log.d("ChatSettings", "Profile identity saved successfully")
             } catch (e: Exception) {

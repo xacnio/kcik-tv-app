@@ -338,10 +338,14 @@ class ChannelRepository {
     /**
      * Updates chat identity for a specific user in a specific channel
      */
-    suspend fun updateChatIdentity(channelId: Long, userId: Long, token: String, badges: List<String>, color: String): Result<Boolean> = withContext(Dispatchers.IO) {
+    suspend fun updateChatIdentity(channelId: Long, userId: Long, token: String, badges: List<String>, badgesV2: List<String>, color: String): Result<Boolean> = withContext(Dispatchers.IO) {
         try {
+            val badgesV2Array = org.json.JSONArray().apply {
+                badgesV2.forEach { name -> put(org.json.JSONObject().put("name", name)) }
+            }
             val jsonBody = org.json.JSONObject().apply {
                 put("badges", org.json.JSONArray(badges))
+                put("badges_v2", badgesV2Array)
                 put("color", color)
             }.toString()
             
@@ -432,6 +436,7 @@ class ChannelRepository {
                         count = badge.count
                     )
                 },
+                badgesV2 = historyMsg.sender.identity?.badgesV2,
                 profilePicture = historyMsg.sender.profilePicture
             ),
             createdAt = parseIsoDate(historyMsg.createdAt),
@@ -494,7 +499,8 @@ class ChannelRepository {
                                 color = senderObj.identity?.color,
                                 badges = senderObj.identity?.badges?.map { b ->
                                     dev.xacnio.kciktv.shared.data.model.PusherBadge(b.type, b.text, b.count)
-                                }
+                                },
+                                badgesV2 = senderObj.identity?.badgesV2
                             )
                         )
                         
@@ -2007,6 +2013,19 @@ class ChannelRepository {
         } catch (e: Exception) {
             Log.e(TAG, "Blerp API Exception: ${e.message}")
             Result.success(null) // Fail gracefully, don't crash for Blerp
+        }
+    }
+
+    suspend fun getUserLevel(token: String): Result<dev.xacnio.kciktv.shared.data.model.UserLevelData> = withContext(Dispatchers.IO) {
+        try {
+            val response = liveStreamsService.getUserLevel("Bearer $token")
+            if (response.isSuccessful && response.body()?.data != null) {
+                Result.success(response.body()!!.data!!)
+            } else {
+                Result.failure(Exception("API error: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 }

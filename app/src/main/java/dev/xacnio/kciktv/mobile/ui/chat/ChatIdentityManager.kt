@@ -55,13 +55,21 @@ class ChatIdentityManager(
                             id = currentUserId,
                             username = prefs.username ?: "Me",
                             color = identity?.color ?: "#53fc18",
-                            badges = identity?.badges?.filter { it.active == true }?.map {
-                                ChatBadge(
-                                    type = it.type ?: "",
-                                    text = it.text,
-                                    count = it.count
-                                )
-                            } ?: emptyList()
+                            badges = identity?.badges
+                                ?.filter { it.active == true }
+                                ?.sortedBy { it.sortOrder ?: Int.MAX_VALUE }
+                                ?.map { ChatBadge(type = it.type ?: "", text = it.text, count = it.count) }
+                                ?: emptyList(),
+                            badgesV2 = identity?.badgesV2
+                                ?.sortedBy { it.sortOrder ?: Int.MAX_VALUE }
+                                ?.map {
+                                    dev.xacnio.kciktv.shared.data.model.ChatBadgeV2(
+                                        name = it.name,
+                                        imageUrl = it.imageUrl,
+                                        selected = it.selected,
+                                        sortOrder = it.sortOrder
+                                    )
+                                }
                         )
                         
                         updateState(isSubscribed, sender)

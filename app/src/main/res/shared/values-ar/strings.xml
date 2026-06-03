@@ -99,6 +99,8 @@
     <string name="recommended_streams">الموصى بها</string>
     <string name="my_list">قائمتي</string>
     <string name="my_channel">قناتي</string>
+    <string name="level_format">المستوى %d</string>
+    <string name="level_towards_next_format">%1$d%% نحو المستوى %2$d</string>
     <string name="search">بحث</string>
     <string name="following">المتابَعون</string>
     <string name="app_settings">إعدادات التطبيق</string>
@@ -670,6 +672,11 @@
     <string name="chat_appearance_title">مظهر الدردشة</string>
     <string name="chat_rules_title">قواعد الدردشة</string>
     <string name="chat_identity_preview">معاينة</string>
+    <string name="chat_identity_badges_section">الشارات</string>
+    <string name="chat_identity_badges_max">يمكن عرض 4 شارات كحد أقصى</string>
+    <string name="chat_identity_global_badges">الشارات العامة: مرئية في جميع القنوات</string>
+    <string name="chat_identity_channel_badges">شارات القناة: مرئية في قناة المذيع</string>
+    <string name="chat_identity_no_badges">لا توجد شارات</string>
     <string name="chat_identity_badges">الشارات</string>
     <string name="chat_identity_color">لون الاسم</string>
     <string name="chat_font_size">حجم الخط</string>

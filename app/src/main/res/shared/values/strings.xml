@@ -99,6 +99,8 @@
     <string name="recommended_streams">Featured</string>
     <string name="my_list">PERSONAL</string>
     <string name="my_channel">My Channel</string>
+    <string name="level_format">Level %d</string>
+    <string name="level_towards_next_format">%1$d%% towards Level %2$d</string>
     <string name="search">Search</string>
     <string name="following">Following</string>
     <string name="app_settings">App Settings</string>
@@ -670,6 +672,11 @@
     <string name="chat_appearance_title">Chat Appearance</string>
     <string name="chat_rules_title">Chat Rules</string>
     <string name="chat_identity_preview">Preview</string>
+    <string name="chat_identity_badges_section">Badges</string>
+    <string name="chat_identity_badges_max">Maximum 4 badges can be shown</string>
+    <string name="chat_identity_global_badges">Global badges: visible on all channels</string>
+    <string name="chat_identity_channel_badges">Channel badges: visible on broadcaster\'s channel</string>
+    <string name="chat_identity_no_badges">No badges available</string>
     <string name="chat_identity_badges">Badges</string>
     <string name="chat_identity_color">Name Color</string>
     <string name="chat_font_size">Font Size</string>

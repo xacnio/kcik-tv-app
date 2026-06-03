@@ -904,7 +904,35 @@ class ChatAdapter(
         // But let's follow standard look for the user: badges + name + content
         
         val badgePlaceholders = mutableListOf<Pair<Int, String>>()
-        
+
+        // Render global badges (badges_v2) first — only selected ones, sorted by sort_order
+        message.sender.badgesV2
+            ?.filter { it.selected == true }
+            ?.sortedBy { it.sortOrder ?: Int.MAX_VALUE }
+            ?.forEach { badge ->
+                val startPos = builder.length
+                val drawableRes = when (badge.name) {
+                    "verified"   -> R.drawable.ic_badge_verified
+                    "staff"      -> R.drawable.ic_badge_staff
+                    "og"         -> R.drawable.ic_badge_og
+                    "sub_gifter" -> R.drawable.ic_badge_sub_gifter
+                    "sidekick"   -> R.drawable.ic_badge_sidekick
+                    "bot"        -> R.drawable.ic_badge_bot
+                    else         -> null
+                }
+                if (drawableRes != null) {
+                    val d = androidx.core.content.ContextCompat.getDrawable(context, drawableRes)?.mutate()
+                    if (d != null) {
+                        d.setBounds(0, 0, badgeSize, badgeSize)
+                        builder.append("  ")
+                        builder.setSpan(CenterImageSpan(d), startPos, startPos + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    }
+                } else if (!badge.imageUrl.isNullOrEmpty()) {
+                    builder.append("  ")
+                    badgePlaceholders.add(startPos to badge.imageUrl)
+                }
+            }
+
         message.sender.badges?.forEach { badge ->
             val startPos = builder.length
             when (badge.type) {
@@ -1597,7 +1625,35 @@ class ChatAdapter(
         
         // Add badges - first add placeholders, then load images
         val badgePlaceholders = mutableListOf<Pair<Int, String>>() // position -> badge URL or emoji
-        
+
+        // Global badges (badges_v2) — selected only, sorted by sort_order
+        message.sender.badgesV2
+            ?.filter { it.selected == true }
+            ?.sortedBy { it.sortOrder ?: Int.MAX_VALUE }
+            ?.forEach { badge ->
+                val startPos = builder.length
+                val drawableRes = when (badge.name) {
+                    "verified"   -> R.drawable.ic_badge_verified
+                    "staff"      -> R.drawable.ic_badge_staff
+                    "og"         -> R.drawable.ic_badge_og
+                    "sub_gifter" -> R.drawable.ic_badge_sub_gifter
+                    "sidekick"   -> R.drawable.ic_badge_sidekick
+                    "bot"        -> R.drawable.ic_badge_bot
+                    else         -> null
+                }
+                if (drawableRes != null) {
+                    val d = androidx.core.content.ContextCompat.getDrawable(context, drawableRes)?.mutate()
+                    if (d != null) {
+                        d.setBounds(0, 0, badgeSize, badgeSize)
+                        builder.append("  ")
+                        builder.setSpan(CenterImageSpan(d), startPos, startPos + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    }
+                } else if (!badge.imageUrl.isNullOrEmpty()) {
+                    builder.append("  ")
+                    badgePlaceholders.add(startPos to badge.imageUrl)
+                }
+            }
+
         message.sender.badges?.forEach { badge ->
             val startPos = builder.length
             when (badge.type) {

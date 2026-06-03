@@ -81,6 +81,7 @@ data class ChatSender(
     val username: String,
     val color: String?,
     val badges: List<ChatBadge>?,
+    val badgesV2: List<ChatBadgeV2>? = null,
     val profilePicture: String? = null
 )
 
@@ -88,6 +89,13 @@ data class ChatBadge(
     val type: String,
     val text: String?,
     val count: Int? = null
+)
+
+data class ChatBadgeV2(
+    @com.google.gson.annotations.SerializedName("name") val name: String?,
+    @com.google.gson.annotations.SerializedName("image_url") val imageUrl: String?,
+    @com.google.gson.annotations.SerializedName("selected") val selected: Boolean?,
+    @com.google.gson.annotations.SerializedName("sort_order") val sortOrder: Int?
 )
 
 /**
@@ -166,9 +174,12 @@ data class PusherSender(
 data class PusherIdentity(
     @SerializedName("color")
     val color: String?,
-    
+
     @SerializedName("badges")
-    val badges: List<PusherBadge>?
+    val badges: List<PusherBadge>?,
+
+    @SerializedName("badges_v2")
+    val badgesV2: List<ChatBadgeV2>?
 )
 
 data class PusherBadge(
@@ -304,9 +315,12 @@ data class ChatHistorySender(
 data class ChatHistoryIdentity(
     @SerializedName("color")
     val color: String?,
-    
+
     @SerializedName("badges")
-    val badges: List<ChatHistoryBadge>?
+    val badges: List<ChatHistoryBadge>?,
+
+    @SerializedName("badges_v2")
+    val badgesV2: List<ChatBadgeV2>?
 )
 
 data class ChatHistoryBadge(

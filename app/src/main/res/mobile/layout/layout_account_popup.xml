@@ -54,6 +54,104 @@
             </LinearLayout>
         </LinearLayout>
 
+        <!-- Level Shimmer (shown while loading) -->
+        <dev.xacnio.kciktv.shared.ui.widget.ShimmerLayout
+            android:id="@+id/popupLevelShimmer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="10dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <View
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="#2A2A2A"/>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="12dp">
+
+                    <View
+                        android:layout_width="72dp"
+                        android:layout_height="12dp"
+                        android:background="#2A2A2A"/>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="4dp"
+                        android:layout_marginTop="6dp"
+                        android:background="#2A2A2A"/>
+
+                    <View
+                        android:layout_width="120dp"
+                        android:layout_height="10dp"
+                        android:layout_marginTop="5dp"
+                        android:background="#2A2A2A"/>
+                </LinearLayout>
+            </LinearLayout>
+        </dev.xacnio.kciktv.shared.ui.widget.ShimmerLayout>
+
+        <!-- Level Card (shown after data loads) -->
+        <LinearLayout
+            android:id="@+id/popupLevelCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="10dp"
+            android:gravity="center_vertical"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/popupLevelBadge"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:scaleType="fitCenter"/>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginStart="12dp">
+
+                <TextView
+                    android:id="@+id/popupLevelText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:textStyle="bold"/>
+
+                <ProgressBar
+                    android:id="@+id/popupLevelProgress"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="4dp"
+                    android:progressTint="#53FC18"
+                    android:max="100"
+                    android:layout_marginTop="4dp"/>
+
+                <TextView
+                    android:id="@+id/popupLevelProgressText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#53FC18"
+                    android:textSize="11sp"
+                    android:layout_marginTop="3dp"/>
+            </LinearLayout>
+        </LinearLayout>
+
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"

@@ -14,11 +14,14 @@ import android.content.Intent
 import android.os.Build
 import android.view.View
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import dev.xacnio.kciktv.mobile.LoginActivity
 import dev.xacnio.kciktv.mobile.MobilePlayerActivity
 import dev.xacnio.kciktv.R
+import kotlinx.coroutines.launch
 
 class AccountPopupManager(private val activity: MobilePlayerActivity) {
 
@@ -73,6 +76,42 @@ class AccountPopupManager(private val activity: MobilePlayerActivity) {
                     .circleCrop()
                     .placeholder(R.drawable.default_avatar)
                     .into(profilePic)
+
+                val token = prefs.authToken
+                if (!token.isNullOrEmpty()) {
+                    val shimmer = view.findViewById<dev.xacnio.kciktv.shared.ui.widget.ShimmerLayout>(R.id.popupLevelShimmer)
+                    shimmer.visibility = View.VISIBLE
+
+                    activity.lifecycleScope.launch {
+                        val result = activity.repository.getUserLevel(token)
+                        shimmer.visibility = View.GONE
+
+                        result.onSuccess { levelData ->
+                            val levelCard = view.findViewById<View>(R.id.popupLevelCard)
+                            val badgeView = view.findViewById<ImageView>(R.id.popupLevelBadge)
+                            val levelText = view.findViewById<TextView>(R.id.popupLevelText)
+                            val progressBar = view.findViewById<ProgressBar>(R.id.popupLevelProgress)
+                            val progressText = view.findViewById<TextView>(R.id.popupLevelProgressText)
+
+                            levelText.text = activity.getString(R.string.level_format, levelData.level)
+                            progressBar.progress = levelData.progressPercent
+                            progressText.text = activity.getString(
+                                R.string.level_towards_next_format,
+                                levelData.progressPercent,
+                                levelData.level + 1
+                            )
+
+                            val badgeUrl = levelData.badge?.imageUrl
+                            if (!badgeUrl.isNullOrEmpty()) {
+                                Glide.with(activity)
+                                    .load(badgeUrl)
+                                    .into(badgeView)
+                            }
+
+                            levelCard.visibility = View.VISIBLE
+                        }
+                    }
+                }
 
                 view.findViewById<View>(R.id.btnPopupMyChannel).setOnClickListener {
                     popupWindow.dismiss()

@@ -32,6 +32,7 @@ data class ChatIdentityData(
 
 data class UserChatIdentity(
     @SerializedName("badges") val badges: List<ChatIdentityBadge>?,
+    @SerializedName("badges_v2") val badgesV2: List<ChatIdentityBadgeV2>?,
     @SerializedName("color") val color: String?
 )
 
@@ -39,5 +40,19 @@ data class ChatIdentityBadge(
     @SerializedName("type") val type: String?,
     @SerializedName("text") val text: String?,
     @SerializedName("count") val count: Int? = null,
-    @SerializedName("active") val active: Boolean? = null
+    @SerializedName("active") val active: Boolean? = null,
+    @SerializedName("sort_order") val sortOrder: Int? = null
+)
+
+data class ChatIdentityBadgeV2(
+    @SerializedName("name") val name: String?,
+    @SerializedName("badge_type") val badgeType: String?,
+    @SerializedName("image_url") val imageUrl: String?,
+    @SerializedName("metadata") val metadata: BadgeV2Metadata?,
+    @SerializedName("selected") val selected: Boolean?,
+    @SerializedName("sort_order") val sortOrder: Int?
+)
+
+data class BadgeV2Metadata(
+    @SerializedName("level") val level: Int?
 )

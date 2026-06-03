@@ -99,6 +99,8 @@
     <string name="recommended_streams">Önerilenler</string>
     <string name="my_list">KİŞİSEL</string>
     <string name="my_channel">Kendi Kanalım</string>
+    <string name="level_format">Seviye %d</string>
+    <string name="level_towards_next_format">Seviye %2$d (%1$d%% tamamlandı)</string>
     <string name="search">Arama</string>
     <string name="following">Takip Edilenler</string>
     <string name="app_settings">Uygulama Ayarları</string>
@@ -670,6 +672,11 @@
     <string name="chat_appearance_title">Sohbet Görünümü</string>
     <string name="chat_rules_title">Sohbet Kuralları</string>
     <string name="chat_identity_preview">Önizleme</string>
+    <string name="chat_identity_badges_section">Rozetler</string>
+    <string name="chat_identity_badges_max">Maksimum 4 rozet gösterilebilir</string>
+    <string name="chat_identity_global_badges">Genel rozetler: tüm kanallarda görünür</string>
+    <string name="chat_identity_channel_badges">Kanal rozetleri: yayıncının kanalında görünür</string>
+    <string name="chat_identity_no_badges">Rozet bulunmuyor</string>
     <string name="chat_identity_badges">Rozetler</string>
     <string name="chat_identity_color">İsim Rengi</string>
     <string name="chat_font_size">Yazı Boyutu</string>
