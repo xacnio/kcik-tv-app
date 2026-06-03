@@ -16,7 +16,10 @@ data class UserLevelData(
     @SerializedName("xp_to_next_level") val xpToNextLevel: Int
 ) {
     val progressPercent: Int
-        get() = if (xpToNextLevel > 0) (progressXp * 100 / xpToNextLevel).coerceIn(0, 100) else 0
+        get() {
+            val total = progressXp + xpToNextLevel
+            return if (total > 0) (progressXp * 100 / total).coerceIn(0, 100) else 0
+        }
 }
 
 data class UserLevelBadge(
