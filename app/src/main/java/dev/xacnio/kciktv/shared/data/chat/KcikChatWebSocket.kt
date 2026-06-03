@@ -48,9 +48,9 @@ class KcikChatWebSocket(
         private data class ClusterConfig(val base: String, val version: String, val authCluster: Boolean = false)
 
         private val CLUSTERS = listOf(
-            ClusterConfig("wss://ws-us3.pusher.com/app/dd11c46dae0376080879", "8.5.0"),
-            ClusterConfig("wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679", "8.4.0-rc2", authCluster = true),
-            ClusterConfig("wss://ws-mt1.pusher.com/app/73aa60a071d0943a6b3e", "8.5.0")
+            ClusterConfig("wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679", "8.4.0-rc2", authCluster = true)
+            //ClusterConfig("wss://ws-us3.pusher.com/app/dd11c46dae0376080879", "8.5.0"),  
+            //ClusterConfig("wss://ws-mt1.pusher.com/app/73aa60a071d0943a6b3e", "8.5.0")
         )
 
         private fun buildWebSocketUrl(cfg: ClusterConfig): String {
@@ -790,6 +790,7 @@ class KcikChatWebSocket(
                                     ChatBadge(type = type, text = badge.text, count = badge.count)
                                 }
                             },
+                            badgesV2 = s.identity?.badgesV2,
                             profilePicture = s.profilePicture
                         )
                     },
@@ -818,6 +819,7 @@ class KcikChatWebSocket(
                         ChatBadge(type = type, text = badge.text, count = badge.count)
                     }
                 },
+                badgesV2 = sender.identity?.badgesV2,
                 profilePicture = sender.profilePicture
             ),
             messageRef = messageRef,
