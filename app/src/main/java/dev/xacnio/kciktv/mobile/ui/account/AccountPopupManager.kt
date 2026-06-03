@@ -10,9 +10,12 @@
  */
 package dev.xacnio.kciktv.mobile.ui.account
 
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
 import android.content.Intent
 import android.os.Build
 import android.view.View
+import android.view.animation.DecelerateInterpolator
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -21,6 +24,7 @@ import com.bumptech.glide.Glide
 import dev.xacnio.kciktv.mobile.LoginActivity
 import dev.xacnio.kciktv.mobile.MobilePlayerActivity
 import dev.xacnio.kciktv.R
+import dev.xacnio.kciktv.shared.data.model.UserLevelData
 import kotlinx.coroutines.launch
 
 class AccountPopupManager(private val activity: MobilePlayerActivity) {
@@ -28,14 +32,10 @@ class AccountPopupManager(private val activity: MobilePlayerActivity) {
     private val prefs get() = activity.prefs
     private val channelProfileManager get() = activity.channelProfileManager
 
-    /**
-     * Shows the account popup menu anchored to the given view.
-     */
     fun showAccountPopupMenu(anchor: View) {
         try {
             val view = activity.layoutInflater.inflate(R.layout.layout_account_popup, null)
 
-            // Calculate width in pixels (280dp)
             val density = activity.resources.displayMetrics.density
             val widthPx = (280 * density).toInt()
 
@@ -46,7 +46,6 @@ class AccountPopupManager(private val activity: MobilePlayerActivity) {
                 true
             )
 
-            // Allow background clicks to dismiss
             popupWindow.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 popupWindow.elevation = 16f
@@ -80,35 +79,33 @@ class AccountPopupManager(private val activity: MobilePlayerActivity) {
                 val token = prefs.authToken
                 if (!token.isNullOrEmpty()) {
                     val shimmer = view.findViewById<dev.xacnio.kciktv.shared.ui.widget.ShimmerLayout>(R.id.popupLevelShimmer)
-                    shimmer.visibility = View.VISIBLE
+                    val levelCard = view.findViewById<View>(R.id.popupLevelCard)
+                    val badgeView = view.findViewById<ImageView>(R.id.popupLevelBadge)
+                    val levelText = view.findViewById<TextView>(R.id.popupLevelText)
+                    val progressBar = view.findViewById<ProgressBar>(R.id.popupLevelProgress)
+                    val progressText = view.findViewById<TextView>(R.id.popupLevelProgressText)
+
+                    val cached = activity.cachedUserLevel
+                    if (cached != null) {
+                        shimmer.visibility = View.GONE
+                        applyLevelData(cached, levelCard, badgeView, levelText, progressBar, progressText)
+                    } else {
+                        shimmer.visibility = View.VISIBLE
+                    }
 
                     activity.lifecycleScope.launch {
                         val result = activity.repository.getUserLevel(token)
-                        shimmer.visibility = View.GONE
-
-                        result.onSuccess { levelData ->
-                            val levelCard = view.findViewById<View>(R.id.popupLevelCard)
-                            val badgeView = view.findViewById<ImageView>(R.id.popupLevelBadge)
-                            val levelText = view.findViewById<TextView>(R.id.popupLevelText)
-                            val progressBar = view.findViewById<ProgressBar>(R.id.popupLevelProgress)
-                            val progressText = view.findViewById<TextView>(R.id.popupLevelProgressText)
-
-                            levelText.text = activity.getString(R.string.level_format, levelData.level)
-                            progressBar.progress = levelData.progressPercent
-                            progressText.text = activity.getString(
-                                R.string.level_towards_next_format,
-                                levelData.progressPercent,
-                                levelData.level + 1
-                            )
-
-                            val badgeUrl = levelData.badge?.imageUrl
-                            if (!badgeUrl.isNullOrEmpty()) {
-                                Glide.with(activity)
-                                    .load(badgeUrl)
-                                    .into(badgeView)
+                        activity.runOnUiThread {
+                            shimmer.visibility = View.GONE
+                            result.onSuccess { newData ->
+                                val oldData = activity.cachedUserLevel
+                                activity.cachedUserLevel = newData
+                                if (oldData == null) {
+                                    applyLevelData(newData, levelCard, badgeView, levelText, progressBar, progressText)
+                                } else {
+                                    animateLevelUpdate(oldData, newData, levelCard, badgeView, levelText, progressBar, progressText)
+                                }
                             }
-
-                            levelCard.visibility = View.VISIBLE
                         }
                     }
                 }
@@ -147,11 +144,95 @@ class AccountPopupManager(private val activity: MobilePlayerActivity) {
                 }
             }
 
-            // Show popup below anchor
             popupWindow.showAsDropDown(anchor, 0, (12 * density).toInt())
 
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    private fun applyLevelData(
+        data: UserLevelData,
+        levelCard: View,
+        badgeView: ImageView,
+        levelText: TextView,
+        progressBar: ProgressBar,
+        progressText: TextView
+    ) {
+        levelText.text = activity.getString(R.string.level_format, data.level)
+        progressBar.progress = data.progressPercent
+        progressText.text = activity.getString(
+            R.string.level_towards_next_format,
+            data.progressPercent,
+            data.level + 1
+        )
+        val badgeUrl = data.badge?.imageUrl
+        if (!badgeUrl.isNullOrEmpty()) {
+            Glide.with(activity).load(badgeUrl).into(badgeView)
+        }
+        levelCard.visibility = View.VISIBLE
+    }
+
+    private fun animateLevelUpdate(
+        oldData: UserLevelData,
+        newData: UserLevelData,
+        levelCard: View,
+        badgeView: ImageView,
+        levelText: TextView,
+        progressBar: ProgressBar,
+        progressText: TextView
+    ) {
+        levelCard.visibility = View.VISIBLE
+        val leveledUp = newData.level > oldData.level
+
+        val badgeUrl = newData.badge?.imageUrl
+        if (!badgeUrl.isNullOrEmpty() && badgeUrl != oldData.badge?.imageUrl) {
+            Glide.with(activity).load(badgeUrl).into(badgeView)
+        }
+
+        progressText.text = activity.getString(
+            R.string.level_towards_next_format,
+            newData.progressPercent,
+            newData.level + 1
+        )
+
+        if (leveledUp) {
+            levelText.text = activity.getString(R.string.level_format, newData.level)
+
+            // Fill to 100%, then reset and fill to new level's progress
+            ValueAnimator.ofInt(oldData.progressPercent, 100).apply {
+                duration = 400
+                interpolator = DecelerateInterpolator()
+                addUpdateListener { progressBar.progress = it.animatedValue as Int }
+                addListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: android.animation.Animator) {
+                        progressBar.progress = 0
+                        ValueAnimator.ofInt(0, newData.progressPercent).apply {
+                            duration = 600
+                            interpolator = DecelerateInterpolator()
+                            addUpdateListener { progressBar.progress = it.animatedValue as Int }
+                            start()
+                        }
+                    }
+                })
+                start()
+            }
+
+            levelText.animate().scaleX(1.35f).scaleY(1.35f).setDuration(200).withEndAction {
+                levelText.animate().scaleX(1f).scaleY(1f).setDuration(200).start()
+            }.start()
+            badgeView.animate().scaleX(1.25f).scaleY(1.25f).setDuration(200).withEndAction {
+                badgeView.animate().scaleX(1f).scaleY(1f).setDuration(200).start()
+            }.start()
+        } else {
+            levelText.text = activity.getString(R.string.level_format, newData.level)
+
+            ValueAnimator.ofInt(oldData.progressPercent, newData.progressPercent).apply {
+                duration = 600
+                interpolator = DecelerateInterpolator()
+                addUpdateListener { progressBar.progress = it.animatedValue as Int }
+                start()
+            }
         }
     }
 }

@@ -13,15 +13,19 @@ package dev.xacnio.kciktv.mobile.ui.chat
 import dev.xacnio.kciktv.shared.ui.chat.ChatRulesManager
 import dev.xacnio.kciktv.shared.data.model.ChannelItem
 
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.util.Log
 import android.view.View
+import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.GridLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.widget.SwitchCompat
@@ -30,6 +34,7 @@ import com.bumptech.glide.Glide
 import dev.xacnio.kciktv.mobile.MobilePlayerActivity
 import dev.xacnio.kciktv.R
 import dev.xacnio.kciktv.shared.data.model.ChatIdentityBadge
+import dev.xacnio.kciktv.shared.data.model.UserLevelData
 import dev.xacnio.kciktv.shared.data.prefs.AppPreferences
 
 import kotlinx.coroutines.CoroutineScope
@@ -692,21 +697,21 @@ class ChatSettingsSheetManager(
 
         // Load level progress
         if (!token.isNullOrEmpty()) {
+            val cached = activity.cachedUserLevel
+            if (cached != null) {
+                applyLevelData(cached, profileLevelCard, profileLevelBadge, profileLevelText, profileLevelProgress, profileLevelProgressText)
+            }
+
             lifecycleScope.launch {
-                repository.getUserLevel(token).onSuccess { levelData ->
+                repository.getUserLevel(token).onSuccess { newData ->
                     activity.runOnUiThread {
-                        profileLevelText.text = activity.getString(R.string.level_format, levelData.level)
-                        profileLevelProgress.progress = levelData.progressPercent
-                        profileLevelProgressText.text = activity.getString(
-                            R.string.level_towards_next_format,
-                            levelData.progressPercent,
-                            levelData.level + 1
-                        )
-                        val badgeUrl = levelData.badge?.imageUrl
-                        if (!badgeUrl.isNullOrEmpty()) {
-                            Glide.with(activity).load(badgeUrl).into(profileLevelBadge)
+                        val oldData = activity.cachedUserLevel
+                        activity.cachedUserLevel = newData
+                        if (oldData == null) {
+                            applyLevelData(newData, profileLevelCard, profileLevelBadge, profileLevelText, profileLevelProgress, profileLevelProgressText)
+                        } else {
+                            animateLevelUpdate(oldData, newData, profileLevelCard, profileLevelBadge, profileLevelText, profileLevelProgress, profileLevelProgressText)
                         }
-                        profileLevelCard.visibility = View.VISIBLE
                     }
                 }
             }
@@ -897,6 +902,90 @@ class ChatSettingsSheetManager(
             "zoom_out" -> activity.getString(R.string.animation_zoom_out)
             "swing" -> activity.getString(R.string.animation_swing)
             else -> activity.getString(R.string.animation_none)
+        }
+    }
+
+    private fun applyLevelData(
+        data: UserLevelData,
+        levelCard: View,
+        badgeView: ImageView,
+        levelText: TextView,
+        progressBar: ProgressBar,
+        progressText: TextView
+    ) {
+        levelText.text = activity.getString(R.string.level_format, data.level)
+        progressBar.progress = data.progressPercent
+        progressText.text = activity.getString(
+            R.string.level_towards_next_format,
+            data.progressPercent,
+            data.level + 1
+        )
+        val badgeUrl = data.badge?.imageUrl
+        if (!badgeUrl.isNullOrEmpty()) {
+            Glide.with(activity).load(badgeUrl).into(badgeView)
+        }
+        levelCard.visibility = View.VISIBLE
+    }
+
+    private fun animateLevelUpdate(
+        oldData: UserLevelData,
+        newData: UserLevelData,
+        levelCard: View,
+        badgeView: ImageView,
+        levelText: TextView,
+        progressBar: ProgressBar,
+        progressText: TextView
+    ) {
+        levelCard.visibility = View.VISIBLE
+        val leveledUp = newData.level > oldData.level
+
+        val badgeUrl = newData.badge?.imageUrl
+        if (!badgeUrl.isNullOrEmpty() && badgeUrl != oldData.badge?.imageUrl) {
+            Glide.with(activity).load(badgeUrl).into(badgeView)
+        }
+
+        progressText.text = activity.getString(
+            R.string.level_towards_next_format,
+            newData.progressPercent,
+            newData.level + 1
+        )
+
+        if (leveledUp) {
+            levelText.text = activity.getString(R.string.level_format, newData.level)
+
+            ValueAnimator.ofInt(oldData.progressPercent, 100).apply {
+                duration = 400
+                interpolator = DecelerateInterpolator()
+                addUpdateListener { progressBar.progress = it.animatedValue as Int }
+                addListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: android.animation.Animator) {
+                        progressBar.progress = 0
+                        ValueAnimator.ofInt(0, newData.progressPercent).apply {
+                            duration = 600
+                            interpolator = DecelerateInterpolator()
+                            addUpdateListener { progressBar.progress = it.animatedValue as Int }
+                            start()
+                        }
+                    }
+                })
+                start()
+            }
+
+            levelText.animate().scaleX(1.35f).scaleY(1.35f).setDuration(200).withEndAction {
+                levelText.animate().scaleX(1f).scaleY(1f).setDuration(200).start()
+            }.start()
+            badgeView.animate().scaleX(1.25f).scaleY(1.25f).setDuration(200).withEndAction {
+                badgeView.animate().scaleX(1f).scaleY(1f).setDuration(200).start()
+            }.start()
+        } else {
+            levelText.text = activity.getString(R.string.level_format, newData.level)
+
+            ValueAnimator.ofInt(oldData.progressPercent, newData.progressPercent).apply {
+                duration = 600
+                interpolator = DecelerateInterpolator()
+                addUpdateListener { progressBar.progress = it.animatedValue as Int }
+                start()
+            }
         }
     }
 

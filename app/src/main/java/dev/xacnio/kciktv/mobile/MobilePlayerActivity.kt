@@ -298,6 +298,7 @@ class MobilePlayerActivity : FragmentActivity() {
         get() = if (::settingsPanelManager.isInitialized) settingsPanelManager.isSettingsVisible else false
     internal var isErrorStateActive = false
     internal var showFullViewerCount = false
+    internal var cachedUserLevel: dev.xacnio.kciktv.shared.data.model.UserLevelData? = null
     internal val chatStateManager: dev.xacnio.kciktv.mobile.ui.chat.ChatStateManager by lazy {
         dev.xacnio.kciktv.mobile.ui.chat.ChatStateManager(this, prefs)
     }
