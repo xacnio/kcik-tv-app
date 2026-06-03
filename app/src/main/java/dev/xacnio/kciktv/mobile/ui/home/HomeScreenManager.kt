@@ -221,7 +221,12 @@ class HomeScreenManager(private val activity: MobilePlayerActivity) {
                     binding.homeScreenContainer.homeSwipeRefresh.visibility = View.VISIBLE
                     binding.startupLoadingOverlay.visibility = View.GONE
                     activity.homeDataLoaded = true
-                    
+
+                    // If no stream is active when data refreshes, restore hero to full mode
+                    if (!activity.miniPlayerManager.isMiniPlayerMode) {
+                        exitThumbnailMode()
+                    }
+
                     // Clear preload cache after first successful load
                     PreloadCache.clear()
                 }
@@ -251,6 +256,9 @@ class HomeScreenManager(private val activity: MobilePlayerActivity) {
             if (heroVisible) onHeroScrolledBack() else onHeroScrolledOff()
         }
     }
+
+    fun enterThumbnailMode() { featuredHero?.enterThumbnailMode() }
+    fun exitThumbnailMode() { featuredHero?.exitThumbnailMode() }
 
     fun onHomeHidden() {
         isHomeVisible = false

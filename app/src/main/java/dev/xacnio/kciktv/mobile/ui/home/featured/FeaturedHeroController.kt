@@ -29,6 +29,7 @@ class FeaturedHeroController(private val activity: MobilePlayerActivity) {
     private var currentPosition = 0
     private var isBound = false
     private var isMuted = true
+    private var thumbnailOnlyMode = false
 
     private val autoAdvanceRunnable = Runnable {
         val p = pager ?: return@Runnable
@@ -55,7 +56,7 @@ class FeaturedHeroController(private val activity: MobilePlayerActivity) {
                 mainHandler.removeCallbacks(autoAdvanceRunnable)
             } else if (state == ViewPager2.SCROLL_STATE_IDLE) {
                 val channel = adapter?.getChannel(currentPosition) ?: return
-                if (previewPlayer.isWifi()) {
+                if (!thumbnailOnlyMode && previewPlayer.isWifi()) {
                     previewPlayer.loadAndPlay(channel.playbackUrl)
                 }
                 scheduleAutoAdvance()
@@ -165,9 +166,37 @@ class FeaturedHeroController(private val activity: MobilePlayerActivity) {
             previewPlayer.attachTo(vh.playerContainer)
             updateMuteIcon(vh.muteBtn)
             val channel = adapter?.getChannel(currentPosition) ?: return@post
-            if (previewPlayer.isWifi()) previewPlayer.loadAndPlay(channel.playbackUrl)
-            chatPreview?.switchTo(channel.chatroomId, channel.id.toLongOrNull(), force = forceChat)
+            if (!thumbnailOnlyMode && previewPlayer.isWifi()) previewPlayer.loadAndPlay(channel.playbackUrl)
+            if (!thumbnailOnlyMode) chatPreview?.switchTo(channel.chatroomId, channel.id.toLongOrNull(), force = forceChat)
         }
+    }
+
+    fun enterThumbnailMode() {
+        if (thumbnailOnlyMode) return
+        thumbnailOnlyMode = true
+        previewPlayer.pause()
+        chatPreview?.pause()
+        chatContainer?.visibility = View.GONE
+        setMuteBtnVisibility(View.GONE)
+    }
+
+    fun exitThumbnailMode() {
+        if (!thumbnailOnlyMode) return
+        thumbnailOnlyMode = false
+        chatContainer?.visibility = View.VISIBLE
+        setMuteBtnVisibility(View.VISIBLE)
+        if (!isBound) return
+        val channel = adapter?.getChannel(currentPosition) ?: return
+        if (previewPlayer.isWifi()) previewPlayer.loadAndPlay(channel.playbackUrl)
+        chatPreview?.reconnect()
+    }
+
+    private fun setMuteBtnVisibility(visibility: Int) {
+        val rv = (pager?.getChildAt(0) as? RecyclerView) ?: return
+        val vh = (rv.findViewHolderForAdapterPosition(currentPosition)
+            ?: rv.findViewHolderForLayoutPosition(currentPosition)) as? FeaturedHeroAdapter.PageViewHolder
+            ?: return
+        vh.muteBtn.visibility = visibility
     }
 
     // Called when home screen is hidden (e.g., user opens a channel)
@@ -182,11 +211,10 @@ class FeaturedHeroController(private val activity: MobilePlayerActivity) {
     fun onResume() {
         if (!isBound) return
         val channel = adapter?.getChannel(currentPosition)
-        // Skip video while mini player is active — two IVS decoders simultaneously can fail
-        if (channel != null && previewPlayer.isWifi() && !activity.miniPlayerManager.isMiniPlayerMode) {
+        if (!thumbnailOnlyMode && channel != null && previewPlayer.isWifi()) {
             previewPlayer.loadAndPlay(channel.playbackUrl)
         }
-        chatPreview?.reconnect()
+        if (!thumbnailOnlyMode) chatPreview?.reconnect()
         scheduleAutoAdvance()
     }
 
@@ -194,10 +222,10 @@ class FeaturedHeroController(private val activity: MobilePlayerActivity) {
     fun onScrollResume() {
         if (!isBound) return
         val channel = adapter?.getChannel(currentPosition)
-        if (channel != null && previewPlayer.isWifi() && !activity.miniPlayerManager.isMiniPlayerMode) {
+        if (!thumbnailOnlyMode && channel != null && previewPlayer.isWifi()) {
             previewPlayer.loadAndPlay(channel.playbackUrl)
         }
-        chatPreview?.resume()
+        if (!thumbnailOnlyMode) chatPreview?.resume()
         scheduleAutoAdvance()
     }
 
@@ -218,10 +246,11 @@ class FeaturedHeroController(private val activity: MobilePlayerActivity) {
             ?: return
         previewPlayer.detach()
         previewPlayer.attachTo(vh.playerContainer)
+        vh.muteBtn.visibility = if (thumbnailOnlyMode) View.GONE else View.VISIBLE
         updateMuteIcon(vh.muteBtn)
 
         val channel = adapter?.getChannel(position) ?: return
-        if (previewPlayer.isWifi()) {
+        if (!thumbnailOnlyMode && previewPlayer.isWifi()) {
             previewPlayer.loadAndPlay(channel.playbackUrl)
         }
     }

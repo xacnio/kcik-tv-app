@@ -95,6 +95,7 @@ class MiniPlayerManager(private val activity: MobilePlayerActivity) {
      * Closes the mini player and stops playback.
      */
     fun closeMiniPlayer() {
+        activity.homeScreenManager.exitThumbnailMode()
         activity.stopPlayer()
         
         // CRITICAL: Reset side chat state to prevent "Stuck Split Screen" bug

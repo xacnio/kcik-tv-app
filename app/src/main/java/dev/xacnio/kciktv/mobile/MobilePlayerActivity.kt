@@ -1110,7 +1110,8 @@ class MobilePlayerActivity : FragmentActivity() {
 
     internal fun enterMiniPlayerMode() {
         miniPlayerManager.enterMiniPlayerMode()
-        
+        homeScreenManager.enterThumbnailMode()
+
         // Always pause chat UI in mini player mode (chat is hidden)
         chatUiManager.isChatUiPaused = true
         
@@ -2990,7 +2991,7 @@ class MobilePlayerActivity : FragmentActivity() {
         
         if (channel.isLive) {
             Log.d(TAG, "  channel is live -> playChannel()")
-            // Channel is live - play it directly
+            homeScreenManager.enterThumbnailMode()
             playChannel(channel)
         } else {
             Log.d(TAG, "  channel is offline -> openChannelProfile()")
@@ -3164,6 +3165,7 @@ class MobilePlayerActivity : FragmentActivity() {
         // Only pause player if NOT in mini-player mode
         if (!miniPlayerManager.isMiniPlayerMode) {
             ivsPlayer?.pause()
+            homeScreenManager.exitThumbnailMode()
         }
         
         // Show home screen, hide others
