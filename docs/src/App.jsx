@@ -1,89 +1,514 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { DownloadSimple, ShieldCheck, Star, Users, GithubLogo, AndroidLogo, Television, DeviceMobile, DeviceTablet, AppWindow, ChatCircleText, PictureInPicture, SpeakerHigh, ShieldSlash, Lightning, QrCode, Code, WifiHigh, Bell, MonitorPlay, WifiNone, Download, Package, Camera, HardDrives, Vibrate, Eye, CheckCircle, CaretDown, CaretUp, File, Clock, Tag } from '@phosphor-icons/react';
+import {
+  DownloadSimple, ShieldCheck, ShieldSlash, GithubLogo, AndroidLogo,
+  Television, DeviceMobile, DeviceTablet, AppWindow, ChatCircleText,
+  PlayCircle, Medal, Gift, Compass, UserCircle, Gauge,
+  Code, Translate, Check, Eye, CaretDown, File, Clock, Tag,
+  List, X, SignIn, GearSix, Coffee
+} from '@phosphor-icons/react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
+import FeatureMock from './FeatureMocks';
 
-// --- Components ---
+// --- Helpers ---
 
 const getAssetPath = (path) => {
   const base = import.meta.env.BASE_URL;
-  // Ensure we don't end up with strictly double slashes unless needed, 
-  // though browsers handle it fine.
   return base + (path.startsWith('/') ? path.slice(1) : path);
 };
 
-const Navbar = () => (
-  <nav className="fixed top-0 w-full z-50 glass border-b border-white/5">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex items-center justify-between h-16">
-        <div className="flex items-center gap-2">
-          <img src={getAssetPath("logo.svg")} alt="KCIKTV" className="w-8 h-8 rounded-full" />
-          <span className="font-bold text-xl tracking-tight">KCIKTV</span>
-        </div>
-        <div className="hidden md:flex items-center space-x-8">
-          <a href="#features" className="text-gray-300 hover:text-brand-500 transition-colors text-sm font-medium">Features</a>
-          <a href="#screenshots" className="text-gray-300 hover:text-brand-500 transition-colors text-sm font-medium">Screenshots</a>
-        </div>
-        <a href="#download" className="bg-brand-500 hover:bg-brand-400 text-black px-4 py-2 rounded-lg font-semibold text-sm transition-all transform hover:scale-105 active:scale-95">
-          Download
+const GITHUB_REPO = 'https://github.com/xacnio/kcik-tv-app';
+
+const SectionHeading = ({ eyebrow, title, subtitle }) => (
+  <div className="mb-12 max-w-2xl">
+    {eyebrow && (
+      <span className="mb-3 block font-mono text-xs uppercase tracking-[0.2em] text-brand-500">
+        {eyebrow}
+      </span>
+    )}
+    <h2 className="text-3xl font-semibold tracking-tight md:text-[2.5rem] md:leading-[1.1]">{title}</h2>
+    {subtitle && <p className="mt-3 text-[15px] leading-relaxed text-gray-400">{subtitle}</p>}
+  </div>
+);
+
+// --- Navbar ---
+
+const NAV_LINKS = [
+  { href: '#features', label: 'Features' },
+  { href: '#screenshots', label: 'Screenshots' },
+  { href: '#download', label: 'Download' },
+];
+
+const Navbar = () => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <nav className="fixed top-0 z-50 w-full glass">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <a href="#top" onClick={() => setOpen(false)} className="flex items-center gap-2.5">
+          <img src={getAssetPath('logo.svg')} alt="KCIKTV" className="h-8 w-8 rounded-full" />
+          <span className="text-xl font-extrabold tracking-tight">KCIKTV</span>
         </a>
+
+        <div className="hidden items-center gap-8 md:flex">
+          {NAV_LINKS.map((l) => (
+            <a key={l.href} href={l.href} className="text-sm font-medium text-gray-300 transition-colors hover:text-brand-500">
+              {l.label}
+            </a>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <a
+            href={GITHUB_REPO}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="GitHub"
+            className="hidden h-10 w-10 items-center justify-center rounded-lg text-gray-300 transition-colors hover:bg-white/5 hover:text-white sm:flex"
+          >
+            <GithubLogo weight="fill" size={22} />
+          </a>
+          <a
+            href="#download"
+            className="hidden rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-black transition-all hover:bg-brand-400 active:scale-95 sm:block"
+          >
+            Download
+          </a>
+          <button
+            onClick={() => setOpen(!open)}
+            aria-label="Toggle menu"
+            className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-300 transition-colors hover:bg-white/5 md:hidden"
+          >
+            {open ? <X size={22} /> : <List size={22} />}
+          </button>
+        </div>
       </div>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden border-t border-white/[0.06] md:hidden"
+          >
+            <div className="flex flex-col gap-1 px-4 py-3">
+              {NAV_LINKS.map((l) => (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg px-3 py-2.5 text-sm font-medium text-gray-300 transition-colors hover:bg-white/5 hover:text-brand-500"
+                >
+                  {l.label}
+                </a>
+              ))}
+              <a
+                href={GITHUB_REPO}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => setOpen(false)}
+                className="rounded-lg px-3 py-2.5 text-sm font-medium text-gray-300 transition-colors hover:bg-white/5 hover:text-brand-500"
+              >
+                GitHub
+              </a>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </nav>
+  );
+};
+
+// --- Hero ---
+
+const heroBadges = [
+  { icon: ShieldSlash, label: 'Zero Ads' },
+  { icon: ShieldCheck, label: 'No Tracking' },
+  { icon: Code, label: 'Open Source' },
+  { icon: Translate, label: '6 Languages' },
+];
+
+const HeroShowcase = () => (
+  <motion.div
+    initial={{ opacity: 0, y: 40 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 0.7, duration: 0.8, ease: 'easeOut' }}
+    className="relative mx-auto mt-20 w-full max-w-4xl px-4"
+  >
+    {/* TV / desktop frame */}
+    <div className="relative overflow-hidden rounded-xl border border-white/10 bg-dark-card shadow-xl shadow-black/40">
+      <div className="flex items-center gap-1.5 border-b border-white/10 bg-black/30 px-4 py-2.5">
+        <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
+        <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
+        <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
+      </div>
+      <img src={getAssetPath('screenshots/tv-home.png')} alt="KCIKTV on Android TV" className="w-full" loading="eager" />
     </div>
-  </nav>
+
+    {/* Floating phone */}
+    <motion.div
+      initial={{ opacity: 0, x: 20, y: 24 }}
+      animate={{ opacity: 1, x: 0, y: 0 }}
+      transition={{ delay: 1, duration: 0.7, ease: 'easeOut' }}
+      className="absolute -bottom-8 right-2 hidden w-[150px] overflow-hidden rounded-[1.75rem] border-4 border-dark-border bg-dark-card shadow-xl shadow-black/50 md:block lg:right-6 lg:w-[180px]"
+    >
+      <img src={getAssetPath('screenshots/mobile-feed.png')} alt="KCIKTV on mobile" className="w-full" loading="eager" />
+    </motion.div>
+  </motion.div>
 );
 
 const Hero = () => (
-  <section className="relative pt-32 pb-20 overflow-hidden hero-gradient">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
+  <section id="top" className="relative overflow-hidden pb-28 pt-36">
+    <div className="mx-auto flex max-w-3xl flex-col items-center px-4 text-center sm:px-6">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="mb-6"
+        initial={{ opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
       >
-        <img src={getAssetPath("logo.svg")} alt="KCIKTV" className="w-24 h-24 rounded-full mx-auto mb-6 shadow-[0_0_50px_rgba(83,252,24,0.3)]" />
-        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-4">
-          KCIK<span className="text-brand-500">TV</span>
-        </h1>
-        <p className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
-          The ultimate open-source Kick client for Android TV and Mobile.
-        </p>
+        <img
+          src={getAssetPath('logo.svg')}
+          alt="KCIKTV"
+          className="mx-auto mb-8 h-20 w-20 rounded-2xl border border-white/10"
+        />
       </motion.div>
 
+      <motion.span
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15, duration: 0.5 }}
+        className="mb-5 block font-mono text-xs uppercase tracking-[0.2em] text-gray-500"
+      >
+        Unofficial Kick client · TV · Mobile · Tablet
+      </motion.span>
 
+      <motion.h1
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25, duration: 0.6 }}
+        className="text-5xl font-bold tracking-tight md:text-7xl"
+      >
+        KCIK<span className="text-brand-500">TV</span>
+      </motion.h1>
+
+      <motion.p
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.35, duration: 0.6 }}
+        className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-gray-400"
+      >
+        An open-source Kick client for Android. No ads, low latency, and no tracking.
+      </motion.p>
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5, duration: 0.6 }}
-        className="flex flex-col sm:flex-row gap-4 w-full justify-center"
+        transition={{ delay: 0.45, duration: 0.6 }}
+        className="mt-9 flex w-full flex-col justify-center gap-3 sm:flex-row"
       >
-        <a href="#download" className="bg-brand-500 hover:bg-brand-400 text-black px-8 py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-brand-500/20">
-          <AndroidLogo weight="bold" size={24} />
+        <a
+          href="#download"
+          className="flex items-center justify-center gap-2 rounded-md bg-brand-500 px-7 py-3 text-base font-semibold text-black transition-colors hover:bg-brand-400"
+        >
+          <AndroidLogo weight="bold" size={20} />
           Install on Android
         </a>
-        <a href="https://github.com/xacnio/kcik-tv-app" target="_blank" rel="noreferrer" className="bg-white/10 hover:bg-white/20 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 backdrop-blur-sm">
-          <GithubLogo weight="bold" size={24} />
+        <a
+          href={GITHUB_REPO}
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center justify-center gap-2 rounded-md border border-white/15 px-7 py-3 text-base font-semibold text-white transition-colors hover:bg-white/5"
+        >
+          <GithubLogo weight="bold" size={20} />
           View Source
         </a>
       </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.6, duration: 0.6 }}
+        className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-3"
+      >
+        {heroBadges.map(({ icon: Icon, label }) => (
+          <span key={label} className="flex items-center gap-2 text-sm text-gray-400">
+            <Icon weight="regular" size={18} className="text-brand-500" />
+            {label}
+          </span>
+        ))}
+      </motion.div>
     </div>
 
-    {/* Background Decor */}
-    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand-500/5 rounded-full blur-3xl -z-10 pointer-events-none"></div>
+    <HeroShowcase />
   </section>
 );
+
+// --- Platforms strip ---
+
+const platforms = [
+  { icon: DeviceMobile, label: 'Phone' },
+  { icon: Television, label: 'Android TV' },
+  { icon: DeviceTablet, label: 'Tablet' },
+];
+
+const Platforms = () => (
+  <section className="border-y border-white/[0.06] bg-black/20 py-10">
+    <div className="mx-auto max-w-5xl px-4">
+      <div className="flex flex-col items-center gap-6 md:flex-row md:justify-between">
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-gray-500">
+          Supported devices
+        </p>
+        <div className="flex flex-wrap items-center justify-center gap-8">
+          {platforms.map(({ icon: Icon, label }) => (
+            <div key={label} className="flex items-center gap-2.5 text-gray-300">
+              <Icon weight="regular" size={24} className="text-brand-500" />
+              <span className="text-sm font-semibold">{label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+// --- Features (hover-reveal split directory) ---
+
+const featureCategories = [
+  {
+    label: 'Playback & player',
+    icon: PlayCircle,
+    desc: 'A full-featured player tuned for low-latency live streams.',
+    shot: 'screenshots/mobile-player.png',
+    items: [
+      { name: 'Completely ad-free' },
+      { name: 'Low-latency playback (Amazon IVS)' },
+      { name: 'Adaptive quality + data limit' },
+      { name: 'Live DVR / rewind' },
+      { name: 'VOD & clip playback' },
+      { name: 'Playback speed 0.5–2×' },
+      { name: 'Theatre mode (vertical)' },
+      { name: 'Fullscreen, rotate & gestures' },
+      { name: 'Picture-in-Picture (auto)' },
+      { name: 'Background audio' },
+      { name: 'Mini player (drag to shrink)' },
+      { name: 'One-tap screenshot capture' },
+      { name: '6-band custom equalizer' },
+      { name: 'Nerd-stats overlay' },
+      { name: 'Notification media controls' },
+    ],
+  },
+  {
+    label: 'Chat',
+    icon: ChatCircleText,
+    desc: 'A native chat client with everything Kick chat can do, and more.',
+    shot: 'screenshots/tv-chat.png',
+    mock: 'chat',
+    items: [
+      { name: 'Reply threads' },
+      { name: 'Mentions + autocomplete' },
+      { name: 'Vibrate, sound & push on mention', new: true },
+      { name: 'Highlights: own, mod, VIP & OG', new: true },
+      { name: 'Fill-background highlight mode', new: true },
+      { name: 'Message entry animations' },
+      { name: 'Adjustable text & emote size' },
+      { name: 'Timestamps' },
+      { name: 'Floating emotes & combos' },
+      { name: 'Quick emote bar (recents)' },
+      { name: 'Emote panel: Global / Channel / Emoji' },
+      { name: 'Pinned messages' },
+      { name: 'Pinned gift banners', new: true },
+      { name: 'Celebration banners', new: true },
+      { name: 'Background buffering + load-missed', new: true },
+      { name: 'Nick detection (alerts without @)', new: true },
+      { name: 'Slow / sub-only / followers-only' },
+    ],
+  },
+  {
+    label: 'Identity & levels',
+    icon: Medal,
+    desc: 'Show off your account level, XP and badges across the app.',
+    shot: 'screenshots/mobile-player.png',
+    mock: 'identity',
+    items: [
+      { name: 'Account levels & level badge', new: true },
+      { name: 'Animated XP progress', new: true },
+      { name: 'badges_v2 support', new: true },
+      { name: 'Global vs channel badge split', new: true },
+      { name: 'Pick up to 4 visible badges', new: true },
+      { name: 'Custom profile color' },
+      { name: 'APNG animated badges' },
+    ],
+  },
+  {
+    label: 'Moderation',
+    icon: ShieldCheck,
+    desc: 'Run your channel without leaving the stream.',
+    shot: 'screenshots/mobile-player.png',
+    items: [
+      { name: 'Ban, timeout & unban' },
+      { name: 'Pin / unpin messages' },
+      { name: 'Edit stream info (title & category)' },
+      { name: 'Channel chat settings' },
+      { name: 'Reward request queue', new: true },
+      { name: 'Mod emote channels', new: true },
+    ],
+  },
+  {
+    label: 'Engagement',
+    icon: Gift,
+    desc: 'Take part in everything happening on stream.',
+    shot: 'screenshots/mobile-player.png',
+    items: [
+      { name: 'Predictions (vote, presets, balance)' },
+      { name: 'Polls (vote & live results)' },
+      { name: 'Gift shop — KICKS, basic & level-up' },
+      { name: 'Loyalty points & rewards' },
+      { name: 'Gifted subs' },
+    ],
+  },
+  {
+    label: 'Discovery',
+    icon: Compass,
+    desc: 'Find streams and clips faster than the official app.',
+    shot: 'screenshots/mobile-feed.png',
+    items: [
+      { name: 'Interactive featured hero', new: true },
+      { name: 'Recently-watched row', new: true },
+      { name: 'Warm-start Following tab', new: true },
+      { name: 'Top categories & popular clips' },
+      { name: 'Search with history' },
+      { name: 'Browse with filter & sort' },
+      { name: 'Vertical feed (streams + clips)' },
+      { name: 'Language filter & hidden categories' },
+      { name: 'Channel profiles, VODs & socials' },
+    ],
+  },
+  {
+    label: 'Account & access',
+    icon: UserCircle,
+    desc: 'Sign in your way and switch accounts instantly.',
+    shot: 'screenshots/mobile-settings.png',
+    items: [
+      { name: 'Multi-account + switcher', new: true },
+      { name: 'Seamless switch (no chat reset)', new: true },
+      { name: 'QR code login (TV)' },
+      { name: 'OTP, 2FA & Google login' },
+      { name: 'TV ⇄ Mobile UI switch' },
+      { name: 'Follow channels & categories' },
+    ],
+  },
+  {
+    label: 'Performance & more',
+    icon: Gauge,
+    desc: 'Light on resources, with the extras that round it out.',
+    shot: 'screenshots/mobile-settings.png',
+    mock: 'settings',
+    items: [
+      { name: 'Battery Saver mode', new: true },
+      { name: 'Per-surface battery controls', new: true },
+      { name: 'Thermal / adaptive performance', new: true },
+      { name: 'In-app updates (stable & beta)' },
+      { name: '6 languages + system detection' },
+      { name: 'Link previews + trusted domains' },
+      { name: 'Built-in browser' },
+      { name: 'Open source, no ad tracking' },
+    ],
+  },
+];
+
+const NewTag = () => (
+  <span className="rounded bg-brand-500/15 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-brand-500">
+    New
+  </span>
+);
+
+const Features = () => {
+  const [active, setActive] = useState(0);
+  const cat = featureCategories[active];
+
+  return (
+    <section id="features" className="scroll-mt-20 py-24">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <SectionHeading
+          eyebrow="Features"
+          title="Everything packed in"
+          subtitle="Dozens of features across eight areas. The green New tag marks what the latest betas added."
+        />
+
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-[minmax(220px,260px)_1fr] md:gap-12">
+          {/* Category rail */}
+          <div className="flex flex-col">
+            {featureCategories.map((c, i) => {
+              const Icon = c.icon;
+              const isActive = i === active;
+              return (
+                <button
+                  key={c.label}
+                  onMouseEnter={() => setActive(i)}
+                  onClick={() => setActive(i)}
+                  className={`flex items-center gap-3 border-l-2 px-4 py-3 text-left transition-colors ${isActive
+                    ? 'border-brand-500 bg-white/[0.03] text-white'
+                    : 'border-white/10 text-gray-400 hover:text-white'
+                    }`}
+                >
+                  <Icon weight="regular" size={20} className={isActive ? 'text-brand-500' : 'text-gray-500'} />
+                  <span className="flex-1 text-sm font-medium">{c.label}</span>
+                  <span className="font-mono text-xs text-gray-600">{c.items.length}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Active category panel */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={active}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="lg:grid lg:grid-cols-[1fr_230px] lg:gap-10"
+            >
+              <div>
+                <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-brand-500">{cat.label}</h3>
+                <p className="mt-2 max-w-md text-[15px] leading-relaxed text-gray-400">{cat.desc}</p>
+
+                <div className="mt-6 grid grid-cols-1 gap-x-8 gap-y-3 border-t border-white/10 pt-6 sm:grid-cols-2">
+                  {cat.items.map((item) => (
+                    <div key={item.name} className="flex items-center gap-2.5 text-sm text-gray-300">
+                      <Check weight="bold" size={14} className="shrink-0 text-brand-500" />
+                      <span>{item.name}</span>
+                      {item.new && <NewTag />}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-8 hidden justify-center lg:mt-0 lg:flex">
+                <FeatureMock mock={cat.mock} shotSrc={getAssetPath(cat.shot)} />
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// --- Screenshots ---
 
 const ScreenshotTab = ({ active, label, onClick, icon: Icon }) => (
   <button
     onClick={onClick}
-    className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold transition-all ${active
+    className={`flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all ${active
       ? 'bg-brand-500 text-black shadow-lg shadow-brand-500/20'
       : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
       }`}
   >
-    <Icon weight="bold" size={20} />
+    <Icon weight="bold" size={18} />
     {label}
   </button>
 );
@@ -94,87 +519,87 @@ const Screenshots = () => {
 
   const screenshots = {
     tv: [
-      { src: getAssetPath("screenshots/tv-chat.png"), caption: "Chat Overlay" },
-      { src: getAssetPath("screenshots/tv-player.png"), caption: "Player" },
-      { src: getAssetPath("screenshots/tv-home.png"), caption: "Home Screen" }
+      { src: getAssetPath('screenshots/tv-chat.png'), caption: 'Chat Overlay' },
+      { src: getAssetPath('screenshots/tv-player.png'), caption: 'Player' },
+      { src: getAssetPath('screenshots/tv-home.png'), caption: 'Home Screen' },
     ],
     mobile: [
-      { src: getAssetPath("screenshots/mobile-feed.png"), caption: "Feed" },
-      { src: getAssetPath("screenshots/mobile-player.png"), caption: "Player" },
-      { src: getAssetPath("screenshots/mobile-settings.png"), caption: "Settings" },
-      { src: getAssetPath("screenshots/mobile-category-view.png"), caption: "Category View" }
+      { src: getAssetPath('screenshots/mobile-feed.png'), caption: 'Feed' },
+      { src: getAssetPath('screenshots/mobile-player.png'), caption: 'Player' },
+      { src: getAssetPath('screenshots/mobile-settings.png'), caption: 'Settings' },
+      { src: getAssetPath('screenshots/mobile-category-view.png'), caption: 'Category View' },
     ],
     tablet: [
-      { src: getAssetPath("screenshots/tablet-home.png"), caption: "Home Screen" },
-      { src: getAssetPath("screenshots/tablet-player.png"), caption: "Player" }
-    ]
+      { src: getAssetPath('screenshots/tablet-home.png'), caption: 'Home Screen' },
+      { src: getAssetPath('screenshots/tablet-player.png'), caption: 'Player' },
+    ],
   };
 
   const widthClass = {
-    tv: 'w-[500px] md:w-[600px]',
-    mobile: 'w-[240px] md:w-[280px]',
-    tablet: 'w-[500px] md:w-[600px]'
+    tv: 'w-full sm:w-[440px] lg:w-[500px]',
+    mobile: 'w-[150px] sm:w-[185px] lg:w-[215px]',
+    tablet: 'w-full sm:w-[440px] lg:w-[500px]',
   };
 
   return (
-    <section id="screenshots" className="py-20 bg-black/20">
-      <div className="max-w-7xl mx-auto px-4 text-center">
-        <div className="mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Experience KCIK<span className="text-brand-500">TV</span></h2>
-          <p className="text-gray-400">Designed for every screen size with a native feel.</p>
+    <section id="screenshots" className="scroll-mt-20 border-y border-white/[0.06] bg-black/20 py-24">
+      <div className="mx-auto max-w-6xl px-4">
+        <SectionHeading
+          eyebrow="Screenshots"
+          title="How it looks"
+          subtitle="The same app on your TV, your phone, and tablets."
+        />
+
+        <div className="mb-12 flex flex-wrap justify-start gap-3">
+          <ScreenshotTab label="TV" icon={Television} active={activeTab === 'tv'} onClick={() => setActiveTab('tv')} />
+          <ScreenshotTab label="Mobile" icon={DeviceMobile} active={activeTab === 'mobile'} onClick={() => setActiveTab('mobile')} />
+          <ScreenshotTab label="Tablet" icon={DeviceTablet} active={activeTab === 'tablet'} onClick={() => setActiveTab('tablet')} />
         </div>
 
-        <div className="flex justify-center gap-4 mb-12 flex-wrap">
-          <ScreenshotTab
-            label="TV Interface"
-            icon={Television}
-            active={activeTab === 'tv'}
-            onClick={() => setActiveTab('tv')}
-          />
-          <ScreenshotTab
-            label="Mobile"
-            icon={DeviceMobile}
-            active={activeTab === 'mobile'}
-            onClick={() => setActiveTab('mobile')}
-          />
-          <ScreenshotTab
-            label="Tablet"
-            icon={DeviceTablet}
-            active={activeTab === 'tablet'}
-            onClick={() => setActiveTab('tablet')}
-          />
-        </div>
-
-        <div className="overflow-x-auto pb-8 hide-scrollbar flex gap-6 px-4 snap-x snap-mandatory justify-start md:justify-center">
+        <div className="flex flex-wrap items-start justify-start gap-5 pb-2 pt-2 sm:gap-6">
           <AnimatePresence mode="wait">
-            {screenshots[activeTab].map((item, idx) => (
-              <motion.div
-                key={`${activeTab}-${idx}`}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.3, delay: idx * 0.05 }}
-                className={`flex-shrink-0 snap-center rounded-xl overflow-hidden shadow-2xl border border-white/10 cursor-pointer group hover:border-brand-500/30 transition-colors ${widthClass[activeTab]}`}
-                onClick={() => setLightbox(item.src)}
-              >
-                <div className="relative">
-                  <img src={item.src} alt={item.caption} className="w-full h-auto" loading="lazy" />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 backdrop-blur-sm rounded-full p-3">
-                      <Eye weight="bold" size={20} className="text-white" />
+            {screenshots[activeTab].map((item, idx) => {
+              const isMobile = activeTab === 'mobile';
+              return (
+                <motion.button
+                  key={`${activeTab}-${idx}`}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.3, delay: idx * 0.05 }}
+                  onClick={() => setLightbox(item.src)}
+                  className={`group relative text-left transition-transform duration-300 hover:-translate-y-1 ${widthClass[activeTab]}`}
+                >
+                  <div
+                    className={`relative overflow-hidden bg-dark-card shadow-md shadow-black/30 transition-all duration-300 ${isMobile
+                      ? 'rounded-[1.75rem] ring-[5px] ring-dark-border group-hover:ring-white/25'
+                      : 'rounded-xl ring-1 ring-white/10 group-hover:ring-white/25'
+                      }`}
+                  >
+                    {!isMobile && (
+                      <div className="flex items-center gap-1.5 border-b border-white/10 bg-black/40 px-3 py-2">
+                        <span className="h-2 w-2 rounded-full bg-white/15" />
+                        <span className="h-2 w-2 rounded-full bg-white/15" />
+                        <span className="h-2 w-2 rounded-full bg-white/15" />
+                      </div>
+                    )}
+                    <img src={item.src} alt={item.caption} className="w-full" loading="lazy" />
+                    <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-gradient-to-t from-black/85 via-black/20 to-transparent px-4 pb-3 pt-12">
+                      <span className="text-sm font-semibold text-white">{item.caption}</span>
+                      <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-white/15 text-white opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100">
+                        <Eye weight="bold" size={14} />
+                      </span>
                     </div>
                   </div>
-                </div>
-                <div className="bg-dark-card/80 backdrop-blur-sm px-4 py-2.5 border-t border-white/5">
-                  <span className="text-xs font-medium text-gray-400">{item.caption}</span>
-                </div>
-              </motion.div>
-            ))}
+                </motion.button>
+              );
+            })}
           </AnimatePresence>
         </div>
+        <p className="mt-3 text-xs text-gray-500">Click any screenshot to view it full size.</p>
       </div>
 
-      {/* Lightbox Modal */}
+      {/* Lightbox */}
       <AnimatePresence>
         {lightbox && (
           <motion.div
@@ -182,7 +607,7 @@ const Screenshots = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer"
+            className="fixed inset-0 z-[100] flex cursor-pointer items-center justify-center bg-black/90 p-4 backdrop-blur-md"
             onClick={() => setLightbox(null)}
           >
             <motion.img
@@ -192,11 +617,12 @@ const Screenshots = () => {
               transition={{ duration: 0.25 }}
               src={lightbox}
               alt="Screenshot preview"
-              className="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl"
+              className="max-h-[90vh] max-w-full rounded-xl object-contain shadow-2xl"
             />
             <button
               onClick={() => setLightbox(null)}
-              className="absolute top-6 right-6 text-white/60 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full p-2 backdrop-blur-sm"
+              aria-label="Close"
+              className="absolute right-6 top-6 rounded-full bg-white/10 p-2 text-white/60 backdrop-blur-sm transition-colors hover:bg-white/20 hover:text-white"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18" />
@@ -210,254 +636,75 @@ const Screenshots = () => {
   );
 };
 
-const FeatureItem = ({ title, desc }) => (
-  <div className="flex items-start gap-4 group">
-    <div className="w-2 h-2 rounded-full bg-brand-500 mt-2.5 flex-shrink-0 group-hover:shadow-[0_0_8px_rgba(83,252,24,0.6)] transition-shadow"></div>
-    <div>
-      <h3 className="text-base font-bold text-white mb-1">{title}</h3>
-      <p className="text-gray-400 text-sm leading-relaxed">{desc}</p>
-    </div>
-  </div>
-);
+// --- Permissions ---
 
-const Features = () => {
-  const [platform, setPlatform] = useState('mobile');
-
-  const mobileFeatures = [
-    { title: "Ad-Free Streaming", desc: "Zero ads — no pre-rolls, mid-rolls, or banners. Just the content, completely uninterrupted." },
-    { title: "Background Audio & Picture-in-Picture", desc: "Lock your phone, switch apps — the stream never stops. Audio keeps playing in the background and auto-PiP lets you multitask without missing a moment." },
-    { title: "Fullscreen & Landscape", desc: "Rotate to landscape for a true fullscreen experience. Supports sensor-based auto-rotation." },
-    { title: "Theatre Mode", desc: "Optimized for vertical 9:16 streams (Kick Go Live). Watch portrait-format broadcasts with the player filling the screen properly." },
-    { title: "Live DVR / Rewind", desc: "Pause and rewind live streams. Missed something? Seek back and catch up, then return to live." },
-    { title: "VOD & Clip Playback", desc: "Watch past broadcasts (VODs) and clips with progress tracking and resume-where-you-left-off." },
-    { title: "Playback Speed Control", desc: "Speed up or slow down VODs and clips (0.5x to 2x) to watch at your preferred pace." },
-    { title: "Dynamic Quality Switching", desc: "Quality changes seamlessly without stopping the stream — you'll never miss a moment. Auto-adapts to your network or set manual limits to save data." },
-    { title: "Advanced Chat", desc: "Highlighted messages (own, mentions, mod, VIP), vibrate on mention, message animations, customizable text & emote sizes, reply threads, and timestamps." },
-    { title: "Quick Emote Panel", desc: "Per-channel recent emotes, subscriber emotes, Global/Channel/Emoji tabs — remembers your most-used emotes for each channel." },
-    { title: "Floating Emotes & Combos", desc: "Enable floating emote animations and emote combo counters for an interactive chat experience." },
-    { title: "Chat Moderation Tools", desc: "Mod actions directly from chat — timeout, ban, unban users, and view mod logs." },
-    { title: "Gift Shop & Loyalty Points", desc: "Send gifts to streamers, track loyalty points, and participate in channel predictions." },
-    { title: "Custom Equalizer", desc: "6-band audio EQ with presets (Bass Boost, Treble, Vocal, etc.), virtualizer, and reverb effects." },
-    { title: "Screenshot Capture", desc: "Take high-resolution screenshots of the video stream with a single tap. Saved directly to gallery." },
-    { title: "Stream & Clip Feed", desc: "Vertical swipe feed like Instagram Reels and TikTok — scroll through live streams and clips to discover new content faster." },
-    { title: "Channel Profiles", desc: "View streamer profiles, about sections, social links, recent VODs, clips, and follow/unfollow." },
-    { title: "Search & Discovery", desc: "Search channels and categories with history. Filter streams by language and block categories." },
-    { title: "Notification Controls", desc: "Control playback directly from the notification shade — play/pause, mute, and close." },
-    { title: "In-App Browser", desc: "Open links with an integrated browser — SSL indicator, share, copy link, and open in external browser." },
-    { title: "In-App Updates", desc: "Check for updates and install new versions directly within the app. Stable & Beta channels supported." },
-    { title: "Multi-Language Support", desc: "Available in English, Turkish, German, French, Spanish, and Arabic — with system language detection." },
-    { title: "Open Source", desc: "Fully transparent, auditable code on GitHub. Community-driven and free forever." },
-  ];
-
-  const tvFeatures = [
-    { title: "Lean-back Experience", desc: "Purpose-built UI for Android TV with D-pad/remote navigation and large, readable text." },
-    { title: "QR Code Login", desc: "Scan a QR code with your phone to log in instantly — no typing on your TV remote." },
-    { title: "Live Chat Overlay", desc: "See chat messages overlaid on the stream while watching in fullscreen on your TV." },
-    { title: "Channel Browsing", desc: "Browse live channels, categories, and followed streamers with a TV-optimized interface." },
-    { title: "Low Latency Playback", desc: "Direct HLS with minimal buffering ensures you're always in sync with the chat." },
-    { title: "Background Audio", desc: "Keep listening to a stream while navigating other parts of the app." },
-    { title: "Ad-Free Experience", desc: "Zero ads, no interruptions — just the content you want to watch." },
-    { title: "Open Source", desc: "Same transparent codebase. Inspect, contribute, or build your own version." },
-  ];
-
-  const mobileChecklist = [
-    "Sign in with OTP, two-factor authentication, or Google login through a secure WebView",
-    "Home screen with featured streams, categories, popular clips, and trending category streams",
-    "Browse live streams with advanced filtering and sorting options",
-    "Explore categories to find content you love",
-    "Discover and watch clips from your favorite streamers",
-    "View category details including live streams, clips, and hide/unhide categories",
-    "Follow channels and categories, and resume watching where you left off",
-    "Swipeable vertical feed for streams and clips — scroll through content like TikTok or Reels",
-    "Full-featured video player with mute toggle, quality selection, and real-time stats overlay",
-    "View and interact with pinned messages in chat",
-    "See pinned gift highlights during live streams",
-    "Participate in channel predictions and track outcomes",
-    "Vote in live polls created by streamers",
-    "Earn and spend channel loyalty points",
-    "Send KICKS gifts to streamers you support",
-    "Display subscriber, moderator, VIP, and custom badges in chat",
-    "Respect slow mode chat restrictions automatically",
-    "Participate in subscriber-only chat when subscribed",
-    "Quick-access emote picker with Global, Channel, and Emoji tabs",
-    "Clip memorable moments with a single tap",
-    "Access moderation tools — timeout, ban, and unban users directly from chat",
-    "Execute moderator slash commands for channel management",
-    "Mention users in chat with auto-complete suggestions",
-    "Tap usernames to view profiles, follow, or perform quick actions",
-    "Press messages to reply, copy, or see other details",
-    "Preview and manage links shared in chat",
-    "Open links in a built-in browser without leaving the app",
-    "Customize your profile color and toggle badge visibility",
-    "Highlight your own messages, mentions, and mod/VIP messages in chat",
-    "Animate incoming chat messages with selectable animation styles",
-    "Adjust chat text size and emote size independently to your preference",
-    "Blerp sound integration for streamers that support it",
-    "Theatre mode optimized for vertical 9:16 portrait live streams",
-  ];
-
-  const features = platform === 'mobile' ? mobileFeatures : tvFeatures;
-
-  return (
-    <section id="features" className="py-20 relative">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Features</h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">Everything you need for the best Kick experience, tailored for each platform.</p>
-        </div>
-
-        <div className="flex justify-center gap-3 mb-12">
-          <button
-            onClick={() => setPlatform('mobile')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold transition-all ${platform === 'mobile'
-              ? 'bg-brand-500 text-black shadow-lg shadow-brand-500/20'
-              : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
-              }`}
-          >
-            <DeviceMobile weight="bold" size={20} />
-            Mobile
-          </button>
-          <button
-            onClick={() => setPlatform('tv')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold transition-all ${platform === 'tv'
-              ? 'bg-brand-500 text-black shadow-lg shadow-brand-500/20'
-              : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
-              }`}
-          >
-            <Television weight="bold" size={20} />
-            TV
-          </button>
-        </div>
-
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={platform}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.25 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6"
-          >
-            {features.map((f, idx) => (
-              <FeatureItem key={idx} title={f.title} desc={f.desc} />
-            ))}
-          </motion.div>
-        </AnimatePresence>
-
-        {platform === 'mobile' && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
-            className="mt-14"
-          >
-            <h3 className="text-xl font-semibold mb-6 text-center text-white/90">What's Built In</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-3">
-              {mobileChecklist.map((item, idx) => (
-                <div key={idx} className="flex items-start gap-3">
-                  <CheckCircle weight="fill" size={20} className="text-brand-500 shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-300">{item}</span>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </div>
-    </section>
-  );
-};
+const permissions = [
+  { name: 'INTERNET', desc: 'Stream video and connect to Kick chat servers.' },
+  { name: 'ACCESS NETWORK STATE', desc: 'Detect when you go offline or come back online.' },
+  { name: 'POST NOTIFICATIONS', desc: 'Playback controls in the notification shade.' },
+  { name: 'FOREGROUND SERVICE', desc: 'Keep playback running in the background.' },
+  { name: 'FOREGROUND SERVICE (MEDIA)', desc: 'Media playback service type on Android 14+.' },
+  { name: 'WAKE LOCK', desc: 'Prevent the device from sleeping during playback.' },
+  { name: 'REQUEST INSTALL PACKAGES', desc: 'Install downloaded in-app update APKs.' },
+  { name: 'QUERY ALL PACKAGES', desc: 'Detect installed browsers for external links.' },
+  { name: 'CAMERA', desc: 'Scan QR codes to log in on TV.' },
+  { name: 'VIBRATE', desc: 'Haptic feedback for interactions and mentions.' },
+  { name: 'STORAGE (Android 9 and older)', desc: 'Temporarily save update APKs on older devices.' },
+];
 
 const Permissions = () => (
-  <section className="py-20 bg-black/30 border-y border-white/5">
-    <div className="max-w-4xl mx-auto px-4">
-      <h2 className="text-2xl font-bold mb-8 text-center">App Permissions</h2>
-      <p className="text-gray-400 text-center mb-8 text-sm">KCIKTV only requests the permissions it truly needs. Here's everything the app uses and why:</p>
-      <div className="bg-dark-card rounded-2xl p-8 border border-white/5">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="flex items-start gap-4">
-            <WifiHigh weight="duotone" size={24} className="text-gray-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <h4 className="font-semibold text-white">INTERNET</h4>
-              <p className="text-xs text-gray-400 mt-1">Required to stream video content and connect to Kick chat servers.</p>
-            </div>
+  <section className="py-24">
+    <div className="mx-auto max-w-4xl px-4">
+      <SectionHeading
+        eyebrow="Permissions"
+        title="What the app can access"
+        subtitle="Every Android permission KCIKTV requests, and why it needs it."
+      />
+      <dl className="mt-2 grid grid-cols-1 gap-x-10 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
+        {permissions.map(({ name, desc }) => (
+          <div key={name}>
+            <dt className="font-mono text-[11px] uppercase tracking-wider text-white/90">{name}</dt>
+            <dd className="mt-1 text-xs leading-relaxed text-gray-500">{desc}</dd>
           </div>
-          <div className="flex items-start gap-4">
-            <WifiHigh weight="duotone" size={24} className="text-gray-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <h4 className="font-semibold text-white">ACCESS NETWORK STATE</h4>
-              <p className="text-xs text-gray-400 mt-1">Checks network connectivity to handle offline/online transitions gracefully.</p>
+        ))}
+      </dl>
+    </div>
+  </section>
+);
+
+// --- Get started ---
+
+const steps = [
+  { icon: DownloadSimple, title: 'Download the APK', desc: 'Get the latest release from GitHub. No store account needed.' },
+  { icon: GearSix, title: 'Allow the install', desc: 'When prompted, enable “Install unknown apps” for your browser or files app.' },
+  { icon: SignIn, title: 'Open and sign in', desc: 'Open KCIKTV, log in (or scan the QR code on TV), and start watching.' },
+];
+
+const GetStarted = () => (
+  <section className="border-y border-white/10 bg-black/20 py-24">
+    <div className="mx-auto max-w-5xl px-4">
+      <SectionHeading
+        eyebrow="Install"
+        title="How to install"
+        subtitle="It's a normal APK. Download it from GitHub and install it like any other app."
+      />
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        {steps.map(({ icon: Icon, title, desc }, i) => (
+          <div key={title} className="bento h-full p-7">
+            <div className="mb-5 flex items-center justify-between">
+              <Icon weight="regular" size={24} className="text-brand-500" />
+              <span className="font-mono text-3xl font-semibold leading-none text-white/15">{String(i + 1).padStart(2, '0')}</span>
             </div>
+            <h3 className="text-lg font-semibold">{title}</h3>
+            <p className="mt-2 text-sm leading-relaxed text-gray-400">{desc}</p>
           </div>
-          <div className="flex items-start gap-4">
-            <Bell weight="duotone" size={24} className="text-gray-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <h4 className="font-semibold text-white">POST NOTIFICATIONS</h4>
-              <p className="text-xs text-gray-400 mt-1">For stream playback controls in the notification shade (play/pause, mute).</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-4">
-            <MonitorPlay weight="duotone" size={24} className="text-gray-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <h4 className="font-semibold text-white">FOREGROUND SERVICE</h4>
-              <p className="text-xs text-gray-400 mt-1">Ensures playback continues reliably in background and audio-only mode.</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-4">
-            <SpeakerHigh weight="duotone" size={24} className="text-gray-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <h4 className="font-semibold text-white">FOREGROUND SERVICE (MEDIA)</h4>
-              <p className="text-xs text-gray-400 mt-1">Specifically for media playback foreground service type on Android 14+.</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-4">
-            <Lightning weight="duotone" size={24} className="text-gray-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <h4 className="font-semibold text-white">WAKE LOCK</h4>
-              <p className="text-xs text-gray-400 mt-1">Prevents the device from sleeping during active stream playback.</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-4">
-            <Package weight="duotone" size={24} className="text-gray-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <h4 className="font-semibold text-white">REQUEST INSTALL PACKAGES</h4>
-              <p className="text-xs text-gray-400 mt-1">Allows in-app updates by installing downloaded APK files.</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-4">
-            <Eye weight="duotone" size={24} className="text-gray-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <h4 className="font-semibold text-white">QUERY ALL PACKAGES</h4>
-              <p className="text-xs text-gray-400 mt-1">Used to detect installed browsers for opening external links properly.</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-4">
-            <Camera weight="duotone" size={24} className="text-gray-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <h4 className="font-semibold text-white">CAMERA</h4>
-              <p className="text-xs text-gray-400 mt-1">Used for QR code scanning to quickly log in on TV devices.</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-4">
-            <Vibrate weight="duotone" size={24} className="text-gray-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <h4 className="font-semibold text-white">VIBRATE</h4>
-              <p className="text-xs text-gray-400 mt-1">Haptic feedback for UI interactions and notifications.</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-4">
-            <HardDrives weight="duotone" size={24} className="text-gray-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <h4 className="font-semibold text-white">STORAGE (Legacy, Android 9-)</h4>
-              <p className="text-xs text-gray-400 mt-1">Used on older Android versions to save app update APKs temporarily.</p>
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   </section>
 );
 
-
+// --- Releases / Download ---
 
 const formatBytes = (bytes) => {
   if (bytes === 0) return '0 B';
@@ -469,28 +716,32 @@ const formatBytes = (bytes) => {
 
 const formatDate = (dateStr) => {
   const d = new Date(dateStr);
-  return d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+  return d.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
 };
 
 const MarkdownBody = ({ children }) => (
   <ReactMarkdown
     remarkPlugins={[remarkGfm]}
+    rehypePlugins={[rehypeRaw]}
     components={{
       a: ({ node, ...props }) => (
-        <a {...props} target="_blank" rel="noreferrer" className="text-brand-500 hover:text-brand-400 underline underline-offset-2 transition-colors" />
+        <a {...props} target="_blank" rel="noreferrer" className="text-brand-500 underline underline-offset-2 transition-colors hover:text-brand-400" />
       ),
-      p: ({ node, ...props }) => <p {...props} className="text-gray-300 text-sm leading-relaxed mb-2 last:mb-0" />,
-      h3: ({ node, ...props }) => <h3 {...props} className="text-white font-semibold text-base mt-4 mb-2" />,
-      h2: ({ node, ...props }) => <h2 {...props} className="text-white font-bold text-lg mt-4 mb-2" />,
-      ul: ({ node, ...props }) => <ul {...props} className="list-disc list-inside space-y-1 text-gray-300 text-sm ml-2" />,
-      ol: ({ node, ...props }) => <ol {...props} className="list-decimal list-inside space-y-1 text-gray-300 text-sm ml-2" />,
-      li: ({ node, ...props }) => <li {...props} className="text-gray-300 text-sm leading-relaxed" />,
-      strong: ({ node, ...props }) => <strong {...props} className="text-white font-semibold" />,
+      img: ({ node, ...props }) => (
+        <img {...props} loading="lazy" className="my-3 h-auto max-w-full rounded-lg border border-white/10" />
+      ),
+      p: ({ node, ...props }) => <p {...props} className="mb-2 text-sm leading-relaxed text-gray-300 last:mb-0" />,
+      h3: ({ node, ...props }) => <h3 {...props} className="mb-2 mt-4 text-base font-semibold text-white" />,
+      h2: ({ node, ...props }) => <h2 {...props} className="mb-2 mt-4 text-lg font-bold text-white" />,
+      ul: ({ node, ...props }) => <ul {...props} className="ml-2 list-inside list-disc space-y-1 text-sm text-gray-300" />,
+      ol: ({ node, ...props }) => <ol {...props} className="ml-2 list-inside list-decimal space-y-1 text-sm text-gray-300" />,
+      li: ({ node, ...props }) => <li {...props} className="text-sm leading-relaxed text-gray-300" />,
+      strong: ({ node, ...props }) => <strong {...props} className="font-semibold text-white" />,
       code: ({ node, inline, ...props }) =>
         inline
-          ? <code {...props} className="bg-white/10 text-brand-400 px-1.5 py-0.5 rounded text-xs font-mono" />
-          : <code {...props} className="block bg-black/40 text-gray-300 p-3 rounded-lg text-xs font-mono overflow-x-auto" />,
-      hr: () => <hr className="border-white/10 my-4" />,
+          ? <code {...props} className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-xs text-brand-400" />
+          : <code {...props} className="block overflow-x-auto rounded-lg bg-black/40 p-3 font-mono text-xs text-gray-300" />,
+      hr: () => <hr className="my-4 border-white/10" />,
     }}
   >
     {children}
@@ -499,48 +750,38 @@ const MarkdownBody = ({ children }) => (
 
 const PastVersionItem = ({ release }) => {
   const [open, setOpen] = useState(false);
-  const apk = release.assets?.find(a => a.name.endsWith('.apk'));
+  const apk = release.assets?.find((a) => a.name.endsWith('.apk'));
 
   return (
-    <div className="border border-white/5 rounded-xl overflow-hidden bg-dark-card/50 hover:border-white/10 transition-colors">
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-5 py-4 text-left group"
-      >
-        <div className="flex items-center gap-3 min-w-0">
-          <Tag weight="duotone" size={20} className="text-brand-500 flex-shrink-0" />
+    <div className="overflow-hidden rounded-lg border border-white/10 bg-dark-card transition-colors hover:border-white/20">
+      <button onClick={() => setOpen(!open)} className="group flex w-full items-center justify-between px-5 py-4 text-left">
+        <div className="flex min-w-0 items-center gap-3">
+          <Tag weight="regular" size={18} className="flex-shrink-0 text-brand-500" />
           <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-semibold text-white text-sm">{release.tag_name}</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-sm font-semibold text-white">{release.tag_name}</span>
               {release.prerelease && (
-                <span className="text-[10px] font-bold uppercase tracking-wider bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full">Beta</span>
+                <span className="rounded-full bg-yellow-500/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-yellow-400">Beta</span>
               )}
             </div>
-            <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-500">
-              <span className="flex items-center gap-1">
-                <Clock size={12} /> {formatDate(release.published_at)}
-              </span>
-              {apk && (
-                <span className="flex items-center gap-1">
-                  <File size={12} /> {formatBytes(apk.size)}
-                </span>
-              )}
+            <div className="mt-0.5 flex items-center gap-3 text-xs text-gray-500">
+              <span className="flex items-center gap-1"><Clock size={12} /> {formatDate(release.published_at)}</span>
+              {apk && <span className="flex items-center gap-1"><File size={12} /> {formatBytes(apk.size)}</span>}
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-3 flex-shrink-0">
+        <div className="flex flex-shrink-0 items-center gap-3">
           {apk && (
             <a
               href={apk.browser_download_url}
               onClick={(e) => e.stopPropagation()}
-              className="hidden sm:flex items-center gap-1.5 bg-brand-500/10 hover:bg-brand-500/20 text-brand-400 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+              className="hidden items-center gap-1.5 rounded-lg bg-brand-500/10 px-3 py-1.5 text-xs font-semibold text-brand-400 transition-colors hover:bg-brand-500/20 sm:flex"
             >
-              <DownloadSimple weight="bold" size={14} />
-              APK
+              <DownloadSimple weight="bold" size={14} /> APK
             </a>
           )}
           <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>
-            <CaretDown size={18} className="text-gray-500 group-hover:text-gray-300 transition-colors" />
+            <CaretDown size={18} className="text-gray-500 transition-colors group-hover:text-gray-300" />
           </motion.div>
         </div>
       </button>
@@ -554,28 +795,23 @@ const PastVersionItem = ({ release }) => {
             transition={{ duration: 0.25, ease: 'easeInOut' }}
             className="overflow-hidden"
           >
-            <div className="px-5 pb-4 border-t border-white/5 pt-4">
+            <div className="border-t border-white/5 px-5 pb-4 pt-4">
               {apk && (
-                <div className="flex items-center gap-3 mb-4 bg-black/30 rounded-lg px-4 py-3 border border-white/5">
-                  <AndroidLogo weight="duotone" size={20} className="text-brand-500 flex-shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs text-gray-400 font-mono truncate">{apk.name}</p>
-                  </div>
+                <div className="mb-4 flex items-center gap-3 rounded-lg border border-white/5 bg-black/30 px-4 py-3">
+                  <AndroidLogo weight="regular" size={20} className="flex-shrink-0 text-brand-500" />
+                  <p className="min-w-0 flex-1 truncate font-mono text-xs text-gray-400">{apk.name}</p>
                   <a
                     href={apk.browser_download_url}
-                    className="bg-brand-500 hover:bg-brand-400 text-black px-4 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 flex-shrink-0"
+                    className="flex flex-shrink-0 items-center gap-1.5 rounded-lg bg-brand-500 px-4 py-1.5 text-xs font-bold text-black transition-colors hover:bg-brand-400"
                   >
-                    <DownloadSimple weight="bold" size={14} />
-                    İndir
+                    <DownloadSimple weight="bold" size={14} /> Download
                   </a>
                 </div>
               )}
               {release.body ? (
-                <div className="prose-custom">
-                  <MarkdownBody>{release.body}</MarkdownBody>
-                </div>
+                <MarkdownBody>{release.body}</MarkdownBody>
               ) : (
-                <p className="text-gray-500 text-sm italic">Açıklama bulunmuyor.</p>
+                <p className="text-sm italic text-gray-500">No release notes.</p>
               )}
             </div>
           </motion.div>
@@ -593,17 +829,16 @@ const DownloadSection = () => {
 
   useEffect(() => {
     fetch('https://api.github.com/repos/xacnio/kcik-tv-app/releases')
-      .then(res => {
-        if (!res.ok) throw new Error('GitHub API isteği başarısız oldu');
+      .then((res) => {
+        if (!res.ok) throw new Error('Could not reach GitHub. Please try again later.');
         return res.json();
       })
-      .then(data => {
-        // Sort explicitly by published_at DESC to fix potential API ordering issues
-        const sortedData = data.sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
-        setReleases(sortedData);
+      .then((data) => {
+        const sorted = data.sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
+        setReleases(sorted);
         setLoading(false);
       })
-      .catch(err => {
+      .catch((err) => {
         setError(err.message);
         setLoading(false);
       });
@@ -611,83 +846,81 @@ const DownloadSection = () => {
 
   const latestRelease = releases[0];
   const pastReleases = releases.slice(1);
-  const latestApk = latestRelease?.assets?.find(a => a.name.endsWith('.apk'));
+  const latestApk = latestRelease?.assets?.find((a) => a.name.endsWith('.apk'));
 
   return (
-    <section id="download" className="py-20 bg-gradient-to-t from-brand-950/50 to-transparent">
-      <div className="max-w-4xl mx-auto px-4">
-        {/* --- Latest Release Card --- */}
-        <div className="bg-dark-card border border-brand-500/20 rounded-3xl p-8 md:p-12 relative overflow-hidden group text-center">
-          <div className="absolute inset-0 bg-brand-500/5 group-hover:bg-brand-500/10 transition-colors"></div>
-          <div className="relative z-10">
-            <h2 className="text-4xl md:text-5xl font-black mb-4">Ready to upgrade your viewing?</h2>
+    <section id="download" className="scroll-mt-20 border-t border-white/10 py-24">
+      <div className="mx-auto max-w-4xl px-4">
+        <SectionHeading
+          eyebrow="Download"
+          title="Get the app"
+          subtitle="Install the latest APK below, or grab an older build from previous versions."
+        />
 
-            {loading ? (
-              <div className="flex flex-col items-center gap-4 py-8">
-                <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-gray-400 text-sm">Yükleniyor...</p>
-              </div>
-            ) : error ? (
-              <div className="py-6">
-                <p className="text-red-400 text-sm mb-4">{error}</p>
-                <a href="https://github.com/xacnio/kcik-tv-app/releases/latest" target="_blank" rel="noreferrer" className="bg-brand-500 hover:bg-brand-400 text-black px-8 py-4 rounded-xl font-bold text-lg transition-all inline-flex items-center gap-3">
-                  <GithubLogo weight="bold" size={24} />
-                  GitHub'dan İndir
-                </a>
-              </div>
-            ) : latestRelease ? (
-              <>
-                <p className="text-xl text-gray-400 mb-2">
-                  <span className="text-brand-500 font-semibold">{latestRelease.name || latestRelease.tag_name}</span>
-                  {latestRelease.prerelease && (
-                    <span className="ml-2 text-xs font-bold uppercase tracking-wider bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-full align-middle">Beta</span>
-                  )}
-                </p>
-                <p className="text-sm text-gray-500 mb-6 flex items-center justify-center gap-4">
-                  <span className="flex items-center gap-1"><Clock size={14} /> {formatDate(latestRelease.published_at)}</span>
-                  {latestApk && <span className="flex items-center gap-1"><File size={14} /> {formatBytes(latestApk.size)}</span>}
-                </p>
-
-                {/* Description (Markdown) */}
-                {latestRelease.body && (
-                  <div className="text-left bg-black/30 rounded-2xl p-6 border border-white/5 mb-8 max-h-[400px] overflow-y-auto hide-scrollbar">
-                    <MarkdownBody>{latestRelease.body}</MarkdownBody>
-                  </div>
-                )}
-
-                {/* APK Download */}
-                {latestApk && (
-                  <div className="flex flex-col items-center gap-3">
-                    <a
-                      href={latestApk.browser_download_url}
-                      className="bg-brand-500 hover:bg-brand-400 text-black px-8 py-4 rounded-xl font-bold text-lg transition-all shadow-lg shadow-brand-500/20 flex items-center justify-center gap-3 transform hover:scale-105 active:scale-95"
-                    >
-                      <DownloadSimple weight="bold" size={24} />
-                      <div>
-                        <div className="text-xs uppercase tracking-wider opacity-70 font-semibold">APK İndir</div>
-                        <div className="leading-none">{latestApk.name}</div>
-                      </div>
-                    </a>
-                  </div>
-                )}
-
-                <p className="mt-6 text-xs text-gray-500">Android 7.0 ve üzeri gerektirir. TV, Mobil & Tablet ile uyumludur.</p>
-              </>
-            ) : null}
+        {loading ? (
+          <div className="flex items-center gap-3 text-sm text-gray-400">
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
+            Loading releases…
           </div>
-        </div>
+        ) : error ? (
+          <div>
+            <p className="mb-4 text-sm text-red-400">{error}</p>
+            <a
+              href={`${GITHUB_REPO}/releases/latest`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-md bg-brand-500 px-6 py-3 text-base font-semibold text-black transition-colors hover:bg-brand-400"
+            >
+              <GithubLogo weight="bold" size={20} /> Download from GitHub
+            </a>
+          </div>
+        ) : latestRelease ? (
+          <>
+            <div className="bento flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-mono text-sm font-semibold text-white">{latestRelease.name || latestRelease.tag_name}</span>
+                  <span className="rounded bg-brand-500/15 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-brand-500">Latest</span>
+                  {latestRelease.prerelease && (
+                    <span className="rounded bg-yellow-500/15 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-yellow-400">Beta</span>
+                  )}
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">
+                  <span className="flex items-center gap-1"><Clock size={13} /> {formatDate(latestRelease.published_at)}</span>
+                  {latestApk && <span className="flex items-center gap-1"><File size={13} /> {formatBytes(latestApk.size)}</span>}
+                  <span>Android 7.0+</span>
+                </div>
+              </div>
+              {latestApk && (
+                <a
+                  href={latestApk.browser_download_url}
+                  className="inline-flex shrink-0 items-center justify-center gap-2 rounded-md bg-brand-500 px-6 py-3 text-base font-semibold text-black transition-colors hover:bg-brand-400"
+                >
+                  <DownloadSimple weight="bold" size={20} /> Download APK
+                </a>
+              )}
+            </div>
 
-        {/* --- Past Versions --- */}
+            {latestRelease.body && (
+              <div className="mt-4">
+                <h3 className="mb-3 font-mono text-xs uppercase tracking-[0.2em] text-gray-500">What's new</h3>
+                <div className="hide-scrollbar max-h-72 overflow-y-auto rounded-lg border border-white/10 bg-dark-card p-5">
+                  <MarkdownBody>{latestRelease.body}</MarkdownBody>
+                </div>
+              </div>
+            )}
+          </>
+        ) : null}
+
         {pastReleases.length > 0 && (
-          <div className="mt-12">
+          <div className="mt-10">
             <button
               onClick={() => setShowPast(!showPast)}
-              className="w-full flex items-center justify-center gap-2 text-gray-400 hover:text-white transition-colors mb-6 group"
+              className="group mb-5 flex items-center gap-2 text-gray-400 transition-colors hover:text-white"
             >
-              <Clock weight="duotone" size={20} />
-              <span className="font-semibold text-sm">Geçmiş Sürümler ({pastReleases.length})</span>
+              <span className="text-sm font-semibold">Previous versions ({pastReleases.length})</span>
               <motion.div animate={{ rotate: showPast ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                <CaretDown size={16} className="group-hover:text-brand-500 transition-colors" />
+                <CaretDown size={16} className="transition-colors group-hover:text-brand-500" />
               </motion.div>
             </button>
 
@@ -715,22 +948,73 @@ const DownloadSection = () => {
   );
 };
 
+// --- Footer ---
+
+const FooterLink = ({ href, children, external }) => (
+  <a
+    href={href}
+    {...(external ? { target: '_blank', rel: 'noreferrer' } : {})}
+    className="text-gray-400 transition-colors hover:text-brand-500"
+  >
+    {children}
+  </a>
+);
+
 const Footer = () => (
-  <footer className="border-t border-white/5 py-12 bg-black/20">
-    <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
-      <div className="flex items-center gap-2">
-        <img src={getAssetPath("logo.svg")} alt="KCIKTV" className="w-6 h-6 rounded-full" />
-        <span className="font-semibold text-gray-300">KCIKTV</span>
+  <footer className="border-t border-white/[0.06] bg-black/20 pb-10 pt-16">
+    <div className="mx-auto max-w-6xl px-4">
+      <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
+        <div className="col-span-2">
+          <div className="flex items-center gap-2.5">
+            <img src={getAssetPath('logo.svg')} alt="KCIKTV" className="h-8 w-8 rounded-full" />
+            <span className="text-lg font-extrabold tracking-tight">KCIKTV</span>
+          </div>
+          <p className="mt-4 max-w-xs text-sm leading-relaxed text-gray-400">
+            A free, open-source Kick client for Android TV, mobile, and tablet.
+          </p>
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <a
+              href={GITHUB_REPO}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="GitHub"
+              className="flex h-10 w-10 items-center justify-center rounded-md border border-white/10 text-gray-300 transition-colors hover:border-white/20 hover:text-white"
+            >
+              <GithubLogo weight="fill" size={20} />
+            </a>
+            <a
+              href="https://buymeacoffee.com/xacnio"
+              target="_blank"
+              rel="noreferrer"
+              className="flex h-10 items-center gap-2 rounded-md border border-white/10 px-3 text-sm font-medium text-gray-300 transition-colors hover:border-white/20 hover:text-white"
+            >
+              <Coffee weight="regular" size={18} /> Buy me a coffee
+            </a>
+          </div>
+        </div>
+
+        <div>
+          <h4 className="text-sm font-semibold text-white">Product</h4>
+          <ul className="mt-4 space-y-2.5 text-sm">
+            <li><FooterLink href="#features">Features</FooterLink></li>
+            <li><FooterLink href="#screenshots">Screenshots</FooterLink></li>
+            <li><FooterLink href="#download">Download</FooterLink></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="text-sm font-semibold text-white">Resources</h4>
+          <ul className="mt-4 space-y-2.5 text-sm">
+            <li><FooterLink href={GITHUB_REPO} external>GitHub</FooterLink></li>
+            <li><FooterLink href={`${GITHUB_REPO}/issues`} external>Report Issue</FooterLink></li>
+            <li><FooterLink href="privacy_policy.md">Privacy Policy</FooterLink></li>
+          </ul>
+        </div>
       </div>
 
-      <div className="flex gap-6 text-sm text-gray-400">
-        <a href="#" className="hover:text-brand-500 transition-colors">Home</a>
-        <a href="privacy_policy.md" className="hover:text-brand-500 transition-colors">Privacy Policy</a>
-        <a href="https://github.com/xacnio/kcik-tv-app/issues" className="hover:text-brand-500 transition-colors">Report Issue</a>
-      </div>
-
-      <div className="text-xs text-gray-600">
-        &copy; 2026 KCIKTV. Open Source Project. Not affiliated with Kick.com.
+      <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-white/[0.06] pt-8 text-xs text-gray-500 md:flex-row">
+        <span>&copy; 2026 KCIKTV. Open-source project. Not affiliated with Kick.com.</span>
+        <span>Built by xacnio</span>
       </div>
     </div>
   </footer>
@@ -741,9 +1025,11 @@ function App() {
     <div className="min-h-screen bg-dark-bg text-white selection:bg-brand-500 selection:text-black">
       <Navbar />
       <Hero />
+      <Platforms />
       <Features />
       <Screenshots />
       <Permissions />
+      <GetStarted />
       <DownloadSection />
       <Footer />
     </div>

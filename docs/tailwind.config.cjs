@@ -26,7 +26,8 @@ module.exports = {
                 }
             },
             fontFamily: {
-                sans: ['Inter', 'sans-serif'],
+                sans: ['"Space Grotesk"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                mono: ['"Space Mono"', 'ui-monospace', 'monospace'],
             }
         },
     },
