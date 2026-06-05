@@ -379,17 +379,27 @@ class ChatSettingsSheetManager(
         val switchHighlightMentions = view.findViewById<SwitchCompat>(R.id.switchHighlightMentions)
         val switchHighlightMods = view.findViewById<SwitchCompat>(R.id.switchHighlightMods)
         val switchHighlightVips = view.findViewById<SwitchCompat>(R.id.switchHighlightVips)
+        val switchHighlightOg = view.findViewById<SwitchCompat>(R.id.switchHighlightOg)
         val switchHighlightUseNameColor = view.findViewById<SwitchCompat>(R.id.switchHighlightUseNameColor)
+        val switchHighlightBackground = view.findViewById<SwitchCompat>(R.id.switchHighlightBackground)
         val switchVibrateOnMentions = view.findViewById<SwitchCompat>(R.id.switchVibrateOnMentions)
+        val switchSoundOnMentions = view.findViewById<SwitchCompat>(R.id.switchSoundOnMentions)
+        val switchNotifyOnMentions = view.findViewById<SwitchCompat>(R.id.switchNotifyOnMentions)
+        val switchNickDetection = view.findViewById<SwitchCompat>(R.id.switchNickDetection)
 
         switchHighlightOwn.isChecked = prefs.highlightOwnMessages
         switchHighlightMentions.isChecked = prefs.highlightMentions
         switchHighlightMods.isChecked = prefs.highlightMods
         switchHighlightVips.isChecked = prefs.highlightVips
+        switchHighlightOg.isChecked = prefs.highlightOg
         switchHighlightUseNameColor.isChecked = prefs.chatUseNameColorForHighlight
+        switchHighlightBackground.isChecked = prefs.highlightFillBackground
         switchVibrateOnMentions.isChecked = prefs.vibrateOnMentions
+        switchSoundOnMentions.isChecked = prefs.soundOnMentions
+        switchNotifyOnMentions.isChecked = prefs.notifyOnMentions
+        switchNickDetection.isChecked = prefs.nickDetectionEnabled
 
-        listOf(switchHighlightOwn, switchHighlightMentions, switchHighlightMods, switchHighlightVips, switchHighlightUseNameColor, switchVibrateOnMentions).forEach { switch ->
+        listOf(switchHighlightOwn, switchHighlightMentions, switchHighlightMods, switchHighlightVips, switchHighlightOg, switchHighlightUseNameColor, switchHighlightBackground, switchVibrateOnMentions, switchSoundOnMentions, switchNotifyOnMentions, switchNickDetection).forEach { switch ->
             switch.trackTintList = themeColorStateList
             switch.thumbTintList = thumbColorStateList
         }
@@ -398,18 +408,39 @@ class ChatSettingsSheetManager(
             prefs.vibrateOnMentions = isChecked
         }
 
+        switchSoundOnMentions.setOnCheckedChangeListener { _, isChecked ->
+            prefs.soundOnMentions = isChecked
+        }
+
+        switchNotifyOnMentions.setOnCheckedChangeListener { _, isChecked ->
+            prefs.notifyOnMentions = isChecked
+            // Ask for the notification permission when enabling (Android 13+).
+            if (isChecked && android.os.Build.VERSION.SDK_INT >= 33 &&
+                activity.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                activity.requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 101)
+            }
+        }
+
+        switchNickDetection.setOnCheckedChangeListener { _, isChecked ->
+            prefs.nickDetectionEnabled = isChecked
+        }
+
         val onHighlightUpdate = {
             prefs.highlightOwnMessages = switchHighlightOwn.isChecked
             prefs.highlightMentions = switchHighlightMentions.isChecked
             prefs.highlightMods = switchHighlightMods.isChecked
             prefs.highlightVips = switchHighlightVips.isChecked
+            prefs.highlightOg = switchHighlightOg.isChecked
             prefs.chatUseNameColorForHighlight = switchHighlightUseNameColor.isChecked
+            prefs.highlightFillBackground = switchHighlightBackground.isChecked
             chatUiManager.chatAdapter.setHighlightSettings(
                 prefs.highlightOwnMessages,
                 prefs.highlightMentions,
                 prefs.highlightMods,
                 prefs.highlightVips,
-                prefs.chatUseNameColorForHighlight
+                prefs.highlightOg,
+                prefs.chatUseNameColorForHighlight,
+                prefs.highlightFillBackground
             )
         }
 
@@ -417,7 +448,9 @@ class ChatSettingsSheetManager(
         switchHighlightMentions.setOnCheckedChangeListener { _, _ -> onHighlightUpdate() }
         switchHighlightMods.setOnCheckedChangeListener { _, _ -> onHighlightUpdate() }
         switchHighlightVips.setOnCheckedChangeListener { _, _ -> onHighlightUpdate() }
+        switchHighlightOg.setOnCheckedChangeListener { _, _ -> onHighlightUpdate() }
         switchHighlightUseNameColor.setOnCheckedChangeListener { _, _ -> onHighlightUpdate() }
+        switchHighlightBackground.setOnCheckedChangeListener { _, _ -> onHighlightUpdate() }
 
         // Add panel to chatContainer (parent of chatListContainer) so it renders above
         // the pinned message overlay which is a sibling declared later in XML.

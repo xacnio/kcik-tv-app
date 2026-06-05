@@ -1113,13 +1113,15 @@ class MobilePlayerActivity : FragmentActivity() {
         miniPlayerManager.enterMiniPlayerMode()
         homeScreenManager.enterThumbnailMode()
 
-        // Always pause chat UI in mini player mode (chat is hidden)
-        chatUiManager.pauseChatUi()
-        
-        // If low battery mode is enabled, pause chat
+        // If low battery mode is enabled, disconnect chat first so the "Chat paused"
+        // system message is the only marker (pauseChatUi skips its background divider
+        // when chat is already paused for low battery).
         if (prefs.lowBatteryModeEnabled && prefs.batterySaverPauseChatInPip && miniPlayerManager.isMiniPlayerMode) {
             pauseChatForLowBatteryMode()
         }
+
+        // Always pause chat UI in mini player mode (chat is hidden)
+        chatUiManager.pauseChatUi()
     }
 
     internal fun exitMiniPlayerMode() {
@@ -1176,20 +1178,26 @@ class MobilePlayerActivity : FragmentActivity() {
     internal fun pauseChatForLowBatteryMode() {
         if (isChatPausedForLowBattery) return
         isChatPausedForLowBattery = true
-        
+
         // Unsubscribe from chat to stop receiving messages
         chatConnectionManager.unsubscribeFromOnlyChat()
-        
-        // Add system message to chat
-        val systemMessage = ChatMessage(
+
+        // Render any messages received just before pausing so the divider lands below them.
+        chatUiManager.flushPendingMessages()
+
+        // Add a "Chat paused (Battery Saver)" divider DIRECTLY to the adapter. Routing it
+        // through handleIncomingMessage would drop it (chat is now paused), so the user
+        // would never see why the chat stopped. A divider also avoids the "Background
+        // Messages" marker, which is wrong here — nothing is being buffered, we disconnected.
+        val pausedDivider = ChatMessage(
             id = "low_battery_pause_${System.currentTimeMillis()}",
             content = getString(R.string.chat_paused_battery_saver),
-            sender = ChatSender(0, getString(R.string.chat_system_username), null, null),
-            type = dev.xacnio.kciktv.shared.data.model.MessageType.SYSTEM,
-            iconResId = R.drawable.ic_hourglass
+            sender = ChatSender(0, "", null, null),
+            type = dev.xacnio.kciktv.shared.data.model.MessageType.DIVIDER
         )
-        chatUiManager.handleIncomingMessage(systemMessage)
-        chatUiManager.flushPendingMessages()
+        runOnUiThread {
+            chatUiManager.chatAdapter.addMessages(listOf(pausedDivider))
+        }
     }
 
     /**
@@ -1211,9 +1219,10 @@ class MobilePlayerActivity : FragmentActivity() {
         // Re-subscribe to chat
         chatConnectionManager.subscribeToOnlyChat()
 
-        // Fetch fresh chat history on return from low battery mode (as we were unsubscribed)
+        // Append the latest history below the existing messages (do NOT reload from
+        // scratch) with a "Load Missed Messages" button to bridge the disconnected gap.
         currentChannelId?.let { channelId ->
-            chatUiManager.loadChatHistory(channelId)
+            chatUiManager.loadHistoryAfterReconnect(channelId)
         }
     }
 
@@ -2594,6 +2603,13 @@ class MobilePlayerActivity : FragmentActivity() {
             // Enforce 360p for background playback
             setForcedQualityLimit("360p")
             
+            // Battery Saver: disconnect chat (shows a "Chat paused" divider) BEFORE
+            // pauseChatUi so its background-messages divider is suppressed. Otherwise chat
+            // keeps buffering in the background as usual.
+            if (prefs.lowBatteryModeEnabled && prefs.batterySaverPauseChatInPip) {
+                pauseChatForLowBatteryMode()
+            }
+
             // Battery Optimization:
             // Pause UI updates for chat while in background to save CPU/Battery.
             // Data will still be received and buffered.
@@ -2708,6 +2724,7 @@ class MobilePlayerActivity : FragmentActivity() {
             overlayManager.cleanup()
             chatStateManager.cleanup()
             vodManager.stopVodChatReplay()
+            mentionsManager.release()
         } catch (e: Exception) {
             Log.e(TAG, "Error cleaning up managers", e)
         }

@@ -452,13 +452,41 @@ class AppPreferences(private val context: Context) {
         get() = prefs.getBoolean("highlight_vips", true)
         set(value) = prefs.edit().putBoolean("highlight_vips", value).apply()
 
+    var highlightOg: Boolean
+        get() = prefs.getBoolean("highlight_og", true)
+        set(value) = prefs.edit().putBoolean("highlight_og", value).apply()
+
     var chatUseNameColorForHighlight: Boolean
         get() = prefs.getBoolean("chat_use_name_color_for_highlight", false)
         set(value) = prefs.edit().putBoolean("chat_use_name_color_for_highlight", value).apply()
 
+    // When true, highlighted messages are shown with a translucent filled background of the
+    // highlight colour instead of just a coloured border.
+    var highlightFillBackground: Boolean
+        get() = prefs.getBoolean("highlight_fill_background", false)
+        set(value) = prefs.edit().putBoolean("highlight_fill_background", value).apply()
+
     var vibrateOnMentions: Boolean
         get() = prefs.getBoolean("vibrate_on_mentions", true)
         set(value) = prefs.edit().putBoolean("vibrate_on_mentions", value).apply()
+
+    // Plays a short, soft sound when the user is mentioned. Off by default (opt-in).
+    var soundOnMentions: Boolean
+        get() = prefs.getBoolean("sound_on_mentions", false)
+        set(value) = prefs.edit().putBoolean("sound_on_mentions", value).apply()
+
+    // Posts a system notification on mention/reply, but only while NOT actively watching in
+    // the foreground (screen locked, PIP, or background audio). Off by default (opt-in).
+    var notifyOnMentions: Boolean
+        get() = prefs.getBoolean("notify_on_mentions", false)
+        set(value) = prefs.edit().putBoolean("notify_on_mentions", value).apply()
+
+    // When enabled, messages containing the user's username (without the @ prefix) will also
+    // be treated as mentions. Fuzzy: leading/trailing word-boundary, underscore ↔ space/nothing
+    // variants are all matched. Off by default (opt-in).
+    var nickDetectionEnabled: Boolean
+        get() = prefs.getBoolean("nick_detection_enabled", false)
+        set(value) = prefs.edit().putBoolean("nick_detection_enabled", value).apply()
 
     var showPinnedGifts: Boolean
         get() = prefs.getBoolean("show_pinned_gifts", true)
