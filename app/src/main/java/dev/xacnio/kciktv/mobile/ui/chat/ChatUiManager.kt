@@ -1249,20 +1249,6 @@ class ChatUiManager(
     fun pauseChatUi() {
         if (isChatUiPaused) return
         isChatUiPaused = true
-        
-        // Add a divider to the chat to separate foreground messages from background messages
-        // But only if we are not in battery saver chat pause (which has its own message)
-        if (!activity.isChatPausedForLowBattery) {
-            val dividerMsg = ChatMessage(
-                id = "divider_${System.currentTimeMillis()}",
-                content = activity.getString(R.string.chat_background_messages_start),
-                sender = ChatSender(0, "", null, null),
-                type = dev.xacnio.kciktv.shared.data.model.MessageType.DIVIDER
-            )
-            activity.runOnUiThread {
-                chatAdapter.addMessages(listOf(dividerMsg))
-            }
-        }
     }
 
     fun resumeChatUi() {
@@ -1308,16 +1294,7 @@ class ChatUiManager(
         }
         
         toAdd.addAll(messages)
-        
-        // Add end divider
-        val endDividerMsg = ChatMessage(
-            id = "divider_end_${System.currentTimeMillis()}",
-            content = activity.getString(R.string.chat_background_messages_end),
-            sender = ChatSender(0, "", null, null),
-            type = dev.xacnio.kciktv.shared.data.model.MessageType.DIVIDER
-        )
-        toAdd.add(endDividerMsg)
-        
+
         // Process emotes/combos for flushed messages
         toAdd.forEach { msg ->
             if (msg.type == dev.xacnio.kciktv.shared.data.model.MessageType.CHAT) {

@@ -142,6 +142,13 @@ class FollowingManager(private val activity: MobilePlayerActivity) {
         }
     }
 
+    fun refreshForAccountSwitch() {
+        followingNextCursor = null
+        followingLiveChannelsList.clear()
+        followingOfflineChannelsList.clear()
+        loadFollowingData()
+    }
+
     fun loadFollowingData(isLoadMore: Boolean = false) {
         if (isFollowingLoading) return
         

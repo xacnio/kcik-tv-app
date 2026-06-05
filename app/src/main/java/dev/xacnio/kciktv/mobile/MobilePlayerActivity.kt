@@ -293,6 +293,8 @@ class MobilePlayerActivity : FragmentActivity() {
     // Tracks login state across onResume() boundaries. If this flips, the auth WebView's KPSDK
     // session was initialized for a different identity (or none) — see WebViewManager.resetForAuthStateChange.
     private var lastKnownLoggedIn: Boolean = false
+    // Tracks the active account id so onResume can detect mid-session account switches.
+    private var lastKnownActiveAccountId: Long = 0L
     internal var isHomeScreenVisible = true // Start with home screen visible
     internal val isSettingsVisible: Boolean
         get() = if (::settingsPanelManager.isInitialized) settingsPanelManager.isSettingsVisible else false
@@ -336,7 +338,9 @@ class MobilePlayerActivity : FragmentActivity() {
     internal var isChannelOwner = false // Can always change title/category even offline
     internal var isBannedFromCurrentChannel = false
     internal var isCheckingBanStatus = false
-    internal var lastMessageSentMillis: Long = 0
+    internal var lastMessageSentMillis: Long
+        get() = chatStateManager.lastMessageSentMillis
+        set(value) { chatStateManager.lastMessageSentMillis = value }
     internal var isPermanentBan = false
     internal var timeoutExpirationMillis: Long = 0
     
@@ -1021,6 +1025,8 @@ class MobilePlayerActivity : FragmentActivity() {
         
         webViewManager.setupWebView()
         lastKnownLoggedIn = prefs.isLoggedIn
+        if (prefs.isLoggedIn) prefs.commitActiveAccountToList()
+        lastKnownActiveAccountId = prefs.activeAccountId
         setupNotifications()
         quickEmoteBarManager.setupQuickEmoteBar()
         
@@ -2238,6 +2244,16 @@ class MobilePlayerActivity : FragmentActivity() {
     private fun connectToChat(channel: ChannelItem) {
         sessionManager.startChannelSession(channel)
     }
+
+    internal fun rebindCurrentChannelSession() {
+        currentChannel?.let { sessionManager.startChannelSession(it) }
+    }
+
+    internal fun softRebindForAccountSwitch() {
+        sessionManager.reconnectForAccountSwitch()
+    }
+
+    internal val isWebViewManagerReady: Boolean get() = ::webViewManager.isInitialized
     
     private fun setupQuickEmoteBar() = quickEmoteBarManager.setupQuickEmoteBar()
 
@@ -2660,9 +2676,19 @@ class MobilePlayerActivity : FragmentActivity() {
         // session was bound to the old identity and would 429 on /follow. Reset it so the
         // next bridge call reloads kick.com/mobile/token with the new cookie set.
         val currentLoggedIn = prefs.isLoggedIn
-        if (currentLoggedIn != lastKnownLoggedIn && ::webViewManager.isInitialized) {
+        val currentAccountId = prefs.activeAccountId
+        val accountChanged = currentAccountId != lastKnownActiveAccountId && lastKnownActiveAccountId != 0L
+        if ((currentLoggedIn != lastKnownLoggedIn || accountChanged) && ::webViewManager.isInitialized) {
             webViewManager.resetForAuthStateChange()
             lastKnownLoggedIn = currentLoggedIn
+            lastKnownActiveAccountId = currentAccountId
+            cachedUserLevel = null
+            updateUserHeaderState()
+            updateChatLoginState()
+            rebindCurrentChannelSession()
+        } else {
+            lastKnownLoggedIn = currentLoggedIn
+            lastKnownActiveAccountId = currentAccountId
         }
 
         updateUserHeaderState()

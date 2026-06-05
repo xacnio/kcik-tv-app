@@ -22,6 +22,82 @@ class ChannelSessionManager(private val activity: MobilePlayerActivity) {
 
     private val TAG = "ChannelSessionManager"
 
+    fun reconnectForAccountSwitch() {
+        val channel = activity.currentChannel ?: return
+        val chatroomId = activity.chatStateManager.currentChatroomId ?: return
+        val channelId = activity.currentChannelId ?: return
+        val binding = activity.binding
+        val prefs = activity.prefs
+        val state = activity.chatStateManager
+
+        activity.userMeJob?.cancel()
+        activity.chatConnectionManager.disconnect()
+        activity.overlayManager.disconnectViewerWebSocket()
+
+        // Reset slow mode for the new account (old account's send time is irrelevant)
+        state.lastMessageSentMillis = 0
+        state.stopSlowModeCountdown()
+
+        // Reconnect chat and viewer WebSockets with the new account's token
+        activity.chatConnectionManager.connectToChat(prefs.authToken ?: "", chatroomId, channelId)
+        activity.startViewerWebSocket(channelId.toString(), channel.slug, channel.livestreamId?.toString())
+
+        // Fetch /me in background to update mod/subscription/ban status
+        if (prefs.isLoggedIn && prefs.authToken != null) {
+            activity.isCheckingBanStatus = true
+            activity.runOnUiThread { activity.updateChatLoginState() }
+            activity.userMeJob = activity.lifecycleScope.launch {
+                try {
+                    val token = prefs.authToken ?: return@launch
+                    activity.repository.getChannelUserMe(channel.slug, token).onSuccess { me ->
+                        activity.isChannelOwner = me.isBroadcaster == true
+                        activity.isModeratorOrOwner = me.isModerator == true || activity.isChannelOwner
+                        activity.isSubscribedToCurrentChannel = me.subscription != null || activity.isChannelOwner
+
+                        state.isModeratorOrOwner = activity.isModeratorOrOwner
+                        state.isChannelOwner = activity.isChannelOwner
+                        state.isSubscribedToCurrentChannel = activity.isSubscribedToCurrentChannel
+                        state.isFollowingCurrentChannel = me.isFollowing == true
+                        state.followingSince = me.followingSince
+
+                        val banInfo = me.banned
+                        activity.isBannedFromCurrentChannel = banInfo != null
+                        activity.isPermanentBan = banInfo?.permanent == true
+                        activity.timeoutExpirationMillis = activity.parseIsoDate(banInfo?.expiresAt)
+                        state.setBanStatus(activity.isBannedFromCurrentChannel, activity.isPermanentBan, activity.timeoutExpirationMillis)
+                        state.isCheckingBanStatus = false
+                        activity.isCheckingBanStatus = false
+
+                        activity.runOnUiThread {
+                            val isMod = activity.isModeratorOrOwner && prefs.isLoggedIn
+                            binding.modMenuButton.visibility = if (isMod) View.VISIBLE else View.GONE
+                            binding.rewardQueueButton.visibility = if (isMod) View.VISIBLE else View.GONE
+                            activity.updateChatLoginState()
+                            activity.updateQuickEmoteBar()
+                            activity.updateChatroomHint(activity.currentChatroom)
+                        }
+                    }.onFailure {
+                        state.isCheckingBanStatus = false
+                        activity.isCheckingBanStatus = false
+                        activity.runOnUiThread { activity.updateChatLoginState() }
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to fetch /me after account switch", e)
+                    state.isCheckingBanStatus = false
+                    activity.isCheckingBanStatus = false
+                    activity.runOnUiThread { activity.updateChatLoginState() }
+                }
+            }
+        } else {
+            activity.runOnUiThread { activity.updateChatLoginState() }
+        }
+
+        // Reload emotes silently (no shimmer, no message clear)
+        activity.lifecycleScope.launch {
+            activity.emotePanelManager.loadChannelEmotes(channel.slug)
+        }
+    }
+
     fun startChannelSession(channel: ChannelItem) {
         val binding = activity.binding
         val prefs = activity.prefs
@@ -41,10 +117,21 @@ class ChannelSessionManager(private val activity: MobilePlayerActivity) {
         // Reset ChatStateManager for new channel (clears chatroom, user state, etc.)
         state.resetForNewChannel()
         // Activity-level poll field
-        activity.currentPoll = null 
+        activity.currentPoll = null
         activity.overlayManager.resetForNewChannel()
         activity.rewardQueueManager.resetForChannel(channel.slug)
-        
+
+        // Clear stale emote categories immediately so the quick bar shows shimmer
+        // (not the previous account's emotes) while the new session loads
+        activity.emotePanelManager.emoteCategories = emptyList()
+        if (prefs.isLoggedIn) {
+            binding.quickEmoteBarContainer.visibility = View.VISIBLE
+            binding.quickEmoteShimmer.root.visibility = View.VISIBLE
+            binding.quickEmoteRecyclerView.visibility = View.GONE
+        } else {
+            binding.quickEmoteBarContainer.visibility = View.GONE
+        }
+
         binding.pinnedMessageContainer.visibility = View.GONE
         binding.pollContainer.visibility = View.GONE
         binding.predictionContainer.visibility = View.GONE
@@ -156,7 +243,7 @@ class ChannelSessionManager(private val activity: MobilePlayerActivity) {
                                     
                                     // Update Quick Emote Bar Subscription Status
                                     activity.quickEmoteBarManager.updateSubscriptionStatus(activity.isSubscribedToCurrentChannel)
-                                    
+
                                     // Banned check from /me endpoint
                                     val banInfo = me.banned
                                     activity.isBannedFromCurrentChannel = banInfo != null
@@ -178,12 +265,17 @@ class ChannelSessionManager(private val activity: MobilePlayerActivity) {
                                         val isMod = activity.isModeratorOrOwner && prefs.isLoggedIn
                                         binding.modMenuButton.visibility = if (isMod) View.VISIBLE else View.GONE
                                         binding.rewardQueueButton.visibility = if (isMod) View.VISIBLE else View.GONE
-                                        
+
                                         // Update prediction UI to reflect new mod status
                                         state.currentPrediction?.let { activity.overlayManager.updatePredictionUI(it) }
-                                        
+
                                         activity.updateChatLoginState()
-                                        
+
+                                        // Re-render quick emote bar now that subscription status is known.
+                                        // loadChannelEmotes may have already run with the stale (reset) value,
+                                        // so we must re-filter the emote list with the authoritative status here.
+                                        activity.updateQuickEmoteBar()
+
                                         // Refresh chat hint with user's actual status
                                         activity.updateChatroomHint(activity.currentChatroom)
                                         

@@ -218,6 +218,9 @@ class ChatSettingsSheetManager(
 
         // Root menu navigation
         val btnProfile = view.findViewById<View>(R.id.btnMenuProfile)
+        val menuProfileAvatar = view.findViewById<android.widget.ImageView>(R.id.menuProfileAvatar)
+        val menuProfileIconFallback = view.findViewById<View>(R.id.menuProfileIconFallback)
+
         if (!prefs.isLoggedIn) {
             btnProfile.isEnabled = false
             btnProfile.alpha = 0.4f
@@ -225,6 +228,34 @@ class ChatSettingsSheetManager(
             btnProfile.isEnabled = true
             btnProfile.alpha = 1.0f
             btnProfile.setOnClickListener { navigate(PAGE_PROFILE) }
+
+            // Load profile avatar in the row icon
+            val picUrl = if (prefs.profilePic.isNullOrEmpty()) {
+                val hash = (prefs.username ?: "").hashCode()
+                val index = (if (hash < 0) -hash else hash) % 6 + 1
+                "https://kick.com/img/default-profile-pictures/default-avatar-$index.webp"
+            } else prefs.profilePic
+
+            Glide.with(activity)
+                .load(picUrl)
+                .circleCrop()
+                .placeholder(R.drawable.default_avatar)
+                .into(menuProfileAvatar)
+
+            menuProfileAvatar.visibility = View.VISIBLE
+            menuProfileIconFallback.visibility = View.GONE
+        }
+
+        // Switch Account shortcut — only visible when 2+ accounts are saved
+        val btnSwitchAccount = view.findViewById<View>(R.id.btnMenuSwitchAccount)
+        if (prefs.isLoggedIn && prefs.getAccounts().size > 1) {
+            btnSwitchAccount.visibility = View.VISIBLE
+            btnSwitchAccount.setOnClickListener {
+                dismissPanel()
+                dev.xacnio.kciktv.mobile.ui.sheet.AccountSwitcherSheetManager(activity).show()
+            }
+        } else {
+            btnSwitchAccount.visibility = View.GONE
         }
 
         view.findViewById<View>(R.id.btnMenuChatSettings).setOnClickListener {

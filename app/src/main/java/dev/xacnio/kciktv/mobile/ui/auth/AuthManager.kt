@@ -32,6 +32,8 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.net.URLDecoder
 import dev.xacnio.kciktv.mobile.ui.chat.ChatStateManager
+import dev.xacnio.kciktv.shared.data.prefs.AppPreferences.StoredAccount
+import dev.xacnio.kciktv.shared.data.util.PreloadCache
 
 class AuthManager(
     private val activity: MobilePlayerActivity,
@@ -45,6 +47,53 @@ class AuthManager(
 
     fun handleLoginClick() {
         activity.startActivity(Intent(activity, LoginActivity::class.java))
+    }
+
+    fun switchActiveAccount(userId: Long) {
+        prefs.commitActiveAccountToList()
+        val target = prefs.getAccounts().find { it.userId == userId } ?: return
+        if (prefs.activeAccountId == userId) return
+
+        prefs.applyAccount(target)
+
+        val cookieManager = CookieManager.getInstance()
+        cookieManager.removeAllCookies(null)
+        cookieManager.flush()
+
+        if (activity.isWebViewManagerReady) {
+            activity.webViewManager.resetForAuthStateChange()
+        }
+
+        // Reset old account's cached sender and moderator status immediately so messages sent
+        // during session rebind use the new account's username and correct slow mode behavior
+        activity.chatStateManager.currentUserSender = null
+        activity.chatUiManager.chatAdapter.setCurrentUser(prefs.username ?: "")
+        activity.isModeratorOrOwner = false
+        activity.isChannelOwner = false
+
+        activity.cachedUserLevel = null
+        activity.updateUserHeaderState()
+        activity.softRebindForAccountSwitch()
+        // Fetch immediately so points update without waiting for getChatInfo to complete first
+        activity.fetchLoyaltyPoints()
+
+        // Invalidate account-specific caches so home and following screens reload fresh data
+        PreloadCache.followingStreams = null
+        PreloadCache.followingStreamsForTab = null
+        activity.homeDataLoaded = false
+        activity.followingDataLoaded = false
+
+        // If home or following screen is currently visible, reload it immediately
+        val isFollowingVisible = activity.binding.followingScreenContainer.root.visibility == android.view.View.VISIBLE
+        val isHomeVisible = activity.binding.homeScreenContainer.root.visibility == android.view.View.VISIBLE
+        if (isFollowingVisible) {
+            activity.followingManager.refreshForAccountSwitch()
+        }
+        if (isHomeVisible) {
+            activity.homeScreenManager.loadHomeScreenData()
+        }
+
+        Toast.makeText(activity, activity.getString(R.string.account_switched, target.username), Toast.LENGTH_SHORT).show()
     }
 
     fun showLogoutConfirmDialog() {
@@ -119,7 +168,9 @@ class AuthManager(
                 Log.e(TAG, "Logout failed", e)
             } finally {
                 withContext(Dispatchers.Main) {
+                    val loggedOutUserId = prefs.userId
                     prefs.clearAuth()
+                    prefs.removeAccount(loggedOutUserId)
                     cookieManager.removeAllCookies(null)
                     cookieManager.flush()
 
@@ -129,10 +180,20 @@ class AuthManager(
                     // initialized here — the logout button only appears once the activity is set up.
                     activity.webViewManager.resetForAuthStateChange()
 
-                    Toast.makeText(activity, R.string.logged_out, Toast.LENGTH_SHORT).show()
+                    val remaining = prefs.getAccounts()
+                    if (remaining.isNotEmpty()) {
+                        val next = remaining.first()
+                        prefs.applyAccount(next)
+                        activity.webViewManager.resetForAuthStateChange()
+                        activity.cachedUserLevel = null
+                        Toast.makeText(activity, activity.getString(R.string.account_switched, next.username), Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(activity, R.string.logged_out, Toast.LENGTH_SHORT).show()
+                    }
+
                     activity.updateChatLoginState()
                     activity.updateUserHeaderState()
-
+                    activity.rebindCurrentChannelSession()
                 }
             }
         }
