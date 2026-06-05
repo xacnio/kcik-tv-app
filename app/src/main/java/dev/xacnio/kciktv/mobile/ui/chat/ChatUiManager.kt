@@ -99,7 +99,9 @@ class ChatUiManager(
                 prefs.highlightMentions,
                 prefs.highlightMods,
                 prefs.highlightVips,
-                prefs.chatUseNameColorForHighlight
+                prefs.highlightOg,
+                prefs.chatUseNameColorForHighlight,
+                prefs.highlightFillBackground
             )
             // Note: chatAdapter is passed to ChatEventHandler in Activity logic, 
             // so we expose it here.
@@ -1253,7 +1255,7 @@ class ChatUiManager(
         if (!activity.isChatPausedForLowBattery) {
             val dividerMsg = ChatMessage(
                 id = "divider_${System.currentTimeMillis()}",
-                content = activity.getString(R.string.chat_background_divider),
+                content = activity.getString(R.string.chat_background_messages_start),
                 sender = ChatSender(0, "", null, null),
                 type = dev.xacnio.kciktv.shared.data.model.MessageType.DIVIDER
             )
@@ -1310,7 +1312,7 @@ class ChatUiManager(
         // Add end divider
         val endDividerMsg = ChatMessage(
             id = "divider_end_${System.currentTimeMillis()}",
-            content = activity.getString(R.string.chat_background_divider),
+            content = activity.getString(R.string.chat_background_messages_end),
             sender = ChatSender(0, "", null, null),
             type = dev.xacnio.kciktv.shared.data.model.MessageType.DIVIDER
         )
@@ -1459,6 +1461,13 @@ class ChatUiManager(
                 }
             }
             updateBufferCount(incomingMessageBuffer.size)
+
+            // The UI is paused (mini/PIP/background) but we still surface mentions in real
+            // time: add to the Mentions tab and fire the badge + vibrate + sound. The later
+            // flush re-checks with dedup, so this never double-notifies.
+            if (detectAndRegisterMentions(listOf(message))) {
+                activity.updateMentionsBadge()
+            }
             return
         }
 
@@ -1502,25 +1511,66 @@ class ChatUiManager(
         }
     }
 
+    /**
+     * Scans [messages] for ones that mention or reply-to the current user and registers any
+     * not already in the Mentions tab (deduped by id). Returns true if at least one NEW
+     * mention was added. Reused by the live flush path, the background buffer path, and the
+     * post-reconnect history load — so mentions are caught even while the chat UI is paused
+     * or was disconnected, and never double-counted.
+     */
+    fun detectAndRegisterMentions(messages: List<ChatMessage>): Boolean {
+        val currentUser = prefs.username ?: return false
+        var hasNew = false
+
+        // Build a nick-detection regex once per call (cheap – only when the feature is enabled).
+        val nickRegex: Regex? = if (prefs.nickDetectionEnabled && currentUser.isNotBlank()) {
+            try {
+                // Split on underscores and escape each part; join with "(_| )?" so the separator
+                // is optional or can be a space.
+                val parts = currentUser.split("_").map { Regex.escape(it) }
+                val inner = if (parts.size > 1) parts.joinToString("(_| )?") else parts[0]
+                Regex("(?i)(?<![\\w])$inner(?![\\w])")
+            } catch (_: Exception) { null }
+        } else null
+
+        for (msg in messages) {
+            if (msg.sender.username.equals(currentUser, ignoreCase = true)) continue
+            val isMention = msg.content.contains("@$currentUser", ignoreCase = true)
+            val isReplyToMe = msg.metadata?.originalSender?.username.equals(currentUser, ignoreCase = true)
+            // Nick detection: bare username present in message (no @ required)
+            val isNickMention = nickRegex != null && !isMention &&
+                nickRegex.containsMatchIn(msg.content)
+            if (isMention || isReplyToMe || isNickMention) {
+                if (activity.mentionMessages.none { it.id == msg.id }) {
+                    activity.mentionMessages.add(msg)
+                    hasNew = true
+                    // Posts a system notification only when backgrounded (the method self-gates
+                    // on foreground state + the notifyOnMentions pref + permission).
+                    activity.mentionsManager.maybeSendMentionNotification(msg)
+                }
+            }
+        }
+        return hasNew
+    }
+
     fun flushPendingMessages() {
         val messages = synchronized(incomingMessageBuffer) {
             val list = ArrayList(incomingMessageBuffer)
             incomingMessageBuffer.clear()
             list
         }
-        
+
         if (messages.isEmpty()) return
-        
+
         val toAdd = ArrayList<ChatMessage>()
         val currentUser = prefs.username
         var anyUpdated = false
-        var hasMention = false
-        
+
         messages.forEach { msg ->
-            // Process recurring emote logic 
+            // Process recurring emote logic
             activity.emoteComboManager.processMessage(msg.content)
             activity.floatingEmoteManager.processMessage(msg.content)
-            
+
             var handled = false
             // Check if this message is from current user and might be a duplicate/echo
             if (currentUser != null && msg.sender.username.equals(currentUser, ignoreCase = true)) {
@@ -1534,24 +1584,15 @@ class ChatUiManager(
                     anyUpdated = true
                 }
             }
-            
-            // Check for mentions or replies (from other users only)
-            if (currentUser != null && !msg.sender.username.equals(currentUser, ignoreCase = true)) {
-                val isMention = msg.content.contains("@$currentUser", ignoreCase = true)
-                val isReplyToMe = msg.metadata?.originalSender?.username == currentUser
-                if (isMention || isReplyToMe) {
-                    activity.mentionMessages.add(msg)
-                    hasMention = true
-                }
-            }
-            
+
             if (!handled) {
                 toAdd.add(msg)
             }
         }
-        
-        // Update mentions badge (triggers vibration internally if needed)
-        if (hasMention) {
+
+        // Register mentions (deduped). Anything already surfaced while buffered in the
+        // background returns false here, so the badge/sound never fires twice.
+        if (detectAndRegisterMentions(messages)) {
             activity.updateMentionsBadge()
         }
         
@@ -1653,6 +1694,103 @@ class ChatUiManager(
                      binding.emptyChatText.text = activity.getString(R.string.history_load_failed)
                      binding.emptyChatText.visibility = View.VISIBLE
                 }
+            }
+        }
+    }
+
+    /**
+     * Called after the chat websocket is re-subscribed following a Battery Saver pause
+     * (mini-player / PIP). Unlike [loadChatHistory] this does NOT clear the existing
+     * messages — the user keeps what they were reading. It appends the latest history
+     * below a "Load Missed Messages" button so the gap created while disconnected can be
+     * pulled in on demand, then live messages continue underneath.
+     */
+    fun loadHistoryAfterReconnect(channelId: Long) {
+        isHistoryLoading = false
+        hasMoreHistory = true
+        lastRequestedCursor = null
+        lifecycleScope.launch {
+            try {
+                val result = repository.getChatHistory(channelId, null)
+                result.onSuccess { history ->
+                    val messages = history.messages
+                    activity.runOnUiThread {
+                        if (messages.isNotEmpty()) {
+                            if (chatStateManager.currentUserSender == null) {
+                                messages.findLast { it.sender.username == prefs.username }?.let {
+                                    chatStateManager.currentUserSender = it.sender
+                                }
+                            }
+
+                            val oldestNew = messages.minByOrNull { it.createdAt }
+                            val cursor = oldestNew?.let { (it.createdAt * 1000).toString() }
+
+                            // Sits just above the freshly loaded batch so the user can pull
+                            // the gap left while chat was disconnected.
+                            val buttonMsg = ChatMessage(
+                                id = "load_missed_${System.currentTimeMillis()}",
+                                content = activity.getString(R.string.chat_load_missed_messages),
+                                sender = ChatSender(0, "", null, null),
+                                type = MessageType.LOAD_MISSED,
+                                messageRef = cursor,
+                                createdAt = (oldestNew?.createdAt ?: System.currentTimeMillis()) - 1
+                            )
+
+                            // End marker: brackets the disconnected section. createdAt = now
+                            // so it sorts below the (older) loaded history but above live messages.
+                            val resumedDivider = ChatMessage(
+                                id = "chat_resumed_${System.currentTimeMillis()}",
+                                content = activity.getString(R.string.chat_resumed),
+                                sender = ChatSender(0, "", null, null),
+                                type = MessageType.DIVIDER,
+                                createdAt = System.currentTimeMillis()
+                            )
+
+                            val toAdd = mutableListOf<ChatMessage>()
+                            toAdd.add(buttonMsg)
+                            toAdd.addAll(messages)
+                            toAdd.add(resumedDivider)
+
+                            messages.forEach { msg ->
+                                if (msg.type == MessageType.CHAT) {
+                                    activity.emoteComboManager.processMessage(msg.content)
+                                    activity.floatingEmoteManager.processMessage(msg.content)
+                                }
+                                recentChatUsers.add(msg.sender.username)
+                            }
+
+                            chatAdapter.addMessages(toAdd, deduplicate = true, animate = false, onCommit = {
+                                handleMessageAdded()
+                                if (binding.chatRecyclerView.visibility != View.VISIBLE) {
+                                    binding.chatRecyclerView.visibility = View.VISIBLE
+                                }
+                                binding.emptyChatText.visibility = View.GONE
+                                binding.chatShimmer.root.visibility = View.GONE
+                            })
+
+                            // Chat was disconnected while paused, so any mentions in this gap
+                            // were never seen. Surface them now: Mentions tab + badge + sound.
+                            if (detectAndRegisterMentions(messages)) {
+                                activity.updateMentionsBadge()
+                            }
+                        }
+
+                        val pinnedMsg = history.pinnedMessage
+                        if (pinnedMsg != null) {
+                            val pinnedMessage = PinnedMessage(
+                                id = pinnedMsg.id,
+                                content = pinnedMsg.content,
+                                sender = pinnedMsg.sender,
+                                createdAt = pinnedMsg.createdAt
+                            )
+                            activity.overlayManager.handlePinnedMessageFromHistory(pinnedMessage)
+                        }
+                    }
+                }.onFailure { e ->
+                    Log.e(TAG, "Failed loading history after reconnect", e)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in loadHistoryAfterReconnect", e)
             }
         }
     }

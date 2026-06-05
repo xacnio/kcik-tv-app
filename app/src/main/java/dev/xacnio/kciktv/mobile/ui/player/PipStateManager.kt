@@ -162,6 +162,13 @@ class PipStateManager(private val activity: MobilePlayerActivity) {
         // Enforce 360p limit for PiP/Background
         activity.setForcedQualityLimit("360p")
 
+        // Battery Saver: disconnect chat (shows a "Chat paused" divider) BEFORE pauseChatUi
+        // so its background-messages divider is suppressed. This covers every PiP entry
+        // path (button and system-initiated), since they all funnel through here.
+        if (activity.prefs.lowBatteryModeEnabled && activity.prefs.batterySaverPauseChatInPip) {
+            activity.pauseChatForLowBatteryMode()
+        }
+
         // Pause UI updates for chat in PiP
         activity.chatUiManager.pauseChatUi()
     }

@@ -242,7 +242,9 @@ class ChatAdapter(
     private var highlightMentions: Boolean = true
     private var highlightMods: Boolean = true
     private var highlightVips: Boolean = true
+    private var highlightOg: Boolean = true
     private var useNameColorForHighlight: Boolean = false
+    private var useBackgroundForHighlight: Boolean = false
     
     // Internal cache to maintain state reliability
     private val messageCache = java.util.Collections.synchronizedList(java.util.ArrayList<ChatMessage>())
@@ -343,12 +345,22 @@ class ChatAdapter(
         notifyDataSetChanged()
     }
 
-    fun setHighlightSettings(own: Boolean, mentions: Boolean, mods: Boolean, vips: Boolean, useNameColor: Boolean) {
+    fun setHighlightSettings(
+        own: Boolean,
+        mentions: Boolean,
+        mods: Boolean,
+        vips: Boolean,
+        og: Boolean,
+        useNameColor: Boolean,
+        fillBackground: Boolean
+    ) {
         this.highlightOwn = own
         this.highlightMentions = mentions
         this.highlightMods = mods
         this.highlightVips = vips
+        this.highlightOg = og
         this.useNameColorForHighlight = useNameColor
+        this.useBackgroundForHighlight = fillBackground
         notifyDataSetChanged()
     }
 
@@ -1450,8 +1462,9 @@ class ChatAdapter(
                    message.metadata?.originalSender?.username == currentUsername)
         val isMod = highlightMods && message.sender.badges?.any { it.type == "moderator" || it.type == "broadcaster" || it.type == "staff" } == true
         val isVip = highlightVips && message.sender.badges?.any { it.type == "vip" } == true
+        val isOg = highlightOg && message.sender.badges?.any { it.type == "og" } == true
 
-        if (isOwn || isMention || isMod || isVip) {
+        if (isOwn || isMention || isMod || isVip || isOg) {
             if (useNameColorForHighlight) {
                 // Priority: Use name color if enabled
                 try {
@@ -1468,6 +1481,7 @@ class ChatAdapter(
                     isMention -> 0xFF00F2FF.toInt() // Mentions: Cyan
                     isMod -> 0xFFFFD700.toInt() // Mods: Gold
                     isVip -> 0xFFFF00FF.toInt() // VIPs: Pink
+                    isOg -> 0xFFB388FF.toInt() // OG: Purple
                     else -> null
                 }
             }
@@ -1481,12 +1495,20 @@ class ChatAdapter(
         }
 
         if (borderColor != null) {
-            val stroke = android.graphics.drawable.GradientDrawable().apply {
-                setColor(Color.TRANSPARENT)
-                setStroke(3, borderColor)
+            val highlight = android.graphics.drawable.GradientDrawable().apply {
                 cornerRadius = 8f
+                if (useBackgroundForHighlight) {
+                    // Filled style: translucent background of the same hue, with a slightly
+                    // stronger same-hue border so the box edge stays legible.
+                    setColor((borderColor and 0x00FFFFFF) or (0x33 shl 24))
+                    setStroke(2, (borderColor and 0x00FFFFFF) or (0x80 shl 24))
+                } else {
+                    // Border style: transparent fill with a solid coloured border.
+                    setColor(Color.TRANSPARENT)
+                    setStroke(3, borderColor)
+                }
             }
-            val layers = if (baseBg != null) arrayOf(baseBg, stroke) else arrayOf(stroke)
+            val layers = if (baseBg != null) arrayOf(baseBg, highlight) else arrayOf(highlight)
             holder.itemView.background = android.graphics.drawable.LayerDrawable(layers)
         } else {
             holder.itemView.background = baseBg

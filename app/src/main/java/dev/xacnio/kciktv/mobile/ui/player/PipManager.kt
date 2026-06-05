@@ -58,19 +58,16 @@ class PipManager(private val activity: MobilePlayerActivity) {
         // Theatre mode check removed to allow PiP
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             try {
-                // Ensure UI is prepared BEFORE entering PiP so the system snapshot is clean
+                // Ensure UI is prepared BEFORE entering PiP so the system snapshot is clean.
+                // The Battery Saver chat disconnect is handled inside PipStateManager.enterPipMode
+                // (reached from here) so every PiP entry path behaves the same.
                 activity.pipStateManager.onPictureInPictureModeChanged(true)
-                
+
                 val params = getPipParams()
                 activity.enterPictureInPictureMode(params)
-                
+
                 // Log analytics event
                 activity.analytics.logPipModeEntered()
-
-                // If low battery mode is enabled, pause chat
-                if (prefs.lowBatteryModeEnabled && prefs.batterySaverPauseChatInPip) {
-                    activity.pauseChatForLowBatteryMode()
-                }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to enter PIP mode: ${e.message}")
             }
