@@ -133,6 +133,10 @@
     <string name="login_prompt">Hesabınıza giriş yapın</string>
     <string name="logout_confirm_title">Çıkış Onayı</string>
     <string name="logout_confirm_message">Çıkış yapmak istediğinizden emin misiniz?</string>
+    <string name="switch_account">Hesap Değiştir</string>
+    <string name="add_account">Hesap Ekle</string>
+    <string name="account_switched">%s hesabına geçildi</string>
+    <string name="account_active">Aktif</string>
     <string name="login_success">Hoş geldin, %s</string>
     <string name="login_required_following">Takip edilenleri görmek için giriş yapmalısınız</string>
     <string name="manual_login">Manuel Giriş</string>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="52dp"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingHorizontal="4dp"
+    android:background="?attr/selectableItemBackground">
+
+    <ImageView
+        android:id="@+id/accountRowAvatar"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/default_avatar"/>
+
+    <TextView
+        android:id="@+id/accountRowUsername"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:maxLines="1"
+        android:ellipsize="end"/>
+
+    <!-- Active tick (shown for the current account) -->
+    <ImageView
+        android:id="@+id/accountRowActiveTick"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/ic_check"
+        android:layout_marginEnd="8dp"
+        app:tint="#53FC18"
+        android:visibility="invisible"/>
+
+    <!-- Remove button (shown for non-active accounts) -->
+    <ImageView
+        android:id="@+id/accountRowRemove"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:padding="6dp"
+        android:src="@drawable/ic_close"
+        app:tint="#888888"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:visibility="invisible"/>
+
+</LinearLayout>

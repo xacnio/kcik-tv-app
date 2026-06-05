@@ -133,6 +133,10 @@
     <string name="login_prompt">Melde dich bei deinem Konto an</string>
     <string name="logout_confirm_title">Abmeldung bestätigen</string>
     <string name="logout_confirm_message">Bist du sicher, dass du dich abmelden möchtest?</string>
+    <string name="switch_account">Konto wechseln</string>
+    <string name="add_account">Konto hinzufügen</string>
+    <string name="account_switched">Gewechselt zu %s</string>
+    <string name="account_active">Aktiv</string>
     <string name="login_success">Willkommen, %s</string>
     <string name="login_required_following">Melde dich an, um Gefolgte zu sehen</string>
     <string name="manual_login">Manuelle Anmeldung</string>

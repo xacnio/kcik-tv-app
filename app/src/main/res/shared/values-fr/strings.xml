@@ -133,6 +133,10 @@
     <string name="login_prompt">Connectez-vous à votre compte</string>
     <string name="logout_confirm_title">Confirmer la Déconnexion</string>
     <string name="logout_confirm_message">Êtes-vous sûr de vouloir vous déconnecter ?</string>
+    <string name="switch_account">Changer de compte</string>
+    <string name="add_account">Ajouter un compte</string>
+    <string name="account_switched">Basculé vers %s</string>
+    <string name="account_active">Actif</string>
     <string name="login_success">Bienvenue, %s</string>
     <string name="login_required_following">Connectez-vous pour voir vos abonnements</string>
     <string name="manual_login">Connexion Manuelle</string>

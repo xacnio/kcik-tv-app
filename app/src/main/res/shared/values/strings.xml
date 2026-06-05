@@ -133,6 +133,10 @@
     <string name="login_prompt">Log in to your account</string>
     <string name="logout_confirm_title">Logout Confirmation</string>
     <string name="logout_confirm_message">Are you sure you want to logout?</string>
+    <string name="switch_account">Switch Account</string>
+    <string name="add_account">Add Account</string>
+    <string name="account_switched">Switched to %s</string>
+    <string name="account_active">Active</string>
     <string name="login_success">Welcome, %s</string>
     <string name="login_required_following">You must be logged in to see following list</string>
     <string name="manual_login">Manual Login</string>

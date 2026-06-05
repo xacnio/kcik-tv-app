@@ -284,8 +284,106 @@ class AppPreferences(private val context: Context) {
         get() = prefs.getString("chat_message_animation", "none") ?: "none"
         set(value) = prefs.edit().putString("chat_message_animation", value).apply()
     
+    // ==================== Multi-Account Registry ====================
+
+    data class StoredAccount(
+        val userId: Long,
+        val username: String,
+        val profilePic: String?,
+        val slug: String?,
+        val chatColor: String?,
+        val authToken: String,
+        val cookies: String?,
+        val xsrfToken: String?,
+        val userJson: String?,
+        val blerpCookies: String?,
+        val addedAt: Long = System.currentTimeMillis()
+    )
+
+    var activeAccountId: Long
+        get() = prefs.getLong("active_account_id", 0L)
+        set(value) = prefs.edit().putLong("active_account_id", value).apply()
+
+    private fun getAccountsRaw(): String? = getStringSafe("accounts_json", null)
+    private fun putAccountsRaw(json: String?) = putStringSafe("accounts_json", json)
+
+    fun getAccounts(): List<StoredAccount> {
+        val raw = getAccountsRaw()
+        val list: List<StoredAccount> = if (raw != null) {
+            try {
+                val type = object : TypeToken<List<StoredAccount>>() {}.type
+                gson.fromJson(raw, type) ?: emptyList()
+            } catch (e: Exception) { emptyList() }
+        } else emptyList()
+
+        // Auto-migrate single-account users: if list is empty but active auth exists, seed it.
+        if (list.isEmpty()) {
+            val token = getStringSafe("auth_token", null) ?: return emptyList()
+            val acc = StoredAccount(
+                userId = prefs.getLong("logged_in_user_id", 0L),
+                username = getStringSafe("logged_in_username", null) ?: return emptyList(),
+                profilePic = getStringSafe("logged_in_profile_pic", null),
+                slug = getStringSafe("logged_in_slug", null),
+                chatColor = getStringSafe("logged_in_chat_color", null),
+                authToken = token,
+                cookies = getStringSafe("saved_cookies", null),
+                xsrfToken = getStringSafe("xsrf_token", null),
+                userJson = getStringSafe("user_json", null),
+                blerpCookies = getStringSafe("saved_blerp_cookies", null)
+            )
+            val migrated = listOf(acc)
+            putAccountsRaw(gson.toJson(migrated))
+            prefs.edit().putLong("active_account_id", acc.userId).apply()
+            return migrated
+        }
+        return list
+    }
+
+    fun commitActiveAccountToList() {
+        val token = getStringSafe("auth_token", null) ?: return
+        val acc = StoredAccount(
+            userId = prefs.getLong("logged_in_user_id", 0L),
+            username = getStringSafe("logged_in_username", null) ?: return,
+            profilePic = getStringSafe("logged_in_profile_pic", null),
+            slug = getStringSafe("logged_in_slug", null),
+            chatColor = getStringSafe("logged_in_chat_color", null),
+            authToken = token,
+            cookies = getStringSafe("saved_cookies", null),
+            xsrfToken = getStringSafe("xsrf_token", null),
+            userJson = getStringSafe("user_json", null),
+            blerpCookies = getStringSafe("saved_blerp_cookies", null)
+        )
+        val current = try {
+            val raw = getAccountsRaw()
+            if (raw != null) {
+                val type = object : TypeToken<List<StoredAccount>>() {}.type
+                (gson.fromJson<List<StoredAccount>>(raw, type) ?: emptyList()).toMutableList()
+            } else mutableListOf()
+        } catch (e: Exception) { mutableListOf() }
+
+        val idx = current.indexOfFirst { it.userId == acc.userId }
+        if (idx >= 0) current[idx] = acc else current.add(0, acc)
+        putAccountsRaw(gson.toJson(current))
+        prefs.edit().putLong("active_account_id", acc.userId).apply()
+    }
+
+    fun applyAccount(acc: StoredAccount) {
+        saveAuth(acc.authToken, acc.username, acc.profilePic, acc.userId, acc.slug, acc.chatColor)
+        putStringSafe("saved_cookies", acc.cookies)
+        putStringSafe("xsrf_token", acc.xsrfToken)
+        putStringSafe("user_json", acc.userJson)
+        putStringSafe("saved_blerp_cookies", acc.blerpCookies)
+        prefs.edit().putLong("active_account_id", acc.userId).apply()
+    }
+
+    fun removeAccount(userId: Long) {
+        val current = getAccounts().toMutableList()
+        current.removeAll { it.userId == userId }
+        putAccountsRaw(if (current.isEmpty()) null else gson.toJson(current))
+    }
+
     // ==================== Auth ====================
-    
+
     var authToken: String?
         get() = getStringSafe("auth_token", null)
         set(value) = putStringSafe("auth_token", value)

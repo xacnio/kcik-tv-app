@@ -133,6 +133,10 @@
     <string name="login_prompt">سجّل الدخول إلى حسابك</string>
     <string name="logout_confirm_title">تأكيد تسجيل الخروج</string>
     <string name="logout_confirm_message">هل أنت متأكد أنك تريد تسجيل الخروج؟</string>
+    <string name="switch_account">تبديل الحساب</string>
+    <string name="add_account">إضافة حساب</string>
+    <string name="account_switched">تم التبديل إلى %s</string>
+    <string name="account_active">نشط</string>
     <string name="login_success">مرحباً، %s</string>
     <string name="login_required_following">يجب تسجيل الدخول لمشاهدة المتابَعين</string>
     <string name="manual_login">تسجيل دخول يدوي</string>

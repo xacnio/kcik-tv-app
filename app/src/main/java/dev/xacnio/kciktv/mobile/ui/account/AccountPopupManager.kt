@@ -123,6 +123,11 @@ class AccountPopupManager(private val activity: MobilePlayerActivity) {
                     activity.showSettingsPanel()
                 }
 
+                view.findViewById<View>(R.id.btnPopupSwitchAccount).setOnClickListener {
+                    popupWindow.dismiss()
+                    dev.xacnio.kciktv.mobile.ui.sheet.AccountSwitcherSheetManager(activity).show()
+                }
+
                 view.findViewById<View>(R.id.btnPopupQrScanner).setOnClickListener {
                     popupWindow.dismiss()
                     val intent = Intent(activity, dev.xacnio.kciktv.mobile.ui.settings.qr.QRScannerActivity::class.java)

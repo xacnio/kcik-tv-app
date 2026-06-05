@@ -483,6 +483,7 @@ class LoginActivity : ComponentActivity() {
                                             cookieManager.flush()
                                             Log.d(TAG, "🧹 WebView Cookies cleared for security after login")
 
+                                            prefs.commitActiveAccountToList()
                                             Toast.makeText(this@LoginActivity, getString(R.string.login_success_welcome, username), Toast.LENGTH_LONG).show()
                                             setResult(android.app.Activity.RESULT_OK)
                                             finish()
@@ -1035,6 +1036,7 @@ class LoginActivity : ComponentActivity() {
                         prefs.saveAuth(token, username, profilePic, userId, slug)
                         // Save the full cookie set too
                         prefs.cookies = allCookies
+                        prefs.commitActiveAccountToList()
                         Toast.makeText(this@LoginActivity, getString(R.string.login_success_cookie), Toast.LENGTH_LONG).show()
                         setResult(android.app.Activity.RESULT_OK)
                         finish()

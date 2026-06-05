@@ -133,6 +133,10 @@
     <string name="login_prompt">Inicia sesión en tu cuenta</string>
     <string name="logout_confirm_title">Confirmar Cierre de Sesión</string>
     <string name="logout_confirm_message">¿Estás seguro de que quieres cerrar sesión?</string>
+    <string name="switch_account">Cambiar de cuenta</string>
+    <string name="add_account">Añadir cuenta</string>
+    <string name="account_switched">Cambiado a %s</string>
+    <string name="account_active">Activo</string>
     <string name="login_success">Bienvenido, %s</string>
     <string name="login_required_following">Debes iniciar sesión para ver los seguidos</string>
     <string name="manual_login">Inicio Manual</string>
