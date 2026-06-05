@@ -1511,6 +1511,7 @@ class ChatUiManager(
         } else null
 
         for (msg in messages) {
+            if (msg.type != dev.xacnio.kciktv.shared.data.model.MessageType.CHAT) continue
             if (msg.sender.username.equals(currentUser, ignoreCase = true)) continue
             val isMention = msg.content.contains("@$currentUser", ignoreCase = true)
             val isReplyToMe = msg.metadata?.originalSender?.username.equals(currentUser, ignoreCase = true)

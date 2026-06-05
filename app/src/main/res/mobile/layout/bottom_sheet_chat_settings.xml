@@ -121,49 +121,16 @@
                         android:textSize="15sp" />
                 </LinearLayout>
 
-                <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:src="@drawable/ic_chevron_right"
-                    app:tint="#444444" />
-            </LinearLayout>
-
-            <!-- Switch Account (visible only when 2+ accounts saved) -->
-            <LinearLayout
-                android:id="@+id/btnMenuSwitchAccount"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:background="@drawable/bg_ripple_rounded"
-                android:paddingHorizontal="10dp"
-                android:visibility="gone">
-
-                <FrameLayout
+                <ImageButton
+                    android:id="@+id/btnMenuSwitchAccount"
                     android:layout_width="36dp"
                     android:layout_height="36dp"
-                    android:background="@drawable/bg_settings_card">
-                    <ImageView
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_person_add"
-                        app:tint="#AAAAAA" />
-                </FrameLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginStart="12dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/switch_account"
-                        android:textColor="#FFFFFF"
-                        android:textSize="15sp" />
-                </LinearLayout>
+                    android:layout_marginEnd="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_switch_account"
+                    android:padding="8dp"
+                    app:tint="#AAAAAA"
+                    android:visibility="gone" />
 
                 <ImageView
                     android:layout_width="16dp"
