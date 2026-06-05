@@ -34,6 +34,7 @@ class QuickEmoteBarManager(
 ) {
     private lateinit var quickEmoteAdapter: QuickEmoteAdapter
     private var isInitialized = false
+    private var revealRunnable: Runnable? = null
     
     // Callbacks for communication with activity
     var onEmoteSend: ((String) -> Unit)? = null
@@ -92,24 +93,36 @@ class QuickEmoteBarManager(
         
         binding.quickEmoteRecyclerView.adapter = quickEmoteAdapter
         isInitialized = true
+
+        // Trigger an immediate visibility pass: if emotes are already loaded this shows
+        // the bar; if not (first open) it shows the shimmer instead of a black gap.
+        updateQuickEmoteBar()
     }
 
     /**
      * Update the quick emote bar with available emotes
      */
-    fun updateQuickEmoteBar() {
+    fun updateQuickEmoteBar(showShimmer: Boolean = true) {
         // Hide for logged out users - they can't send emotes anyway
         if (!prefs.isLoggedIn) {
             binding.quickEmoteBarContainer.visibility = View.GONE
             return
         }
-        
+
         // Make sure container is visible for logged in users
         binding.quickEmoteBarContainer.visibility = View.VISIBLE
-        
-        if (!isInitialized || emoteCategories.isEmpty()) {
+
+        if (!isInitialized) {
+            // Adapter not set up yet — hide everything
             binding.quickEmoteRecyclerView.visibility = View.GONE
             binding.quickEmoteShimmer.root.visibility = View.GONE
+            return
+        }
+
+        if (emoteCategories.isEmpty()) {
+            // Still loading emotes — show shimmer placeholder
+            binding.quickEmoteRecyclerView.visibility = View.GONE
+            binding.quickEmoteShimmer.root.visibility = View.VISIBLE
             return
         }
 
@@ -119,8 +132,8 @@ class QuickEmoteBarManager(
         val allUsableEmotes = emoteCategories.flatMap { category ->
             category.emotes.filter { emote ->
                 if (!emote.subscribersOnly) return@filter true
-                
-                // If it's a sub emote: 
+
+                // If it's a sub emote:
                 // - Only allow current channel's sub emotes if user is subscribed
                 // - Allow other channels' sub emotes (since we got them via the API, user is a sub there)
                 val emoteChannelId = emote.channelId
@@ -142,7 +155,7 @@ class QuickEmoteBarManager(
         val channelRecent = if (channelId != null) prefs.getChannelRecentEmoteIds(channelId) else null
         val globalRecent = prefs.recentEmoteIds
         val effectiveRecent = channelRecent ?: globalRecent
-        
+
         val recentIds = effectiveRecent?.split(",")?.mapNotNull { it.toLongOrNull() } ?: emptyList()
         val recentEmotes = recentIds.mapNotNull { id ->
             allUsableEmotes.find { it.id == id }
@@ -151,9 +164,55 @@ class QuickEmoteBarManager(
         // 3. Combine: Recent first, then others (limit total for performance/UI)
         val finalEmotes = (recentEmotes + allUsableEmotes).distinctBy { it.id }.take(40)
 
+        // Strategy: keep shimmer visible while images load, reveal RecyclerView only when
+        // the threshold number of images is loaded, or when the 1000ms failsafe timeout fires.
+        if (showShimmer) {
+            binding.quickEmoteRecyclerView.visibility = View.INVISIBLE
+            binding.quickEmoteShimmer.root.visibility = View.VISIBLE
+
+            val startTime = android.os.SystemClock.uptimeMillis()
+
+            // Cancel any pending reveal to avoid multiple posts/leaks
+            revealRunnable?.let { mainHandler.removeCallbacks(it) }
+
+            val runnable = Runnable {
+                binding.quickEmoteShimmer.root.visibility = View.GONE
+                binding.quickEmoteRecyclerView.visibility = View.VISIBLE
+                revealRunnable = null
+            }
+            revealRunnable = runnable
+
+            // Failsafe: if some emotes fail or load too slowly, reveal the RecyclerView after 1000ms anyway
+            mainHandler.postDelayed(runnable, 1000L)
+
+            quickEmoteAdapter.onFirstImageReady = {
+                val elapsed = android.os.SystemClock.uptimeMillis() - startTime
+                // If loaded instantly (elapsed < 15ms), it's a memory cache hit - reveal instantly.
+                // Otherwise, enforce a minimum shimmer duration of 300ms to allow parallel loads to finish.
+                val delay = if (elapsed < 15L) 0L else Math.max(0L, 300L - elapsed)
+                
+                revealRunnable?.let { mainHandler.removeCallbacks(it) }
+                
+                val revealAction = Runnable {
+                    binding.quickEmoteShimmer.root.visibility = View.GONE
+                    binding.quickEmoteRecyclerView.visibility = View.VISIBLE
+                    revealRunnable = null
+                }
+                revealRunnable = revealAction
+                if (delay > 0) {
+                    mainHandler.postDelayed(revealAction, delay)
+                } else {
+                    revealAction.run()
+                }
+            }
+        } else {
+            quickEmoteAdapter.onFirstImageReady = null
+        }
         quickEmoteAdapter.setEmotes(finalEmotes)
-        binding.quickEmoteShimmer.root.visibility = View.GONE
-        binding.quickEmoteRecyclerView.visibility = View.VISIBLE
+        
+        if (!showShimmer) {
+            binding.quickEmoteRecyclerView.scrollToPosition(0)
+        }
     }
 
     /**
@@ -187,7 +246,7 @@ class QuickEmoteBarManager(
         // Refresh bar to move this emote to the front
         // Delay update to allow click animation to finish
         mainHandler.postDelayed({
-            updateQuickEmoteBar()
+            updateQuickEmoteBar(showShimmer = false)
         }, 250)
     }
     
