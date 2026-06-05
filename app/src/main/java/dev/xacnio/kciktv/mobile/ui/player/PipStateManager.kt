@@ -163,15 +163,14 @@ class PipStateManager(private val activity: MobilePlayerActivity) {
         activity.setForcedQualityLimit("360p")
 
         // Pause UI updates for chat in PiP
-        activity.chatUiManager.isChatUiPaused = true
+        activity.chatUiManager.pauseChatUi()
     }
 
     private fun exitPipMode() {
         isCurrentlyInPipMode = false
         
         // Resume UI updates and flush buffer
-        activity.chatUiManager.isChatUiPaused = false
-        activity.chatUiManager.flushPendingMessages()
+        activity.chatUiManager.resumeChatUi()
 
         if (isExplicitAudioSwitch) {
             exitedPipMode = false

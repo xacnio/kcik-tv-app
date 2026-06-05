@@ -39,7 +39,9 @@ enum class MessageType {
     RESTORE_BUTTON,
     REWARD,
     CELEBRATION,
-    GIFT
+    GIFT,
+    DIVIDER,
+    LOAD_MISSED
 }
 
 data class ChatMetadata(

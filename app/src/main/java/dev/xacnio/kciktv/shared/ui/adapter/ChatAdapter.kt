@@ -62,7 +62,9 @@ class ChatAdapter(
     private val onMessageAdded: (() -> Unit)? = null, // Called when new message is added
     private val onEmptySpaceClick: (() -> Unit)? = null, // Click on empty space
     private val onClipUrlFound: ((String) -> Unit)? = null,
-    private val onClipClick: ((String) -> Unit)? = null
+    private val onClipClick: ((String) -> Unit)? = null,
+    private val onLoadMissedClick: ((ChatMessage) -> Unit)? = null, // Click on Load Missed button
+    private val onLoadMissedDismiss: ((ChatMessage) -> Unit)? = null // Click on dismiss Load Missed button
 ) : ListAdapter<ChatMessage, RecyclerView.ViewHolder>(ChatDiffCallback()) {
 
     // Animation variables
@@ -260,6 +262,8 @@ class ChatAdapter(
         private const val VIEW_TYPE_REWARD = 4
         private const val VIEW_TYPE_CELEBRATION = 5
         private const val VIEW_TYPE_GIFT = 6
+        private const val VIEW_TYPE_DIVIDER = 7
+        private const val VIEW_TYPE_LOAD_MISSED = 8
         
         // Pattern to match [emote:id:name] format
         private val EMOTE_PATTERN = java.util.regex.Pattern.compile("\\[emote:([^:]+):([^\\]]+)\\]")
@@ -276,6 +280,8 @@ class ChatAdapter(
             dev.xacnio.kciktv.shared.data.model.MessageType.REWARD -> VIEW_TYPE_REWARD
             dev.xacnio.kciktv.shared.data.model.MessageType.CELEBRATION -> VIEW_TYPE_CELEBRATION
             dev.xacnio.kciktv.shared.data.model.MessageType.GIFT -> VIEW_TYPE_GIFT
+            dev.xacnio.kciktv.shared.data.model.MessageType.DIVIDER -> VIEW_TYPE_DIVIDER
+            dev.xacnio.kciktv.shared.data.model.MessageType.LOAD_MISSED -> VIEW_TYPE_LOAD_MISSED
             else -> VIEW_TYPE_MESSAGE
         }
     }
@@ -426,6 +432,10 @@ class ChatAdapter(
         val dismissButton: android.widget.ImageButton = view.findViewById(R.id.dismissButton)
     }
 
+    class DividerViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val dividerText: android.widget.TextView = view.findViewById(R.id.dividerText)
+    }
+
     class RewardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val rewardHeader: TextView = view.findViewById(R.id.rewardHeader)
         val rewardTitle: TextView = view.findViewById(R.id.rewardTitle)
@@ -509,6 +519,12 @@ class ChatAdapter(
             }
             VIEW_TYPE_RESTORE_BUTTON -> {
                 RestoreButtonViewHolder(inflater.inflate(R.layout.item_chat_restore_button, parent, false))
+            }
+            VIEW_TYPE_LOAD_MISSED -> {
+                RestoreButtonViewHolder(inflater.inflate(R.layout.item_chat_restore_button, parent, false))
+            }
+            VIEW_TYPE_DIVIDER -> {
+                DividerViewHolder(inflater.inflate(R.layout.item_chat_divider, parent, false))
             }
             VIEW_TYPE_REWARD -> {
                 RewardViewHolder(inflater.inflate(R.layout.item_chat_reward, parent, false))
@@ -603,7 +619,14 @@ class ChatAdapter(
             is ChatViewHolder -> bindChatMessage(holder, message)
             is SystemViewHolder -> bindSystemMessage(holder, message)
             is InfoViewHolder -> bindInfoMessage(holder, message)
-            is RestoreButtonViewHolder -> bindRestoreButton(holder, message)
+            is RestoreButtonViewHolder -> {
+                if (message.type == dev.xacnio.kciktv.shared.data.model.MessageType.LOAD_MISSED) {
+                    bindLoadMissedButton(holder, message)
+                } else {
+                    bindRestoreButton(holder, message)
+                }
+            }
+            is DividerViewHolder -> bindDivider(holder, message)
             is RewardViewHolder -> bindRewardMessage(holder, message)
             is CelebrationViewHolder -> bindCelebrationMessage(holder, message)
             is GiftViewHolder -> bindGiftMessage(holder, message)
@@ -1165,6 +1188,20 @@ class ChatAdapter(
         }
         holder.dismissButton.setOnClickListener {
             onRestoreDismiss?.invoke()
+        }
+    }
+
+    private fun bindDivider(holder: DividerViewHolder, message: ChatMessage) {
+        holder.dividerText.text = message.content
+    }
+
+    private fun bindLoadMissedButton(holder: RestoreButtonViewHolder, message: ChatMessage) {
+        holder.restoreButton.text = message.content
+        holder.restoreButton.setOnClickListener {
+            onLoadMissedClick?.invoke(message)
+        }
+        holder.dismissButton.setOnClickListener {
+            onLoadMissedDismiss?.invoke(message)
         }
     }
 
@@ -2337,36 +2374,34 @@ class ChatAdapter(
             }
 
             // Fast path for single message append (most common case)
-            if (newMessages.size == 1 && !deduplicate) {
+            if (newMessages.size == 1) {
                 val newMsg = newMessages[0]
-                // Insert maintaining sort order
-                val insertIndex = messageCache.indexOfLast { it.createdAt <= newMsg.createdAt } + 1
-                messageCache.add(insertIndex, newMsg)
+                val alreadyExists = messageCache.any { it.id == newMsg.id }
+                if (!alreadyExists) {
+                    // Insert maintaining sort order
+                    val insertIndex = messageCache.indexOfLast { it.createdAt <= newMsg.createdAt } + 1
+                    messageCache.add(insertIndex, newMsg)
 
-                while (messageCache.size > effectiveLimit) {
-                    messageCache.removeAt(0)
+                    while (messageCache.size > effectiveLimit) {
+                        messageCache.removeAt(0)
+                    }
                 }
-
                 finalList = ArrayList(messageCache)
             } else {
                 // Batch path for multiple messages or history loading
                 messageCache.addAll(newMessages)
 
-                // Only deduplicate when loading history
-                val workingList = if (deduplicate) {
-                    val seen = HashSet<String>(messageCache.size)
-                    messageCache.filter { seen.add(it.id) }
-                } else {
-                    messageCache.toList()
-                }
+                // Always deduplicate by message ID to prevent clone/duplicate messages
+                val seen = HashSet<String>(messageCache.size)
+                val workingList = messageCache.filter { seen.add(it.id) }
 
                 // Sort by createdAt
-                //val sortedList = workingList.sortedBy { it.createdAt }
+                val sortedList = workingList.sortedBy { it.createdAt }
 
-                val trimmedList = if (workingList.size > effectiveLimit) {
-                    workingList.subList(workingList.size - effectiveLimit, workingList.size)
+                val trimmedList = if (sortedList.size > effectiveLimit) {
+                    sortedList.subList(sortedList.size - effectiveLimit, sortedList.size)
                 } else {
-                    workingList
+                    sortedList
                 }
 
                 messageCache.clear()
@@ -2405,16 +2440,17 @@ class ChatAdapter(
 
 
     fun updateMessageStatus(messageRef: String, newStatus: dev.xacnio.kciktv.shared.data.model.MessageStatus, updatedSender: dev.xacnio.kciktv.shared.data.model.ChatSender? = null) {
-        val currentList = currentList.toMutableList()
-        val index = currentList.indexOfFirst { it.messageRef == messageRef }
-        if (index != -1) {
-            val oldMsg = currentList[index]
-            val updatedMsg = oldMsg.copy(
-                status = newStatus,
-                sender = updatedSender ?: oldMsg.sender
-            )
-            currentList[index] = updatedMsg
-            submitList(currentList)
+        synchronized(messageCache) {
+            val index = messageCache.indexOfFirst { it.messageRef == messageRef }
+            if (index != -1) {
+                val oldMsg = messageCache[index]
+                val updatedMsg = oldMsg.copy(
+                    status = newStatus,
+                    sender = updatedSender ?: oldMsg.sender
+                )
+                messageCache[index] = updatedMsg
+                submitList(ArrayList(messageCache))
+            }
         }
     }
 
@@ -2505,7 +2541,9 @@ class ChatAdapter(
             // This is faster than full object comparison
             return oldItem.content == newItem.content &&
                    oldItem.status == newItem.status &&
-                   oldItem.isAiModerated == newItem.isAiModerated
+                   oldItem.isAiModerated == newItem.isAiModerated &&
+                   oldItem.messageRef == newItem.messageRef &&
+                   oldItem.createdAt == newItem.createdAt
         }
     }
 

@@ -104,7 +104,7 @@ class MiniPlayerManager(private val activity: MobilePlayerActivity) {
         }
         
         // Clean up Chat UI state
-        activity.chatUiManager.isChatUiPaused = false
+        activity.chatUiManager.resumeChatUi()
         activity.chatUiManager.reset()
         
         binding.playerScreenContainer.visibility = View.GONE

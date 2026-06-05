@@ -48,6 +48,7 @@ interface LiveStreamsApiService {
     @GET("api/v1/chat/{chatroomId}/history")
     suspend fun getChatHistory(
         @Path("chatroomId") chatroomId: Long,
+        @Query("cursor") cursor: String? = null,
         @Query("start_time") startTime: String? = null
     ): Response<ChatHistoryResponse>
 

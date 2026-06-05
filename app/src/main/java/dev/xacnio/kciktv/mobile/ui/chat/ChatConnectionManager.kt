@@ -56,16 +56,7 @@ class ChatConnectionManager(private val activity: MobilePlayerActivity) {
                          return@chatListener
                      }
 
-                     // Short-circuit on the WS reader thread when chat is not visible.
-                     // Skips the runOnUiThread allocation + main-looper Message dispatch per
-                     // message; ChatUiManager.handleIncomingMessage would have dropped it
-                     // anyway, this just avoids the cross-thread hop. On a busy channel this
-                     // saves dozens of main-thread wakeups per second while in PIP/mini.
-                     val isPip = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
-                         activity.isInPictureInPictureMode else false
-                     if (activity.miniPlayerManager.isMiniPlayerMode || isPip || chatUiManager.isChatUiPaused) {
-                         return@chatListener
-                     }
+                     // Forward all messages to ChatUiManager so they can be buffered when the chat is paused/PiP.
 
                      // Delegate message buffering/handling to UI Manager
                      activity.runOnUiThread {
@@ -162,6 +153,10 @@ class ChatConnectionManager(private val activity: MobilePlayerActivity) {
         chatWebSocket = null
     }
 
+    fun isConnected(): Boolean {
+        return chatWebSocket?.isConnected() == true
+    }
+
     fun manualReconnect() {
         chatWebSocket?.manualReconnect()
     }
@@ -186,7 +181,7 @@ class ChatConnectionManager(private val activity: MobilePlayerActivity) {
      * Low Battery OFF: 2 min (120 s) — restore default.
      */
     fun applyLowBatteryPingInterval() {
-        val intervalMs = if (prefs.lowBatteryModeEnabled) 300_000L else 120_000L
+        val intervalMs = if (prefs.lowBatteryModeEnabled && prefs.batterySaverSlowTimers) 300_000L else 120_000L
         chatWebSocket?.setPingInterval(intervalMs)
     }
 }

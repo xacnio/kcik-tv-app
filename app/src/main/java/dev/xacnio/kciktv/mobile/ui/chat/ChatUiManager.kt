@@ -85,7 +85,9 @@ class ChatUiManager(
             onMessageAdded = { handleMessageAdded() },
             onEmptySpaceClick = { activity.handleScreenTap() },
             onClipUrlFound = { clipId -> fetchClipDetails(clipId) },
-            onClipClick = { clipId -> handleClipClick(clipId) }
+            onClipClick = { clipId -> handleClipClick(clipId) },
+            onLoadMissedClick = { message -> handleLoadMissedClick(message) },
+            onLoadMissedDismiss = { message -> handleLoadMissedDismiss(message) }
         ).apply {
             setChatTextSize(prefs.chatTextSize)
             setChatEmoteSize(prefs.chatEmoteSize)
@@ -142,6 +144,11 @@ class ChatUiManager(
                         chatAdapter.isAutoScrollEnabled = false
                         updateJumpToBottomButton()
                     }
+                    val layoutManager = recyclerView.layoutManager as? LinearLayoutManager
+                    val firstVisible = layoutManager?.findFirstVisibleItemPosition() ?: -1
+                    if (firstVisible >= 0 && firstVisible <= 5) {
+                        loadOlderChatHistory()
+                    }
                 }
             }
 
@@ -151,6 +158,11 @@ class ChatUiManager(
                 if (dy < 0) {
                     isChatAutoScrollEnabled = false
                     chatAdapter.isAutoScrollEnabled = false
+                    val layoutManager = recyclerView.layoutManager as? LinearLayoutManager
+                    val firstVisible = layoutManager?.findFirstVisibleItemPosition() ?: -1
+                    if (firstVisible >= 0 && firstVisible <= 5) {
+                        loadOlderChatHistory()
+                    }
                 }
 
                 if (!recyclerView.canScrollVertically(1)) {
@@ -1175,6 +1187,9 @@ class ChatUiManager(
     }
     
     fun reset() {
+        isHistoryLoading = false
+        hasMoreHistory = true
+        lastRequestedCursor = null
         // Reset Chat List
         chatAdapter.clearMessages()
         clearedMessages = emptyList()
@@ -1225,21 +1240,228 @@ class ChatUiManager(
     fun setModeratorStatus(isMod: Boolean) {
         chatStateManager.setModeratorStatus(isMod)
     }
+    private var missedMessagesCount = 0
+    private var isHistoryLoading = false
+    private var hasMoreHistory = true
+    private var lastRequestedCursor: String? = null
+    fun pauseChatUi() {
+        if (isChatUiPaused) return
+        isChatUiPaused = true
+        
+        // Add a divider to the chat to separate foreground messages from background messages
+        // But only if we are not in battery saver chat pause (which has its own message)
+        if (!activity.isChatPausedForLowBattery) {
+            val dividerMsg = ChatMessage(
+                id = "divider_${System.currentTimeMillis()}",
+                content = activity.getString(R.string.chat_background_divider),
+                sender = ChatSender(0, "", null, null),
+                type = dev.xacnio.kciktv.shared.data.model.MessageType.DIVIDER
+            )
+            activity.runOnUiThread {
+                chatAdapter.addMessages(listOf(dividerMsg))
+            }
+        }
+    }
 
-    fun handleIncomingMessage(message: ChatMessage) {
-        // Drop messages when chat UI cannot be seen by the user.
-        // - Mini player: flushRunnable returns early, buffer would grow unbounded.
-        // - PIP: chat container is not on screen, per-message work (emote combo, floating
-        //   emote, mention regex) is wasted.
-        // - isChatUiPaused: set in onStop background-audio path. Without a drop, a long
-        //   background session accumulates thousands of messages that flush in one batch
-        //   on resume (UI hiccup + memory spike), and the user can't see them in the
-        //   meantime anyway.
-        val isPip = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
-            activity.isInPictureInPictureMode else false
-        if (activity.miniPlayerManager.isMiniPlayerMode || isPip || isChatUiPaused) {
+    fun resumeChatUi() {
+        if (!isChatUiPaused) return
+        isChatUiPaused = false
+        
+        // If low battery mode was active, we don't flush the buffer because we didn't buffer anything
+        if (activity.isChatPausedForLowBattery) {
+            startFlushing()
             return
         }
+        
+        // Flush buffered messages with potential "Load Missed Messages" button
+        flushBufferedMessagesOnResume()
+        startFlushing()
+    }
+
+    private fun flushBufferedMessagesOnResume() {
+        val messages = synchronized(incomingMessageBuffer) {
+            val list = ArrayList(incomingMessageBuffer)
+            incomingMessageBuffer.clear()
+            list
+        }
+        
+        if (messages.isEmpty()) return
+        
+        val toAdd = mutableListOf<ChatMessage>()
+        
+        if (missedMessagesCount > 0) {
+            val oldestMsg = messages.firstOrNull()
+            val cursor = oldestMsg?.let { (it.createdAt * 1000).toString() }
+            
+            val buttonMsg = ChatMessage(
+                id = "load_missed_${System.currentTimeMillis()}",
+                content = activity.getString(R.string.chat_load_missed_messages),
+                sender = ChatSender(0, "", null, null),
+                type = dev.xacnio.kciktv.shared.data.model.MessageType.LOAD_MISSED,
+                messageRef = cursor, // Store cursor in messageRef
+                createdAt = (oldestMsg?.createdAt ?: System.currentTimeMillis()) - 1
+            )
+            toAdd.add(buttonMsg)
+            missedMessagesCount = 0 // Reset counter
+        }
+        
+        toAdd.addAll(messages)
+        
+        // Add end divider
+        val endDividerMsg = ChatMessage(
+            id = "divider_end_${System.currentTimeMillis()}",
+            content = activity.getString(R.string.chat_background_divider),
+            sender = ChatSender(0, "", null, null),
+            type = dev.xacnio.kciktv.shared.data.model.MessageType.DIVIDER
+        )
+        toAdd.add(endDividerMsg)
+        
+        // Process emotes/combos for flushed messages
+        toAdd.forEach { msg ->
+            if (msg.type == dev.xacnio.kciktv.shared.data.model.MessageType.CHAT) {
+                activity.emoteComboManager.processMessage(msg.content)
+                activity.floatingEmoteManager.processMessage(msg.content)
+            }
+        }
+        
+        activity.runOnUiThread {
+            chatAdapter.addMessages(toAdd, onCommit = {
+                handleMessageAdded()
+                if (binding.chatRecyclerView.visibility != View.VISIBLE) {
+                    binding.chatRecyclerView.visibility = View.VISIBLE
+                }
+                binding.emptyChatText.visibility = View.GONE
+            })
+        }
+    }
+    fun handleLoadMissedClick(buttonMessage: ChatMessage) {
+        val cursor = buttonMessage.messageRef ?: return
+        val channelId = activity.currentChannelId ?: chatStateManager.currentChatroomId ?: activity.currentChannel?.id?.toLongOrNull() ?: return
+        
+        lifecycleScope.launch {
+            try {
+                val result = repository.getChatHistory(channelId, cursor)
+                result.onSuccess { history ->
+                    val nextCursor = history.cursor
+                    if (nextCursor != null && nextCursor != cursor) {
+                        activity.runOnUiThread {
+                            val oldestLoadedMsg = history.messages.minByOrNull { it.createdAt }
+                            
+                            val updatedButton = buttonMessage.copy(
+                                content = activity.getString(R.string.chat_load_missed_messages_more),
+                                messageRef = nextCursor,
+                                createdAt = if (oldestLoadedMsg != null) oldestLoadedMsg.createdAt - 1 else buttonMessage.createdAt
+                            )
+                            
+                            chatAdapter.removeMessage(buttonMessage.id)
+                            
+                            val toAdd = history.messages.toMutableList()
+                            toAdd.add(updatedButton)
+                            
+                            chatAdapter.addMessages(toAdd, deduplicate = true, animate = false)
+                        }
+                    } else {
+                        activity.runOnUiThread {
+                            if (history.messages.isNotEmpty()) {
+                                chatAdapter.addMessages(history.messages, deduplicate = true, animate = false)
+                            }
+                            chatAdapter.removeMessage(buttonMessage.id)
+                        }
+                    }
+                }.onFailure { e ->
+                    Log.e(TAG, "Failed to load missed messages", e)
+                    activity.runOnUiThread {
+                        Toast.makeText(activity, activity.getString(R.string.history_load_failed), Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in handleLoadMissedClick", e)
+            }
+        }
+    }
+
+    fun handleLoadMissedDismiss(buttonMessage: ChatMessage) {
+        activity.runOnUiThread {
+            chatAdapter.removeMessage(buttonMessage.id)
+        }
+    }
+    
+    fun loadOlderChatHistory() {
+        if (isHistoryLoading || !hasMoreHistory) return
+        val channelId = activity.currentChannelId ?: chatStateManager.currentChatroomId ?: activity.currentChannel?.id?.toLongOrNull() ?: return
+        
+        val oldestMsg = chatAdapter.currentList.firstOrNull { 
+            it.type == MessageType.CHAT || 
+            it.type == MessageType.REWARD || 
+            it.type == MessageType.CELEBRATION || 
+            it.type == MessageType.GIFT
+        } ?: return
+
+        val fallbackCursor = (oldestMsg.createdAt * 1000).toString()
+        val currentCursor = lastRequestedCursor ?: fallbackCursor
+
+        isHistoryLoading = true
+        
+        lifecycleScope.launch {
+            try {
+                val result = repository.getChatHistory(channelId, currentCursor)
+                result.onSuccess { history ->
+                    lastRequestedCursor = history.cursor
+                    val messages = history.messages
+                    if (messages.isNotEmpty()) {
+                        activity.runOnUiThread {
+                            val layoutManager = binding.chatRecyclerView.layoutManager as? LinearLayoutManager
+                            val firstVisiblePos = layoutManager?.findFirstVisibleItemPosition() ?: 0
+                            val offset = layoutManager?.findViewByPosition(firstVisiblePos)?.top ?: 0
+                            
+                            val originalItemCount = chatAdapter.itemCount
+                            chatAdapter.addMessages(messages, deduplicate = true, animate = false, onCommit = {
+                                activity.runOnUiThread {
+                                    val newItemCount = chatAdapter.itemCount
+                                    val addedCount = newItemCount - originalItemCount
+                                    if (addedCount > 0) {
+                                        val newFirstVisiblePos = firstVisiblePos + addedCount
+                                        layoutManager?.scrollToPositionWithOffset(newFirstVisiblePos, offset)
+                                    }
+                                }
+                            })
+                        }
+                    } else {
+                        hasMoreHistory = false
+                    }
+                }.onFailure { e ->
+                    Log.e(TAG, "Failed to load older chat history", e)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in loadOlderChatHistory", e)
+            } finally {
+                isHistoryLoading = false
+            }
+        }
+    }
+
+    fun handleIncomingMessage(message: ChatMessage) {
+        val isPip = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
+            activity.isInPictureInPictureMode else false
+        val isPaused = activity.miniPlayerManager.isMiniPlayerMode || isPip || isChatUiPaused
+        
+        if (isPaused) {
+            // If low battery mode is active and chat is paused, we don't buffer at all (completely drop)
+            if (activity.isChatPausedForLowBattery) {
+                return
+            }
+            
+            synchronized(incomingMessageBuffer) {
+                incomingMessageBuffer.add(message)
+                if (incomingMessageBuffer.size > 200) {
+                    incomingMessageBuffer.removeAt(0)
+                    missedMessagesCount++
+                }
+            }
+            updateBufferCount(incomingMessageBuffer.size)
+            return
+        }
+
         incomingMessageBuffer.add(message)
         updateBufferCount(incomingMessageBuffer.size)
     }
@@ -1274,7 +1496,7 @@ class ChatUiManager(
             // floor so we batch more messages per UI rebind. Quality of the rendered
             // chat is unchanged — only the cadence.
             val thermalFloor = if (dev.xacnio.kciktv.shared.util.ThermalMonitor.level >= 2) 700L else 0L
-            val interval = if (prefs.lowBatteryModeEnabled) 1500L
+            val interval = if (prefs.lowBatteryModeEnabled && prefs.batterySaverSlowTimers) 1500L
                 else maxOf(baseInterval, thermalFloor)
             mainHandler.postDelayed(this, interval)
         }
@@ -1348,6 +1570,8 @@ class ChatUiManager(
     }
 
     fun loadChatHistory(channelId: Long) {
+        isHistoryLoading = false
+        hasMoreHistory = true
         lifecycleScope.launch {
             try {
                 activity.runOnUiThread {

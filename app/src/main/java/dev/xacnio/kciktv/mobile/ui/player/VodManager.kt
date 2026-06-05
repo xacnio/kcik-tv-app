@@ -629,7 +629,7 @@ class VodManager(
 
         // Reset chat UI for new content
         activity.chatUiManager.reset()
-        activity.chatUiManager.isChatUiPaused = false
+        activity.chatUiManager.resumeChatUi()
         activity.chatUiManager.chatAdapter.setSubscriberBadges(emptyMap())
         
         currentPlaybackMode = PlaybackMode.VOD
@@ -889,7 +889,7 @@ class VodManager(
 
         // Reset chat UI for new content
         activity.chatUiManager.reset()
-        activity.chatUiManager.isChatUiPaused = false
+        activity.chatUiManager.resumeChatUi()
         activity.chatUiManager.chatAdapter.setSubscriberBadges(emptyMap())
         
         currentPlaybackMode = PlaybackMode.CLIP

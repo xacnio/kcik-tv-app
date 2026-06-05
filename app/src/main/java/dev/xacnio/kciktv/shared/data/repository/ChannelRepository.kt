@@ -372,24 +372,7 @@ class ChannelRepository {
     suspend fun getChatHistory(chatroomId: Long, cursor: String? = null): Result<ChatHistoryResult> = withContext(Dispatchers.IO) {
         try {
             Log.d(TAG, "getChatHistory using liveStreamsService. Cursor: $cursor")
-            
-            // Convert cursor (unix timestamp string) to ISO-8601 for start_time
-            val startTime = cursor?.toLongOrNull()?.let { nanos ->
-                // Kick API returns duplicates if we use exact time. Subtract 1ms to fetch previous window? 
-                // Or maybe start_time fetches forward?
-                // The cursor is likely the "oldest" message timestamp.
-                // If we want OLDER messages, and start_time fetches forward, we are stuck.
-                // Assuming start_time fetches "around" or "starting window ending at timestamp", 
-                // Let's try to feed the exact timestamp.
-                
-                val millis = nanos / 1000  // Cursor is microseconds in Kick
-                val sdf = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.US)
-                sdf.timeZone = java.util.TimeZone.getTimeZone("UTC")
-                sdf.format(java.util.Date(millis)) 
-            }
-
-            // Using pure start_time per user request
-            val response = liveStreamsService.getChatHistory(chatroomId, startTime)
+            val response = liveStreamsService.getChatHistory(chatroomId, cursor = cursor)
             
             if (!response.isSuccessful || response.body() == null) {
                 return@withContext Result.failure(Exception("API error: ${response.code()}"))
@@ -1264,7 +1247,7 @@ class ChannelRepository {
      */
     suspend fun getChatHistoryForVod(channelId: Long, startTime: String): Result<ChatHistoryResult> = withContext(Dispatchers.IO) {
         try {
-            val response = liveStreamsService.getChatHistory(channelId, startTime)
+            val response = liveStreamsService.getChatHistory(channelId, startTime = startTime)
             if (response.isSuccessful && response.body() != null) {
                 val body = response.body()!!
                 val historyData = body.data

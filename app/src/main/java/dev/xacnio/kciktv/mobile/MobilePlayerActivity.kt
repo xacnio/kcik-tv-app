@@ -1114,10 +1114,10 @@ class MobilePlayerActivity : FragmentActivity() {
         homeScreenManager.enterThumbnailMode()
 
         // Always pause chat UI in mini player mode (chat is hidden)
-        chatUiManager.isChatUiPaused = true
+        chatUiManager.pauseChatUi()
         
         // If low battery mode is enabled, pause chat
-        if (prefs.lowBatteryModeEnabled && miniPlayerManager.isMiniPlayerMode) {
+        if (prefs.lowBatteryModeEnabled && prefs.batterySaverPauseChatInPip && miniPlayerManager.isMiniPlayerMode) {
             pauseChatForLowBatteryMode()
         }
     }
@@ -1161,7 +1161,7 @@ class MobilePlayerActivity : FragmentActivity() {
         miniPlayerManager.exitMiniPlayerMode()
         
         // Resume Chat UI
-        chatUiManager.isChatUiPaused = false
+        chatUiManager.resumeChatUi()
         
         if (prefs.lowBatteryModeEnabled && wasInMiniPlayer) {
             resumeChatForLowBatteryMode()
@@ -1183,7 +1183,7 @@ class MobilePlayerActivity : FragmentActivity() {
         // Add system message to chat
         val systemMessage = ChatMessage(
             id = "low_battery_pause_${System.currentTimeMillis()}",
-            content = getString(R.string.chat_low_battery_paused),
+            content = getString(R.string.chat_paused_battery_saver),
             sender = ChatSender(0, getString(R.string.chat_system_username), null, null),
             type = dev.xacnio.kciktv.shared.data.model.MessageType.SYSTEM,
             iconResId = R.drawable.ic_hourglass
@@ -1199,13 +1199,22 @@ class MobilePlayerActivity : FragmentActivity() {
         if (!isChatPausedForLowBattery) return
         isChatPausedForLowBattery = false
         
-        // Show floating reconnect indicator (hides automatically when connected)
-        binding.chatConnectionContainer.visibility = View.VISIBLE
-        binding.chatConnectionProgress.visibility = View.VISIBLE
-        binding.chatConnectionContainer.isClickable = false
+        if (chatConnectionManager.isConnected()) {
+            binding.chatConnectionContainer.visibility = View.GONE
+        } else {
+            // Show floating reconnect indicator (hides automatically when connected)
+            binding.chatConnectionContainer.visibility = View.VISIBLE
+            binding.chatConnectionProgress.visibility = View.VISIBLE
+            binding.chatConnectionContainer.isClickable = false
+        }
         
         // Re-subscribe to chat
         chatConnectionManager.subscribeToOnlyChat()
+
+        // Fetch fresh chat history on return from low battery mode (as we were unsubscribed)
+        currentChannelId?.let { channelId ->
+            chatUiManager.loadChatHistory(channelId)
+        }
     }
 
     // createNotificationChannel() is now delegated to playbackNotificationManager
@@ -1492,9 +1501,22 @@ class MobilePlayerActivity : FragmentActivity() {
             else -> getString(R.string.chat_hint_default)
         }
         binding.chatInput.hint = hint
-        
-        // Manage followers countdown timer
-        chatInputStateManager.startFollowersCountdown()
+
+        // Manage followers countdown timer.
+        // Only run the periodic countdown while the user is actually waiting to meet the
+        // follower-duration requirement. Starting it unconditionally caused an infinite
+        // zero-delay loop pinning the main thread at ~100%: startFollowersCountdown()
+        // posts with no delay, and the runnable's "requirement met" branch calls
+        // updateChatroomHint() again, which re-armed the countdown — forever. Stopping it
+        // once the requirement is met (or not applicable) breaks the cycle.
+        val isWaitingForFollowDuration = chatroom?.followersMode == true &&
+            isFollowing && followingSince != null &&
+            followersMinDuration > 0 && followDurationMinutes < followersMinDuration
+        if (isWaitingForFollowDuration) {
+            chatInputStateManager.startFollowersCountdown()
+        } else {
+            chatInputStateManager.stopFollowersCountdown()
+        }
         
         // Update chat mode icons
         chatUiManager.updateChatModeIndicators()
@@ -1915,7 +1937,7 @@ class MobilePlayerActivity : FragmentActivity() {
         
         // Reset chat UI for new channel
         chatUiManager.reset()
-        chatUiManager.isChatUiPaused = false
+        chatUiManager.resumeChatUi()
 
         // FORCE RESET PLAYER LAYOUT STATE
         // Fix for "stuck layout" when closing video in landscape vs portrait
@@ -1980,6 +2002,7 @@ class MobilePlayerActivity : FragmentActivity() {
         
         // Save as last watched
         prefs.lastWatchedChannelSlug = channel.slug
+        channel.slug?.let { prefs.saveRecentWatchedSlug(it) }
         
         // Show player screen
         // actionBar visibility is managed by ChannelUiManager (animateActionBarIn/Out)
@@ -2497,9 +2520,7 @@ class MobilePlayerActivity : FragmentActivity() {
         }
         
         // Resume UI updates and flush buffer
-        chatUiManager.isChatUiPaused = false
-        chatUiManager.startFlushing() // Ensure the loop is running (restarts if dead)
-        chatUiManager.flushPendingMessages()
+        chatUiManager.resumeChatUi()
 
         // Resume viewer count polling if we have an active livestream (paired with onStop cancel).
         if (currentLivestreamId != null) {
@@ -2517,7 +2538,7 @@ class MobilePlayerActivity : FragmentActivity() {
 
     override fun onStop() {
         super.onStop()
-        
+
         // If we explicitly exited PiP mode (closed the window), stop playback
         if (exitedPipMode) {
             Log.d(TAG, "PiP mode exited explicitely - stopping playback")
@@ -2576,7 +2597,7 @@ class MobilePlayerActivity : FragmentActivity() {
             // Battery Optimization:
             // Pause UI updates for chat while in background to save CPU/Battery.
             // Data will still be received and buffered.
-            chatUiManager.isChatUiPaused = true
+            chatUiManager.pauseChatUi()
         } else {
             // Stop playback and notification if we are not staying in background mode
             if (!isInPip) {
@@ -2650,8 +2671,7 @@ class MobilePlayerActivity : FragmentActivity() {
         // This is critical because onStart may not be called in some scenarios
         // (e.g., when background audio is enabled or certain lifecycle transitions)
         if (::chatUiManager.isInitialized && !miniPlayerManager.isMiniPlayerMode) {
-            chatUiManager.isChatUiPaused = false
-            chatUiManager.startFlushing()
+            chatUiManager.resumeChatUi()
         }
         
         // Refresh mini player interactions after PiP or other lifecycle changes
