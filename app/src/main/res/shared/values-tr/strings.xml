@@ -588,6 +588,10 @@
     <!-- Chat Clear -->
     <string name="chat_cleared">Sohbet temizlendi</string>
     <string name="chat_restore_messages">%d mesajı geri getir</string>
+    <string name="chat_background_divider">Arka Plan Mesajları</string>
+    <string name="chat_load_missed_messages">Kaçırılan Mesajları Yükle</string>
+    <string name="chat_load_missed_messages_more">Kaçırılan Mesajları Yükle (Daha Fazla)</string>
+    <string name="chat_paused_battery_saver">Sohbet durduruldu (Pil Tasarrufu)</string>
 
     <!-- Ban Status -->
     <string name="ban_permanent">Kalıcı Yasak</string>
@@ -695,6 +699,23 @@
     <!-- Chat Connection -->
     <string name="chat_low_battery_paused">Arka plan modu aktif. Sohbet duraklatıldı (Pil Tasarrufu)</string>
     <string name="chat_battery_saver_subtitle">Kaliteyi 720p ile sınırlar, animasyonları azaltır, zamanlayıcı &amp; ping yavaşlar</string>
+
+    <!-- Battery saver: per-surface animation settings -->
+    <string name="battery_saver_settings">Pil Tasarrufu</string>
+    <string name="battery_saver_settings_subtitle">Pil &amp; CPU için animasyon ayarları</string>
+    <string name="battery_animations_header">Animasyonlar</string>
+    <string name="battery_animated_badges">Animasyonlu Abone Rozetleri</string>
+    <string name="battery_animated_chat_emotes">Animasyonlu Emojiler (Chat)</string>
+    <string name="battery_chat_emote_fps">Emoji kare hızı (FPS)</string>
+    <string name="battery_animated_quick_panel">Animasyonlu Emojiler (Hızlı Panel)</string>
+    <string name="battery_general_header">Genel</string>
+    <string name="battery_chat_refresh_rate">Chat Yenileme Hızı (ms)</string>
+    <string name="battery_refresh_locked_by_slow_timers">\'Chat / ping / timer yavaşlat\' etkinken 1500 ms kilitlenir</string>
+    <string name="battery_effects_header">Pil Tasarrufu Etkileri</string>
+    <string name="battery_effect_limit_quality">Kaliteyi 720p ile sınırla</string>
+    <string name="battery_effect_slow_timers">Chat / ping / timer yavaşlat</string>
+    <string name="battery_effect_disable_shimmer">Yükleme animasyonlarını kapat</string>
+    <string name="battery_effect_pause_chat_pip">Mini-player / PIP\'de chat duraklat</string>
 
     <!-- Chat appearance subtitles -->
     <string name="chat_timestamps_subtitle">Her mesajın yanında gönderim saatini göster</string>

@@ -588,6 +588,10 @@
     <!-- Chat Clear -->
     <string name="chat_cleared">تم مسح الدردشة</string>
     <string name="chat_restore_messages">استعادة %d رسائل</string>
+    <string name="chat_background_divider">رسائل الخلفية</string>
+    <string name="chat_load_missed_messages">تحميل الرسائل الفائتة</string>
+    <string name="chat_load_missed_messages_more">تحميل الرسائل الفائتة (المزيد)</string>
+    <string name="chat_paused_battery_saver">توقف الدردشة مؤقتًا (توفير البطارية)</string>
 
     <!-- Ban Status -->
     <string name="ban_permanent">حظر دائم</string>
@@ -695,6 +699,23 @@
     <!-- Chat Connection -->
     <string name="chat_low_battery_paused">تم تفعيل وضع الخلفية. الدردشة متوقفة (توفير البطارية)</string>
     <string name="chat_battery_saver_subtitle">يحدد الجودة بـ 720p ويقلل الرسوم المتحركة ويبطئ المؤقتات &amp; الـ ping</string>
+
+    <!-- Battery saver: per-surface animation settings -->
+    <string name="battery_saver_settings">توفير البطارية</string>
+    <string name="battery_saver_settings_subtitle">تبديل الرسوم المتحركة لتوفير البطارية والمعالج</string>
+    <string name="battery_animations_header">الرسوم المتحركة</string>
+    <string name="battery_animated_badges">شارات المشتركين المتحركة</string>
+    <string name="battery_animated_chat_emotes">إيموتات متحركة (الدردشة)</string>
+    <string name="battery_chat_emote_fps">معدل إطارات الإيموت (FPS)</string>
+    <string name="battery_animated_quick_panel">إيموتات متحركة (الشريط السريع)</string>
+    <string name="battery_general_header">عام</string>
+    <string name="battery_chat_refresh_rate">معدل تحديث الدردشة (ملي ثانية)</string>
+    <string name="battery_refresh_locked_by_slow_timers">1500 ملي ثانية مقفلة أثناء تفعيل \'إبطاء الدردشة / ping / المؤقتات\'</string>
+    <string name="battery_effects_header">تأثيرات توفير البطارية</string>
+    <string name="battery_effect_limit_quality">تحديد الجودة بـ 720p</string>
+    <string name="battery_effect_slow_timers">إبطاء الدردشة / ping / المؤقتات</string>
+    <string name="battery_effect_disable_shimmer">تعطيل رسوم التحميل المتحركة</string>
+    <string name="battery_effect_pause_chat_pip">إيقاف الدردشة مؤقتاً في المشغل المصغر / PIP</string>
 
     <!-- Chat appearance subtitles -->
     <string name="chat_timestamps_subtitle">عرض وقت الإرسال بجانب كل رسالة</string>

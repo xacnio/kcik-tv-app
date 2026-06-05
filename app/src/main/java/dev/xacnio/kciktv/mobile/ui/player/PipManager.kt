@@ -68,7 +68,7 @@ class PipManager(private val activity: MobilePlayerActivity) {
                 activity.analytics.logPipModeEntered()
 
                 // If low battery mode is enabled, pause chat
-                if (prefs.lowBatteryModeEnabled) {
+                if (prefs.lowBatteryModeEnabled && prefs.batterySaverPauseChatInPip) {
                     activity.pauseChatForLowBatteryMode()
                 }
             } catch (e: Exception) {

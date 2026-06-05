@@ -204,6 +204,49 @@
                     app:tint="#444444" />
             </LinearLayout>
 
+            <!-- Battery Saver -->
+            <LinearLayout
+                android:id="@+id/btnMenuBattery"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_ripple_rounded"
+                android:paddingHorizontal="10dp">
+
+                <FrameLayout
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_settings_card">
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_battery_saver"
+                        app:tint="#AAAAAA" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="12dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/battery_saver_settings"
+                        android:textColor="#FFFFFF"
+                        android:textSize="15sp" />
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_chevron_right"
+                    app:tint="#444444" />
+            </LinearLayout>
+
         </LinearLayout>
 
         <!-- PROFILE IDENTITY VIEW -->
@@ -874,40 +917,6 @@
                                 app:tint="#5A5A5E" />
                         </LinearLayout>
 
-                        <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#2C2C2E" />
-
-                        <!-- Battery Saver -->
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="52dp"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical">
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical"
-                                android:layout_marginEnd="12dp">
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/chat_low_battery_mode"
-                                    android:textColor="#FFFFFF"
-                                    android:textSize="14sp" />
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/chat_battery_saver_subtitle"
-                                    android:textColor="#5A5A5E"
-                                    android:textSize="12sp"
-                                    android:layout_marginTop="2dp" />
-                            </LinearLayout>
-                            <androidx.appcompat.widget.SwitchCompat
-                                android:id="@+id/switchLowBatteryMode"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content" />
-                        </LinearLayout>
-
                     </LinearLayout>
 
                 </LinearLayout>
@@ -1077,6 +1086,327 @@
                         android:orientation="vertical"
                         android:paddingHorizontal="16dp"
                         android:paddingBottom="16dp" />
+                </androidx.core.widget.NestedScrollView>
+
+            </LinearLayout>
+
+            <!-- Battery Saver Settings Sub-Page -->
+            <LinearLayout
+                android:id="@+id/batterySettingsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <androidx.core.widget.NestedScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scrollbars="none"
+                    android:overScrollMode="never">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="16dp"
+                        android:paddingVertical="12dp">
+
+                        <!-- Master: Battery Saver (quality cap + slower timers) -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:background="@drawable/bg_settings_card"
+                            android:paddingHorizontal="16dp"
+                            android:layout_marginBottom="12dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="62dp"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+                                <LinearLayout
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:orientation="vertical"
+                                    android:layout_marginEnd="12dp">
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="@string/chat_low_battery_mode"
+                                        android:textColor="#FFFFFF"
+                                        android:textSize="14sp" />
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginTop="2dp"
+                                        android:text="@string/chat_battery_saver_subtitle"
+                                        android:textColor="#5A5A5E"
+                                        android:textSize="12sp" />
+                                </LinearLayout>
+                                <androidx.appcompat.widget.SwitchCompat
+                                    android:id="@+id/switchLowBatteryMode"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content" />
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                        <!-- Battery Saver effects (gated by master) -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/battery_effects_header"
+                            android:textColor="#5A5A5E"
+                            android:textSize="12sp"
+                            android:textAllCaps="true"
+                            android:layout_marginStart="4dp"
+                            android:layout_marginBottom="6dp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:background="@drawable/bg_settings_card"
+                            android:paddingHorizontal="16dp"
+                            android:layout_marginBottom="12dp">
+
+                            <!-- Limit quality to 720p -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="56dp"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:layout_marginEnd="12dp"
+                                    android:text="@string/battery_effect_limit_quality"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="14sp" />
+                                <androidx.appcompat.widget.SwitchCompat
+                                    android:id="@+id/switchEffectLimitQuality"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content" />
+                            </LinearLayout>
+
+                            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#2C2C2E" />
+
+                            <!-- Slow down timers -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="56dp"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:layout_marginEnd="12dp"
+                                    android:text="@string/battery_effect_slow_timers"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="14sp" />
+                                <androidx.appcompat.widget.SwitchCompat
+                                    android:id="@+id/switchEffectSlowTimers"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content" />
+                            </LinearLayout>
+
+                            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#2C2C2E" />
+
+                            <!-- Disable shimmer -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="56dp"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:layout_marginEnd="12dp"
+                                    android:text="@string/battery_effect_disable_shimmer"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="14sp" />
+                                <androidx.appcompat.widget.SwitchCompat
+                                    android:id="@+id/switchEffectShimmer"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content" />
+                            </LinearLayout>
+
+                            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#2C2C2E" />
+
+                            <!-- Pause chat in mini-player / PIP -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="56dp"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:layout_marginEnd="12dp"
+                                    android:text="@string/battery_effect_pause_chat_pip"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="14sp" />
+                                <androidx.appcompat.widget.SwitchCompat
+                                    android:id="@+id/switchEffectPauseChatPip"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content" />
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/battery_animations_header"
+                            android:textColor="#5A5A5E"
+                            android:textSize="12sp"
+                            android:textAllCaps="true"
+                            android:layout_marginStart="4dp"
+                            android:layout_marginBottom="6dp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:background="@drawable/bg_settings_card"
+                            android:paddingHorizontal="16dp">
+
+                            <!-- Animated subscriber badges -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="56dp"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:layout_marginEnd="12dp"
+                                    android:text="@string/battery_animated_badges"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="14sp" />
+                                <androidx.appcompat.widget.SwitchCompat
+                                    android:id="@+id/switchAnimatedBadges"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content" />
+                            </LinearLayout>
+
+                            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#2C2C2E" />
+
+                            <!-- Animated chat emotes -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="56dp"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:layout_marginEnd="12dp"
+                                    android:text="@string/battery_animated_chat_emotes"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="14sp" />
+                                <androidx.appcompat.widget.SwitchCompat
+                                    android:id="@+id/switchAnimatedChatEmotes"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content" />
+                            </LinearLayout>
+
+                            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#2C2C2E" />
+
+                            <!-- Animated quick emoji panel -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="56dp"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:layout_marginEnd="12dp"
+                                    android:text="@string/battery_animated_quick_panel"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="14sp" />
+                                <androidx.appcompat.widget.SwitchCompat
+                                    android:id="@+id/switchAnimatedQuickPanel"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content" />
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                        <!-- Independent of the Battery Saver master: always editable -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/battery_general_header"
+                            android:textColor="#5A5A5E"
+                            android:textSize="12sp"
+                            android:textAllCaps="true"
+                            android:layout_marginStart="4dp"
+                            android:layout_marginTop="16dp"
+                            android:layout_marginBottom="6dp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:background="@drawable/bg_settings_card"
+                            android:paddingHorizontal="16dp">
+
+                            <!-- Chat emote FPS -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:paddingVertical="12dp">
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/battery_chat_emote_fps"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="14sp" />
+                                <LinearLayout
+                                    android:id="@+id/batteryFpsOptions"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="8dp"
+                                    android:orientation="horizontal" />
+                            </LinearLayout>
+
+                            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#2C2C2E" />
+
+                            <!-- Chat refresh rate -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:paddingVertical="12dp">
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/battery_chat_refresh_rate"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="14sp" />
+                                <LinearLayout
+                                    android:id="@+id/batteryRefreshOptions"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="8dp"
+                                    android:orientation="horizontal" />
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
                 </androidx.core.widget.NestedScrollView>
 
             </LinearLayout>

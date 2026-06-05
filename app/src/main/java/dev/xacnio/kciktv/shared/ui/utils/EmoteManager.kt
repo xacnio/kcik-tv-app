@@ -38,22 +38,141 @@ object EmoteManager {
     private const val EMOTE_BASE_URL = "https://files.kick.com/emotes/"
     private val EMOTE_PATTERN = java.util.regex.Pattern.compile("\\[emote:(\\d+):([^\\]]+)\\]")
     
-    // Minimum interval between frame captures (16ms ≈ 60fps cap)
-    private const val MIN_FRAME_INTERVAL_MS = 16L
-    // Batch invalidation interval
-    private const val INVALIDATION_BATCH_MS = 16L
+    // Default frame interval (33ms ≈ 30fps) used for badges and as the chat-emote
+    // default. Emotes are tiny, so 30fps is visually indistinguishable from 60 here while
+    // roughly halving the per-frame decode + draw + invalidation work.
+    private const val DEFAULT_FRAME_INTERVAL_MS = 33L
+    // Batch invalidation interval (matched to the default frame cap)
+    private const val INVALIDATION_BATCH_MS = 33L
+
+    /** Animation surface category, so per-surface settings can be applied independently. */
+    enum class Category { EMOTE, BADGE }
+
+    // --- Battery saver: per-surface animation settings (mirrored from AppPreferences) ---
+    // Whether animated chat emotes / subscriber badges play. When false the first decoded
+    // frame is shown statically. The quick-emote bar is gated separately in QuickEmoteAdapter.
+    @Volatile var chatEmotesAnimated: Boolean = true
+        private set
+    @Volatile var badgesAnimated: Boolean = true
+        private set
+    @Volatile var quickPanelEmotesAnimated: Boolean = true
+    // Frame interval for animated chat emotes, derived from the user's FPS choice (15/30/60).
+    @Volatile private var chatEmoteFrameIntervalMs: Long = DEFAULT_FRAME_INTERVAL_MS
     
     /**
-     * When true, EmoteEntry will skip starting animated drawables on init and
-     * ensureRunning() becomes a no-op. The first decoded frame is still rendered
-     * (so badges/emotes remain visible as static images). LauncherActivity wires
-     * this from prefs.lowBatteryModeEnabled at startup; toggle changes take
-     * effect on next app launch (existing entries keep their state).
+     * Broader Battery Saver flag (quality cap, slower timers). No longer gates emote/badge
+     * animation — that is governed solely by the per-surface settings above so the two are
+     * independent. Still read by other UI (e.g. ShimmerLayout) to drop optional effects.
+     * Wired from prefs.lowBatteryModeEnabled at startup.
      */
     @Volatile var lowBatteryMode: Boolean = false
 
+    /**
+     * Effective "disable shimmer (loading) animations" flag, read by ShimmerLayout.
+     * Mirrors prefs.lowBatteryModeEnabled && prefs.batterySaverDisableShimmer; set at
+     * startup and whenever the Battery Saver / shimmer toggles change.
+     */
+    @Volatile var shimmerDisabled: Boolean = false
+
+    /**
+     * When true, all shared emote master animations are stopped. Set while no chat
+     * surface is visible (screen off / app backgrounded): the per-emote decode +
+     * main-thread frame scheduling is the dominant background CPU cost, and nothing
+     * is on screen to animate. New entries created while paused start static and are
+     * woken by resumeAllAnimations(). Independent of [lowBatteryMode].
+     */
+    @Volatile var animationsPaused: Boolean = false
+        private set
+
     private val emoteEntries = mutableMapOf<String, EmoteEntry>()
     private val activeTargets = mutableMapOf<String, Target<*>>()
+
+    /**
+     * Stops every shared emote animation. Call when no chat surface is visible
+     * (screen off / app backgrounded) — this halts the per-emote frame decode and
+     * the main-thread frame scheduling that otherwise keeps the UI thread busy in
+     * the background. Idempotent; pair with [resumeAllAnimations].
+     */
+    fun pauseAllAnimations() {
+        if (animationsPaused) return
+        animationsPaused = true
+        val snapshot = synchronized(emoteEntries) { emoteEntries.values.toList() }
+        for (entry in snapshot) entry.pauseMaster()
+    }
+
+    /** Restarts animations stopped by [pauseAllAnimations] (per-surface settings still apply). */
+    fun resumeAllAnimations() {
+        if (!animationsPaused) return
+        animationsPaused = false
+        val snapshot = synchronized(emoteEntries) { emoteEntries.values.toList() }
+        for (entry in snapshot) entry.ensureRunning()
+    }
+
+    /**
+     * Applies the battery-saver settings. The per-surface animation toggles only take
+     * effect while the Battery Saver master is ON; when it is OFF everything animates
+     * (the toggles are inert and shown disabled in the UI). FPS is independent and always
+     * applies. Reconciles existing entries, so it is safe to call at runtime.
+     */
+    fun applyBatterySettings(
+        masterEnabled: Boolean,
+        chatEmotes: Boolean,
+        badges: Boolean,
+        quickPanel: Boolean,
+        chatEmoteFps: Int
+    ) {
+        setChatEmoteFps(chatEmoteFps)
+        setChatEmotesAnimated(!masterEnabled || chatEmotes)
+        setBadgesAnimated(!masterEnabled || badges)
+        quickPanelEmotesAnimated = !masterEnabled || quickPanel
+    }
+
+    /** Toggles animated chat emotes, applying to existing entries immediately. */
+    fun setChatEmotesAnimated(enabled: Boolean) {
+        chatEmotesAnimated = enabled
+        forEachEntryOfCategory(Category.EMOTE) { if (enabled) it.ensureRunning() else it.pauseMaster() }
+    }
+
+    /** Toggles animated subscriber badges, applying to existing entries immediately. */
+    fun setBadgesAnimated(enabled: Boolean) {
+        badgesAnimated = enabled
+        if (enabled) {
+            // Drop badges that were loaded statically while disabled so they re-load as
+            // animated APNG on their next bind (a static BitmapDrawable can't animate).
+            synchronized(emoteEntries) {
+                val it = emoteEntries.entries.iterator()
+                while (it.hasNext()) {
+                    val e = it.next().value
+                    if (e.category == Category.BADGE && e.master !is android.graphics.drawable.Animatable) {
+                        it.remove()
+                    }
+                }
+            }
+            forEachEntryOfCategory(Category.BADGE) { it.ensureRunning() }
+        } else {
+            forEachEntryOfCategory(Category.BADGE) { it.pauseMaster() }
+        }
+    }
+
+    /** Updates the chat-emote FPS cap (15/30/60). Applies live — entries read it per frame. */
+    fun setChatEmoteFps(fps: Int) {
+        chatEmoteFrameIntervalMs = fpsToInterval(fps)
+    }
+
+    /** Public emote image URL, for surfaces that load their own (static) copy. */
+    fun emoteUrl(emoteId: String): String = "$EMOTE_BASE_URL$emoteId/fullsize"
+
+    private fun fpsToInterval(fps: Int): Long =
+        when (fps) {
+            60 -> 16L
+            15 -> 66L
+            else -> 33L // 30fps default
+        }
+
+    private inline fun forEachEntryOfCategory(category: Category, action: (EmoteEntry) -> Unit) {
+        val snapshot = synchronized(emoteEntries) { emoteEntries.values.toList() }
+        for (entry in snapshot) if (entry.category == category) action(entry)
+    }
     
     // Pending callbacks for emotes that are currently loading (original implementation for loadSynchronizedImage)
     private val pendingCallbacks = mutableMapOf<String, MutableList<Pair<WeakReference<View>, (Drawable) -> Unit>>>()
@@ -84,7 +203,12 @@ object EmoteManager {
         }
     }
 
-    internal class EmoteEntry(val id: String, val master: Drawable, val size: Int) {
+    internal class EmoteEntry(
+        val id: String,
+        val master: Drawable,
+        val size: Int,
+        val category: Category = Category.EMOTE
+    ) {
         val buffer: Bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         private val bufferCanvas = Canvas(buffer)
         // Changed to Drawable to support both ProxyDrawable and ScalingProxyDrawable
@@ -94,12 +218,19 @@ object EmoteManager {
         // Track last invalidation dispatch time for throttling
         @Volatile private var lastInvalidationTime: Long = 0
 
+        // Per-surface settings: badges use a fixed cap; chat emotes follow the user's FPS.
+        private fun frameIntervalMs(): Long =
+            if (category == Category.BADGE) DEFAULT_FRAME_INTERVAL_MS else chatEmoteFrameIntervalMs
+
+        private fun categoryAnimated(): Boolean =
+            if (category == Category.BADGE) badgesAnimated else chatEmotesAnimated
+
         @androidx.annotation.Keep
         private val callback = object : Drawable.Callback {
             override fun invalidateDrawable(who: Drawable) {
                 // Throttle invalidation dispatches to avoid spamming views every GIF frame
                 val now = SystemClock.uptimeMillis()
-                if (now - lastInvalidationTime < MIN_FRAME_INTERVAL_MS) return
+                if (now - lastInvalidationTime < frameIntervalMs()) return
                 lastInvalidationTime = now
 
                 // Only remove viewers whose view is garbage-collected (viewRef == null).
@@ -142,7 +273,7 @@ object EmoteManager {
                 mainHandler.removeCallbacks(what)
                 val delay = Math.max(0L, `when` - SystemClock.uptimeMillis())
                 // Enforce minimum frame delay for smooth pacing
-                val clampedDelay = Math.max(delay, MIN_FRAME_INTERVAL_MS)
+                val clampedDelay = Math.max(delay, frameIntervalMs())
                 mainHandler.postDelayed(what, clampedDelay)
             }
 
@@ -154,7 +285,10 @@ object EmoteManager {
         init {
             master.callback = callback
             master.setBounds(0, 0, size, size)
-            if (master is Animatable && !lowBatteryMode) {
+            // Animation is governed purely by the per-surface settings (categoryAnimated),
+            // independent of the broader Battery Saver mode — so users can keep emotes
+            // animated while Battery Saver trims quality/timers, or vice versa.
+            if (master is Animatable && !animationsPaused && categoryAnimated()) {
                 if (master is GifDrawable) {
                     master.setLoopCount(GifDrawable.LOOP_FOREVER)
                 }
@@ -170,7 +304,7 @@ object EmoteManager {
 
         /** Restart master animation if it was paused while idle. */
         fun ensureRunning() {
-            if (lowBatteryMode) return
+            if (animationsPaused || !categoryAnimated()) return
             try {
                 val d = master
                 if (d is Animatable && !d.isRunning) {
@@ -191,8 +325,8 @@ object EmoteManager {
 
         fun captureFrame() {
             val currentTime = SystemClock.uptimeMillis()
-            // Only re-capture if at least MIN_FRAME_INTERVAL_MS has passed
-            if (currentTime - lastCaptureTime < MIN_FRAME_INTERVAL_MS) return
+            // Only re-capture if at least the per-surface frame interval has passed
+            if (currentTime - lastCaptureTime < frameIntervalMs()) return
             lastCaptureTime = currentTime
             try {
                 buffer.eraseColor(Color.TRANSPARENT)
@@ -436,13 +570,21 @@ object EmoteManager {
             return
         }
 
+        // Battery saver: when badge animation is off, an APNGDrawable that is never started
+        // decodes no frames and draws blank. Load the static first frame via Glide instead
+        // (non-animated PNG decoders render the APNG default image) so the badge is visible.
+        if (!badgesAnimated) {
+            loadStaticBadge(targetView.context.applicationContext, url, key, size)
+            return
+        }
+
         ApngBadgeManager.loadBadge(url, size, targetView) { apngDrawable ->
             if (apngDrawable != null) {
                 (apngDrawable as? APNGDrawable)?.setAutoPlay(true)
                 android.util.Log.d("EmoteManager", "✅ Loaded APNG badge via ApngBadgeManager: $url")
 
                 Handler(Looper.getMainLooper()).post {
-                    val newEntry = EmoteEntry(key, apngDrawable, size)
+                    val newEntry = EmoteEntry(key, apngDrawable, size, Category.BADGE)
                     emoteEntries[key] = newEntry
 
                     val callbacks = pendingCallbacks.remove(key) ?: return@post
@@ -459,6 +601,48 @@ object EmoteManager {
                 pendingCallbacks.remove(key)
             }
         }
+    }
+
+    /**
+     * Loads a badge as a static (non-animated) drawable via Glide. Used when badge
+     * animation is disabled — guarantees a visible first frame without relying on
+     * APNGDrawable's start()-driven decode (which would otherwise render blank).
+     */
+    private fun loadStaticBadge(context: Context, url: String, key: String, size: Int) {
+        val glideUrl = com.bumptech.glide.load.model.GlideUrl(
+            url,
+            com.bumptech.glide.load.model.LazyHeaders.Builder()
+                .addHeader("User-Agent", dev.xacnio.kciktv.shared.util.Constants.USER_AGENT)
+                .build()
+        )
+        Glide.with(context)
+            .asDrawable()
+            .load(glideUrl)
+            .dontAnimate()
+            .signature(ObjectKey("static_badge_$key"))
+            .diskCacheStrategy(DiskCacheStrategy.DATA)
+            .disallowHardwareConfig()
+            .into(object : CustomTarget<Drawable>(size, size) {
+                override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
+                    val newEntry = EmoteEntry(key, resource, size, Category.BADGE)
+                    emoteEntries[key] = newEntry
+                    val callbacks = pendingCallbacks.remove(key) ?: return
+                    for ((viewRef, callback) in callbacks) {
+                        val view = viewRef.get() ?: continue
+                        val proxy = ProxyDrawable(newEntry, view)
+                        newEntry.attachViewer(proxy)
+                        proxy.setBounds(0, 0, size, size)
+                        callback(proxy)
+                    }
+                }
+
+                override fun onLoadCleared(placeholder: Drawable?) {}
+
+                override fun onLoadFailed(errorDrawable: Drawable?) {
+                    android.util.Log.e("EmoteManager", "❌ Failed to load static badge: $url")
+                    pendingCallbacks.remove(key)
+                }
+            })
     }
 
     /**

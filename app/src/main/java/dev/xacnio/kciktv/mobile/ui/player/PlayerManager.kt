@@ -84,7 +84,7 @@ class PlayerManager(
                         // Lets 120 Hz panels seamlessly drop to a matching refresh mode.
                         // Battery saver narrows the hint to 30 Hz: most Kick live streams
                         // top out at 30 fps so this is a free win on the compositor side.
-                        applyDisplayFrameRate(if (prefs.lowBatteryModeEnabled) 30f else 60f)
+                        applyDisplayFrameRate(if (prefs.lowBatteryModeEnabled && prefs.batterySaverLimitQuality) 30f else 60f)
 
                         // Check mobile data quality limit
                         checkAndApplyQualityLimit()
@@ -320,7 +320,7 @@ class PlayerManager(
 
          // Battery saver caps to 720p regardless of network — even on WiFi a 1080p60
          // stream pulls ~5-8 Mbps, while 720p halves that and drops decode CPU notably.
-         val batterySaverCap = if (prefs.lowBatteryModeEnabled) 720 else null
+         val batterySaverCap = if (prefs.lowBatteryModeEnabled && prefs.batterySaverLimitQuality) 720 else null
 
          val userLimitHeight = userSelectedQualityLimit?.height
          val combinedSystemLimit = when {

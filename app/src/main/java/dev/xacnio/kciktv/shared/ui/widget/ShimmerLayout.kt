@@ -49,7 +49,7 @@ class ShimmerLayout @JvmOverloads constructor(
         if (isShimmering) return
         // Battery saver: render the placeholder children flat (no sweeping highlight).
         // Saves a Choreographer-driven invalidate loop and a saveLayer per frame.
-        if (dev.xacnio.kciktv.shared.ui.utils.EmoteManager.lowBatteryMode) return
+        if (dev.xacnio.kciktv.shared.ui.utils.EmoteManager.shimmerDisabled) return
         animator = ValueAnimator.ofFloat(-1f, 2f).apply {
             duration = 1500
             repeatCount = ValueAnimator.INFINITE

@@ -1026,7 +1026,7 @@ class OverlayManager(
                     sheetTimerText?.text = activity.getString(R.string.prediction_status_open_format, String.format(Locale.US, "%02d:%02d", mins, secs))
                 }
                 // Low Battery: prediction shows mm:ss — 2 s tick is visually indistinguishable.
-                val predTickMs = if (prefs.lowBatteryModeEnabled) 2000L else 1000L
+                val predTickMs = if (prefs.lowBatteryModeEnabled && prefs.batterySaverSlowTimers) 2000L else 1000L
                 predictionHandler.postDelayed(this, predTickMs)
             }
         }

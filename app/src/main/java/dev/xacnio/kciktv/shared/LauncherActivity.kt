@@ -91,6 +91,15 @@ class LauncherActivity : FragmentActivity() {
             // reach prefs at runtime (EmoteManager.EmoteEntry init runs on bg threads).
             dev.xacnio.kciktv.shared.ui.utils.EmoteManager.lowBatteryMode =
                 prefs.lowBatteryModeEnabled
+            dev.xacnio.kciktv.shared.ui.utils.EmoteManager.shimmerDisabled =
+                prefs.lowBatteryModeEnabled && prefs.batterySaverDisableShimmer
+            dev.xacnio.kciktv.shared.ui.utils.EmoteManager.applyBatterySettings(
+                masterEnabled = prefs.lowBatteryModeEnabled,
+                chatEmotes = prefs.chatEmotesAnimated,
+                badges = prefs.subscriberBadgesAnimated,
+                quickPanel = prefs.quickPanelEmotesAnimated,
+                chatEmoteFps = prefs.chatEmoteFps
+            )
             
             // Task 1: Auth & Following Check
             val authJob = async {

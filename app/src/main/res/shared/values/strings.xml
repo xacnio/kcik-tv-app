@@ -588,6 +588,10 @@
     <!-- Chat Clear -->
     <string name="chat_cleared">Chat was cleared</string>
     <string name="chat_restore_messages">Restore %d messages</string>
+    <string name="chat_background_divider">Background Messages</string>
+    <string name="chat_load_missed_messages">Load Missed Messages</string>
+    <string name="chat_load_missed_messages_more">Load Missed Messages (More)</string>
+    <string name="chat_paused_battery_saver">Chat paused (Battery Saver)</string>
 
     <!-- Ban Status -->
     <string name="ban_permanent">Permanent Ban</string>
@@ -695,6 +699,23 @@
     <!-- Chat Connection -->
     <string name="chat_low_battery_paused">Background mode active. Chat paused (Battery Saver)</string>
     <string name="chat_battery_saver_subtitle">Limits quality to 720p, reduces animations, slows timers &amp; ping</string>
+
+    <!-- Battery saver: per-surface animation settings -->
+    <string name="battery_saver_settings">Battery Saver</string>
+    <string name="battery_saver_settings_subtitle">Animation toggles to save battery &amp; CPU</string>
+    <string name="battery_animations_header">Animations</string>
+    <string name="battery_animated_badges">Animated Subscriber Badges</string>
+    <string name="battery_animated_chat_emotes">Animated Emotes (Chat)</string>
+    <string name="battery_chat_emote_fps">Emote frame rate (FPS)</string>
+    <string name="battery_animated_quick_panel">Animated Emotes (Quick Bar)</string>
+    <string name="battery_general_header">General</string>
+    <string name="battery_chat_refresh_rate">Chat refresh rate (ms)</string>
+    <string name="battery_refresh_locked_by_slow_timers">1500 ms is locked while \'Slow down chat\' is enabled</string>
+    <string name="battery_effects_header">Battery Saver Effects</string>
+    <string name="battery_effect_limit_quality">Limit quality to 720p</string>
+    <string name="battery_effect_slow_timers">Slow down chat / ping / timers</string>
+    <string name="battery_effect_disable_shimmer">Disable loading animations</string>
+    <string name="battery_effect_pause_chat_pip">Pause chat in mini-player / PIP</string>
 
     <!-- Chat appearance subtitles -->
     <string name="chat_timestamps_subtitle">Show send time next to each message</string>

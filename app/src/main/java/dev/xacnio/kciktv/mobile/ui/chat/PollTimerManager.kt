@@ -42,7 +42,7 @@ class PollTimerManager(
     // still imperceptible on a mm:ss display, but halves Choreographer wakeups.
     // Backed by the main looper Handler (no extra thread + no per-tick runOnUiThread
     // post compared to java.util.Timer).
-    private val TICK_MS: Long get() = if (prefs.lowBatteryModeEnabled) 500L else 200L
+    private val TICK_MS: Long get() = if (prefs.lowBatteryModeEnabled && prefs.batterySaverSlowTimers) 500L else 200L
     private var activeTickRunnable: Runnable? = null
     private var pollAutoHideRunnable: Runnable? = null
 

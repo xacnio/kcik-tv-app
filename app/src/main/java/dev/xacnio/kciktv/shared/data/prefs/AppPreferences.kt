@@ -419,6 +419,21 @@ class AppPreferences(private val context: Context) {
         get() = prefs.getString("last_watched_channel_slug", null)
         set(value) = prefs.edit().putString("last_watched_channel_slug", value).apply()
 
+    // Comma-separated slugs of recently watched channels (from followed list), most recent first.
+    private var recentWatchedSlugsRaw: String?
+        get() = prefs.getString("recent_watched_slugs", null)
+        set(value) = prefs.edit().putString("recent_watched_slugs", value).apply()
+
+    fun getRecentWatchedSlugs(): List<String> =
+        recentWatchedSlugsRaw?.split(",")?.filter { it.isNotBlank() } ?: emptyList()
+
+    fun saveRecentWatchedSlug(slug: String) {
+        val current = getRecentWatchedSlugs().toMutableList()
+        current.remove(slug)
+        current.add(0, slug)
+        recentWatchedSlugsRaw = current.take(30).joinToString(",")
+    }
+
     // ==================== Chat Highlight Settings ====================
     
     var highlightOwnMessages: Boolean
@@ -461,6 +476,42 @@ class AppPreferences(private val context: Context) {
         get() = prefs.getBoolean("low_battery_mode_enabled", false)
         set(value) = prefs.edit().putBoolean("low_battery_mode_enabled", value).apply()
 
+    // --- Battery saver: per-surface animation controls ---
+    var chatEmotesAnimated: Boolean
+        get() = prefs.getBoolean("chat_emotes_animated", true)
+        set(value) = prefs.edit().putBoolean("chat_emotes_animated", value).apply()
+
+    // Frame-rate cap for animated chat emotes. Allowed values: 15, 30, 60.
+    var chatEmoteFps: Int
+        get() = prefs.getInt("chat_emote_fps", 30)
+        set(value) = prefs.edit().putInt("chat_emote_fps", value).apply()
+
+    var subscriberBadgesAnimated: Boolean
+        get() = prefs.getBoolean("subscriber_badges_animated", true)
+        set(value) = prefs.edit().putBoolean("subscriber_badges_animated", value).apply()
+
+    var quickPanelEmotesAnimated: Boolean
+        get() = prefs.getBoolean("quick_panel_emotes_animated", true)
+        set(value) = prefs.edit().putBoolean("quick_panel_emotes_animated", value).apply()
+
+    // --- Battery saver: individually toggleable effects (only apply while the master
+    // lowBatteryModeEnabled is ON). Default true = the master keeps its full behaviour. ---
+    var batterySaverLimitQuality: Boolean
+        get() = prefs.getBoolean("battery_saver_limit_quality", true)
+        set(value) = prefs.edit().putBoolean("battery_saver_limit_quality", value).apply()
+
+    var batterySaverSlowTimers: Boolean
+        get() = prefs.getBoolean("battery_saver_slow_timers", true)
+        set(value) = prefs.edit().putBoolean("battery_saver_slow_timers", value).apply()
+
+    var batterySaverDisableShimmer: Boolean
+        get() = prefs.getBoolean("battery_saver_disable_shimmer", true)
+        set(value) = prefs.edit().putBoolean("battery_saver_disable_shimmer", value).apply()
+
+    var batterySaverPauseChatInPip: Boolean
+        get() = prefs.getBoolean("battery_saver_pause_chat_pip", true)
+        set(value) = prefs.edit().putBoolean("battery_saver_pause_chat_pip", value).apply()
+
     var lastSeenWhatsNewVersion: String
         get() = prefs.getString("last_seen_whats_new_version", "") ?: ""
         set(value) = prefs.edit().putString("last_seen_whats_new_version", value).apply()
@@ -471,10 +522,8 @@ class AppPreferences(private val context: Context) {
         set(value) = prefs.edit().putBoolean("analytics_enabled", value).apply()
 
     var chatRefreshRate: Long
-        // Default 300 ms (~3.3 Hz flush). Visually indistinguishable from 200 ms but ~33%
-        // less main-thread work per second (adapter notify + emote/combo/mention processing).
-        // User-customised values are preserved; this only affects fresh installs.
-        get() = prefs.getLong("chat_refresh_rate", 300L)
+        // Default 1500 ms. User-customised values are preserved; this only affects fresh installs.
+        get() = prefs.getLong("chat_refresh_rate", 1500L)
         set(value) = prefs.edit().putLong("chat_refresh_rate", value).apply()
 
     var recentCategoriesRaw: String?

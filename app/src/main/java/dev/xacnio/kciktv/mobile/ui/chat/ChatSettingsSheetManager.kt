@@ -79,6 +79,7 @@ class ChatSettingsSheetManager(
         const val PAGE_CHAT_SETTINGS = 2
         const val PAGE_HIGHLIGHTS = 3
         const val PAGE_ANIMATIONS = 4
+        const val PAGE_BATTERY = 5
     }
 
     fun isPanelShowing(): Boolean = currentPanelView != null
@@ -116,6 +117,7 @@ class ChatSettingsSheetManager(
         val mainScrollView = view.findViewById<View>(R.id.mainSettingsScrollView)
         val highlightContainer = view.findViewById<View>(R.id.highlightSettingsScrollView)
         val animContainer = view.findViewById<View>(R.id.animationSettingsContainer)
+        val batteryContainer = view.findViewById<View>(R.id.batterySettingsContainer)
 
         // Sync prefs
         currentTextSize = prefs.chatTextSize
@@ -140,8 +142,9 @@ class ChatSettingsSheetManager(
         fun navigate(page: Int) {
             currentPage = page
             val targetHeight = when (page) {
-                PAGE_ROOT    -> dpToPx(264)
+                PAGE_ROOT    -> dpToPx(320)
                 PAGE_PROFILE -> getSubPageHeight(0.88f)
+                PAGE_BATTERY -> getSubPageHeight(0.92f)
                 else         -> getSubPageHeight()
             }
             animatePanelToHeight(targetHeight)
@@ -165,20 +168,35 @@ class ChatSettingsSheetManager(
                     mainScrollView.visibility = View.VISIBLE
                     highlightContainer.visibility = View.GONE
                     animContainer.visibility = View.GONE
+                    batteryContainer.visibility = View.GONE
                     updateHeader(R.string.chat_appearance_title, true)
                 }
                 PAGE_HIGHLIGHTS -> {
                     mainScrollView.visibility = View.GONE
                     highlightContainer.visibility = View.VISIBLE
                     animContainer.visibility = View.GONE
+                    batteryContainer.visibility = View.GONE
                     updateHeader(R.string.chat_setting_highlights, true)
                 }
                 PAGE_ANIMATIONS -> {
                     mainScrollView.visibility = View.GONE
                     highlightContainer.visibility = View.GONE
                     animContainer.visibility = View.VISIBLE
+                    batteryContainer.visibility = View.GONE
                     updateHeader(R.string.setting_chat_animation, true)
                     setupAnimationSettings(view)
+                }
+                PAGE_BATTERY -> {
+                    // Reached directly from the root menu, so toggle the outer containers too.
+                    rootMenu.visibility = View.GONE
+                    profileView.visibility = View.GONE
+                    chatSettingsView.visibility = View.VISIBLE
+                    mainScrollView.visibility = View.GONE
+                    highlightContainer.visibility = View.GONE
+                    animContainer.visibility = View.GONE
+                    batteryContainer.visibility = View.VISIBLE
+                    updateHeader(R.string.battery_saver_settings, true)
+                    setupBatterySettings(view)
                 }
             }
         }
@@ -192,6 +210,7 @@ class ChatSettingsSheetManager(
                 PAGE_CHAT_SETTINGS -> navigate(PAGE_ROOT)
                 PAGE_HIGHLIGHTS -> navigate(PAGE_CHAT_SETTINGS)
                 PAGE_ANIMATIONS -> navigate(PAGE_CHAT_SETTINGS)
+                PAGE_BATTERY -> navigate(PAGE_ROOT)
             }
         }
 
@@ -241,9 +260,8 @@ class ChatSettingsSheetManager(
         val switchPinnedGifts = view.findViewById<SwitchCompat>(R.id.switchPinnedGifts)
         val switchEmoteCombo = view.findViewById<SwitchCompat>(R.id.switchEmoteCombo)
         val switchFloatingEmotes = view.findViewById<SwitchCompat>(R.id.switchFloatingEmotes)
-        val switchLowBatteryMode = view.findViewById<SwitchCompat>(R.id.switchLowBatteryMode)
 
-        listOf(switchTimestamps, switchSeconds, switchPinnedGifts, switchEmoteCombo, switchFloatingEmotes, switchLowBatteryMode).forEach { switch ->
+        listOf(switchTimestamps, switchSeconds, switchPinnedGifts, switchEmoteCombo, switchFloatingEmotes).forEach { switch ->
             switch.trackTintList = themeColorStateList
             switch.thumbTintList = thumbColorStateList
         }
@@ -299,6 +317,10 @@ class ChatSettingsSheetManager(
             navigate(PAGE_ANIMATIONS)
         }
 
+        view.findViewById<View>(R.id.btnMenuBattery).setOnClickListener {
+            navigate(PAGE_BATTERY)
+        }
+
         // Timestamps
         switchTimestamps.isChecked = showTimestamps
         switchSeconds.isChecked = showSeconds
@@ -346,14 +368,7 @@ class ChatSettingsSheetManager(
             if (!isChecked) activity.floatingEmoteManager.clear()
         }
 
-        // Low Battery Mode
-        switchLowBatteryMode.isChecked = prefs.lowBatteryModeEnabled
-        switchLowBatteryMode.setOnCheckedChangeListener { _, isChecked ->
-            prefs.lowBatteryModeEnabled = isChecked
-            chatUiManager.stopFlushing()
-            chatUiManager.startFlushing()
-            activity.chatConnectionManager.applyLowBatteryPingInterval()
-        }
+        // Low Battery Mode (master) is wired in setupBatterySettings() on the Battery page.
 
         // Highlight Settings
         view.findViewById<View>(R.id.btnHighlightedMessages).setOnClickListener {
@@ -427,7 +442,7 @@ class ChatSettingsSheetManager(
         else navigate(PAGE_ROOT)
     }
 
-    private fun computePanelHeight(): Int = dpToPx(264)
+    private fun computePanelHeight(): Int = dpToPx(320)
 
     private fun getSubPageHeight(ratio: Float = 0.70f): Int {
         val container = activity.binding.chatListContainer
@@ -884,6 +899,264 @@ class ChatSettingsSheetManager(
             }
 
             optionsContainer.addView(itemLayout)
+        }
+    }
+
+    private fun setupBatterySettings(view: View) {
+        val themeColor = prefs.themeColor
+        val themeColorStateList = android.content.res.ColorStateList(
+            arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
+            intArrayOf(themeColor, 0xFF333333.toInt())
+        )
+        val thumbColorStateList = android.content.res.ColorStateList(
+            arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
+            intArrayOf(themeColor, 0xFFFFFFFF.toInt())
+        )
+
+        val switchMaster = view.findViewById<SwitchCompat>(R.id.switchLowBatteryMode)
+        val switchBadges = view.findViewById<SwitchCompat>(R.id.switchAnimatedBadges)
+        val switchChatEmotes = view.findViewById<SwitchCompat>(R.id.switchAnimatedChatEmotes)
+        val switchQuickPanel = view.findViewById<SwitchCompat>(R.id.switchAnimatedQuickPanel)
+        val switchLimitQuality = view.findViewById<SwitchCompat>(R.id.switchEffectLimitQuality)
+        val switchSlowTimers = view.findViewById<SwitchCompat>(R.id.switchEffectSlowTimers)
+        val switchShimmer = view.findViewById<SwitchCompat>(R.id.switchEffectShimmer)
+        val switchPauseChatPip = view.findViewById<SwitchCompat>(R.id.switchEffectPauseChatPip)
+        val fpsOptions = view.findViewById<LinearLayout>(R.id.batteryFpsOptions)
+        val refreshOptions = view.findViewById<LinearLayout>(R.id.batteryRefreshOptions)
+
+        listOf(
+            switchMaster, switchBadges, switchChatEmotes, switchQuickPanel,
+            switchLimitQuality, switchSlowTimers, switchShimmer, switchPauseChatPip
+        ).forEach {
+            it.trackTintList = themeColorStateList
+            it.thumbTintList = thumbColorStateList
+        }
+
+        switchMaster.isChecked = prefs.lowBatteryModeEnabled
+        switchBadges.isChecked = prefs.subscriberBadgesAnimated
+        switchChatEmotes.isChecked = prefs.chatEmotesAnimated
+        switchQuickPanel.isChecked = prefs.quickPanelEmotesAnimated
+        switchLimitQuality.isChecked = prefs.batterySaverLimitQuality
+        switchSlowTimers.isChecked = prefs.batterySaverSlowTimers
+        switchShimmer.isChecked = prefs.batterySaverDisableShimmer
+        switchPauseChatPip.isChecked = prefs.batterySaverPauseChatInPip
+
+        // Every sub-setting only applies while the Battery Saver master is ON; gate their
+        // editability accordingly. FPS/refresh stay adjustable regardless.
+        val masterGated = listOf(
+            switchBadges, switchChatEmotes,
+            switchLimitQuality, switchSlowTimers, switchShimmer, switchPauseChatPip
+        )
+        fun updateSubTogglesEnabled() {
+            val masterOn = switchMaster.isChecked
+            masterGated.forEach { sw ->
+                sw.isEnabled = masterOn
+                (sw.parent as? View)?.alpha = if (masterOn) 1f else 0.4f
+            }
+            // The quick bar shares the animation master with chat emotes, so it can only
+            // animate when chat emotes do. Gate it on both master and chat-emote state.
+            val quickEnabled = masterOn && switchChatEmotes.isChecked
+            switchQuickPanel.isEnabled = quickEnabled
+            (switchQuickPanel.parent as? View)?.alpha = if (quickEnabled) 1f else 0.4f
+        }
+        updateSubTogglesEnabled()
+
+        val density = activity.resources.displayMetrics.density
+
+        // Kick green for selected, yellow for default, grey for unselected.
+        val kickGreen = Color.parseColor("#53FC18")
+        val defaultYellow = Color.parseColor("#FFD700")
+        val chipNormal = Color.parseColor("#AAAAAA")
+
+        // Build a chip background:
+        //   fillColor only  → solid GradientDrawable (selected state)
+        //   strokeColor only → transparent bg with colored border (default state)
+        //   neither         → bg_ripple_rounded (normal state)
+        fun makeChipBg(fillColor: Int? = null, strokeColor: Int? = null): android.graphics.drawable.Drawable {
+            return if (fillColor != null || strokeColor != null) {
+                android.graphics.drawable.GradientDrawable().apply {
+                    shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                    cornerRadius = (20 * density)
+                    if (fillColor != null) setColor(fillColor)
+                    else setColor(android.graphics.Color.TRANSPARENT)
+                    if (strokeColor != null) setStroke((2 * density).toInt(), strokeColor)
+                }
+            } else {
+                activity.getDrawable(R.drawable.bg_ripple_rounded)!!
+            }
+        }
+
+        // FPS default is 30.
+        val fpsDef = 30
+        // FPS — independent of the master; applies whenever emotes animate.
+        val fpsValues = listOf("15" to 15, "30" to 30, "60" to 60)
+        fun renderFpsChips() {
+            fpsOptions.removeAllViews()
+            val cur = prefs.chatEmoteFps
+            fpsValues.forEach { (label, value) ->
+                val selected = value == cur
+                val isDefault = value == fpsDef && !selected
+                val chipBgColor: Int? = when {
+                    selected  -> kickGreen
+                    else      -> null
+                }
+                val chipStroke: Int? = when {
+                    isDefault -> defaultYellow
+                    else      -> null
+                }
+                val textColor = when {
+                    selected  -> Color.BLACK          // solid green chip — dark text
+                    isDefault -> defaultYellow        // yellow border chip — yellow text
+                    else      -> chipNormal
+                }
+                val chip = TextView(activity).apply {
+                    text = label
+                    textSize = 13f
+                    setTextColor(textColor)
+                    setPadding((14 * density).toInt(), (6 * density).toInt(), (14 * density).toInt(), (6 * density).toInt())
+                    val lp = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                    lp.marginStart = (6 * density).toInt()
+                    layoutParams = lp
+                    background = makeChipBg(fillColor = chipBgColor, strokeColor = chipStroke)
+                    setOnClickListener {
+                        prefs.chatEmoteFps = value
+                        dev.xacnio.kciktv.shared.ui.utils.EmoteManager.setChatEmoteFps(value)
+                        renderFpsChips()
+                    }
+                }
+                fpsOptions.addView(chip)
+            }
+        }
+        renderFpsChips()
+
+        // Chat refresh rate — independent of the master; applied live to the flush loop.
+        // Default is 1500 ms. When slow timers (batterySaverSlowTimers) is ON,
+        // the 1500 ms option is highlighted red and locked (cannot be selected).
+        val refreshDef = 1500L
+        val refreshValues = listOf("100" to 100L, "200" to 200L, "500" to 500L, "1000" to 1000L, "1500" to 1500L)
+        fun renderRefreshChips() {
+            refreshOptions.removeAllViews()
+            val cur = prefs.chatRefreshRate
+            val slowOn = prefs.lowBatteryModeEnabled && prefs.batterySaverSlowTimers
+            refreshValues.forEach { (label, value) ->
+                val isLocked1500 = value == 1500L && slowOn
+                val selected = value == cur && !isLocked1500
+                val isDefault = value == refreshDef && !selected && !isLocked1500
+                val chipBgColor: Int? = when {
+                    isLocked1500 -> Color.parseColor("#E53935") // red — locked by slow timers
+                    selected     -> kickGreen
+                    else         -> null
+                }
+                val chipStroke: Int? = when {
+                    isDefault -> defaultYellow
+                    else      -> null
+                }
+                val textColor = when {
+                    isLocked1500 -> Color.WHITE    // red solid chip — white text
+                    selected     -> Color.BLACK    // green solid chip — dark text
+                    isDefault    -> defaultYellow  // yellow border chip — yellow text
+                    else         -> chipNormal
+                }
+                val chip = TextView(activity).apply {
+                    text = label
+                    textSize = 13f
+                    setTextColor(textColor)
+                    setPadding((14 * density).toInt(), (6 * density).toInt(), (14 * density).toInt(), (6 * density).toInt())
+                    val lp = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                    lp.marginStart = (6 * density).toInt()
+                    layoutParams = lp
+                    background = makeChipBg(fillColor = chipBgColor, strokeColor = chipStroke)
+                    setOnClickListener {
+                        if (isLocked1500) {
+                            android.widget.Toast.makeText(
+                                activity,
+                                activity.getString(R.string.battery_refresh_locked_by_slow_timers),
+                                android.widget.Toast.LENGTH_SHORT
+                            ).show()
+                            return@setOnClickListener
+                        }
+                        prefs.chatRefreshRate = value
+                        chatUiManager.stopFlushing()
+                        chatUiManager.startFlushing()
+                        renderRefreshChips()
+                    }
+                }
+                refreshOptions.addView(chip)
+            }
+        }
+        renderRefreshChips()
+
+        switchBadges.setOnCheckedChangeListener { _, isChecked ->
+            prefs.subscriberBadgesAnimated = isChecked
+            dev.xacnio.kciktv.shared.ui.utils.EmoteManager.setBadgesAnimated(isChecked)
+        }
+
+        switchChatEmotes.setOnCheckedChangeListener { _, isChecked ->
+            prefs.chatEmotesAnimated = isChecked
+            dev.xacnio.kciktv.shared.ui.utils.EmoteManager.setChatEmotesAnimated(isChecked)
+            // Linked: the quick bar can't animate without chat emotes (shared master), so
+            // turning chat emotes off also turns the quick bar off. Its listener applies it.
+            if (!isChecked && switchQuickPanel.isChecked) {
+                switchQuickPanel.isChecked = false
+            }
+            updateSubTogglesEnabled()
+        }
+
+        switchQuickPanel.setOnCheckedChangeListener { _, isChecked ->
+            prefs.quickPanelEmotesAnimated = isChecked
+            dev.xacnio.kciktv.shared.ui.utils.EmoteManager.quickPanelEmotesAnimated = isChecked
+            // Rebind the quick bar so emotes switch between animated (shared) and static.
+            activity.quickEmoteBarManager.updateQuickEmoteBar()
+        }
+
+        // --- Battery Saver effect toggles (gated by master) ---
+        switchLimitQuality.setOnCheckedChangeListener { _, isChecked ->
+            prefs.batterySaverLimitQuality = isChecked
+            activity.playerManager.checkAndApplyQualityLimit()
+        }
+
+        switchSlowTimers.setOnCheckedChangeListener { _, isChecked ->
+            prefs.batterySaverSlowTimers = isChecked
+            chatUiManager.stopFlushing()
+            chatUiManager.startFlushing()
+            activity.chatConnectionManager.applyLowBatteryPingInterval()
+        }
+
+        switchShimmer.setOnCheckedChangeListener { _, isChecked ->
+            prefs.batterySaverDisableShimmer = isChecked
+            dev.xacnio.kciktv.shared.ui.utils.EmoteManager.shimmerDisabled =
+                prefs.lowBatteryModeEnabled && isChecked
+        }
+
+        switchPauseChatPip.setOnCheckedChangeListener { _, isChecked ->
+            prefs.batterySaverPauseChatInPip = isChecked
+        }
+
+        // Master Battery Saver: gates all the sub-toggles (not FPS/refresh) and applies
+        // every effect's live state.
+        switchMaster.setOnCheckedChangeListener { _, isChecked ->
+            prefs.lowBatteryModeEnabled = isChecked
+            chatUiManager.stopFlushing()
+            chatUiManager.startFlushing()
+            activity.chatConnectionManager.applyLowBatteryPingInterval()
+            activity.playerManager.checkAndApplyQualityLimit()
+            dev.xacnio.kciktv.shared.ui.utils.EmoteManager.applyBatterySettings(
+                masterEnabled = isChecked,
+                chatEmotes = prefs.chatEmotesAnimated,
+                badges = prefs.subscriberBadgesAnimated,
+                quickPanel = prefs.quickPanelEmotesAnimated,
+                chatEmoteFps = prefs.chatEmoteFps
+            )
+            dev.xacnio.kciktv.shared.ui.utils.EmoteManager.shimmerDisabled =
+                isChecked && prefs.batterySaverDisableShimmer
+            updateSubTogglesEnabled()
+            activity.quickEmoteBarManager.updateQuickEmoteBar()
         }
     }
 
