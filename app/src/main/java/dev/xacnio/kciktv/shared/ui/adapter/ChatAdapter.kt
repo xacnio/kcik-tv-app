@@ -2513,7 +2513,7 @@ class ChatAdapter(
 
     fun confirmSentMessage(messageRef: String, serverMessage: ChatMessage) {
         synchronized(messageCache) {
-            val index = messageCache.indexOfFirst { it.messageRef == messageRef && it.status == dev.xacnio.kciktv.shared.data.model.MessageStatus.SENDING }
+            val index = messageCache.indexOfFirst { it.messageRef == messageRef && (it.status == dev.xacnio.kciktv.shared.data.model.MessageStatus.SENDING || it.status == dev.xacnio.kciktv.shared.data.model.MessageStatus.SENT) }
             if (index != -1) {
                 val oldMsg = messageCache[index]
                 // Replace local draft with server message but PRESERVE original timestamp
@@ -2535,8 +2535,8 @@ class ChatAdapter(
         synchronized(messageCache) {
             // Find a pending message from same user with same content
             // We search from end (most recent) to start as the most recent one is likely the one being confirmed
-            val index = messageCache.indexOfLast { 
-                it.status == dev.xacnio.kciktv.shared.data.model.MessageStatus.SENDING &&
+            val index = messageCache.indexOfLast {
+                (it.status == dev.xacnio.kciktv.shared.data.model.MessageStatus.SENDING || it.status == dev.xacnio.kciktv.shared.data.model.MessageStatus.SENT) &&
                 it.sender.username.equals(serverMessage.sender.username, ignoreCase = true) &&
                 it.content == serverMessage.content
             }

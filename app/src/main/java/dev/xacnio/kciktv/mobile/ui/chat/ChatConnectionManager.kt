@@ -45,8 +45,6 @@ class ChatConnectionManager(private val activity: MobilePlayerActivity) {
                          chatStateManager.currentUserSender = message.sender
                      }
 
-                     // Check for message confirmation (own sent messages — always handle so UI
-                     // reconciles regardless of chat visibility)
                      val ref = message.messageRef
                      if (ref != null && chatStateManager.shouldConfirmSentMessage(ref)) {
                          chatStateManager.confirmSentMessage(ref)
@@ -56,9 +54,6 @@ class ChatConnectionManager(private val activity: MobilePlayerActivity) {
                          return@chatListener
                      }
 
-                     // Forward all messages to ChatUiManager so they can be buffered when the chat is paused/PiP.
-
-                     // Delegate message buffering/handling to UI Manager
                      activity.runOnUiThread {
                         chatUiManager.handleIncomingMessage(message)
                      }
