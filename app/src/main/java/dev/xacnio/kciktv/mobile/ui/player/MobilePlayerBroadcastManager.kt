@@ -22,6 +22,7 @@ import com.amazonaws.ivs.player.Player
 import dev.xacnio.kciktv.mobile.MobilePlayerActivity
 import dev.xacnio.kciktv.R
 import dev.xacnio.kciktv.shared.PlaybackService
+import dev.xacnio.kciktv.shared.ui.utils.EmoteManager
 
 class MobilePlayerBroadcastManager(private val activity: MobilePlayerActivity) {
 
@@ -107,15 +108,52 @@ class MobilePlayerBroadcastManager(private val activity: MobilePlayerActivity) {
         }
     }
 
+    // While audio playback continues with the screen locked, nothing is on screen to
+    // animate, yet the shared emote animations keep decoding frames and scheduling work
+    // on the UI thread (Glide is bound to the application context, so it never pauses on
+    // its own). Stop all emote animations on screen-off and resume them on screen-on.
+    private val screenReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when (intent?.action) {
+                Intent.ACTION_SCREEN_OFF -> {
+                    val isPlaying = activity.ivsPlayer?.state == Player.State.PLAYING
+                    val audioMode = activity.isBackgroundAudioEnabled ||
+                        activity.prefs.backgroundAudioEnabled
+                    if (isPlaying && audioMode) {
+                        EmoteManager.pauseAllAnimations()
+                    }
+                }
+                Intent.ACTION_SCREEN_ON -> {
+                    EmoteManager.resumeAllAnimations()
+                }
+            }
+        }
+    }
+
     fun registerReceivers() {
+        // Defensive: if a previous activity was killed while paused (screen off), the
+        // static paused flag would survive and start fresh emotes static. Clear it here.
+        EmoteManager.resumeAllAnimations()
+
         val pipFilter = IntentFilter(activity.PIP_CONTROL_ACTION)
         ContextCompat.registerReceiver(
             activity, pipReceiver, pipFilter, ContextCompat.RECEIVER_EXPORTED
         )
-        
+
         val stopFilter = IntentFilter(PlaybackService.ACTION_STOP_PLAYBACK)
         ContextCompat.registerReceiver(
             activity, stopPlaybackReceiver, stopFilter, ContextCompat.RECEIVER_EXPORTED
+        )
+
+        // SCREEN_ON/OFF are protected broadcasts that can only be received by a
+        // runtime-registered receiver (not the manifest). Sender is the system, so
+        // NOT_EXPORTED is the correct, safest visibility.
+        val screenFilter = IntentFilter().apply {
+            addAction(Intent.ACTION_SCREEN_OFF)
+            addAction(Intent.ACTION_SCREEN_ON)
+        }
+        ContextCompat.registerReceiver(
+            activity, screenReceiver, screenFilter, ContextCompat.RECEIVER_NOT_EXPORTED
         )
     }
 
@@ -123,6 +161,7 @@ class MobilePlayerBroadcastManager(private val activity: MobilePlayerActivity) {
         try {
             activity.unregisterReceiver(pipReceiver)
             activity.unregisterReceiver(stopPlaybackReceiver)
+            activity.unregisterReceiver(screenReceiver)
         } catch (e: Exception) {
             // Ignore if not registered
         }
