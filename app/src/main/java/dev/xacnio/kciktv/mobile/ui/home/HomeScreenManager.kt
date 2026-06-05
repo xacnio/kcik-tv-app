@@ -42,6 +42,7 @@ import kotlinx.coroutines.withContext
 import androidx.lifecycle.lifecycleScope
 import dev.xacnio.kciktv.shared.data.util.PreloadCache
 import dev.xacnio.kciktv.mobile.ui.home.featured.FeaturedHeroController
+import dev.xacnio.kciktv.shared.ui.adapter.LiveStoryAdapter
 
 /**
  * Manages Home Screen data loading, adapters, and dynamic sections.
@@ -158,8 +159,29 @@ class HomeScreenManager(private val activity: MobilePlayerActivity) {
 
 
                 followingTask?.await()?.let { followingChannels ->
+                    // Share the full channel list with the following tab so it can show
+                    // data instantly on first open instead of fetching from scratch.
+                    PreloadCache.followingStreamsForTab = followingChannels
                     val liveFollowingChannels = followingChannels.filter { it.isLive && !blocked.contains(it.categoryName) }
+
+                    // Build live-story list: only recently watched channels that are live now,
+                    // sorted by most recently watched (order of saved slugs).
+                    val recentSlugs = prefs.getRecentWatchedSlugs()
+                    val liveBySlug = liveFollowingChannels.associateBy { it.slug }
+                    val storyChannels = recentSlugs
+                        .mapNotNull { slug -> liveBySlug[slug] }
+                        .distinctBy { it.slug }
+
                     withContext(Dispatchers.Main) {
+                        // Live stories row
+                        if (storyChannels.isNotEmpty()) {
+                            binding.homeScreenContainer.homeLiveStoriesSection.visibility = View.VISIBLE
+                            setupLiveStoriesAdapter(storyChannels)
+                        } else {
+                            binding.homeScreenContainer.homeLiveStoriesSection.visibility = View.GONE
+                        }
+
+                        // Following channels row (always all live, minus those shown as stories)
                         if (liveFollowingChannels.isNotEmpty()) {
                             binding.homeScreenContainer.homeFollowingSection.visibility = View.VISIBLE
                             setupHomeChannelAdapter(binding.homeScreenContainer.homeFollowingRecycler, liveFollowingChannels)
@@ -294,6 +316,16 @@ class HomeScreenManager(private val activity: MobilePlayerActivity) {
         featuredHero?.onDestroy()
         featuredHero = null
         scrollListenerAttached = false
+    }
+
+    private fun setupLiveStoriesAdapter(channels: List<ChannelItem>) {
+        val recycler = binding.homeScreenContainer.homeLiveStoriesRecycler
+        val adapter = LiveStoryAdapter { channel ->
+            activity.openChannel(channel)
+        }
+        recycler.layoutManager = LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false)
+        recycler.adapter = adapter
+        adapter.submitList(channels)
     }
 
     private fun setupHomeChannelAdapter(recyclerView: RecyclerView?, channels: List<ChannelItem>) {

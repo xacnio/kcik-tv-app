@@ -79,6 +79,13 @@
             </LinearLayout>
         </LinearLayout>
 
+        <!-- Channels shimmer (hidden when showing cached data so channels appear immediately) -->
+        <LinearLayout
+            android:id="@+id/shimmerChannelsSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
         <!-- Header 2: "Live Channels" -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -86,9 +93,9 @@
             android:paddingHorizontal="16dp"
             android:paddingVertical="12dp"
             android:layout_marginTop="8dp">
-            <View 
-                android:layout_width="140dp" 
-                android:layout_height="22dp" 
+            <View
+                android:layout_width="140dp"
+                android:layout_height="22dp"
                 android:background="#1A1A1A" />
         </LinearLayout>
 
@@ -208,6 +215,8 @@
             </LinearLayout>
 
         </LinearLayout>
+
+        </LinearLayout><!-- end shimmerChannelsSection -->
 
     </LinearLayout>
 </dev.xacnio.kciktv.shared.ui.widget.ShimmerLayout>

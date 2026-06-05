@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="72dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:paddingHorizontal="4dp"
+    android:paddingVertical="6dp"
+    android:background="?attr/selectableItemBackgroundBorderless">
+
+    <!-- Ring + profile pic + LIVE badge, all in a FrameLayout -->
+    <FrameLayout
+        android:layout_width="60dp"
+        android:layout_height="60dp">
+
+        <!-- Red gradient ring (outer) -->
+        <View
+            android:id="@+id/liveStoryRing"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@drawable/bg_live_story_ring" />
+
+        <!-- White gap between ring and image -->
+        <View
+            android:layout_width="54dp"
+            android:layout_height="54dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_rounded_circle"
+            android:backgroundTint="#111111" />
+
+        <!-- Profile picture (circular) -->
+        <ImageView
+            android:id="@+id/liveStoryProfilePic"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:scaleType="centerCrop"
+            android:background="@drawable/bg_rounded_circle"
+            android:backgroundTint="#1A1A1A"
+            android:clipToOutline="true" />
+
+        <!-- CANLI badge anchored to the bottom of the circle -->
+        <TextView
+            android:id="@+id/liveStoryBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="16dp"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="-4dp"
+            android:paddingHorizontal="6dp"
+            android:text="@string/live"
+            android:textColor="#FFFFFF"
+            android:textSize="9sp"
+            android:textStyle="bold"
+            android:background="@drawable/bg_live_badge"
+            android:gravity="center" />
+
+    </FrameLayout>
+
+    <!-- Channel name below -->
+    <TextView
+        android:id="@+id/liveStoryUsername"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:textColor="#FFFFFF"
+        android:textSize="11sp" />
+
+</LinearLayout>

@@ -38,6 +38,7 @@ import dev.xacnio.kciktv.mobile.ui.browse.BrowseManager
 import dev.xacnio.kciktv.shared.data.model.ChannelVideo
 import dev.xacnio.kciktv.shared.data.model.TopCategory
 import dev.xacnio.kciktv.shared.data.prefs.AppPreferences
+import dev.xacnio.kciktv.shared.data.util.PreloadCache
 import dev.xacnio.kciktv.shared.ui.adapter.FollowingCategoriesAdapter
 import dev.xacnio.kciktv.shared.ui.adapter.OfflineChannelAdapter
 
@@ -152,20 +153,54 @@ class FollowingManager(private val activity: MobilePlayerActivity) {
             container.followingLoadMoreButton.text = ""
             container.followingLoadMoreSpinner.visibility = View.VISIBLE
         } else {
-            container.followingShimmerLayout.root.visibility = View.VISIBLE
-            // Reset shimmer sections visibility
-            container.followingShimmerLayout.shimmerCategoriesSection.visibility = View.VISIBLE
-            // Keep swipe refresh VISIBLE so Header and Continue Watching are shown
-            container.followingSwipeRefresh.visibility = View.VISIBLE
             followingNextCursor = null
-            
-            // Clean up existing lists visuals if needed, but keep data until reload?
-            // Better to hide lists so shimmer is the only "content" below headers
-            container.followingLiveSection.visibility = View.GONE
-            container.followingOfflineSection.visibility = View.GONE
-            container.followingCategoriesSection.visibility = View.GONE
-            container.followingEmptyState.visibility = View.GONE
-            
+
+            // If the home page already fetched following streams during this session, show
+            // them instantly (no shimmer) and then refresh in the background.
+            val cached = PreloadCache.followingStreamsForTab
+            if (cached != null && !isLoadMore) {
+                val liveChannels = cached.filter { it.isLive }
+                val offlineChannels = cached.filter { !it.isLive }
+                followingLiveChannelsList.clear()
+                followingOfflineChannelsList.clear()
+                followingLiveChannelsList.addAll(liveChannels)
+                followingOfflineChannelsList.addAll(offlineChannels)
+                // Show the shimmer layout but hide only the channels section so the
+                // categories shimmer remains visible while loadFollowedCategories() runs.
+                // The channels shimmer (shimmerChannelsSection) is hidden so the cached
+                // channel content below it is not blocked.
+                container.followingShimmerLayout.root.visibility = View.VISIBLE
+                container.followingShimmerLayout.shimmerCategoriesSection.visibility = View.VISIBLE
+                container.followingShimmerLayout.shimmerChannelsSection.visibility = View.GONE
+                container.followingSwipeRefresh.visibility = View.VISIBLE
+                container.followingEmptyState.visibility = View.GONE
+                container.followingCategoriesSection.visibility = View.GONE
+                if (followingLiveChannelsList.isNotEmpty()) {
+                    container.followingLiveSection.visibility = View.VISIBLE
+                    setupFollowingLiveAdapter(container.followingLiveRecycler)
+                    followingLiveAdapter?.notifyDataSetChanged()
+                } else {
+                    container.followingLiveSection.visibility = View.GONE
+                }
+                if (followingOfflineChannelsList.isNotEmpty()) {
+                    container.followingOfflineSection.visibility = View.VISIBLE
+                    setupFollowingOfflineAdapter(container.followingOfflineRecycler)
+                    followingOfflineAdapter?.submitList(followingOfflineChannelsList.toList())
+                } else {
+                    container.followingOfflineSection.visibility = View.GONE
+                }
+                activity.followingDataLoaded = true
+                // Fall through to the network fetch below to silently refresh in background.
+            } else {
+                container.followingShimmerLayout.root.visibility = View.VISIBLE
+                container.followingShimmerLayout.shimmerCategoriesSection.visibility = View.VISIBLE
+                container.followingSwipeRefresh.visibility = View.VISIBLE
+                container.followingLiveSection.visibility = View.GONE
+                container.followingOfflineSection.visibility = View.GONE
+                container.followingCategoriesSection.visibility = View.GONE
+                container.followingEmptyState.visibility = View.GONE
+            }
+
             // Load followed categories (only on fresh load/refresh and if logged in)
             if (prefs.isLoggedIn) {
                 loadFollowedCategories()
