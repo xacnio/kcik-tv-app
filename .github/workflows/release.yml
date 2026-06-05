@@ -84,15 +84,28 @@ jobs:
           VERSION_BASE=$(grep 'val baseVersion =' app/build.gradle.kts | head -n 1 | awk -F '"' '{print $2}')
           SHORT_SHA=$(git rev-parse --short HEAD)
           VERSION="${VERSION_BASE}-${SHORT_SHA}"
-          
+
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "tag=v$VERSION" >> $GITHUB_OUTPUT
-          
+
           if [[ $VERSION_BASE == *"beta"* ]]; then
             echo "is_prerelease=true" >> $GITHUB_OUTPUT
           else
             echo "is_prerelease=false" >> $GITHUB_OUTPUT
           fi
+
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -n "$PREV_TAG" ]; then
+            CHANGES=$(git log --pretty=format:"- %s" "$PREV_TAG"..HEAD)
+          else
+            CHANGES=$(git log --pretty=format:"- %s" -20)
+          fi
+
+          {
+            echo 'changes<<EOF'
+            echo "$CHANGES"
+            echo EOF
+          } >> $GITHUB_OUTPUT
         
       - name: Rename file to version
         run: mv app/build/outputs/apk/release/KCIKTV-release.apk app/build/outputs/apk/release/KCIKTV-${{ env.VERSION }}.apk
@@ -108,6 +121,9 @@ jobs:
           draft: false
           prerelease: ${{ steps.version.outputs.is_prerelease }}
           files: app/build/outputs/apk/release/KCIKTV-${{ env.VERSION }}.apk
+          body: |
+            ## Changes
+            ${{ steps.version.outputs.changes }}
           generate_release_notes: true
 
       - name: Upload APK Artifact
