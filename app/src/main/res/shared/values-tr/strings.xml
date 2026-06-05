@@ -589,6 +589,9 @@
     <string name="chat_cleared">Sohbet temizlendi</string>
     <string name="chat_restore_messages">%d mesajı geri getir</string>
     <string name="chat_background_divider">Arka Plan Mesajları</string>
+    <string name="chat_background_messages_start">Arka Plan Mesajları — Başlangıç</string>
+    <string name="chat_background_messages_end">Arka Plan Mesajları — Bitiş</string>
+    <string name="chat_resumed">Sohbet Devam Ediyor</string>
     <string name="chat_load_missed_messages">Kaçırılan Mesajları Yükle</string>
     <string name="chat_load_missed_messages_more">Kaçırılan Mesajları Yükle (Daha Fazla)</string>
     <string name="chat_paused_battery_saver">Sohbet durduruldu (Pil Tasarrufu)</string>
@@ -670,7 +673,9 @@
     <string name="chat_setting_own_messages">Kendi Mesajların</string>
     <string name="chat_setting_mod_messages">Moderatör Mesajları</string>
     <string name="chat_setting_vip_messages">VIP Mesajları</string>
+    <string name="chat_setting_og_messages">OG Mesajları</string>
     <string name="chat_setting_name_color">İsim Rengini Kullan</string>
+    <string name="chat_setting_highlight_background">Arka Plan Olarak Vurgula</string>
     <string name="chat_settings_title">Sohbet Ayarları</string>
     <string name="chat_identity_title">Sohbet Kimliği</string>
     <string name="chat_appearance_title">Sohbet Görünümü</string>
@@ -694,7 +699,16 @@
     <string name="chat_low_battery_mode">Pil Tasarrufu</string>
     <string name="chat_emote_combo">Emote Kombo</string>
     <string name="chat_settings_vibrate_on_mention">Bahsedilince Titret</string>
+    <string name="chat_settings_sound_on_mention">Bahsedilince Ses Çal</string>
+    <string name="chat_settings_notify_on_mention">Bildirim Gönder</string>
+    <string name="notif_mention_title">%1$s senden bahsetti</string>
+    <string name="notif_reply_title">%1$s sana yanıt verdi</string>
+    <string name="notif_reply_original">↩ Sen: %1$s</string>
+    <string name="notif_mentions_channel">Bahsetmeler</string>
+    <string name="notif_mentions_channel_desc">Senden bahsedildiğinde veya yanıtlandığında uyarır</string>
     <string name="chat_settings_floating_emotes">Uçan Emojiler</string>
+    <string name="chat_settings_nick_detection">Nick Algılama</string>
+    <string name="chat_settings_nick_detection_subtitle">@ olmadan ismin geçtiğinde bildir</string>
 
     <!-- Chat Connection -->
     <string name="chat_low_battery_paused">Arka plan modu aktif. Sohbet duraklatıldı (Pil Tasarrufu)</string>

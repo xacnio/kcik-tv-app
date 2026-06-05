@@ -589,6 +589,9 @@
     <string name="chat_cleared">Chat was cleared</string>
     <string name="chat_restore_messages">Restore %d messages</string>
     <string name="chat_background_divider">Background Messages</string>
+    <string name="chat_background_messages_start">Background Messages — Start</string>
+    <string name="chat_background_messages_end">Background Messages — End</string>
+    <string name="chat_resumed">Chat Resumed</string>
     <string name="chat_load_missed_messages">Load Missed Messages</string>
     <string name="chat_load_missed_messages_more">Load Missed Messages (More)</string>
     <string name="chat_paused_battery_saver">Chat paused (Battery Saver)</string>
@@ -670,7 +673,9 @@
     <string name="chat_setting_own_messages">Own Messages</string>
     <string name="chat_setting_mod_messages">Moderator Messages</string>
     <string name="chat_setting_vip_messages">VIP Messages</string>
+    <string name="chat_setting_og_messages">OG Messages</string>
     <string name="chat_setting_name_color">Use Name Color</string>
+    <string name="chat_setting_highlight_background">Highlight as Background</string>
     <string name="chat_settings_title">Chat Settings</string>
     <string name="chat_identity_title">Chat Identity</string>
     <string name="chat_appearance_title">Chat Appearance</string>
@@ -694,7 +699,16 @@
     <string name="chat_low_battery_mode">Battery Saver</string>
     <string name="chat_emote_combo">Emote Combo</string>
     <string name="chat_settings_vibrate_on_mention">Vibrate on Mention</string>
+    <string name="chat_settings_sound_on_mention">Sound on Mention</string>
+    <string name="chat_settings_notify_on_mention">Send Notification</string>
+    <string name="notif_mention_title">%1$s mentioned you</string>
+    <string name="notif_reply_title">%1$s replied to you</string>
+    <string name="notif_reply_original">↩ You: %1$s</string>
+    <string name="notif_mentions_channel">Mentions</string>
+    <string name="notif_mentions_channel_desc">Alerts when you are mentioned or replied to</string>
     <string name="chat_settings_floating_emotes">Floating Emotes</string>
+    <string name="chat_settings_nick_detection">Nick Detection</string>
+    <string name="chat_settings_nick_detection_subtitle">Alert when your name appears without @</string>
 
     <!-- Chat Connection -->
     <string name="chat_low_battery_paused">Background mode active. Chat paused (Battery Saver)</string>

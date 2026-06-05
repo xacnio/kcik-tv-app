@@ -589,6 +589,9 @@
     <string name="chat_cleared">Chat wurde gelöscht</string>
     <string name="chat_restore_messages">%d Nachrichten wiederherstellen</string>
     <string name="chat_background_divider">Hintergrundnachrichten</string>
+    <string name="chat_background_messages_start">Hintergrundnachrichten — Anfang</string>
+    <string name="chat_background_messages_end">Hintergrundnachrichten — Ende</string>
+    <string name="chat_resumed">Chat fortgesetzt</string>
     <string name="chat_load_missed_messages">Verpasste Nachrichten laden</string>
     <string name="chat_load_missed_messages_more">Verpasste Nachrichten laden (Mehr)</string>
     <string name="chat_paused_battery_saver">Chat pausiert (Energiesparmodus)</string>
@@ -670,7 +673,9 @@
     <string name="chat_setting_own_messages">Eigene Nachrichten</string>
     <string name="chat_setting_mod_messages">Moderatoren-Nachrichten</string>
     <string name="chat_setting_vip_messages">VIP-Nachrichten</string>
+    <string name="chat_setting_og_messages">OG-Nachrichten</string>
     <string name="chat_setting_name_color">Namensfarbe verwenden</string>
+    <string name="chat_setting_highlight_background">Als Hintergrund hervorheben</string>
     <string name="chat_settings_title">Chat-Einstellungen</string>
     <string name="chat_identity_title">Chat-Identität</string>
     <string name="chat_appearance_title">Chat-Aussehen</string>
@@ -694,7 +699,16 @@
     <string name="chat_low_battery_mode">Energiesparmodus</string>
     <string name="chat_emote_combo">Emote Combo</string>
     <string name="chat_settings_vibrate_on_mention">Bei Erwähnung vibrieren</string>
+    <string name="chat_settings_sound_on_mention">Ton bei Erwähnung</string>
+    <string name="chat_settings_notify_on_mention">Benachrichtigung senden</string>
+    <string name="notif_mention_title">%1$s hat dich erwähnt</string>
+    <string name="notif_reply_title">%1$s hat dir geantwortet</string>
+    <string name="notif_reply_original">↩ Du: %1$s</string>
+    <string name="notif_mentions_channel">Erwähnungen</string>
+    <string name="notif_mentions_channel_desc">Hinweise, wenn du erwähnt wirst oder eine Antwort erhältst</string>
     <string name="chat_settings_floating_emotes">Schwebende Emotes</string>
+    <string name="chat_settings_nick_detection">Nick-Erkennung</string>
+    <string name="chat_settings_nick_detection_subtitle">Benachrichtigung wenn dein Name ohne @ erscheint</string>
 
     <!-- Chat Connection -->
     <string name="chat_low_battery_paused">Hintergrundmodus aktiviert. Chat pausiert (Energiesparmodus)</string>

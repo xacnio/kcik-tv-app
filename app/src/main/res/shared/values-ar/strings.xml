@@ -589,6 +589,9 @@
     <string name="chat_cleared">تم مسح الدردشة</string>
     <string name="chat_restore_messages">استعادة %d رسائل</string>
     <string name="chat_background_divider">رسائل الخلفية</string>
+    <string name="chat_background_messages_start">رسائل الخلفية — البداية</string>
+    <string name="chat_background_messages_end">رسائل الخلفية — النهاية</string>
+    <string name="chat_resumed">استؤنفت الدردشة</string>
     <string name="chat_load_missed_messages">تحميل الرسائل الفائتة</string>
     <string name="chat_load_missed_messages_more">تحميل الرسائل الفائتة (المزيد)</string>
     <string name="chat_paused_battery_saver">توقف الدردشة مؤقتًا (توفير البطارية)</string>
@@ -670,7 +673,9 @@
     <string name="chat_setting_own_messages">رسائلك</string>
     <string name="chat_setting_mod_messages">رسائل المشرفين</string>
     <string name="chat_setting_vip_messages">رسائل VIP</string>
+    <string name="chat_setting_og_messages">رسائل OG</string>
     <string name="chat_setting_name_color">استخدام لون الاسم</string>
+    <string name="chat_setting_highlight_background">تمييز كخلفية</string>
     <string name="chat_settings_title">إعدادات الدردشة</string>
     <string name="chat_identity_title">هوية الدردشة</string>
     <string name="chat_appearance_title">مظهر الدردشة</string>
@@ -694,7 +699,16 @@
     <string name="chat_low_battery_mode">توفير البطارية</string>
     <string name="chat_emote_combo">كومبو الرموز</string>
     <string name="chat_settings_vibrate_on_mention">اهتزاز عند الإشارة</string>
+    <string name="chat_settings_sound_on_mention">صوت عند الإشارة</string>
+    <string name="chat_settings_notify_on_mention">إرسال إشعار</string>
+    <string name="notif_mention_title">%1$s أشار إليك</string>
+    <string name="notif_reply_title">%1$s رد عليك</string>
+    <string name="notif_reply_original">↩ أنت: %1$s</string>
+    <string name="notif_mentions_channel">الإشارات</string>
+    <string name="notif_mentions_channel_desc">تنبيهات عند الإشارة إليك أو الرد عليك</string>
     <string name="chat_settings_floating_emotes">رموز عائمة</string>
+    <string name="chat_settings_nick_detection">اكتشاف اللقب</string>
+    <string name="chat_settings_nick_detection_subtitle">تنبيه عند ظهور اسمك بدون @</string>
 
     <!-- Chat Connection -->
     <string name="chat_low_battery_paused">تم تفعيل وضع الخلفية. الدردشة متوقفة (توفير البطارية)</string>

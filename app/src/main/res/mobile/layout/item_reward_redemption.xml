@@ -67,7 +67,7 @@
             android:textColor="@color/brand_green"
             android:textSize="13sp"
             android:textStyle="bold"
-            tools:text="overyet" />
+            tools:text="username" />
 
         <!-- Row 3: user input (full width, multiline) -->
         <TextView
