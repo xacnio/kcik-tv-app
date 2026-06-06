@@ -74,6 +74,9 @@ class AuthManager(
         activity.cachedUserLevel = null
         activity.updateUserHeaderState()
         activity.softRebindForAccountSwitch()
+        // Already handled the switch seamlessly; sync so onResume (e.g. after PiP) does not
+        // mistake this for an external login change and rebind the session from scratch.
+        activity.syncKnownAuthState()
         // Fetch immediately so points update without waiting for getChatInfo to complete first
         activity.fetchLoyaltyPoints()
 
@@ -194,9 +197,65 @@ class AuthManager(
                     activity.updateChatLoginState()
                     activity.updateUserHeaderState()
                     activity.rebindCurrentChannelSession()
+                    // Just rebound; sync so the next onResume doesn't rebind a second time.
+                    activity.syncKnownAuthState()
                 }
             }
         }
+    }
+
+    /**
+     * Called when an API rejects the active account's token with 401 Unauthenticated
+     * (revoked/expired). Signs that account out *locally* — no server-side /logout call, it
+     * would 401 too — removes it, and switches to the next saved account if there is one.
+     * Notifies the user with a toast.
+     *
+     * [deadAuthHeader] is the Authorization header of the failed request; we only act if it
+     * still matches the active token, so a late stale 401 cannot sign out an account the user
+     * just switched into.
+     */
+    fun handleUnauthorized(deadAuthHeader: String?) {
+        val token = prefs.authToken
+        if (token.isNullOrEmpty()) return
+        if (deadAuthHeader != null && deadAuthHeader != "Bearer $token") return
+
+        val deadUserId = prefs.userId
+        val cookieManager = CookieManager.getInstance()
+
+        prefs.clearAuth()
+        prefs.removeAccount(deadUserId)
+        cookieManager.removeAllCookies(null)
+        cookieManager.flush()
+        if (activity.isWebViewManagerReady) {
+            activity.webViewManager.resetForAuthStateChange()
+        }
+        activity.cachedUserLevel = null
+
+        val remaining = prefs.getAccounts()
+        if (remaining.isNotEmpty()) {
+            val next = remaining.first()
+            prefs.applyAccount(next)
+            if (activity.isWebViewManagerReady) {
+                activity.webViewManager.resetForAuthStateChange()
+            }
+            Toast.makeText(
+                activity,
+                "${activity.getString(R.string.session_expired)} · ${activity.getString(R.string.account_switched, next.username)}",
+                Toast.LENGTH_LONG
+            ).show()
+        } else {
+            Toast.makeText(
+                activity,
+                "${activity.getString(R.string.session_expired)} · ${activity.getString(R.string.logged_out)}",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+
+        activity.updateChatLoginState()
+        activity.updateUserHeaderState()
+        activity.rebindCurrentChannelSession()
+        // Mark handled so onResume's account-change check doesn't rebind a second time.
+        activity.syncKnownAuthState()
     }
 
     fun updateUserHeaderState() {

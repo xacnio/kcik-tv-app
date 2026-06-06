@@ -44,7 +44,20 @@ object RetrofitClient {
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
     }
-    
+
+    /**
+     * Invoked (off the main thread) when an authenticated kick.com request returns 401
+     * Unauthenticated. The argument is the request's Authorization header so the handler can
+     * confirm the 401 belongs to the currently active token before signing the user out.
+     * Debounced to fire at most once every few seconds, so a burst of parallel 401s (home,
+     * following, /me, ...) does not trigger repeated logouts.
+     */
+    @Volatile
+    var onUnauthorized: ((authHeader: String?) -> Unit)? = null
+
+    @Volatile
+    private var lastUnauthorizedNotifyMs = 0L
+
     private fun getUnsafeOkHttpClientBuilder(): OkHttpClient.Builder {
         try {
             val trustAllCerts = arrayOf<javax.net.ssl.TrustManager>(object : javax.net.ssl.X509TrustManager {
@@ -74,6 +87,22 @@ object RetrofitClient {
                 .header("Accept", "application/json")
                 .build()
             chain.proceed(request)
+        }
+        .addInterceptor { chain ->
+            val request = chain.request()
+            val response = chain.proceed(request)
+            if (response.code == 401) {
+                val authHeader = request.header("Authorization")
+                val host = request.url.host
+                if (!authHeader.isNullOrBlank() && (host == "kick.com" || host == "web.kick.com")) {
+                    val now = System.currentTimeMillis()
+                    if (now - lastUnauthorizedNotifyMs > 3000L) {
+                        lastUnauthorizedNotifyMs = now
+                        onUnauthorized?.invoke(authHeader)
+                    }
+                }
+            }
+            response
         }
         .addInterceptor(loggingInterceptor)
         .connectTimeout(15, TimeUnit.SECONDS)

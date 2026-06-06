@@ -1027,6 +1027,11 @@ class MobilePlayerActivity : FragmentActivity() {
         lastKnownLoggedIn = prefs.isLoggedIn
         if (prefs.isLoggedIn) prefs.commitActiveAccountToList()
         lastKnownActiveAccountId = prefs.activeAccountId
+
+        // Auto sign-out the active account when the API rejects its token with 401.
+        dev.xacnio.kciktv.shared.data.api.RetrofitClient.onUnauthorized = { authHeader ->
+            runOnUiThread { authManager.handleUnauthorized(authHeader) }
+        }
         setupNotifications()
         quickEmoteBarManager.setupQuickEmoteBar()
         
@@ -2253,6 +2258,18 @@ class MobilePlayerActivity : FragmentActivity() {
         sessionManager.reconnectForAccountSwitch()
     }
 
+    /**
+     * Marks the current prefs auth identity as already handled. onResume() compares
+     * activeAccountId/isLoggedIn against these to detect an external LoginActivity change
+     * and trigger a full channel rebind. In-app account switch/logout already rebind the
+     * session, so they must sync this state to avoid a redundant rebind (which reloads chat
+     * from scratch) the next time onResume runs — e.g. after returning from PiP or a rotation.
+     */
+    internal fun syncKnownAuthState() {
+        lastKnownLoggedIn = prefs.isLoggedIn
+        lastKnownActiveAccountId = prefs.activeAccountId
+    }
+
     internal val isWebViewManagerReady: Boolean get() = ::webViewManager.isInitialized
     
     private fun setupQuickEmoteBar() = quickEmoteBarManager.setupQuickEmoteBar()
@@ -2737,6 +2754,9 @@ class MobilePlayerActivity : FragmentActivity() {
         // Unregister thermal listener so the system doesn't keep delivering callbacks
         // to a torn-down activity context.
         dev.xacnio.kciktv.shared.util.ThermalMonitor.stop(this)
+
+        // Stop routing global 401 callbacks to this destroyed activity.
+        dev.xacnio.kciktv.shared.data.api.RetrofitClient.onUnauthorized = null
 
         // Clean up handlers
         viewerCountHandler.removeCallbacks(viewerCountRunnable)
