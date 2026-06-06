@@ -162,19 +162,28 @@ class FeaturedHeroController(private val activity: MobilePlayerActivity) {
             val rv = (pager?.getChildAt(0) as? RecyclerView) ?: return@post
             val vh = rv.findViewHolderForLayoutPosition(currentPosition) as? FeaturedHeroAdapter.PageViewHolder
                 ?: return@post
+            // Keep the IVS player off the page while in thumbnail mode so its surface can't
+            // cover the thumbnail.
+            if (thumbnailOnlyMode) {
+                previewPlayer.detach()
+                return@post
+            }
             previewPlayer.detach()
             previewPlayer.attachTo(vh.playerContainer)
             updateMuteIcon(vh.muteBtn)
             val channel = adapter?.getChannel(currentPosition) ?: return@post
-            if (!thumbnailOnlyMode && previewPlayer.isWifi()) previewPlayer.loadAndPlay(channel.playbackUrl)
-            if (!thumbnailOnlyMode) chatPreview?.switchTo(channel.chatroomId, channel.id.toLongOrNull(), force = forceChat)
+            if (previewPlayer.isWifi()) previewPlayer.loadAndPlay(channel.playbackUrl)
+            chatPreview?.switchTo(channel.chatroomId, channel.id.toLongOrNull(), force = forceChat)
         }
     }
 
     fun enterThumbnailMode() {
         if (thumbnailOnlyMode) return
         thumbnailOnlyMode = true
-        previewPlayer.pause()
+        // Detach (not just pause) the shared IVS player. pause() left the PlayerView attached
+        // and its container visible, so a paused/black surface stayed on top of the thumbnail
+        // for every page the player had touched.
+        previewPlayer.detach()
         chatPreview?.pause()
         chatContainer?.visibility = View.GONE
         setMuteBtnVisibility(View.GONE)
@@ -186,8 +195,8 @@ class FeaturedHeroController(private val activity: MobilePlayerActivity) {
         chatContainer?.visibility = View.VISIBLE
         setMuteBtnVisibility(View.VISIBLE)
         if (!isBound) return
-        val channel = adapter?.getChannel(currentPosition) ?: return
-        if (previewPlayer.isWifi()) previewPlayer.loadAndPlay(channel.playbackUrl)
+        // Re-attach the shared player to the current page (it was detached on enter) and resume.
+        attachPlayerToPage(currentPosition)
         chatPreview?.reconnect()
     }
 
@@ -244,13 +253,20 @@ class FeaturedHeroController(private val activity: MobilePlayerActivity) {
         val vh = (rv.findViewHolderForAdapterPosition(position)
             ?: rv.findViewHolderForLayoutPosition(position)) as? FeaturedHeroAdapter.PageViewHolder
             ?: return
+        // In thumbnail mode, keep the IVS player off the pages entirely so its black surface
+        // never covers a thumbnail. Detaching also frees its previous (now-empty) container.
+        if (thumbnailOnlyMode) {
+            previewPlayer.detach()
+            vh.muteBtn.visibility = View.GONE
+            return
+        }
         previewPlayer.detach()
         previewPlayer.attachTo(vh.playerContainer)
-        vh.muteBtn.visibility = if (thumbnailOnlyMode) View.GONE else View.VISIBLE
+        vh.muteBtn.visibility = View.VISIBLE
         updateMuteIcon(vh.muteBtn)
 
         val channel = adapter?.getChannel(position) ?: return
-        if (!thumbnailOnlyMode && previewPlayer.isWifi()) {
+        if (previewPlayer.isWifi()) {
             previewPlayer.loadAndPlay(channel.playbackUrl)
         }
     }

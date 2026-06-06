@@ -55,6 +55,10 @@ class HomeScreenManager(private val activity: MobilePlayerActivity) {
     private val TAG = "HomeScreenManager"
 
     private var featuredHero: FeaturedHeroController? = null
+    // Desired hero thumbnail state. Tracked separately so it survives the hero being created
+    // lazily after a channel is already playing (startup quick-play), where the earlier
+    // featuredHero?.enterThumbnailMode() call was a no-op on the still-null controller.
+    private var heroThumbnailDesired = false
     private var isHomeVisible = false
     private var isHeroScrollVisible = true
     private var scrollListenerAttached = false
@@ -71,7 +75,6 @@ class HomeScreenManager(private val activity: MobilePlayerActivity) {
 
         // Priority 1: If we have preloaded data, hide ALL loading indicators IMMEDIATELY
         if (hasPreloadedData) {
-            binding.startupLoadingOverlay.visibility = View.GONE
             binding.homeScreenContainer.homeSwipeRefresh.visibility = View.VISIBLE
             binding.homeScreenContainer.homeShimmerLayout.root.visibility = View.GONE
             binding.homeScreenContainer.homeCategoriesSection.visibility = View.VISIBLE
@@ -80,8 +83,7 @@ class HomeScreenManager(private val activity: MobilePlayerActivity) {
         else if (!isSwipeRefreshing) {
             binding.homeScreenContainer.homeShimmerLayout.root.visibility = View.VISIBLE
             binding.homeScreenContainer.homeSwipeRefresh.visibility = View.GONE
-            binding.startupLoadingOverlay.visibility = View.VISIBLE
-            
+
             // Hide following shimmer if not logged in
             val shimmerFollowingSection = binding.homeScreenContainer.homeShimmerLayout.root.findViewById<View>(R.id.shimmerFollowingSection)
             if (shimmerFollowingSection != null) {
@@ -241,13 +243,13 @@ class HomeScreenManager(private val activity: MobilePlayerActivity) {
                     binding.homeScreenContainer.homeSwipeRefresh.isRefreshing = false
                     binding.homeScreenContainer.homeShimmerLayout.root.visibility = View.GONE
                     binding.homeScreenContainer.homeSwipeRefresh.visibility = View.VISIBLE
-                    binding.startupLoadingOverlay.visibility = View.GONE
                     activity.homeDataLoaded = true
 
-                    // If no stream is active when data refreshes, restore hero to full mode
-                    if (!activity.miniPlayerManager.isMiniPlayerMode) {
-                        exitThumbnailMode()
-                    }
+                    // Re-apply the hero mode after a refresh based on the tracked desired state:
+                    // thumbnail while a channel is active (full or mini player), full hero
+                    // otherwise. The old isMiniPlayerMode-only check wrongly restored the full
+                    // hero (and its preview/chat) while watching full screen.
+                    if (heroThumbnailDesired) enterThumbnailMode() else exitThumbnailMode()
 
                     // Clear preload cache after first successful load
                     PreloadCache.clear()
@@ -262,6 +264,10 @@ class HomeScreenManager(private val activity: MobilePlayerActivity) {
         if (featuredHero == null) {
             featuredHero = FeaturedHeroController(activity)
             featuredHero!!.bind(heroRoot, channels)
+            // A channel may already be playing (e.g. user tapped a channel during startup,
+            // before the hero existed). Apply the desired mode now so the freshly-built hero
+            // doesn't start its own preview/chat behind the active stream.
+            if (heroThumbnailDesired) featuredHero!!.enterThumbnailMode()
         } else {
             featuredHero!!.updateChannels(channels)
         }
@@ -279,8 +285,15 @@ class HomeScreenManager(private val activity: MobilePlayerActivity) {
         }
     }
 
-    fun enterThumbnailMode() { featuredHero?.enterThumbnailMode() }
-    fun exitThumbnailMode() { featuredHero?.exitThumbnailMode() }
+    fun enterThumbnailMode() {
+        heroThumbnailDesired = true
+        featuredHero?.enterThumbnailMode()
+    }
+
+    fun exitThumbnailMode() {
+        heroThumbnailDesired = false
+        featuredHero?.exitThumbnailMode()
+    }
 
     fun onHomeHidden() {
         isHomeVisible = false
