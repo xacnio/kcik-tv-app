@@ -183,13 +183,6 @@ class SettingsPanelManager(
                 activity.finish()
             }
       
-            // Chat Refresh Rate
-            addSettingItem(container, R.drawable.ic_timer,
-                activity.getString(R.string.setting_chat_refresh_title),
-                "${prefs.chatRefreshRate}ms") {
-                showChatRefreshDialog()
-            }
-            
             // Auto-update Toggle
             addToggleSetting(container, R.drawable.ic_update,
                 activity.getString(R.string.setting_auto_update),
@@ -226,7 +219,7 @@ class SettingsPanelManager(
             // Privacy Policy
             addSettingItem(container, R.drawable.ic_security,
                 activity.getString(R.string.privacy_policy), null) {
-                val policyUrl = "https://github.com/xacnio/kcik-tv-app/blob/main/docs/privacy_policy.md"
+                val policyUrl = "https://github.com/xacnio/kcik-tv-app/blob/master/privacy_policy.md"
                 dev.xacnio.kciktv.mobile.InternalBrowserSheet.newInstance(policyUrl).show(activity.supportFragmentManager, "PrivacyPolicy")
                 hideSettingsPanel()
             }
@@ -703,29 +696,6 @@ class SettingsPanelManager(
             .setTitle(R.string.setting_update_channel)
             .setSingleChoiceItems(options, currentIndex) { dialog, which ->
                 prefs.updateChannel = values[which]
-                dialog.dismiss()
-                // Refresh detail sheet
-                detailDialog?.dismiss()
-                showAppSettings()
-            }
-            .setNegativeButton(R.string.cancel, null)
-            .show()
-    }
-    
-    private fun showChatRefreshDialog() {
-        val options = arrayOf(
-            activity.getString(R.string.speed_ultra_fast),
-            activity.getString(R.string.speed_fast),
-            activity.getString(R.string.speed_normal),
-            activity.getString(R.string.speed_slow)
-        )
-        val values = arrayOf(100L, 200L, 500L, 1000L)
-        val currentIndex = values.indexOf(prefs.chatRefreshRate).takeIf { it >= 0 } ?: 1
-
-        AlertDialog.Builder(activity)
-            .setTitle(R.string.setting_chat_refresh_title)
-            .setSingleChoiceItems(options, currentIndex) { dialog, which ->
-                prefs.chatRefreshRate = values[which]
                 dialog.dismiss()
                 // Refresh detail sheet
                 detailDialog?.dismiss()
