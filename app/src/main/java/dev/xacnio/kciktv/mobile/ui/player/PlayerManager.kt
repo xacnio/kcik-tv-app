@@ -80,11 +80,10 @@ class PlayerManager(
                         // Keep screen on while playing
                         activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-                        // Hint the display that the player surface only needs ~60 Hz.
-                        // Lets 120 Hz panels seamlessly drop to a matching refresh mode.
-                        // Battery saver narrows the hint to 30 Hz: most Kick live streams
-                        // top out at 30 fps so this is a free win on the compositor side.
-                        applyDisplayFrameRate(if (prefs.lowBatteryModeEnabled && prefs.batterySaverLimitQuality) 30f else 60f)
+                        // Cap the display refresh to the stream's frame rate (full player only;
+                        // released in mini-player mode). fps may not be known yet here —
+                        // onQualityChanged re-applies once it is.
+                        applyPlaybackRefreshForCurrentState()
 
                         // Check mobile data quality limit
                         checkAndApplyQualityLimit()
@@ -163,7 +162,16 @@ class PlayerManager(
             }
         }
 
-        override fun onQualityChanged(quality: Quality) {}
+        override fun onQualityChanged(quality: Quality) {
+            activity.runOnUiThread {
+                // Re-evaluate the refresh policy for the new stream frame rate. Respects
+                // mini-player mode, so a quality change while minimised stays at the panel's
+                // full refresh rate instead of dropping back to the 60/30 Hz cap.
+                if (ivsPlayer?.state == Player.State.PLAYING || ivsPlayer?.state == Player.State.BUFFERING) {
+                    applyPlaybackRefreshForCurrentState()
+                }
+            }
+        }
         override fun onCue(cue: com.amazonaws.ivs.player.Cue) {}
         override fun onDurationChanged(duration: Long) {}
         override fun onMetadata(type: String, data: ByteBuffer) {}
@@ -214,20 +222,102 @@ class PlayerManager(
         return null
     }
 
+    /**
+     * Picks the display refresh cap for a stream running at [fps]. Never below the content
+     * rate — capping a 60 fps stream to 30 Hz judders. Battery saver may use 30 Hz only for
+     * genuinely <=30 fps content, where it costs nothing. 0/unknown defaults to 60 Hz.
+     */
+    /**
+     * Release the playback refresh-rate cap — e.g. in mini-player mode, where the high-refresh
+     * home feed scroll is what's on screen, so the panel should run at its full rate again.
+     */
+    fun releasePlaybackRefreshCap() = applyDisplayFrameRate(0f)
+
+    /** Re-apply the content-matched refresh cap for the current stream (e.g. back to full player). */
+    fun reapplyPlaybackRefreshCap() {
+        val state = ivsPlayer?.state
+        if (state == Player.State.PLAYING || state == Player.State.BUFFERING) {
+            applyPlaybackRefreshForCurrentState()
+        }
+    }
+
+    /**
+     * Applies the refresh policy for the current state: released (system default, high Hz) while
+     * in mini-player mode — the home feed is what's on screen there — otherwise capped to the
+     * stream's frame rate. Centralised so a quality change in mini-player mode can't re-pin the cap.
+     */
+    private fun applyPlaybackRefreshForCurrentState() {
+        val mini = try { activity.miniPlayerManager.isMiniPlayerMode } catch (e: Exception) { false }
+        applyDisplayFrameRate(if (mini) 0f else refreshRateForFps(ivsPlayer?.quality?.framerate ?: 0f))
+    }
+
+    private fun refreshRateForFps(fps: Float): Float = when {
+        fps >= 50f -> 60f
+        fps >= 1f -> if (prefs.lowBatteryModeEnabled && prefs.batterySaverLimitQuality) 30f else 60f
+        else -> 60f
+    }
+
     private fun applyDisplayFrameRate(rate: Float) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
+        // 1) Surface-level hint (API 31+): tells the compositor the video's content rate so a
+        // 120 Hz panel can seamlessly drop to a matching mode. ONLY_IF_SEAMLESS avoids a black
+        // flicker, but is silently ignored by panels that can't switch seamlessly.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            try {
+                findPlayerSurface(binding.playerView)?.setFrameRate(
+                    rate,
+                    Surface.FRAME_RATE_COMPATIBILITY_DEFAULT,
+                    Surface.CHANGE_FRAME_RATE_ONLY_IF_SEAMLESS
+                )
+            } catch (e: Exception) {
+                Log.w(TAG, "setFrameRate hint failed: ${e.message}")
+            }
+        }
+
+        // 2) Window-level cap: the surface hint above is ignored by many adaptive displays
+        // (notably Samsung's 120 Hz panels, which stay high to keep UI smooth). Pinning the
+        // window to a real ~`rate` Hz display mode of the current resolution is the
+        // authoritative path that actually drops the screen refresh while watching.
+        applyWindowRefreshCap(rate)
+    }
+
+    /**
+     * Pins (rate > 0) or releases (rate <= 0) the activity window to a display mode at the
+     * current resolution whose refresh rate is closest to, but not above, [rate]. This forces
+     * the screen refresh down on devices that ignore the surface frame-rate hint.
+     */
+    private fun applyWindowRefreshCap(rate: Float) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return
         try {
-            val surface = findPlayerSurface(binding.playerView) ?: return
-            // CHANGE_FRAME_RATE_ONLY_IF_SEAMLESS avoids the brief black flicker on
-            // panels that can't switch modes without resync; if seamless isn't
-            // possible the hint is silently ignored.
-            surface.setFrameRate(
-                rate,
-                Surface.FRAME_RATE_COMPATIBILITY_DEFAULT,
-                Surface.CHANGE_FRAME_RATE_ONLY_IF_SEAMLESS
-            )
+            val window = activity.window
+            val lp = window.attributes
+            if (rate <= 0f) {
+                if (lp.preferredDisplayModeId == 0 && lp.preferredRefreshRate == 0f) return
+                lp.preferredDisplayModeId = 0
+                lp.preferredRefreshRate = 0f
+                window.attributes = lp
+                return
+            }
+            val display = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) activity.display
+                else @Suppress("DEPRECATION") activity.windowManager.defaultDisplay
+            val current = display?.mode
+            val modes = display?.supportedModes
+            var modeId = 0
+            if (current != null && modes != null) {
+                val sameRes = modes.filter {
+                    it.physicalWidth == current.physicalWidth &&
+                        it.physicalHeight == current.physicalHeight
+                }
+                val target = sameRes.filter { it.refreshRate <= rate + 1f }
+                    .maxByOrNull { it.refreshRate }
+                    ?: sameRes.minByOrNull { it.refreshRate }
+                modeId = target?.modeId ?: 0
+            }
+            if (lp.preferredDisplayModeId == modeId && lp.preferredRefreshRate == rate) return
+            lp.preferredDisplayModeId = modeId
+            lp.preferredRefreshRate = rate
+            window.attributes = lp
         } catch (e: Exception) {
-            Log.w(TAG, "setFrameRate hint failed: ${e.message}")
+            Log.w(TAG, "applyWindowRefreshCap failed: ${e.message}")
         }
     }
 

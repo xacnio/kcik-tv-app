@@ -258,7 +258,11 @@ class MiniPlayerManager(private val activity: MobilePlayerActivity) {
         videoContainer.translationY = 0f
         
         isMiniPlayerMode = true
-        
+
+        // Mini player floats over the home feed — drop the playback refresh cap so the feed
+        // scrolls at the panel's full refresh rate (e.g. 120 Hz) again.
+        activity.playerManager.releasePlaybackRefreshCap()
+
         // Log analytics event
         activity.analytics.logMiniPlayerUsed()
 
@@ -346,7 +350,10 @@ class MiniPlayerManager(private val activity: MobilePlayerActivity) {
         }
 
         isMiniPlayerMode = false
-        
+
+        // Back to full player — re-apply the content-matched refresh cap (e.g. 60 Hz).
+        activity.playerManager.reapplyPlaybackRefreshCap()
+
         activity.overlayManager.updatePinnedGiftsUI()
 
         binding.videoContainer.translationX = 0f
