@@ -71,6 +71,7 @@ class ChatSettingsSheetManager(
     private var showSeconds = false
 
     private var currentPanelView: View? = null
+    private var scrimView: View? = null
     private var pendingRulesChannel: ChannelItem? = null
 
     private companion object {
@@ -87,6 +88,8 @@ class ChatSettingsSheetManager(
     fun dismissPanel() {
         val view = currentPanelView ?: return
         if (hasProfileChanges) saveProfileIdentity()
+        scrimView?.let { (it.parent as? android.view.ViewGroup)?.removeView(it) }
+        scrimView = null
         view.animate().alpha(0f).setDuration(150).withEndAction {
             (view.parent as? android.view.ViewGroup)?.removeView(view)
             currentPanelView = null
@@ -486,6 +489,24 @@ class ChatSettingsSheetManager(
         // Add panel to chatContainer (parent of chatListContainer) so it renders above
         // the pinned message overlay which is a sibling declared later in XML.
         val container = activity.binding.chatContainer
+
+        // Full-container click-catcher behind the panel: a tap anywhere outside the panel
+        // dismisses it (the panel consumes its own taps via isClickable below).
+        val scrim = View(activity).apply {
+            layoutParams = androidx.constraintlayout.widget.ConstraintLayout.LayoutParams(0, 0).apply {
+                topToTop = androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID
+                bottomToBottom = androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID
+                startToStart = androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID
+                endToEnd = androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID
+            }
+            isClickable = true
+            isFocusable = true
+            elevation = dpToPx(15).toFloat()
+            setOnClickListener { dismissPanel() }
+        }
+        container.addView(scrim)
+        scrimView = scrim
+
         val panelHeight = computePanelHeight()
         val lp = androidx.constraintlayout.widget.ConstraintLayout.LayoutParams(
             androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.MATCH_PARENT,
@@ -495,6 +516,9 @@ class ChatSettingsSheetManager(
         lp.startToStart = androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID
         lp.endToEnd = androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID
         view.layoutParams = lp
+        // Consume stray taps on the panel's own (transparent corner) areas so they don't fall
+        // through to the scrim and dismiss it.
+        view.isClickable = true
         container.addView(view)
         view.elevation = dpToPx(16).toFloat()
 

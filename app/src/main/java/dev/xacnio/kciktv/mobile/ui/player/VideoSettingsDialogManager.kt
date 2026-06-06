@@ -34,6 +34,7 @@ class VideoSettingsDialogManager(
     }
 
     private var currentPanelView: View? = null
+    private var scrimView: View? = null
 
     private companion object {
         const val PAGE_ROOT = 0
@@ -45,6 +46,8 @@ class VideoSettingsDialogManager(
 
     fun dismissPanel() {
         val view = currentPanelView ?: return
+        scrimView?.let { (it.parent as? android.view.ViewGroup)?.removeView(it) }
+        scrimView = null
         view.animate().alpha(0f).setDuration(150).withEndAction {
             (view.parent as? android.view.ViewGroup)?.removeView(view)
             currentPanelView = null
@@ -281,6 +284,23 @@ class VideoSettingsDialogManager(
 
         // Inject into chatContainer so it appears at the top of the chat area (same approach as chat settings panel)
         val container = activity.binding.chatContainer
+
+        // Full-container click-catcher behind the panel: a tap outside the panel dismisses it.
+        val scrim = View(activity).apply {
+            layoutParams = ConstraintLayout.LayoutParams(0, 0).apply {
+                topToTop = ConstraintLayout.LayoutParams.PARENT_ID
+                bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+                startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+                endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+            }
+            isClickable = true
+            isFocusable = true
+            elevation = dpToPx(15).toFloat()
+            setOnClickListener { dismissPanel() }
+        }
+        container.addView(scrim)
+        scrimView = scrim
+
         var rootItemCount = 3
         if (isVodOrClip) rootItemCount++
         if (hasAudio) rootItemCount++
@@ -290,7 +310,10 @@ class VideoSettingsDialogManager(
         lp.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
         lp.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
         view.layoutParams = lp
+        // Consume stray taps on the panel itself so they don't fall through to the scrim.
+        view.isClickable = true
         container.addView(view)
+        view.elevation = dpToPx(16).toFloat()
 
         view.alpha = 0f
         view.animate().alpha(1f).setDuration(180).start()
