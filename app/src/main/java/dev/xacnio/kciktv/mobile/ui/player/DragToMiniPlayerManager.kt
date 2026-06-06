@@ -197,6 +197,11 @@ class DragToMiniPlayerManager(private val activity: MobilePlayerActivity) {
         // when they become visible during drag animation
         binding.playerScreenContainer.bringToFront()
         binding.videoContainer.bringToFront()
+        // Lift the WHOLE player subtree above the home header + divider (root-level views with
+        // elevation 30/31dp) while dragging, so they don't render over the shrinking,
+        // semi-transparent video as the background fades in. videoContainer is nested inside
+        // playerScreenContainer, so the container's Z is what must outrank the root-level divider.
+        binding.playerScreenContainer.translationZ = 40f * activity.resources.displayMetrics.density
     }
 
     /**
@@ -425,6 +430,9 @@ class DragToMiniPlayerManager(private val activity: MobilePlayerActivity) {
         videoContainer.scaleY = 1f
         videoContainer.translationX = 0f
         videoContainer.translationY = 0f
+        // Restore the player-subtree z-lift applied at drag start so the home header/divider
+        // layer normally again once we're back to full player or mini.
+        binding.playerScreenContainer.translationZ = 0f
         // Reset pivot to center
         if (originalVideoWidth > 0 && originalVideoHeight > 0) {
             videoContainer.pivotX = (originalVideoWidth / 2f)
