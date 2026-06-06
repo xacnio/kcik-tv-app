@@ -730,12 +730,7 @@ class MobilePlayerActivity : FragmentActivity() {
         
         binding = ActivityMobilePlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        
-        // Immediate check for preloaded data to avoid flicker
-        if (PreloadCache.categories != null && PreloadCache.featuredStreams != null) {
-            binding.startupLoadingOverlay.visibility = View.GONE
-        }
-        
+
         // Force LTR layout regardless of language (Arabic text will still render RTL naturally)
         window.decorView.layoutDirection = View.LAYOUT_DIRECTION_LTR
         
@@ -2039,7 +2034,6 @@ class MobilePlayerActivity : FragmentActivity() {
             binding.browseScreenContainer.root.visibility = View.GONE
             binding.followingScreenContainer.root.visibility = View.GONE
             binding.searchContainer.visibility = View.GONE
-            binding.startupLoadingOverlay.visibility = View.GONE
             binding.categoryDetailsContainer.root.visibility = View.GONE // Ensure category details is hidden
             // Hide channel profile too - we don't return to it anymore
             binding.channelProfileContainer.root.visibility = View.GONE
