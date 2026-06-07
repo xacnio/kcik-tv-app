@@ -72,6 +72,7 @@ class PlayerManager(
                 when (state) {
                     Player.State.PLAYING -> {
                         activity.hideLoading()
+                        activity.isErrorStateActive = false
                         binding.playerView.visibility = View.VISIBLE
                         binding.offlineBanner.visibility = View.GONE
                         binding.errorOverlay.visibility = View.GONE
@@ -657,7 +658,11 @@ class PlayerManager(
                 val url = apiPlaybackUrl ?: repository.getStreamUrl(channel.slug).getOrNull() ?: channel.getStreamUrl()
                 if (url == null) {
                     activity.runOnUiThread {
-                        showOfflineState(channel.offlineBannerUrl, null, channel.getEffectiveOfflineBannerUrl())
+                        if (dev.xacnio.kciktv.shared.data.mock.MockConfig.enabled) {
+                            showMockImageState(channel.thumbnailUrl ?: channel.offlineBannerUrl)
+                        } else {
+                            showOfflineState(channel.offlineBannerUrl, null, channel.getEffectiveOfflineBannerUrl())
+                        }
                     }
                 } else {
                     activity.runOnUiThread {
@@ -668,6 +673,15 @@ class PlayerManager(
                 }
             } catch (e: Exception) { Log.e(TAG, "Error loading stream", e) }
         }
+    }
+
+    private fun showMockImageState(imageUrl: String?) {
+        activity.hideLoading()
+        val url = imageUrl ?: "https://picsum.photos/1280/720"
+        binding.offlineBanner.visibility = View.VISIBLE
+        Glide.with(activity).load(url).into(binding.offlineBanner)
+        binding.playerView.visibility = View.GONE
+        ivsPlayer?.pause()
     }
 
     fun showOfflineState(bannerUrl: String?, bannerSrc: String?, defaultBannerUrl: String?, bannerSrcset: String? = null) {

@@ -97,19 +97,21 @@ class MobilePlayerListener(private val activity: MobilePlayerActivity) : Player.
                             activity.lifecycleScope.launch {
                                 var cachedBody: String? = null
                                 val maxAttempts = 10
-                                
+
                                 for (attempt in 1..maxAttempts) {
                                     val (code, body) = activity.repository.checkStreamStatus(streamUrl)
                                     Log.d(TAG, "Stream Check Attempt $attempt/$maxAttempts -> Status: $code, BodyLength: ${body?.length}")
-                                    
+
                                     val channel = activity.currentChannel
-                                    activity.showOfflineState(null, null, channel?.offlineBannerUrl)
-                                    
-                                    // 2. Cache first response body
+
                                     if (attempt == 1) {
+                                        // Show offline state once on first detection — repeated calls would
+                                        // re-trigger showOverlay() whose 3-second auto-hide timer matches
+                                        // the retry interval, causing the offline text to flicker.
+                                        activity.showOfflineState(null, null, channel?.offlineBannerUrl)
                                         cachedBody = body
                                     } else {
-                                        // 3. If response body changes (and not 404), stream is likely valid/updated -> continue playing
+                                        // If response body changes (and not 404), stream is likely valid/updated -> continue playing
                                         if (body != cachedBody && code != -1 && code != 404) {
                                             Log.d(TAG, "Analysis: Playlist content changed -> Restarting Playback")
                                             activity.runOnUiThread {
@@ -118,7 +120,7 @@ class MobilePlayerListener(private val activity: MobilePlayerActivity) : Player.
                                             return@launch
                                         }
                                     }
-                                    
+
                                     if (attempt < maxAttempts) {
                                         kotlinx.coroutines.delay(3000L)
                                     }
