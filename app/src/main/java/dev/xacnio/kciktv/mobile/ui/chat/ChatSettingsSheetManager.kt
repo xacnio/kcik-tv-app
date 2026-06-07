@@ -571,6 +571,7 @@ class ChatSettingsSheetManager(
         val profileLevelText = view.findViewById<TextView>(R.id.profileLevelText)
         val profileLevelProgress = view.findViewById<android.widget.ProgressBar>(R.id.profileLevelProgress)
         val profileLevelProgressText = view.findViewById<TextView>(R.id.profileLevelProgressText)
+        val profileWatchTimeText = view.findViewById<TextView>(R.id.profileWatchTimeText)
 
         val channelId = activity.currentChannel?.id?.toLongOrNull() ?: 0L
         val userId = prefs.userId
@@ -802,7 +803,7 @@ class ChatSettingsSheetManager(
         if (!token.isNullOrEmpty()) {
             val cached = activity.cachedUserLevel
             if (cached != null) {
-                applyLevelData(cached, profileLevelCard, profileLevelBadge, profileLevelText, profileLevelProgress, profileLevelProgressText)
+                applyLevelData(cached, profileLevelCard, profileLevelBadge, profileLevelText, profileLevelProgress, profileLevelProgressText, profileWatchTimeText)
             }
 
             lifecycleScope.launch {
@@ -811,9 +812,9 @@ class ChatSettingsSheetManager(
                         val oldData = activity.cachedUserLevel
                         activity.cachedUserLevel = newData
                         if (oldData == null) {
-                            applyLevelData(newData, profileLevelCard, profileLevelBadge, profileLevelText, profileLevelProgress, profileLevelProgressText)
+                            applyLevelData(newData, profileLevelCard, profileLevelBadge, profileLevelText, profileLevelProgress, profileLevelProgressText, profileWatchTimeText)
                         } else {
-                            animateLevelUpdate(oldData, newData, profileLevelCard, profileLevelBadge, profileLevelText, profileLevelProgress, profileLevelProgressText)
+                            animateLevelUpdate(oldData, newData, profileLevelCard, profileLevelBadge, profileLevelText, profileLevelProgress, profileLevelProgressText, profileWatchTimeText)
                         }
                     }
                 }
@@ -1266,21 +1267,43 @@ class ChatSettingsSheetManager(
         }
     }
 
+    private fun formatWatchTime(totalXp: Int, xpToNextLevel: Int): String {
+        val watchedMinutes = totalXp / 2
+        val wHours = watchedMinutes / 60
+        val wMins = watchedMinutes % 60
+        val watchedStr = if (wHours > 0)
+            activity.getString(R.string.watch_time_hours_minutes, wHours, wMins)
+        else
+            activity.getString(R.string.watch_time_minutes, watchedMinutes)
+
+        val remainingMinutes = xpToNextLevel / 2
+        val rHours = remainingMinutes / 60
+        val rMins = remainingMinutes % 60
+        val remainingStr = if (rHours > 0)
+            activity.getString(R.string.time_to_level_up_hours_minutes, rHours, rMins)
+        else
+            activity.getString(R.string.time_to_level_up_minutes, remainingMinutes)
+
+        return "$watchedStr  •  $remainingStr"
+    }
+
     private fun applyLevelData(
         data: UserLevelData,
         levelCard: View,
         badgeView: ImageView,
         levelText: TextView,
         progressBar: ProgressBar,
-        progressText: TextView
+        progressText: TextView,
+        watchTimeText: TextView
     ) {
         levelText.text = activity.getString(R.string.level_format, data.level)
         progressBar.progress = data.progressPercent
         progressText.text = activity.getString(
-            R.string.level_towards_next_format,
-            data.progressPercent,
-            data.level + 1
+            R.string.xp_progress_format,
+            data.progressXp,
+            data.progressXp + data.xpToNextLevel
         )
+        watchTimeText.text = formatWatchTime(data.totalXp, data.xpToNextLevel)
         val badgeUrl = data.badge?.imageUrl
         if (!badgeUrl.isNullOrEmpty()) {
             Glide.with(activity).load(badgeUrl).into(badgeView)
@@ -1295,7 +1318,8 @@ class ChatSettingsSheetManager(
         badgeView: ImageView,
         levelText: TextView,
         progressBar: ProgressBar,
-        progressText: TextView
+        progressText: TextView,
+        watchTimeText: TextView
     ) {
         levelCard.visibility = View.VISIBLE
         val leveledUp = newData.level > oldData.level
@@ -1306,10 +1330,11 @@ class ChatSettingsSheetManager(
         }
 
         progressText.text = activity.getString(
-            R.string.level_towards_next_format,
-            newData.progressPercent,
-            newData.level + 1
+            R.string.xp_progress_format,
+            newData.progressXp,
+            newData.progressXp + newData.xpToNextLevel
         )
+        watchTimeText.text = formatWatchTime(newData.totalXp, newData.xpToNextLevel)
 
         if (leveledUp) {
             levelText.text = activity.getString(R.string.level_format, newData.level)

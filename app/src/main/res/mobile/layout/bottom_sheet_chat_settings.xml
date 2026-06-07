@@ -359,13 +359,29 @@
                             android:orientation="vertical"
                             android:layout_marginStart="10dp">
 
-                            <TextView
-                                android:id="@+id/profileLevelText"
-                                android:layout_width="wrap_content"
+                            <LinearLayout
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:textColor="#FFFFFF"
-                                android:textSize="12sp"
-                                android:textStyle="bold"/>
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+
+                                <TextView
+                                    android:id="@+id/profileLevelText"
+                                    android:layout_width="0dp"
+                                    android:layout_weight="1"
+                                    android:layout_height="wrap_content"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="12sp"
+                                    android:textStyle="bold"/>
+
+                                <TextView
+                                    android:id="@+id/profileLevelProgressText"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textColor="#888888"
+                                    android:textSize="10sp"/>
+
+                            </LinearLayout>
 
                             <ProgressBar
                                 android:id="@+id/profileLevelProgress"
@@ -374,15 +390,15 @@
                                 android:layout_height="3dp"
                                 android:progressTint="#53FC18"
                                 android:max="100"
-                                android:layout_marginTop="4dp"/>
+                                android:layout_marginTop="5dp"/>
 
                             <TextView
-                                android:id="@+id/profileLevelProgressText"
+                                android:id="@+id/profileWatchTimeText"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textColor="#53FC18"
+                                android:textColor="#888888"
                                 android:textSize="10sp"
-                                android:layout_marginTop="2dp"/>
+                                android:layout_marginTop="5dp"/>
                         </LinearLayout>
                     </LinearLayout>
 

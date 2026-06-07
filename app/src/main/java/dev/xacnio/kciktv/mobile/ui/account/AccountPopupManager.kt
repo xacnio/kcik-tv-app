@@ -82,13 +82,15 @@ class AccountPopupManager(private val activity: MobilePlayerActivity) {
                     val levelCard = view.findViewById<View>(R.id.popupLevelCard)
                     val badgeView = view.findViewById<ImageView>(R.id.popupLevelBadge)
                     val levelText = view.findViewById<TextView>(R.id.popupLevelText)
+                    val xpText = view.findViewById<TextView>(R.id.popupLevelXpText)
                     val progressBar = view.findViewById<ProgressBar>(R.id.popupLevelProgress)
                     val progressText = view.findViewById<TextView>(R.id.popupLevelProgressText)
+                    val watchTimeText = view.findViewById<TextView>(R.id.popupWatchTimeText)
 
                     val cached = activity.cachedUserLevel
                     if (cached != null) {
                         shimmer.visibility = View.GONE
-                        applyLevelData(cached, levelCard, badgeView, levelText, progressBar, progressText)
+                        applyLevelData(cached, levelCard, badgeView, levelText, xpText, progressBar, progressText, watchTimeText)
                     } else {
                         shimmer.visibility = View.VISIBLE
                     }
@@ -101,9 +103,9 @@ class AccountPopupManager(private val activity: MobilePlayerActivity) {
                                 val oldData = activity.cachedUserLevel
                                 activity.cachedUserLevel = newData
                                 if (oldData == null) {
-                                    applyLevelData(newData, levelCard, badgeView, levelText, progressBar, progressText)
+                                    applyLevelData(newData, levelCard, badgeView, levelText, xpText, progressBar, progressText, watchTimeText)
                                 } else {
-                                    animateLevelUpdate(oldData, newData, levelCard, badgeView, levelText, progressBar, progressText)
+                                    animateLevelUpdate(oldData, newData, levelCard, badgeView, levelText, xpText, progressBar, progressText, watchTimeText)
                                 }
                             }
                         }
@@ -156,21 +158,45 @@ class AccountPopupManager(private val activity: MobilePlayerActivity) {
         }
     }
 
+    private fun formatWatchTime(totalXp: Int, xpToNextLevel: Int): String {
+        val watchedMinutes = totalXp / 2
+        val wHours = watchedMinutes / 60
+        val wMins = watchedMinutes % 60
+        val watchedStr = if (wHours > 0)
+            activity.getString(R.string.watch_time_hours_minutes, wHours, wMins)
+        else
+            activity.getString(R.string.watch_time_minutes, watchedMinutes)
+
+        val remainingMinutes = xpToNextLevel / 2
+        val rHours = remainingMinutes / 60
+        val rMins = remainingMinutes % 60
+        val remainingStr = if (rHours > 0)
+            activity.getString(R.string.time_to_level_up_hours_minutes, rHours, rMins)
+        else
+            activity.getString(R.string.time_to_level_up_minutes, remainingMinutes)
+
+        return "$watchedStr  •  $remainingStr"
+    }
+
     private fun applyLevelData(
         data: UserLevelData,
         levelCard: View,
         badgeView: ImageView,
         levelText: TextView,
+        xpText: TextView,
         progressBar: ProgressBar,
-        progressText: TextView
+        progressText: TextView,
+        watchTimeText: TextView
     ) {
         levelText.text = activity.getString(R.string.level_format, data.level)
+        xpText.text = activity.getString(R.string.xp_progress_format, data.progressXp, data.progressXp + data.xpToNextLevel)
         progressBar.progress = data.progressPercent
         progressText.text = activity.getString(
             R.string.level_towards_next_format,
             data.progressPercent,
             data.level + 1
         )
+        watchTimeText.text = formatWatchTime(data.totalXp, data.xpToNextLevel)
         val badgeUrl = data.badge?.imageUrl
         if (!badgeUrl.isNullOrEmpty()) {
             Glide.with(activity).load(badgeUrl).into(badgeView)
@@ -184,8 +210,10 @@ class AccountPopupManager(private val activity: MobilePlayerActivity) {
         levelCard: View,
         badgeView: ImageView,
         levelText: TextView,
+        xpText: TextView,
         progressBar: ProgressBar,
-        progressText: TextView
+        progressText: TextView,
+        watchTimeText: TextView
     ) {
         levelCard.visibility = View.VISIBLE
         val leveledUp = newData.level > oldData.level
@@ -195,11 +223,13 @@ class AccountPopupManager(private val activity: MobilePlayerActivity) {
             Glide.with(activity).load(badgeUrl).into(badgeView)
         }
 
+        xpText.text = activity.getString(R.string.xp_progress_format, newData.progressXp, newData.progressXp + newData.xpToNextLevel)
         progressText.text = activity.getString(
             R.string.level_towards_next_format,
             newData.progressPercent,
             newData.level + 1
         )
+        watchTimeText.text = formatWatchTime(newData.totalXp, newData.xpToNextLevel)
 
         if (leveledUp) {
             levelText.text = activity.getString(R.string.level_format, newData.level)
