@@ -1762,6 +1762,8 @@ class ChatUiManager(
                                 createdAt = pinnedMsg.createdAt
                             )
                             activity.overlayManager.handlePinnedMessageFromHistory(pinnedMessage)
+                        } else {
+                            activity.overlayManager.handlePinnedMessageFromHistory(null)
                         }
                     }
                 }.onFailure { e ->

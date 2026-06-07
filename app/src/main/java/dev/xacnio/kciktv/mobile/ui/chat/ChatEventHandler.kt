@@ -293,12 +293,21 @@ class ChatEventHandler(
     private fun handlePinnedMessageDeleted() {
         runOnUiThread {
             stateManager.isPinnedMessageActive = false
-            activity.overlayManager.clearPinnedEmotes()
-            
-            activity.overlayManager.hideOverlayView(binding.pinnedMessageContainer)
-            
             stateManager.isPinnedMessageHiddenByManual = false
+            activity.overlayManager.clearPinnedEmotes()
             binding.restorePinnedMessage.visibility = View.GONE
+
+            activity.overlayManager.hideOverlayView(binding.pinnedMessageContainer)
+
+            // If the event arrived while in background the Choreographer may not deliver
+            // VSYNC frames, so the animation's withEndAction might never fire.
+            // Force the final state after the animation window has passed.
+            binding.pinnedMessageContainer.postDelayed({
+                if (!stateManager.isPinnedMessageActive) {
+                    binding.pinnedMessageContainer.visibility = View.GONE
+                    activity.updateChatOverlayState()
+                }
+            }, 400)
         }
     }
     
