@@ -290,6 +290,7 @@ class PlayerActivity : FragmentActivity() {
     // Chat
     private var chatAdapter: ChatAdapter? = null
     private var chatWebSocket: KcikChatWebSocket? = null
+    private var mockChatSource: dev.xacnio.kciktv.shared.data.mock.MockChatSource? = null
     private val chatHandler = Handler(Looper.getMainLooper())
     private val pendingChatMessages = mutableListOf<ChatMessage>()
     private var chatConnectJob: Job? = null
@@ -840,8 +841,8 @@ class PlayerActivity : FragmentActivity() {
             
             actions.add(RemoteAction(
                 Icon.createWithResource(this, R.drawable.ic_pip_live),
-                "Canlı",
-                "Canlı Yayına Git",
+                getString(R.string.live),
+                getString(R.string.pip_action_return_to_live),
                 livePendingIntent
             ))
 
@@ -2145,6 +2146,7 @@ class PlayerActivity : FragmentActivity() {
     }
 
     private fun setupWebSocket() {
+        if (dev.xacnio.kciktv.shared.data.mock.MockConfig.enabled) return
         chatWebSocket = KcikChatWebSocket(
             applicationContext,
             onMessageReceived = { message ->
@@ -4567,6 +4569,8 @@ class PlayerActivity : FragmentActivity() {
         // If slug changed, disconnect WebSocket completely and clear messages
         if (slugChanged) {
             Log.d("PlayerActivity", "Slug changed - disconnecting WebSocket and clearing messages")
+            mockChatSource?.stop()
+            mockChatSource = null
             chatWebSocket?.disconnect()
             if (isChatVisible) {
                 chatHandler.post {
@@ -4574,10 +4578,10 @@ class PlayerActivity : FragmentActivity() {
                 }
             }
         }
-        
+
         // Update lastSubscribedSlug BEFORE API call to prevent race conditions
         lastSubscribedSlug = slug
-        
+
         // Connect WebSocket (will be a fresh connection if we just disconnected)
         chatWebSocket?.connect()
         
@@ -4595,13 +4599,21 @@ class PlayerActivity : FragmentActivity() {
 
                 // 1. Subscribe to channel events (e.g., StreamerIsLive)
                 chatWebSocket?.subscribeToChannelEvents(chatInfo.channelId)
-                
+
+                // Mock live chat
+                if (dev.xacnio.kciktv.shared.data.mock.MockConfig.enabled && isChatVisible && mockChatSource == null) {
+                    mockChatSource = dev.xacnio.kciktv.shared.data.mock.MockChatSource(chatInfo.chatroomId) { message ->
+                        chatHandler.post { addChatMessage(message) }
+                    }
+                    mockChatSource?.start(lifecycleScope)
+                }
+
                 // 2. Manage Chat Subscription
                 if (isChatVisible) {
                     chatHandler.post {
                         chatAdapter?.setSubscriberBadges(chatInfo.subscriberBadges)
                     }
-                    
+
                     // Subscribe to chat
                     chatWebSocket?.subscribeToChat(chatInfo.chatroomId)
                     
@@ -4699,10 +4711,12 @@ class PlayerActivity : FragmentActivity() {
         powerSavingHandler.removeCallbacksAndMessages(null)
         retryHandler.removeCallbacksAndMessages(null)
         chatHandler.removeCallbacksAndMessages(null)
+        mockChatSource?.stop()
+        mockChatSource = null
         chatWebSocket?.disconnect()
         chatWebSocket = null
         ivsPlayer?.release()
-        ivsPlayer = null 
+        ivsPlayer = null
 
     }
 
@@ -4945,10 +4959,12 @@ class PlayerActivity : FragmentActivity() {
             retryHandler.removeCallbacksAndMessages(null)
             chatHandler.removeCallbacksAndMessages(null)
             stopRecoveryPolling()
+            mockChatSource?.stop()
+            mockChatSource = null
             chatWebSocket?.disconnect()
             return
         }
-        
+
         // Background audio - nothing to do, service is already running
         Log.d("PlayerActivity", "onPause: Background mode active, audio continues")
     }

@@ -227,6 +227,12 @@ class EmotePanelManager(
         val result = repository.getEmotes(slug, activity.prefs.authToken)
         result.onSuccess { categories ->
             this.emoteCategories = categories
+            if (dev.xacnio.kciktv.shared.data.mock.MockConfig.enabled) {
+                dev.xacnio.kciktv.shared.data.mock.MockDataPools.availableEmotes = categories
+                    .flatMap { it.emotes }
+                    .filter { !it.subscribersOnly }
+                    .map { it.id to it.name }
+            }
             Log.d(TAG, "Stored ${categories.size} categories. Building name map...")
             val nameMap = mutableMapOf<String, Long>()
             categories.forEach { category ->

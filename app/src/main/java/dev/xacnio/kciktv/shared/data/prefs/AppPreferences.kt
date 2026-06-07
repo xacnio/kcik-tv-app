@@ -638,6 +638,12 @@ class AppPreferences(private val context: Context) {
         get() = prefs.getBoolean("battery_saver_pause_chat_pip", true)
         set(value) = prefs.edit().putBoolean("battery_saver_pause_chat_pip", value).apply()
 
+    // ==================== Developer / Mock Mode ====================
+
+    var mockModeEnabled: Boolean
+        get() = prefs.getBoolean("mock_mode_enabled", false)
+        set(value) = prefs.edit().putBoolean("mock_mode_enabled", value).apply()
+
     var lastSeenWhatsNewVersion: String
         get() = prefs.getString("last_seen_whats_new_version", "") ?: ""
         set(value) = prefs.edit().putString("last_seen_whats_new_version", value).apply()

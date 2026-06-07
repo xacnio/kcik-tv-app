@@ -95,7 +95,14 @@ class SettingsPanelManager(
         view.findViewById<View>(R.id.categoryAdvanced)?.setOnClickListener {
             showAdvancedSettings()
         }
-        
+
+        if (dev.xacnio.kciktv.BuildConfig.DEBUG) {
+            view.findViewById<View>(R.id.categoryDeveloper)?.visibility = View.VISIBLE
+            view.findViewById<View>(R.id.categoryDeveloper)?.setOnClickListener {
+                showDeveloperSettings()
+            }
+        }
+
         dialog.setOnDismissListener {
             isSettingsVisible = false
             currentDialog = null
@@ -343,6 +350,27 @@ class SettingsPanelManager(
                         .setNegativeButton(R.string.cancel, null)
                         .show()
                 }
+            }
+        }
+    }
+
+    private fun showDeveloperSettings() {
+        showDetailSheet("Developer") { container ->
+            val isMockEnabled = prefs.mockModeEnabled
+            addToggleSetting(
+                container,
+                R.drawable.ic_settings,
+                "Mock Data Mode",
+                if (isMockEnabled) "Active — restart app to apply" else "Inactive — restart app to apply",
+                isMockEnabled
+            ) { enabled ->
+                prefs.mockModeEnabled = enabled
+                dev.xacnio.kciktv.shared.data.mock.MockConfig.enabled = enabled
+                Toast.makeText(
+                    activity,
+                    if (enabled) "Mock mode ON — restart the app" else "Mock mode OFF — restart the app",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }

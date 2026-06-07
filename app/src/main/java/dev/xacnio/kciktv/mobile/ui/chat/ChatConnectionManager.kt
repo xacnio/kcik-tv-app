@@ -17,12 +17,15 @@ import dev.xacnio.kciktv.mobile.MobilePlayerActivity
 import dev.xacnio.kciktv.R
 import dev.xacnio.kciktv.shared.data.api.RetrofitClient
 import dev.xacnio.kciktv.shared.data.chat.KcikChatWebSocket
+import dev.xacnio.kciktv.shared.data.mock.MockChatSource
+import dev.xacnio.kciktv.shared.data.mock.MockConfig
 import dev.xacnio.kciktv.shared.data.model.ChatMessage
 import kotlinx.coroutines.launch
 
 class ChatConnectionManager(private val activity: MobilePlayerActivity) {
     private val TAG = "ChatConnectionManager"
     private var chatWebSocket: KcikChatWebSocket? = null
+    private var mockChatSource: MockChatSource? = null
     
     private val prefs get() = activity.prefs
     private val chatStateManager get() = activity.chatStateManager
@@ -34,9 +37,21 @@ class ChatConnectionManager(private val activity: MobilePlayerActivity) {
     fun connectToChat(token: String, chatroomId: Long, channelId: Long) {
         disconnect()
 
+        if (MockConfig.enabled) {
+            chatWasDisconnected = false
+            mockChatSource = MockChatSource(chatroomId) { message ->
+                chatUiManager.handleIncomingMessage(message)
+            }
+            mockChatSource?.start(activity.lifecycleScope)
+            activity.runOnUiThread {
+                activity.binding.chatConnectionContainer.visibility = View.GONE
+            }
+            return
+        }
+
         activity.runOnUiThread {
              chatWasDisconnected = false
-             
+
              chatWebSocket = KcikChatWebSocket(
                  activity.applicationContext,
                  onMessageReceived = chatListener@{ message ->
@@ -144,11 +159,14 @@ class ChatConnectionManager(private val activity: MobilePlayerActivity) {
     }
     
     fun disconnect() {
+        mockChatSource?.stop()
+        mockChatSource = null
         chatWebSocket?.disconnect()
         chatWebSocket = null
     }
 
     fun isConnected(): Boolean {
+        if (MockConfig.enabled) return mockChatSource != null
         return chatWebSocket?.isConnected() == true
     }
 

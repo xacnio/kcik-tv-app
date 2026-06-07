@@ -79,6 +79,7 @@ object RetrofitClient {
     }
 
     val okHttpClient = getUnsafeOkHttpClientBuilder()
+        .addInterceptor(dev.xacnio.kciktv.shared.data.mock.MockInterceptor())
         .addInterceptor { chain ->
             val originalRequest = chain.request()
             
@@ -91,7 +92,7 @@ object RetrofitClient {
         .addInterceptor { chain ->
             val request = chain.request()
             val response = chain.proceed(request)
-            if (response.code == 401) {
+            if (response.code == 401 && !dev.xacnio.kciktv.shared.data.mock.MockConfig.enabled) {
                 val authHeader = request.header("Authorization")
                 val host = request.url.host
                 if (!authHeader.isNullOrBlank() && (host == "kick.com" || host == "web.kick.com")) {

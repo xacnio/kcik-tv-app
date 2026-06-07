@@ -87,6 +87,24 @@ class LauncherActivity : FragmentActivity() {
             val prefs = AppPreferences(this@LauncherActivity)
             val repository = ChannelRepository()
 
+            // Propagate mock mode before any network call is made.
+            if (dev.xacnio.kciktv.BuildConfig.DEBUG) {
+                dev.xacnio.kciktv.shared.data.mock.MockConfig.enabled = prefs.mockModeEnabled
+                val mockToken = "mock_bearer_token"
+                if (prefs.mockModeEnabled && !prefs.isLoggedIn) {
+                    prefs.saveAuth(
+                        token = mockToken,
+                        user = "MockUser",
+                        pic = dev.xacnio.kciktv.shared.data.mock.MockImageUrls.avatar(42),
+                        id = 99999L,
+                        slug = "mockuser",
+                        color = "#FF4500"
+                    )
+                } else if (!prefs.mockModeEnabled && prefs.authToken == mockToken) {
+                    prefs.clearAuth()
+                }
+            }
+
             // Propagate battery saver flag to shared singletons that can't easily
             // reach prefs at runtime (EmoteManager.EmoteEntry init runs on bg threads).
             dev.xacnio.kciktv.shared.ui.utils.EmoteManager.lowBatteryMode =
@@ -103,14 +121,18 @@ class LauncherActivity : FragmentActivity() {
             
             // Task 1: Auth & Following Check
             val authJob = async {
-                if (prefs.isLoggedIn) {
+                if (dev.xacnio.kciktv.shared.data.mock.MockConfig.enabled && prefs.isLoggedIn) {
+                    // Skip token validation in mock mode — fake token must not be sent to the real API
+                    PreloadCache.isAuthValid = true
+                    PreloadCache.followingStreams = emptyList()
+                } else if (prefs.isLoggedIn) {
                     Log.d("Preload", "Launcher - Starting Auth & Following Check")
                     try {
                         val response = RetrofitClient.authService.getUser("Bearer ${prefs.authToken}")
                         if (response.isSuccessful && response.body() != null) {
                             Log.d("Preload", "Launcher - Auth Valid: ${response.body()?.username}")
                             PreloadCache.isAuthValid = true
-                            
+
                             // If auth is valid, preload following immediately
                             try {
                                 val followingResponse = repository.getFollowingLiveStreams(prefs.authToken!!)
@@ -118,7 +140,7 @@ class LauncherActivity : FragmentActivity() {
                                 Log.d("Preload", "Launcher - Following Count: ${PreloadCache.followingStreams?.size}")
                             } catch (e: Exception) {
                                 Log.e("Preload", "Launcher - Following pre-fetch failed", e)
-                                PreloadCache.followingStreams = emptyList() // Fallback to empty instead of null to allow progress
+                                PreloadCache.followingStreams = emptyList()
                             }
                         } else {
                             Log.w("Preload", "Launcher - Auth invalid (Code: ${response.code()}), clearing prefs")
