@@ -53,25 +53,33 @@ class PipManager(private val activity: MobilePlayerActivity) {
 
     /**
      * Enters Picture-in-Picture mode.
+     * Returns true if PiP was successfully entered, false otherwise.
      */
-    fun enterPipMode() {
-        // Theatre mode check removed to allow PiP
+    fun enterPipMode(): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             try {
                 // Ensure UI is prepared BEFORE entering PiP so the system snapshot is clean.
-                // The Battery Saver chat disconnect is handled inside PipStateManager.enterPipMode
-                // (reached from here) so every PiP entry path behaves the same.
                 activity.pipStateManager.onPictureInPictureModeChanged(true)
 
                 val params = getPipParams()
-                activity.enterPictureInPictureMode(params)
+                val entered = activity.enterPictureInPictureMode(params)
 
-                // Log analytics event
+                if (!entered) {
+                    // PiP was rejected by the system — roll back the state change so the UI
+                    // isn't stuck in the "everything hidden" PiP layout when the user returns.
+                    Log.w(TAG, "enterPictureInPictureMode returned false — rolling back PiP state")
+                    activity.pipStateManager.onPictureInPictureModeChanged(false)
+                    return false
+                }
+
                 activity.analytics.logPipModeEntered()
+                return true
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to enter PIP mode: ${e.message}")
+                try { activity.pipStateManager.onPictureInPictureModeChanged(false) } catch (_: Exception) {}
             }
         }
+        return false
     }
 
     /**
