@@ -81,8 +81,8 @@ class InternalBrowserSheet : BottomSheetDialogFragment() {
             val browserResolve = pm.resolveActivity(browserCheckIntent, android.content.pm.PackageManager.MATCH_DEFAULT_ONLY)
             
             var browserPkg: String? = null
-            var browserLabel = "Tarayıcı"
-            
+            var browserLabel = getString(R.string.browser_label_fallback)
+
             if (browserResolve != null) {
                 val pkg = browserResolve.activityInfo.packageName
                 if (pkg != "android" && !pkg.contains("resolver") && !pkg.contains("start")) {
@@ -95,7 +95,7 @@ class InternalBrowserSheet : BottomSheetDialogFragment() {
             val externalAppData = dev.xacnio.kciktv.mobile.util.DialogUtils.getExternalAppIntent(requireContext(), currentUrl)
             if (externalAppData != null) {
                 val (appIntent, _, appLabel) = externalAppData
-                popup.menu.add("$appLabel'da Aç").setOnMenuItemClickListener {
+                popup.menu.add(getString(R.string.open_in_format, appLabel)).setOnMenuItemClickListener {
                      try {
                          startActivity(appIntent)
                          dismiss()
@@ -104,7 +104,7 @@ class InternalBrowserSheet : BottomSheetDialogFragment() {
                 }
             }
             
-            popup.menu.add("$browserLabel'da Aç").setOnMenuItemClickListener {
+            popup.menu.add(getString(R.string.open_in_format, browserLabel)).setOnMenuItemClickListener {
                 try {
                     val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(currentUrl))
                     if (browserPkg != null) {
@@ -120,9 +120,9 @@ class InternalBrowserSheet : BottomSheetDialogFragment() {
                 }
                 true
             }
-            
+
             // 4. Copy Link
-            popup.menu.add("Bağlantıyı kopyala").setOnMenuItemClickListener {
+            popup.menu.add(getString(R.string.copy_link)).setOnMenuItemClickListener {
                 val clipboard = requireContext().getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
                 val clip = android.content.ClipData.newPlainText("URL", currentUrl)
                 clipboard.setPrimaryClip(clip)
@@ -130,7 +130,7 @@ class InternalBrowserSheet : BottomSheetDialogFragment() {
             }
             
             // 5. Share
-            popup.menu.add("Şununla paylaş...").setOnMenuItemClickListener {
+            popup.menu.add(getString(R.string.share_with)).setOnMenuItemClickListener {
                  try {
                      val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND)
                      shareIntent.type = "text/plain"
@@ -167,19 +167,19 @@ class InternalBrowserSheet : BottomSheetDialogFragment() {
                  try {
                      androidx.appcompat.app.AlertDialog.Builder(context)
                          .setTitle("Blerp Overlay")
-                         .setMessage("Blerp Overlay kapalı. Bu içeriği (ses/efekt) düzgün görüntülemek için açmak ister misiniz?")
-                         .setPositiveButton("Evet") { _, _ ->
+                         .setMessage(getString(R.string.blerp_overlay_disabled_message))
+                         .setPositiveButton(getString(R.string.yes)) { _, _ ->
                              prefs.blerpEnabled = true
-                             val activity = (context as? android.app.Activity) 
+                             val activity = (context as? android.app.Activity)
                                  ?: (context as? android.content.ContextWrapper)?.baseContext as? android.app.Activity
-                                 
+
                              if (activity is dev.xacnio.kciktv.mobile.MobilePlayerActivity) {
                                  dismiss()
                                  activity.cachedBlerpFragment = dev.xacnio.kciktv.mobile.BlerpBottomSheetFragment.newInstance(url)
                                  activity.cachedBlerpFragment?.show(activity.supportFragmentManager, "blerp_sheet")
                              }
                          }
-                         .setNegativeButton("Hayır") { _, _ ->
+                         .setNegativeButton(getString(R.string.no)) { _, _ ->
                              binding.blerpWebView.loadUrl(url)
                          }
                          .show()
@@ -331,16 +331,16 @@ class InternalBrowserSheet : BottomSheetDialogFragment() {
                     } else {
                         // Automatic redirect -> Ask for confirmation
                         androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                            .setTitle("Dış Bağlantı Yönlendirmesi")
-                            .setMessage("Bu sayfa harici bir uygulama açmak istiyor. İzin veriyor musunuz?")
-                            .setPositiveButton("Aç") { _, _ ->
-                                try { 
-                                    startActivity(intent) 
+                            .setTitle(getString(R.string.external_redirect_title))
+                            .setMessage(getString(R.string.external_redirect_message))
+                            .setPositiveButton(getString(R.string.open)) { _, _ ->
+                                try {
+                                    startActivity(intent)
                                 } catch (e: Exception) {
                                     fallbackToMarket()
                                 }
                             }
-                            .setNegativeButton("İptal", null)
+                            .setNegativeButton(getString(R.string.cancel), null)
                             .show()
                     }
                     return true 

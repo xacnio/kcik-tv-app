@@ -167,7 +167,7 @@
                     tools:text="IRL" />
             </LinearLayout>
 
-            <!-- Şimdi İzle button -->
+            <!-- Watch Now CTA -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/heroWatchCta"
                 android:layout_width="wrap_content"

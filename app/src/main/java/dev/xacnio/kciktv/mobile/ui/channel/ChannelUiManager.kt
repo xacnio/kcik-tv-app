@@ -155,7 +155,7 @@ class ChannelUiManager(private val activity: MobilePlayerActivity) {
             binding.pollContainer.visibility = View.GONE
             binding.predictionContainer.visibility = View.GONE
 
-            // Hide "Canlıya Dön" button - reset viewer layout
+            // Hide "Return to Live" button - reset viewer layout
             binding.liveDot.visibility = View.GONE
             binding.viewerLayout.visibility = View.GONE
             binding.viewerLayout.setOnClickListener(null)

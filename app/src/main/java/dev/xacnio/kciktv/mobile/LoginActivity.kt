@@ -81,6 +81,25 @@ class LoginActivity : ComponentActivity() {
         }
     }
 
+    override fun attachBaseContext(newBase: android.content.Context) {
+        val prefs = AppPreferences(newBase)
+        val savedLang = prefs.language
+        val locale = if (savedLang == "system" || savedLang.isEmpty()) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                android.content.res.Resources.getSystem().configuration.locales.get(0)
+            } else {
+                @Suppress("DEPRECATION")
+                android.content.res.Resources.getSystem().configuration.locale
+            }
+        } else {
+            java.util.Locale(savedLang)
+        }
+        java.util.Locale.setDefault(locale)
+        val config = newBase.resources.configuration
+        config.setLocale(locale)
+        super.attachBaseContext(newBase.createConfigurationContext(config))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         

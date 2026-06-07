@@ -101,6 +101,11 @@
     <string name="my_channel">Kendi Kanalım</string>
     <string name="level_format">Seviye %d</string>
     <string name="level_towards_next_format">Seviye %2$d (%1$d%% tamamlandı)</string>
+    <string name="xp_progress_format">%1$d / %2$d XP</string>
+    <string name="watch_time_hours_minutes">%1$d sa %2$d dk izlendi</string>
+    <string name="watch_time_minutes">%d dk izlendi</string>
+    <string name="time_to_level_up_hours_minutes">Sonraki seviyeye %1$d sa %2$d dk</string>
+    <string name="time_to_level_up_minutes">Sonraki seviyeye %d dk</string>
     <string name="search">Arama</string>
     <string name="following">Takip Edilenler</string>
     <string name="app_settings">Uygulama Ayarları</string>
@@ -1103,6 +1108,19 @@
     <string name="category_update_failed">Kategori güncellenemedi: %s</string>
     <string name="popular_categories_label">Popüler Kategoriler</string>
     <string name="recent_categories_label">Son Kategoriler</string>
+
+    <!-- QR Login -->
+    <string name="qr_login_instructions">1. Kick mobil uygulamanızın yüklü ve giriş yaptığınızdan emin olun.\n2. QR kodu telefonunuzla okutun.\n3. Ekrandaki kodun telefonunuzdakiyle eşleştiğini doğrulayın.</string>
+
+    <!-- Browser / sharing -->
+    <string name="browser_label_fallback">Tarayıcı</string>
+    <string name="open_in_format">%s ile Aç</string>
+    <string name="copy_link">Bağlantıyı Kopyala</string>
+    <string name="share_with">Paylaş…</string>
+    <string name="open">Aç</string>
+    <string name="external_redirect_title">Harici Bağlantı</string>
+    <string name="external_redirect_message">Bu sayfa harici bir uygulama açmak istiyor. İzin veriyor musunuz?</string>
+    <string name="blerp_overlay_disabled_message">Blerp Overlay kapalı. Bu içeriği (ses/efekt) düzgün görüntülemek için etkinleştirmek ister misiniz?</string>
 
     <!-- Number Suffix -->
     <string name="number_suffix_thousand">B</string>

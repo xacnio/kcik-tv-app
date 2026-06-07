@@ -84,7 +84,7 @@ object BadgeRenderUtils {
                             imageView.setImageDrawable(drawable)
                             (drawable as? android.graphics.drawable.Animatable)?.start()
                         } else {
-                            // APNG başarısız olduysa Glide statik fallback
+                            // APNG failed, fall back to Glide static load
                             Glide.with(context).load(badgeUrl).into(imageView)
                         }
                     }

@@ -101,6 +101,11 @@
     <string name="my_channel">My Channel</string>
     <string name="level_format">Level %d</string>
     <string name="level_towards_next_format">%1$d%% towards Level %2$d</string>
+    <string name="xp_progress_format">%1$d / %2$d XP</string>
+    <string name="watch_time_hours_minutes">%1$dh %2$dm watched</string>
+    <string name="watch_time_minutes">%dm watched</string>
+    <string name="time_to_level_up_hours_minutes">%1$dh %2$dm to level up</string>
+    <string name="time_to_level_up_minutes">%dm to level up</string>
     <string name="search">Search</string>
     <string name="following">Following</string>
     <string name="app_settings">App Settings</string>
@@ -814,9 +819,9 @@
     <string name="home_top_categories_title">Top Live Categories</string>
     <string name="home_following_title">Channels You Follow</string>
     <string name="home_popular_clips_title">Popular Clips</string>
-    <string name="featured_watch_now_cta">Şimdi İzle</string>
-    <string name="featured_no_live">Şu an canlı yayın yok</string>
-    <string name="chat_title">Canlı Sohbet</string>
+    <string name="featured_watch_now_cta">Watch Now</string>
+    <string name="featured_no_live">No live streams right now</string>
+    <string name="chat_title">Live Chat</string>
 
     <!-- PIP and Notifications -->
     <string name="pip_action_return_to_live">Return to Live</string>
@@ -1104,6 +1109,19 @@
     <string name="popular_categories_label">Popular Categories</string>
     <string name="recent_categories_label">Recent Categories</string>
 
+    <!-- QR Login -->
+    <string name="qr_login_instructions">1. Make sure you have the Kick mobile app and are signed in.\n2. Scan the QR code with your phone.\n3. Verify that the code on screen matches the one on your phone.</string>
+
+    <!-- Browser / sharing -->
+    <string name="browser_label_fallback">Browser</string>
+    <string name="open_in_format">Open in %s</string>
+    <string name="copy_link">Copy link</string>
+    <string name="share_with">Share via…</string>
+    <string name="open">Open</string>
+    <string name="external_redirect_title">External Link</string>
+    <string name="external_redirect_message">This page wants to open an external app. Do you allow it?</string>
+    <string name="blerp_overlay_disabled_message">Blerp Overlay is disabled. Do you want to enable it to view this content (audio/effects) properly?</string>
+
     <!-- Number Suffix -->
     <string name="number_suffix_thousand">K</string>
 
@@ -1187,5 +1205,5 @@
     <string name="invalid_qr_code">Invalid QR Code format</string>
     <string name="code_label">Confirmation Code</string>
     <string name="qr_confirm_instruction">If the following code matches the one displayed on your TV, click confirm to proceed.</string>
-    <string name="tv_qr_login">TV için QR Giriş</string>
+    <string name="tv_qr_login">QR Login for TV</string>
 </resources>

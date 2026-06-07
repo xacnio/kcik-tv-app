@@ -1510,7 +1510,7 @@ class MobilePlayerActivity : FragmentActivity() {
             }
             // Emotes mode
             chatroom?.emotesMode == true -> {
-                getString(R.string.chat_hint_emotes_only) // "Emote kullanın..."
+                getString(R.string.chat_hint_emotes_only)
             }
             // Default (includes slow mode which doesn't block)
             else -> getString(R.string.chat_hint_default)
@@ -1631,7 +1631,7 @@ class MobilePlayerActivity : FragmentActivity() {
         binding.fullscreenButton.setOnClickListener {
             if (isFullscreen) exitFullscreen() else enterFullscreen()
         }
-        // Fullscreen button long press - Theatre Mode (Dikey İzleme Modu)
+        // Fullscreen button long press - Theatre Mode (portrait viewing mode)
         binding.fullscreenButton.setOnLongClickListener {
             fullscreenToggleManager.enterTheatreMode()
             true
@@ -2509,7 +2509,7 @@ class MobilePlayerActivity : FragmentActivity() {
         super.onUserLeaveHint()
     }
 
-    private fun enterPipMode() = pipManager.enterPipMode()
+    private fun enterPipMode(): Boolean = pipManager.enterPipMode()
 
     internal fun updatePiPUi(overrideIsPlaying: Boolean? = null) = pipManager.updatePiPUi(overrideIsPlaying)
 
@@ -2604,8 +2604,7 @@ class MobilePlayerActivity : FragmentActivity() {
             val isPlaying = ivsPlayer?.state == Player.State.PLAYING
             if (isPlaying && !isInPip) {
                 try {
-                    pipManager.enterPipMode()
-                    return // Don't continue with background audio logic if entering PIP
+                    if (pipManager.enterPipMode()) return // Don't continue with background audio logic if entering PIP
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to enter PIP in onStop", e)
                 }

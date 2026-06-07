@@ -137,7 +137,7 @@ class BlerpBottomSheetFragment : BottomSheetDialogFragment() {
             // Resolve generic URL (Google) to find the default browser app
             val browserCheckIntent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://google.com"))
             val browserResolve = pm.resolveActivity(browserCheckIntent, android.content.pm.PackageManager.MATCH_DEFAULT_ONLY)
-            var browserLabel = "Tarayıcı"
+            var browserLabel = getString(R.string.browser_label_fallback)
             var browserPkg: String? = null
             
             if (browserResolve != null) {
@@ -148,7 +148,7 @@ class BlerpBottomSheetFragment : BottomSheetDialogFragment() {
                 }
             }
             
-            popup.menu.add("$browserLabel'da Aç").setOnMenuItemClickListener {
+            popup.menu.add(getString(R.string.open_in_format, browserLabel)).setOnMenuItemClickListener {
                 try {
                     val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(currentUrl))
                     if (browserPkg != null) {
@@ -166,7 +166,7 @@ class BlerpBottomSheetFragment : BottomSheetDialogFragment() {
             }
             
             // 3. Copy Link
-            popup.menu.add("Bağlantıyı kopyala").setOnMenuItemClickListener {
+            popup.menu.add(getString(R.string.copy_link)).setOnMenuItemClickListener {
                 val clipboard = requireContext().getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
                 val clip = android.content.ClipData.newPlainText("URL", currentUrl)
                 clipboard.setPrimaryClip(clip)

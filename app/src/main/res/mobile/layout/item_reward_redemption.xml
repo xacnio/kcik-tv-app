@@ -55,7 +55,7 @@
                 android:layout_marginStart="8dp"
                 android:textColor="#888888"
                 android:textSize="11sp"
-                tools:text="3 dk önce" />
+                tools:text="5m ago" />
         </LinearLayout>
 
         <!-- Row 2: username -->
@@ -81,7 +81,7 @@
             android:textColor="#DDDDDD"
             android:textSize="13sp"
             android:visibility="gone"
-            tools:text="Kullanıcının yazdığı metin buraya gelir ve uzun olursa alt satıra geçer"
+            tools:text="The text entered by the user goes here and wraps to the next line if too long"
             tools:visibility="visible" />
     </LinearLayout>
 

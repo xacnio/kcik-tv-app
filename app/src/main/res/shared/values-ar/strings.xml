@@ -101,6 +101,11 @@
     <string name="my_channel">قناتي</string>
     <string name="level_format">المستوى %d</string>
     <string name="level_towards_next_format">%1$d%% نحو المستوى %2$d</string>
+    <string name="xp_progress_format">%1$d / %2$d XP</string>
+    <string name="watch_time_hours_minutes">%1$d س %2$d د مشاهدة</string>
+    <string name="watch_time_minutes">%d د مشاهدة</string>
+    <string name="time_to_level_up_hours_minutes">%1$d س %2$d د للمستوى التالي</string>
+    <string name="time_to_level_up_minutes">%d د للمستوى التالي</string>
     <string name="search">بحث</string>
     <string name="following">المتابَعون</string>
     <string name="app_settings">إعدادات التطبيق</string>
@@ -1103,6 +1108,19 @@
     <string name="category_update_failed">فشل تحديث الفئة: %s</string>
     <string name="popular_categories_label">الفئات الشائعة</string>
     <string name="recent_categories_label">الفئات الأخيرة</string>
+
+    <!-- QR Login -->
+    <string name="qr_login_instructions">1. تأكد من تثبيت تطبيق Kick وتسجيل الدخول.\n2. امسح رمز QR بهاتفك.\n3. تحقق من تطابق الرمز على الشاشة مع الرمز على هاتفك.</string>
+
+    <!-- Browser / sharing -->
+    <string name="browser_label_fallback">المتصفح</string>
+    <string name="open_in_format">فتح في %s</string>
+    <string name="copy_link">نسخ الرابط</string>
+    <string name="share_with">مشاركة عبر…</string>
+    <string name="open">فتح</string>
+    <string name="external_redirect_title">رابط خارجي</string>
+    <string name="external_redirect_message">تريد هذه الصفحة فتح تطبيق خارجي. هل تسمح بذلك؟</string>
+    <string name="blerp_overlay_disabled_message">Blerp Overlay معطّل. هل تريد تفعيله لعرض هذا المحتوى (صوت/تأثيرات) بشكل صحيح؟</string>
 
     <!-- Number Suffix -->
     <string name="number_suffix_thousand">ألف</string>

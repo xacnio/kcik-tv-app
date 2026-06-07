@@ -54,7 +54,7 @@ class RewardQueueManager(
     private val rewardCounts = mutableMapOf<String?, Int>()
 
     private var channelSlug: String = ""
-    /** null = "Tümü" */
+    /** null = show all */
     private var activeFilter: String? = null
 
     // --- Pagination state (reset on each navigateToRedemptions call) -------------------------

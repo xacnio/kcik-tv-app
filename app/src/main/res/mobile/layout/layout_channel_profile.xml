@@ -449,7 +449,7 @@
                     android:orientation="vertical"
                     android:visibility="visible">
 
-                    <!-- Yayın Videoları Section -->
+                    <!-- Stream Videos Section -->
                     <LinearLayout
                         android:id="@+id/videosSection"
                         android:layout_width="match_parent"
@@ -507,7 +507,7 @@
                             android:visibility="gone" />
                     </LinearLayout>
 
-                    <!-- Popüler Klipler Section -->
+                    <!-- Popular Clips Section -->
                     <LinearLayout
                         android:id="@+id/clipsSection"
                         android:layout_width="match_parent"

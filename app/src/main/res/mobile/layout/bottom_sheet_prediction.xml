@@ -218,7 +218,7 @@
                 <!-- Items populated programmatically -->
             </LinearLayout>
 
-            <!-- Status Text (Tahminler Kapandı, Kilitlendi, Sonuçlandı, İade Edildi) -->
+            <!-- Status Text (Predictions Closed, Locked, Resolved, Refunded) -->
             <TextView
                 android:id="@+id/timerText"
                 android:layout_width="match_parent"

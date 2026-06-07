@@ -961,7 +961,7 @@ class ChannelRepository {
                 Result.success(true)
             } else {
                 Log.e(TAG, "Delete message failed: ${response.code()}")
-                Result.failure(Exception("Silme başarısız: ${response.code()}"))
+                Result.failure(Exception("Delete failed: ${response.code()}"))
             }
         } catch (e: Exception) {
             Log.e(TAG, "Delete message Exception: ${e.message}", e)
@@ -1510,7 +1510,7 @@ class ChannelRepository {
             val authHeader = token?.let { "Bearer $it" }
             val response = channelService.getStreamInfo(slug, authHeader)
             if (response.code() == 204) {
-                 Result.failure(Exception("Yayın bilgisi alınamadı (Server 204)"))
+                 Result.failure(Exception("Stream info unavailable (Server 204)"))
             } else if (response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!)
             } else {
@@ -1659,7 +1659,7 @@ class ChannelRepository {
             } else {
                 val errorBody = response.errorBody()?.string()
                 Log.e(TAG, "Create poll failed: ${response.code()} - $errorBody")
-                Result.failure(Exception("Anket oluşturulamadı: ${response.code()}"))
+                Result.failure(Exception("Poll creation failed: ${response.code()}"))
             }
         } catch (e: Exception) {
             Log.e(TAG, "Create poll Exception: ${e.message}", e)
@@ -1692,7 +1692,7 @@ class ChannelRepository {
             val request = UpdatePredictionRequest(state = "LOCKED")
             val response = channelService.updatePrediction(channelSlug, predictionId, "Bearer $token", request)
             if (response.isSuccessful) Result.success(true)
-            else Result.failure(Exception("Kilitleme başarısız: ${response.code()}"))
+            else Result.failure(Exception("Lock failed: ${response.code()}"))
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -1703,7 +1703,7 @@ class ChannelRepository {
             val request = UpdatePredictionRequest(state = "RESOLVED", winningOutcomeId = outcomeId)
             val response = channelService.updatePrediction(channelSlug, predictionId, "Bearer $token", request)
             if (response.isSuccessful) Result.success(true)
-            else Result.failure(Exception("Sonuçlandırma başarısız: ${response.code()}"))
+            else Result.failure(Exception("Finalize failed: ${response.code()}"))
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -1714,7 +1714,7 @@ class ChannelRepository {
             val request = UpdatePredictionRequest(state = "CANCELLED")
             val response = channelService.updatePrediction(channelSlug, predictionId, "Bearer $token", request)
             if (response.isSuccessful) Result.success(true)
-            else Result.failure(Exception("İptal başarısız: ${response.code()}"))
+            else Result.failure(Exception("Cancel failed: ${response.code()}"))
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -1735,7 +1735,7 @@ class ChannelRepository {
             )
             val response = channelService.createPrediction(channelSlug, "Bearer $token", request)
             if (response.isSuccessful) Result.success(true)
-            else Result.failure(Exception("Sohbet tahmini oluşturulamadı: ${response.code()}"))
+            else Result.failure(Exception("Chat prediction creation failed: ${response.code()}"))
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -1808,7 +1808,7 @@ class ChannelRepository {
             } else {
                 val errorBody = response.errorBody()?.string() ?: ""
                 Log.e(TAG, "Finalize clip failed: ${response.code()} - $errorBody")
-                Result.failure(Exception("Klip paylaşılamadı: ${response.code()}"))
+                Result.failure(Exception("Clip share failed: ${response.code()}"))
             }
         } catch (e: Exception) {
             Log.e(TAG, "Finalize clip Exception: ${e.message}", e)

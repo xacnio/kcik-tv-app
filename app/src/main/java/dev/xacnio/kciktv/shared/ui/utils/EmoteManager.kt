@@ -506,7 +506,7 @@ object EmoteManager {
         size: Int,
         @Suppress("UNUSED_PARAMETER") onReady: (Drawable) -> Unit
     ) {
-        // PNG URL'leri için APNGDrawable kullan (animasyonlu abone rozetleri)
+        // Use APNGDrawable for PNG URLs (animated subscriber badges)
         if (url.contains(".png", ignoreCase = true)) {
             loadInternalApng(url, key, size)
             return
@@ -559,8 +559,8 @@ object EmoteManager {
     }
 
     /**
-     * APNG animasyonlu rozetleri yükler. Glide PNG'yi statik bitmap'e indirger;
-     * penfeizhou APNGDrawable ise APNG animasyon çerçevelerini doğru oynatır.
+     * Loads APNG animated badges. Glide reduces PNG to a static bitmap;
+     * penfeizhou APNGDrawable correctly plays APNG animation frames.
      */
     private fun loadInternalApng(url: String, key: String, size: Int) {
         val targetView = pendingCallbacks[key]?.firstOrNull()?.first?.get()

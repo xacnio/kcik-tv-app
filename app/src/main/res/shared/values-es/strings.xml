@@ -101,6 +101,11 @@
     <string name="my_channel">Mi Canal</string>
     <string name="level_format">Nivel %d</string>
     <string name="level_towards_next_format">%1$d%% hacia el Nivel %2$d</string>
+    <string name="xp_progress_format">%1$d / %2$d XP</string>
+    <string name="watch_time_hours_minutes">%1$dh %2$dm visto</string>
+    <string name="watch_time_minutes">%dm visto</string>
+    <string name="time_to_level_up_hours_minutes">%1$dh %2$dm para subir de nivel</string>
+    <string name="time_to_level_up_minutes">%dm para subir de nivel</string>
     <string name="search">Buscar</string>
     <string name="following">Siguiendo</string>
     <string name="app_settings">Ajustes de la App</string>
@@ -1103,6 +1108,19 @@
     <string name="category_update_failed">Error al actualizar categoría: %s</string>
     <string name="popular_categories_label">Categorías Populares</string>
     <string name="recent_categories_label">Categorías Recientes</string>
+
+    <!-- QR Login -->
+    <string name="qr_login_instructions">1. Asegúrate de tener la app de Kick y haber iniciado sesión.\n2. Escanea el código QR con tu teléfono.\n3. Verifica que el código en pantalla coincida con el de tu teléfono.</string>
+
+    <!-- Browser / sharing -->
+    <string name="browser_label_fallback">Navegador</string>
+    <string name="open_in_format">Abrir en %s</string>
+    <string name="copy_link">Copiar enlace</string>
+    <string name="share_with">Compartir con…</string>
+    <string name="open">Abrir</string>
+    <string name="external_redirect_title">Enlace Externo</string>
+    <string name="external_redirect_message">Esta página quiere abrir una app externa. ¿Lo permites?</string>
+    <string name="blerp_overlay_disabled_message">Blerp Overlay está desactivado. ¿Quieres activarlo para ver este contenido (audio/efectos) correctamente?</string>
 
     <!-- Number Suffix -->
     <string name="number_suffix_thousand">K</string>

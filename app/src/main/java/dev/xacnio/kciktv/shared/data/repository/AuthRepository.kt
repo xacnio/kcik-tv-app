@@ -178,7 +178,7 @@ class AuthRepository {
                             message = json.optString("message", "Error")
                         )
                     } catch (e: Exception) {
-                        dev.xacnio.kciktv.shared.data.api.SendGiftResponse(null, "Hata oluştu: ${response.code()}")
+                        dev.xacnio.kciktv.shared.data.api.SendGiftResponse(null, "Error: ${response.code()}")
                     }
                 } else {
                     null

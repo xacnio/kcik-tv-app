@@ -631,7 +631,7 @@ interface ChannelApiService {
     suspend fun createClipDraft(
         @Path("slug") slug: String,
         @Header("Authorization") token: String,
-        @Body body: Map<String, String> = emptyMap() // Genellikle boş body gider
+        @Body body: Map<String, String> = emptyMap() // Usually sent with an empty body
     ): Response<dev.xacnio.kciktv.shared.data.model.ClipResponse>
     
     @Headers(

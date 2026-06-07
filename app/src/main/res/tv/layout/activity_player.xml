@@ -1350,7 +1350,7 @@
                     android:id="@+id/qrLoginInstructions"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="1. Kick mobil uygulamasına sahip olduğunuzdan ve giriş yaptığınızdan emin olun.\n2. QR kodu telefonuzla okutun.\n3. Ekrandaki kodun telefonunuzdakiyle aynı olup olmadığını eşleştirin."
+                    android:text="@string/qr_login_instructions"
                     android:textColor="@color/text_secondary"
                     android:textSize="14sp"
                     android:layout_marginBottom="24dp"

@@ -55,7 +55,7 @@
         android:layout_marginTop="4dp"
         android:textColor="#FFFFFF"
         android:textSize="14sp"
-        tools:text="@Xacnio merhaba nasılsın?" />
+        tools:text="messageContent" />
 
     <!-- Action Buttons -->
     <LinearLayout

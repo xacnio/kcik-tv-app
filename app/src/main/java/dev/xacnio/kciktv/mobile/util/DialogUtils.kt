@@ -256,13 +256,13 @@ object DialogUtils {
                       try {
                          androidx.appcompat.app.AlertDialog.Builder(context)
                              .setTitle("Blerp Overlay")
-                             .setMessage("Blerp Overlay kapalı. Bu içeriği (ses/efekt) düzgün görüntülemek için açmak ister misiniz?")
-                             .setPositiveButton("Evet") { _, _ ->
+                             .setMessage(context.getString(R.string.blerp_overlay_disabled_message))
+                             .setPositiveButton(context.getString(R.string.yes)) { _, _ ->
                                  prefs.blerpEnabled = true
                                  activity.cachedBlerpFragment = dev.xacnio.kciktv.mobile.BlerpBottomSheetFragment.newInstance(url)
                                  activity.cachedBlerpFragment?.show(activity.supportFragmentManager, "blerp_sheet")
                              }
-                             .setNegativeButton("Hayır") { _, _ ->
+                             .setNegativeButton(context.getString(R.string.no)) { _, _ ->
                                  // Fallback to normal flow (show link confirmation)
                                  showLinkConfirmationDialogInternal(context, url)
                              }
@@ -817,13 +817,13 @@ object DialogUtils {
                           try {
                              androidx.appcompat.app.AlertDialog.Builder(context)
                                  .setTitle("Blerp Overlay")
-                                 .setMessage("Blerp Overlay kapalı. Bu içeriği (ses/efekt) düzgün görüntülemek için açmak ister misiniz?")
-                                 .setPositiveButton("Evet") { _, _ ->
+                                 .setMessage(context.getString(R.string.blerp_overlay_disabled_message))
+                                 .setPositiveButton(context.getString(R.string.yes)) { _, _ ->
                                      prefs.blerpEnabled = true
                                      activity.cachedBlerpFragment = dev.xacnio.kciktv.mobile.BlerpBottomSheetFragment.newInstance(url)
                                      activity.cachedBlerpFragment?.show(activity.supportFragmentManager, "blerp_sheet")
                                  }
-                                 .setNegativeButton("Hayır") { _, _ ->
+                                 .setNegativeButton(context.getString(R.string.no)) { _, _ ->
                                      // Open Internal Browser as fallback
                                      dev.xacnio.kciktv.mobile.InternalBrowserSheet.newInstance(url, true).show(activity.supportFragmentManager, "InternalBrowserSheet")
                                  }
