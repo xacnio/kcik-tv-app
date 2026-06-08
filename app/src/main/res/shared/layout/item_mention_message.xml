@@ -33,6 +33,17 @@
             android:textColor="#888888"
             android:textSize="12sp"
             tools:text="messageTime" />
+
+        <ImageButton
+            android:id="@+id/deleteMentionButton"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginStart="4dp"
+            android:background="@drawable/bg_item_ripple"
+            android:contentDescription="@string/delete"
+            android:padding="6dp"
+            android:src="@drawable/ic_close"
+            app:tint="#666666" />
     </LinearLayout>
     
     <!-- Reply Content (Visible if it's a reply) -->

@@ -34,6 +34,7 @@ import dev.xacnio.kciktv.shared.data.model.ChatMessage
 import dev.xacnio.kciktv.shared.ui.adapter.MentionsAdapter
 import dev.xacnio.kciktv.shared.data.prefs.AppPreferences
 import dev.xacnio.kciktv.databinding.ActivityMobilePlayerBinding
+import dev.xacnio.kciktv.shared.util.MentionStore
 
 class MentionsManager(
     private val activity: MobilePlayerActivity,
@@ -43,11 +44,13 @@ class MentionsManager(
     internal var onReplyClick: ((ChatMessage) -> Unit)? = null
     internal var onGoToMessageClick: ((ChatMessage) -> Unit)? = null
 
-    // Mentions state
+    // Mentions for the current channel only; cleared on channel switch and reloaded from disk
     internal val mentionMessages = mutableListOf<ChatMessage>()
     internal var lastSeenMentionCount = 0
 
-    // Short soft "mention" sound, played via SoundPool (low-latency, mixes with stream audio).
+    // The slug of the channel whose mentions are currently loaded in memory
+    private var currentChannelSlug: String? = null
+
     private var soundPool: SoundPool? = null
     private var mentionSoundId: Int = 0
     private var mentionSoundLoaded = false
@@ -67,6 +70,60 @@ class MentionsManager(
         } catch (e: Exception) {
             android.util.Log.e("MentionsManager", "Failed to init mention sound", e)
         }
+    }
+
+    /**
+     * Called when a new channel is opened. Saves the previous channel's unsaved state,
+     * clears in-memory mentions, and loads this channel's persisted mentions from disk.
+     */
+    fun switchToChannel(slug: String) {
+        if (slug == currentChannelSlug) return
+
+        val username = prefs.username
+        // Load persisted mentions for the new channel
+        currentChannelSlug = slug
+        mentionMessages.clear()
+        lastSeenMentionCount = 0
+        updateMentionsBadge()
+
+        if (!username.isNullOrEmpty()) {
+            Thread {
+                val saved = MentionStore.load(activity, username, slug)
+                activity.runOnUiThread {
+                    // Guard: slug may have changed again while the thread ran
+                    if (currentChannelSlug != slug) return@runOnUiThread
+                    mentionMessages.addAll(saved)
+                    // Don't badge already-seen mentions on channel load
+                    lastSeenMentionCount = mentionMessages.size
+                    updateMentionsBadge()
+                }
+            }.start()
+        }
+    }
+
+    /** Called after a mention is added to mentionMessages. Persists and fires notification. */
+    fun onMentionAdded(msg: ChatMessage) {
+        saveMentions()
+        maybeSendMentionNotification(msg)
+    }
+
+    private fun saveMentions() {
+        val username = prefs.username ?: return
+        val slug = currentChannelSlug ?: return
+        val snapshot = mentionMessages.toList()
+        Thread { MentionStore.save(activity, username, slug, snapshot) }.start()
+    }
+
+    /** Cancels all active mention notifications (call when app comes to foreground). */
+    fun clearMentionNotifications() {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                val nm = activity.getSystemService(NotificationManager::class.java)
+                nm.activeNotifications
+                    .filter { it.notification.channelId == MENTION_CHANNEL_ID }
+                    .forEach { nm.cancel(it.id) }
+            }
+        } catch (_: Exception) {}
     }
 
     /** Releases the SoundPool. Call from the activity's onDestroy. */
@@ -97,13 +154,18 @@ class MentionsManager(
 
         val mentionsRecycler = view.findViewById<RecyclerView>(R.id.mentionsRecycler)
         val mentionsCountText = view.findViewById<TextView>(R.id.mentionsCount)
-        val clearButton = view.findViewById<View>(R.id.clearMentionsButton)
+        val deleteAllButton = view.findViewById<View>(R.id.deleteAllMentionsButton)
+        val closeButton = view.findViewById<View>(R.id.closeMentionsButton)
         val emptyState = view.findViewById<View>(R.id.emptyStateContainer)
 
-        mentionsCountText.text = activity.getString(R.string.mentions_count_format, mentionMessages.size)
-        emptyState.visibility = if (mentionMessages.isEmpty()) View.VISIBLE else View.GONE
+        fun refreshDialog(adapter: MentionsAdapter) {
+            mentionsCountText.text = activity.getString(R.string.mentions_count_format, mentionMessages.size)
+            emptyState.visibility = if (mentionMessages.isEmpty()) View.VISIBLE else View.GONE
+            adapter.submitList(mentionMessages.toList())
+        }
 
-        val mentionsAdapter = MentionsAdapter(
+        lateinit var mentionsAdapter: MentionsAdapter
+        mentionsAdapter = MentionsAdapter(
             onReplyClick = { message ->
                 onReplyClick?.invoke(message)
                 dialog.dismiss()
@@ -111,18 +173,40 @@ class MentionsManager(
             onGoToMessageClick = { message ->
                 onGoToMessageClick?.invoke(message)
                 dialog.dismiss()
+            },
+            onDeleteClick = { message ->
+                mentionMessages.remove(message)
+                saveMentions()
+                updateMentionsBadge()
+                refreshDialog(mentionsAdapter)
             }
         )
 
         mentionsRecycler.layoutManager = LinearLayoutManager(activity)
         mentionsRecycler.adapter = mentionsAdapter
-        mentionsAdapter.submitList(mentionMessages)
+        refreshDialog(mentionsAdapter)
 
-        clearButton.setOnClickListener {
-            mentionMessages.clear()
-            lastSeenMentionCount = 0
-            updateMentionsBadge()
+        closeButton.setOnClickListener {
             dialog.dismiss()
+        }
+
+        deleteAllButton.setOnClickListener {
+            com.google.android.material.dialog.MaterialAlertDialogBuilder(activity, R.style.Theme_KcikTV_Dialog)
+                .setTitle(activity.getString(R.string.mentions_clear_confirm_title))
+                .setMessage(activity.getString(R.string.mentions_clear_confirm_msg))
+                .setPositiveButton(activity.getString(R.string.delete)) { _, _ ->
+                    mentionMessages.clear()
+                    lastSeenMentionCount = 0
+                    val slug = currentChannelSlug
+                    val username = prefs.username
+                    if (!username.isNullOrEmpty() && !slug.isNullOrEmpty()) {
+                        Thread { MentionStore.clear(activity, username, slug) }.start()
+                    }
+                    updateMentionsBadge()
+                    dialog.dismiss()
+                }
+                .setNegativeButton(activity.getString(R.string.cancel), null)
+                .show()
         }
 
         dialog.setOnDismissListener {
@@ -135,7 +219,7 @@ class MentionsManager(
 
     private fun triggerMentionVibration() {
         if (!prefs.vibrateOnMentions) return
-        
+
         try {
             val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 val vibratorManager = activity.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as android.os.VibratorManager
@@ -146,7 +230,6 @@ class MentionsManager(
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                // Simple short vibration for mentions
                 val effect = android.os.VibrationEffect.createOneShot(50, android.os.VibrationEffect.DEFAULT_AMPLITUDE)
                 vibrator.vibrate(effect)
             } else {
@@ -163,7 +246,6 @@ class MentionsManager(
         val sp = soundPool ?: return
         if (!mentionSoundLoaded) return
         try {
-            // The asset is already mastered soft; play at full SoundPool volume.
             sp.play(mentionSoundId, 1.0f, 1.0f, 1, 0, 1.0f)
         } catch (e: Exception) {
             android.util.Log.e("MentionsManager", "Failed to play mention sound", e)
@@ -183,8 +265,6 @@ class MentionsManager(
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = activity.getString(R.string.notif_mentions_channel_desc)
-                // The in-app "sound on mention" / "vibrate on mention" toggles own the audio
-                // and haptics, so keep the channel itself silent to avoid doubling them.
                 setSound(null, null)
                 enableVibration(false)
                 setShowBadge(true)
@@ -202,12 +282,10 @@ class MentionsManager(
     fun maybeSendMentionNotification(msg: ChatMessage) {
         if (!prefs.notifyOnMentions) return
 
-        // Skip while the app is in the foreground and the user is already watching.
         val isInPip = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && activity.isInPictureInPictureMode
         val isResumed = activity.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
         if (isResumed && !isInPip) return
 
-        // Notifications need runtime permission on Android 13+.
         if (Build.VERSION.SDK_INT >= 33 &&
             activity.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             return
@@ -238,6 +316,7 @@ class MentionsManager(
 
             val intent = Intent(activity, MobilePlayerActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                putExtra("open_mentions", true)
             }
             val pendingIntent = PendingIntent.getActivity(
                 activity, 0, intent, PendingIntent.FLAG_IMMUTABLE
@@ -252,6 +331,7 @@ class MentionsManager(
                 .setAutoCancel(true)
                 .setCategory(NotificationCompat.CATEGORY_MESSAGE)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setGroup("kciktv.mentions")
                 .build()
 
             NotificationManagerCompat.from(activity).notify(msg.id.hashCode(), notification)

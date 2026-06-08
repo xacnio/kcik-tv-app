@@ -1522,9 +1522,7 @@ class ChatUiManager(
                 if (activity.mentionMessages.none { it.id == msg.id }) {
                     activity.mentionMessages.add(msg)
                     hasNew = true
-                    // Posts a system notification only when backgrounded (the method self-gates
-                    // on foreground state + the notifyOnMentions pref + permission).
-                    activity.mentionsManager.maybeSendMentionNotification(msg)
+                    activity.mentionsManager.onMentionAdded(msg)
                 }
             }
         }

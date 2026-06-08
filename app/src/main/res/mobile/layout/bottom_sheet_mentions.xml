@@ -43,12 +43,23 @@
             tools:text="mentionsCount" />
 
         <ImageButton
-            android:id="@+id/clearMentionsButton"
+            android:id="@+id/deleteAllMentionsButton"
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:layout_marginStart="8dp"
             android:background="@drawable/bg_item_ripple"
-            android:contentDescription="@string/clear_action"
+            android:contentDescription="@string/clear_all"
+            android:padding="8dp"
+            android:src="@drawable/ic_delete"
+            app:tint="#888888" />
+
+        <ImageButton
+            android:id="@+id/closeMentionsButton"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="4dp"
+            android:background="@drawable/bg_item_ripple"
+            android:contentDescription="@string/cancel"
             android:padding="8dp"
             android:src="@drawable/ic_close"
             app:tint="#888888" />
