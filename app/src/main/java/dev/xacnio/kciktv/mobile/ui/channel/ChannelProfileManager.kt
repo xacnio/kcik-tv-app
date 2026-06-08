@@ -18,6 +18,8 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.bumptech.glide.Glide
 import dev.xacnio.kciktv.mobile.MobilePlayerActivity
@@ -139,12 +141,13 @@ class ChannelProfileManager(
         activity.updateNavigationBarColor(false) // Transparent for channel profile
         activity.setCurrentScreen(MobilePlayerActivity.AppScreen.CHANNEL_PROFILE)
         
-        // Switch to MiniPlayer if watching a stream
+        // Switch to MiniPlayer only if a stream is actively playing (skip for offline channels)
         if (activity.currentChannel != null) {
-            if (!activity.miniPlayerManager.isMiniPlayerMode) {
+            if (!activity.miniPlayerManager.isMiniPlayerMode && activity.isStreamPlaying) {
                 activity.enterMiniPlayerMode()
             }
-            binding.playerScreenContainer.visibility = View.VISIBLE
+            binding.playerScreenContainer.visibility =
+                if (activity.miniPlayerManager.isMiniPlayerMode) View.VISIBLE else View.GONE
         } else {
             binding.playerScreenContainer.visibility = View.GONE
         }
@@ -170,6 +173,17 @@ class ChannelProfileManager(
         // Setup back button (using binding)
         binding.channelProfileContainer.btnBack.setOnClickListener {
             closeChannelProfile()
+        }
+
+        // Push banner buttons below the status bar
+        val statusBarHeight = ViewCompat.getRootWindowInsets(activity.window.decorView)
+            ?.getInsets(WindowInsetsCompat.Type.statusBars())?.top ?: 0
+        if (statusBarHeight > 0) {
+            val topMarginPx = statusBarHeight + 12.dpToPx(activity.resources)
+            listOf(binding.channelProfileContainer.btnBack, binding.channelProfileContainer.btnMore).forEach { btn ->
+                (btn.layoutParams as? android.widget.FrameLayout.LayoutParams)?.topMargin = topMarginPx
+                btn.requestLayout()
+            }
         }
         
         // Setup Pull-to-Refresh
