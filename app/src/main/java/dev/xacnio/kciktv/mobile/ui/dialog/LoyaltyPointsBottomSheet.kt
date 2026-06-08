@@ -83,17 +83,17 @@ class LoyaltyPointsBottomSheet : BottomSheetDialogFragment() {
     
     override fun onStart() {
         super.onStart()
-        // Prevent full screen expansion
         dialog?.let { dialog ->
             val bottomSheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
             bottomSheet?.let {
                 val behavior = com.google.android.material.bottomsheet.BottomSheetBehavior.from(it)
-                behavior.isFitToContents = false
+                val screenHeight = resources.displayMetrics.heightPixels
+                behavior.maxHeight = (screenHeight * 0.65).toInt()
+                behavior.isFitToContents = true
                 behavior.skipCollapsed = true
                 behavior.isDraggable = true
                 behavior.isHideable = true
-                behavior.halfExpandedRatio = 0.65f
-                behavior.state = com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HALF_EXPANDED
+                behavior.state = com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
             }
         }
     }
