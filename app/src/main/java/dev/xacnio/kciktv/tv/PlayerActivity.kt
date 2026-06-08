@@ -2191,6 +2191,9 @@ class PlayerActivity : FragmentActivity() {
                     allChannels[currentChannelIndex] = updatedChannel
                     
                     playCurrentChannel(useZapDelay = false, showInfo = true)
+                    // Stream just went live — reset uptime to 0; getChatInfo will refine later
+                    streamCreatedAtMillis = System.currentTimeMillis()
+                    updateUptimeDisplay()
                 }
             }, 2500L)
         }
