@@ -88,13 +88,12 @@ class LoyaltyPointsBottomSheet : BottomSheetDialogFragment() {
             val bottomSheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
             bottomSheet?.let {
                 val behavior = com.google.android.material.bottomsheet.BottomSheetBehavior.from(it)
+                behavior.isFitToContents = false
                 behavior.skipCollapsed = true
-                behavior.isFitToContents = true
                 behavior.isDraggable = true
-                // Set max height to prevent full screen
-                val displayMetrics = resources.displayMetrics
-                val maxHeight = (displayMetrics.heightPixels * 0.65).toInt()
-                it.layoutParams.height = maxHeight
+                behavior.isHideable = true
+                behavior.halfExpandedRatio = 0.65f
+                behavior.state = com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HALF_EXPANDED
             }
         }
     }

@@ -176,8 +176,13 @@ class PipStateManager(private val activity: MobilePlayerActivity) {
     private fun exitPipMode() {
         isCurrentlyInPipMode = false
         
-        // Resume UI updates and flush buffer
+        // Resume UI updates and flush buffer.
+        // resumeChatUi() may return early if onStart() already cleared isChatUiPaused while
+        // the activity was still technically in PIP (screen unlock before PIP exit). In that
+        // case the flush runnable stopped itself (isPip guard) and was never rescheduled, so
+        // we call startFlushing() unconditionally to restart it.
         activity.chatUiManager.resumeChatUi()
+        activity.chatUiManager.startFlushing()
 
         if (isExplicitAudioSwitch) {
             exitedPipMode = false

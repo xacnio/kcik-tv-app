@@ -67,12 +67,14 @@ class LoyaltyPointsManager(
                     } else {
                         activity.binding.loyaltyPointsText.visibility = View.VISIBLE
                         activity.binding.loyaltyInfinityIcon.visibility = View.GONE
-                        val formatted = formatCompactNumber(points)
-                        activity.binding.loyaltyPointsText.text = formatted
+                        activity.binding.loyaltyPointsText.text = formatCompactNumber(points)
                     }
+                } else {
+                    // Server error (e.g. 500) — hide the button so we don't show a wrong 0
+                    activity.binding.loyaltyPointsButton.visibility = View.GONE
                 }
             } catch (e: Exception) {
-                // Ignore
+                activity.binding.loyaltyPointsButton.visibility = View.GONE
             }
         }
     }
