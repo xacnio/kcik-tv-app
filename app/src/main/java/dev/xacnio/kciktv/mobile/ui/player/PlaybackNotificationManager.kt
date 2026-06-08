@@ -122,14 +122,14 @@ class PlaybackNotificationManager(
 
         val notification: Notification = if (isChatAliveMode) {
             // Chat-alive: custom RemoteViews without media controls
-            val remoteViewsCollapsed = RemoteViews(activity.packageName, R.layout.notification_tiktok_style)
+            val remoteViewsCollapsed = RemoteViews(activity.packageName, R.layout.notification_chat_alive)
             remoteViewsCollapsed.setTextViewText(R.id.notification_title, channel?.username ?: "KCIKTV")
             remoteViewsCollapsed.setTextViewText(R.id.notification_text, notifSubtitle)
             remoteViewsCollapsed.setOnClickPendingIntent(R.id.btn_notification_stop, stopIntent)
             remoteViewsCollapsed.setViewVisibility(R.id.btn_notification_mute, android.view.View.GONE)
             remoteViewsCollapsed.setViewVisibility(R.id.btn_notification_play_pause, android.view.View.GONE)
 
-            val remoteViewsExpanded = RemoteViews(activity.packageName, R.layout.notification_tiktok_style_expanded)
+            val remoteViewsExpanded = RemoteViews(activity.packageName, R.layout.notification_chat_alive_expanded)
             remoteViewsExpanded.setTextViewText(R.id.notification_title, channel?.username ?: "KCIKTV")
             remoteViewsExpanded.setTextViewText(R.id.notification_text, notifSubtitle)
             remoteViewsExpanded.setOnClickPendingIntent(R.id.btn_notification_stop, stopIntent)
