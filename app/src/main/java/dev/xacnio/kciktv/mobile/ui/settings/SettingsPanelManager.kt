@@ -430,7 +430,14 @@ class SettingsPanelManager(
         try {
             // Clear app cache directory
             activity.cacheDir.deleteRecursively()
-            
+
+            // Clear emote and mention caches stored in filesDir
+            activity.filesDir.listFiles()?.forEach { file ->
+                if (file.name.startsWith("emotes_") || file.name.startsWith("mentions_")) {
+                    file.delete()
+                }
+            }
+
             // Clear WebView cache
             android.webkit.WebView(activity).apply {
                 clearCache(true)
