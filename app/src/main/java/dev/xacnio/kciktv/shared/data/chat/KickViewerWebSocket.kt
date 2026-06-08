@@ -15,10 +15,18 @@ import okhttp3.*
 import org.json.JSONObject
 import java.util.Timer
 import java.util.TimerTask
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import dev.xacnio.kciktv.shared.data.chat.KickViewerWebSocket
 
-class KickViewerWebSocket(private val client: OkHttpClient) {
+class KickViewerWebSocket(client: OkHttpClient) {
+    // Build a WebSocket-optimised client: no read timeout (server may be silent for long periods)
+    // and a 30s OkHttp-level ping to satisfy both sides and reset the TCP idle timer.
+    private val wsClient = client.newBuilder()
+        .readTimeout(0, TimeUnit.MILLISECONDS)
+        .pingInterval(30, TimeUnit.SECONDS)
+        .build()
+
     private var webSocket: WebSocket? = null
     private val TAG = "KickViewerWS"
     private var pingTimer: Timer? = null
@@ -74,7 +82,7 @@ class KickViewerWebSocket(private val client: OkHttpClient) {
             .url("wss://websockets.kick.com/viewer/v1/connect?token=$token")
             .build()
             
-        webSocket = client.newWebSocket(request, object : WebSocketListener() {
+        webSocket = wsClient.newWebSocket(request, object : WebSocketListener() {
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
         Log.d(TAG, "Viewer WS Connected")
@@ -273,6 +281,9 @@ class KickViewerWebSocket(private val client: OkHttpClient) {
     }
     
     private fun startPing() {
+        // OkHttp-level pingInterval(30s) on wsClient already keeps the TCP connection alive.
+        // Application-level ping frames are redundant but harmless; we keep the timer as a
+        // belt-and-suspenders fallback in case the server expects Kick-specific ping JSON.
         stopPing()
         pingTimer = Timer()
         pingTimer?.schedule(object : TimerTask() {
@@ -285,9 +296,9 @@ class KickViewerWebSocket(private val client: OkHttpClient) {
                     // Ignore
                 }
             }
-        }, 30000, 30000) // 30 seconds interval (Standard fallback)
+        }, 30000, 30000)
     }
-    
+
     private fun stopPing() {
         pingTimer?.cancel()
         pingTimer = null
