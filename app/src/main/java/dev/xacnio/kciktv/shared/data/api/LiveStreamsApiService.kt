@@ -65,7 +65,7 @@ interface LiveStreamsApiService {
      * Returns available gifts metadata
      */
     @retrofit2.http.Headers("Accept: application/json")
-    @GET("api/v2/kicks/gifts")
+    @GET("api/v1/kicks/gifts")
     suspend fun getGifts(): Response<dev.xacnio.kciktv.shared.data.model.GiftsListResponse>
 
     /**

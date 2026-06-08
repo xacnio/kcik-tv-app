@@ -51,7 +51,7 @@ class MockInterceptor : Interceptor {
             isWebKick(host) && path.contains("/api/v1/kicks/") && path.contains("/pinned-gifts") ->
                 """{"data":{"pinned_gifts":[]}}"""
 
-            isWebKick(host) && path.contains("/api/v2/kicks/gifts") ->
+            isWebKick(host) && path.contains("/api/v1/kicks/gifts") ->
                 """{"data":[]}"""
 
             // ---- kick.com ----
