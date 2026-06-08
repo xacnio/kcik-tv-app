@@ -18,7 +18,8 @@ import dev.xacnio.kciktv.R
 import dev.xacnio.kciktv.shared.data.model.SearchResultItem
 import dev.xacnio.kciktv.shared.data.prefs.AppPreferences
 import dev.xacnio.kciktv.shared.ui.adapter.SearchResultAdapter
-import com.google.android.material.bottomsheet.BottomSheetBehavior
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -36,7 +37,15 @@ class SearchUiManager(private val activity: MobilePlayerActivity) {
     private val TAG = "SearchUiManager"
 
     fun setupSearchListeners() {
-        // Search Screen Bottom Nav handled by MobilePlayerActivity
+        // Tapping the transparent scrim area dismisses the overlay
+        binding.searchContainer.setOnClickListener { closeSearch() }
+
+        // Panel rides above the keyboard: update paddingBottom as IME animates in/out
+        ViewCompat.setOnApplyWindowInsetsListener(binding.searchContainer) { view, insets ->
+            val imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+            view.setPadding(0, 0, 0, imeHeight)
+            insets
+        }
 
         // Live search as user types (with debounce)
         binding.searchInput.addTextChangedListener(object : android.text.TextWatcher {
@@ -80,34 +89,14 @@ class SearchUiManager(private val activity: MobilePlayerActivity) {
     }
 
     fun showSearchScreen() {
-        binding.mobileHeader.visibility = View.VISIBLE
-        binding.homeScreenContainer.root.visibility = View.GONE
-        binding.browseScreenContainer.root.visibility = View.GONE
-        binding.followingScreenContainer.root.visibility = View.GONE
-        binding.categoryDetailsContainer.root.visibility = View.GONE
-        
-        // Only hide player if not in mini player mode
-        if (!activity.miniPlayerManager.isMiniPlayerMode) {
-            binding.playerScreenContainer.visibility = View.GONE
-        }
-        activity.updateNavigationBarColor(false) // Transparent for search screen
-        
+        if (binding.searchContainer.visibility == View.VISIBLE) return
         binding.searchContainer.visibility = View.VISIBLE
-        activity.setCurrentScreen(MobilePlayerActivity.AppScreen.SEARCH)
-        
-        // Focus on input
+        updateSearchHistoryUI()
+
+        // Focus and show keyboard
         binding.searchInput.requestFocus()
         val imm = activity.getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
         imm.showSoftInput(binding.searchInput, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
-        
-        // Sync Nav in search screen
-        try {
-            if (activity.binding.mainBottomNavigation.selectedItemId != R.id.nav_search) {
-                activity.isNavigationProgrammatic = true
-                activity.binding.mainBottomNavigation.selectedItemId = R.id.nav_search
-                activity.isNavigationProgrammatic = false
-            }
-        } catch (e: Exception) {}
     }
 
     private fun hideKeyboard() {
@@ -133,19 +122,16 @@ class SearchUiManager(private val activity: MobilePlayerActivity) {
                         performEmbeddedSearch(query)
                     }
                     "channel" -> {
+                        closeSearch()
                         item.channelItem?.let { ch ->
-                            // Use modern channel profile system
-                            activity.channelProfileManager.openChannelProfile(ch.slug) 
+                            activity.channelProfileManager.openChannelProfile(ch.slug)
                         }
-                        binding.searchContainer.visibility = View.GONE
-                        hideKeyboard()
                     }
                     "category" -> {
+                        closeSearch()
                         item.categoryItem?.let { cat ->
                             activity.browseManager.openCategoryBySlug(cat.slug, fromSearch = true)
                         }
-                        binding.searchContainer.visibility = View.GONE
-                        hideKeyboard()
                     }
                 }
             }
@@ -193,21 +179,14 @@ class SearchUiManager(private val activity: MobilePlayerActivity) {
                             hideKeyboard()
                             when (item) {
                                 is SearchResultItem.ChannelResult -> {
-                                    binding.searchInput.setText("")
                                     prefs.addSearchHistoryEntry(AppPreferences.HistoryEntry(type = "channel", channelItem = item))
-                                    // Use modern channel profile system
+                                    closeSearch()
                                     activity.channelProfileManager.openChannelProfile(item.slug)
-                                    binding.searchContainer.visibility = View.GONE
-                                    // Note: we can't access bottomSheetBehavior directly unless exposed.
-                                    // But usually search is full screen. If it was inside bottom sheet, we would need to know.
-                                    // MobilePlayerActivity:3396: bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-                                    // Let's assume searchContainer closing is enough or expose bottomSheetBehavior.
                                 }
                                 is SearchResultItem.CategoryResult -> {
-                                    binding.searchInput.setText("")
                                     prefs.addSearchHistoryEntry(AppPreferences.HistoryEntry(type = "category", categoryItem = item))
+                                    closeSearch()
                                     activity.browseManager.openCategoryBySlug(item.slug, fromSearch = true)
-                                    binding.searchContainer.visibility = View.GONE
                                 }
                                 is SearchResultItem.TagResult -> {
                                     Toast.makeText(activity, activity.getString(R.string.tag_format, item.label), Toast.LENGTH_SHORT).show()
@@ -225,13 +204,15 @@ class SearchUiManager(private val activity: MobilePlayerActivity) {
             }
         }
     }
+    fun closeSearch() {
+        binding.searchContainer.visibility = View.GONE
+        binding.searchInput.setText("")
+        hideKeyboard()
+    }
+
     fun handleBack(): Boolean {
-        if (activity.miniPlayerManager.isMiniPlayerMode) return false
-        
         if (binding.searchContainer.visibility == View.VISIBLE) {
-            binding.searchContainer.visibility = View.GONE
-            hideKeyboard()
-            activity.showHomeScreen()
+            closeSearch()
             return true
         }
         return false

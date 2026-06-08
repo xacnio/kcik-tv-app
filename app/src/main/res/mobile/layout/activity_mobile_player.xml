@@ -159,169 +159,191 @@
         android:clipToPadding="false" />
 
     <!-- Search Screen Container -->
+    <!-- Search Overlay: scrim + dropdown panel -->
     <LinearLayout
         android:id="@+id/searchContainer"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@android:color/black"
+        android:background="#CC000000"
         android:orientation="vertical"
+        android:clickable="true"
+        android:focusable="true"
         android:visibility="gone"
+        android:elevation="50dp"
+        android:weightSum="100"
         app:layout_constraintWidth_max="@dimen/max_content_width"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/mobileHeader"
-        android:paddingBottom="100dp"
-        android:clipToPadding="false">
+        app:layout_constraintTop_toBottomOf="@id/mobileHeader">
 
-        <!-- Search Input Row -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="8dp">
-
-            <EditText
-                android:id="@+id/searchInput"
-                android:layout_width="0dp"
-                android:layout_height="44dp"
-                android:layout_marginHorizontal="8dp"
-                android:layout_weight="1"
-                android:background="@drawable/bg_search_input"
-                android:hint="@string/search_channels"
-                android:imeOptions="actionSearch"
-                android:inputType="text"
-                android:maxLines="1"
-                android:paddingHorizontal="16dp"
-                android:textColor="#FFFFFF"
-                android:textColorHint="#666666"
-                android:textSize="15sp" />
-        </LinearLayout>
-
-        <!-- Divider -->
+        <!-- Dismiss area: transparent top portion, taps bubble up to scrim and close search -->
         <View
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2a2a2a" />
+            android:layout_height="0dp"
+            android:layout_weight="35" />
 
-        <!-- Search Results -->
-        <FrameLayout
+        <!-- Search Panel (65% of available height, solid background) -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1">
+            android:layout_weight="65"
+            android:background="#1A1A1A"
+            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="true">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/searchResultsRecyclerView"
+            <!-- Search Input Row -->
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clipToPadding="false"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="8dp"
-                android:visibility="gone" />
-
-            <ProgressBar
-                android:id="@+id/searchLoading"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_gravity="center"
-                android:indeterminateTint="#53fc18"
-                android:visibility="gone" />
-
-            <LinearLayout
-                android:id="@+id/searchEmptyState"
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:visibility="gone">
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="8dp">
 
-                <ImageView
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
-                    android:src="@drawable/ic_search"
-                    app:tint="#444444" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/no_results_found"
-                    android:textColor="#888888"
-                    android:textSize="16sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/searchInitialState"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:visibility="visible">
-
-                <ImageView
-                    android:id="@+id/searchInitialIcon"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:src="@drawable/ic_search"
-                    app:tint="#333333" />
-
-                <TextView
-                    android:id="@+id/searchInitialText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/search_channels"
-                    android:textColor="#555555"
-                    android:textSize="14sp" />
-            </LinearLayout>
-
-            <!-- Search History -->
-            <LinearLayout
-                android:id="@+id/searchHistoryContainer"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
+                <EditText
+                    android:id="@+id/searchInput"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_marginHorizontal="8dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_search_input"
+                    android:hint="@string/search_channels"
+                    android:imeOptions="actionSearch"
+                    android:inputType="text"
+                    android:maxLines="1"
                     android:paddingHorizontal="16dp"
-                    android:paddingTop="12dp"
-                    android:paddingBottom="8dp">
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#666666"
+                    android:textSize="15sp" />
+            </LinearLayout>
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/recent_searches"
-                        android:textColor="#555555"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
+            <!-- Divider -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#2a2a2a" />
 
-                    <ImageButton
-                        android:id="@+id/clearSearchHistoryButton"
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:src="@drawable/ic_delete"
-                        app:tint="#FF4444" />
-                </LinearLayout>
+            <!-- Search Results -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/searchHistoryRecyclerView"
+                    android:id="@+id/searchResultsRecyclerView"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:clipToPadding="false"
-                    android:paddingBottom="16dp" />
-            </LinearLayout>
-        </FrameLayout>
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="8dp"
+                    android:visibility="gone" />
+
+                <ProgressBar
+                    android:id="@+id/searchLoading"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:indeterminateTint="#53fc18"
+                    android:visibility="gone" />
+
+                <LinearLayout
+                    android:id="@+id/searchEmptyState"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:src="@drawable/ic_search"
+                        app:tint="#444444" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="@string/no_results_found"
+                        android:textColor="#888888"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/searchInitialState"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:visibility="visible">
+
+                    <ImageView
+                        android:id="@+id/searchInitialIcon"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:src="@drawable/ic_search"
+                        app:tint="#333333" />
+
+                    <TextView
+                        android:id="@+id/searchInitialText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="@string/search_channels"
+                        android:textColor="#555555"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <!-- Search History -->
+                <LinearLayout
+                    android:id="@+id/searchHistoryContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="16dp"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="8dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/recent_searches"
+                            android:textColor="#555555"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <ImageButton
+                            android:id="@+id/clearSearchHistoryButton"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:src="@drawable/ic_delete"
+                            app:tint="#FF4444" />
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/searchHistoryRecyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:clipToPadding="false"
+                        android:paddingBottom="16dp" />
+                </LinearLayout>
+            </FrameLayout>
+
+        </LinearLayout>
+        <!-- Remaining 35% is transparent scrim — tapping it dismisses the overlay -->
 
     </LinearLayout>
 
@@ -2480,7 +2502,7 @@
             android:id="@+id/rewardQueueButton"
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:layout_marginEnd="2dp"
+            android:layout_marginEnd="4dp"
             android:visibility="gone"
             tools:visibility="visible">
 
@@ -2511,6 +2533,34 @@
                 tools:text="3"
                 tools:visibility="visible" />
         </FrameLayout>
+
+        <!-- Activity Feed Button (Only visible to Mods/Owners) -->
+        <ImageButton
+            android:id="@+id/activityFeedButton"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/bg_item_ripple"
+            android:contentDescription="@string/activity_feed_title"
+            android:padding="9dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_sparkle"
+            android:visibility="gone"
+            app:tint="#FFFFFF" />
+
+        <!-- Mod Log Button (Only visible to Mods/Owners) -->
+        <ImageButton
+            android:id="@+id/modLogButton"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/bg_item_ripple"
+            android:contentDescription="@string/mod_log_title"
+            android:padding="9dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_history"
+            android:visibility="gone"
+            app:tint="#FFFFFF" />
 
         <!-- Moderator Menu Button (Only visible to Mods/Owners) -->
         <ImageButton
