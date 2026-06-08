@@ -126,13 +126,18 @@ class EmoteAdapter(
 
         fun bind(emote: Emote) {
             val size = (40 * itemView.context.resources.displayMetrics.density).toInt()
+            // Tag the view with this emote's ID so stale async callbacks can be discarded
+            emoteImage.tag = emote.id
+            emoteImage.setImageDrawable(null)
             dev.xacnio.kciktv.shared.ui.utils.EmoteManager.loadSynchronizedEmote(
                 itemView.context,
                 emote.id.toString(),
                 size,
                 emoteImage
             ) { sharedDrawable ->
-                emoteImage.setImageDrawable(sharedDrawable)
+                if (emoteImage.tag == emote.id) {
+                    emoteImage.setImageDrawable(sharedDrawable)
+                }
             }
 
             val canUse = canUseEmote(emote)

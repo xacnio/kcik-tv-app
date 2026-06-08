@@ -19,8 +19,11 @@ import dev.xacnio.kciktv.mobile.MobilePlayerActivity
 import dev.xacnio.kciktv.R
 import dev.xacnio.kciktv.shared.data.repository.ChannelRepository
 import dev.xacnio.kciktv.databinding.ActivityMobilePlayerBinding
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import dev.xacnio.kciktv.shared.ui.adapter.EmoteAdapter
+import dev.xacnio.kciktv.shared.util.EmoteCache
 import dev.xacnio.kciktv.shared.ui.utils.EmoteManager
 
 /**
@@ -37,10 +40,16 @@ class EmotePanelManager(
     }
 
     internal var emoteCategories: List<dev.xacnio.kciktv.shared.data.model.EmoteCategory> = emptyList()
+    private var activeEmoteSlug: String? = null
     private var currentEmoteCategoryIndex = 0
     private var emoteNameToId: Map<String, Long> = emptyMap() // For quick emote name lookup
     private var isEmotePanelInitialized = false
     private var modEmoteChannelsManager: ModEmoteChannelsManager? = null
+
+    fun resetForNewChannel() {
+        emoteCategories = emptyList()
+        activeEmoteSlug = null
+    }
 
     fun toggleEmotePanel(showKeyboardOnClose: Boolean = true) {
         val panel = binding.emotePanelContainer
@@ -224,50 +233,59 @@ class EmotePanelManager(
     }
     
     suspend fun loadChannelEmotes(slug: String) {
+        activeEmoteSlug = slug
+        // Load from disk cache for instant display
+        val cached = withContext(Dispatchers.IO) { EmoteCache.load(activity, slug) }
+        if (cached != null) {
+            applyCategories(slug, cached)
+            // Background refresh to pick up any newly added emotes
+            lifecycleScope.launch { refreshFromApi(slug) }
+            return
+        }
+        // No cache yet — fetch from network
+        refreshFromApi(slug)
+    }
+
+    private suspend fun refreshFromApi(slug: String) {
         val result = repository.getEmotes(slug, activity.prefs.authToken)
         result.onSuccess { categories ->
-            this.emoteCategories = categories
-            if (dev.xacnio.kciktv.shared.data.mock.MockConfig.enabled) {
-                dev.xacnio.kciktv.shared.data.mock.MockDataPools.availableEmotes = categories
-                    .flatMap { it.emotes }
-                    .filter { !it.subscribersOnly }
-                    .map { it.id to it.name }
-            }
-            Log.d(TAG, "Stored ${categories.size} categories. Building name map...")
-            val nameMap = mutableMapOf<String, Long>()
-            categories.forEach { category ->
-                category.emotes.forEach { emote ->
-                    nameMap[emote.name] = emote.id
-                }
-            }
-            emoteNameToId = nameMap
-            Log.d(TAG, "Emote map built with ${nameMap.size} entries")
-
-            // Pass emote map to ChatUiManager for manual typing support
-            try {
-                activity.chatUiManager.setEmoteMap(nameMap.mapValues { it.value.toString() })
-            } catch (e: Exception) {
-                Log.e(TAG, "Error setting emote map to ChatUiManager", e)
-            }
-
-            // Load mod emote channels if moderator
-            if (activity.chatStateManager.isModeratorOrOwner) {
-                loadModEmoteChannels()
-            }
-
-            // Update UI if panel is initialized
-            if (isEmotePanelInitialized) {
-                activity.runOnUiThread {
-                    populateEmotePanel()
-                }
-            }
-            // Update Quick Emote Bar
-            activity.runOnUiThread {
-                activity.updateQuickEmoteBar()
-            }
+            withContext(Dispatchers.IO) { EmoteCache.save(activity, slug, categories) }
+            applyCategories(slug, categories)
         }.onFailure {
-            Log.e(TAG, "Failed to load emotes", it)
+            Log.e(TAG, "Failed to load emotes from API", it)
         }
+    }
+
+    private suspend fun applyCategories(slug: String, categories: List<dev.xacnio.kciktv.shared.data.model.EmoteCategory>) {
+        // Discard results from a previous channel's in-flight request
+        if (slug != activeEmoteSlug) return
+        this.emoteCategories = categories
+        if (dev.xacnio.kciktv.shared.data.mock.MockConfig.enabled) {
+            dev.xacnio.kciktv.shared.data.mock.MockDataPools.availableEmotes = categories
+                .flatMap { it.emotes }
+                .filter { !it.subscribersOnly }
+                .map { it.id to it.name }
+        }
+        val nameMap = mutableMapOf<String, Long>()
+        categories.forEach { category ->
+            category.emotes.forEach { emote -> nameMap[emote.name] = emote.id }
+        }
+        emoteNameToId = nameMap
+
+        try {
+            activity.chatUiManager.setEmoteMap(nameMap.mapValues { it.value.toString() })
+        } catch (e: Exception) {
+            Log.e(TAG, "Error setting emote map to ChatUiManager", e)
+        }
+
+        if (activity.chatStateManager.isModeratorOrOwner) {
+            loadModEmoteChannels()
+        }
+
+        if (isEmotePanelInitialized) {
+            activity.runOnUiThread { populateEmotePanel() }
+        }
+        activity.runOnUiThread { activity.updateQuickEmoteBar() }
     }
 
     suspend fun loadModEmoteChannels() {

@@ -145,7 +145,9 @@ class QuickEmoteAdapter(
                     size,
                     emoteImage
                 ) { sharedDrawable ->
-                    emoteImage.setImageDrawable(sharedDrawable)
+                    if (myGen == generation) {
+                        emoteImage.setImageDrawable(sharedDrawable)
+                    }
                     revealImage(myGen)
                 }
             } else {
