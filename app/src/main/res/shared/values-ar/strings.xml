@@ -546,6 +546,71 @@
     <string name="error_user_not_exists">المستخدم غير موجود</string>
     <string name="error_cannot_ban_owner">لا يمكنك حظر مالك القناة</string>
 
+    <!-- Activity Feed -->
+    <string name="activity_feed_title">موجز النشاط</string>
+    <string name="activity_feed_followed">بدأ بمتابعة القناة</string>
+    <string name="activity_feed_unfollowed">أوقف متابعة القناة</string>
+    <string name="activity_feed_subscribed">اشترك!</string>
+    <string name="activity_feed_resubscribed">أعاد الاشتراك!</string>
+    <string name="activity_feed_gifted_sub">أهدى اشتراكاً!</string>
+    <string name="activity_feed_redeemed">استرد</string>
+    <string name="activity_feed_months">مشترك منذ %d شهر</string>
+    <string name="activity_feed_months_plural">مشترك منذ %d أشهر</string>
+    <string name="activity_feed_celebrates">يحتفل بـ %d شهر من الاشتراك!</string>
+    <string name="activity_feed_celebrates_plural">يحتفل بـ %d أشهر من الاشتراك!</string>
+    <string name="activity_feed_empty">لا يوجد نشاط حديث</string>
+    <string name="activity_feed_load_error">فشل تحميل النشاط</string>
+    <!-- Activity Feed Filters -->
+    <string name="activity_filter_all">الكل</string>
+    <string name="activity_filter_followers">المتابعون</string>
+    <string name="activity_filter_unfollowers">إلغاء المتابعة</string>
+    <string name="activity_filter_subscribers">المشتركون</string>
+    <string name="activity_filter_gifted_subs">الاشتراكات المهداة</string>
+    <string name="activity_filter_hosts">المضيفون</string>
+    <string name="activity_filter_rewards">المكافآت</string>
+    <string name="activity_filter_follower_goals">أهداف المتابعين</string>
+    <string name="activity_filter_subscriber_goals">أهداف المشتركين</string>
+    <string name="activity_filter_channel_engagement">تفاعل القناة</string>
+
+    <!-- Mod Log -->
+    <string name="mod_log_title">إجراءات الإشراف</string>
+    <string name="mod_log_empty">لا توجد إجراءات حديثة</string>
+    <string name="mod_log_load_error">فشل تحميل الإجراءات</string>
+    <string name="mod_log_filter_banned_words">الكلمات المحظورة</string>
+    <string name="mod_log_filter_bans_unbans">الحظر وإلغاء الحظر</string>
+    <string name="mod_log_filter_category">تغيير الفئة</string>
+    <string name="mod_log_filter_chat_mode">تغييرات وضع المحادثة</string>
+    <string name="mod_log_filter_language">تغيير اللغة</string>
+    <string name="mod_log_filter_mature">تغيير وضع المحتوى الصريح</string>
+    <string name="mod_log_filter_deleted">الرسائل المحذوفة</string>
+    <string name="mod_log_filter_pin_unpin">تثبيت الرسائل وإلغاء تثبيتها</string>
+    <string name="mod_log_filter_polls">الاستطلاعات</string>
+    <string name="mod_log_filter_title">تغيير العنوان</string>
+    <string name="mod_log_filter_timeouts">مهل المستخدمين</string>
+    <string name="mod_log_banned">محظور</string>
+    <string name="mod_log_banned_by">محظور بواسطة</string>
+    <string name="mod_log_unbanned">تم رفع الحظر</string>
+    <string name="mod_log_unbanned_by">تم رفع الحظر بواسطة</string>
+    <string name="mod_log_timed_out">تم إيقافه مؤقتاً</string>
+    <string name="mod_log_timeout_removed">تم إلغاء الإيقاف المؤقت لـ</string>
+    <string name="mod_log_pinned">ثبّت رسالة</string>
+    <string name="mod_log_unpinned">أزال تثبيت الرسالة</string>
+    <string name="mod_log_deleted">حذف رسالة</string>
+    <string name="mod_log_word_added">أضاف كلمة محظورة</string>
+    <string name="mod_log_word_removed">أزال كلمة محظورة</string>
+    <string name="mod_log_created_poll">أنشأ استطلاعاً</string>
+    <string name="mod_log_ended_poll">أنهى استطلاعاً</string>
+    <string name="mod_log_cancelled_poll">ألغى استطلاعاً</string>
+    <string name="mod_log_changed_category">غيّر الفئة</string>
+    <string name="mod_log_changed_title">حدّث العنوان</string>
+    <string name="mod_log_changed_mode">غيّر وضع المحادثة</string>
+    <string name="mod_log_changed_language">غيّر اللغة</string>
+    <string name="mod_log_changed_mature">غيّر وضع المحتوى الصريح</string>
+
+    <!-- API Errors -->
+    <string name="error_server_unavailable">الخادم لا يستجيب (%1$d). حاول مرة أخرى.</string>
+    <string name="error_network_unavailable">خطأ في الاتصال. حاول مرة أخرى.</string>
+
     <!-- Moderator Actions -->
     <string name="mod_actions_title">إجراءات القناة</string>
     <string name="mod_slow_mode">الوضع البطيء</string>

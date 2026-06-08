@@ -546,6 +546,71 @@
     <string name="error_user_not_exists">User does not exist</string>
     <string name="error_cannot_ban_owner">You cannot ban the channel owner</string>
 
+    <!-- Activity Feed -->
+    <string name="activity_feed_title">Activity Feed</string>
+    <string name="activity_feed_followed">just followed the channel</string>
+    <string name="activity_feed_unfollowed">unfollowed the channel</string>
+    <string name="activity_feed_subscribed">Subscribed!</string>
+    <string name="activity_feed_resubscribed">Resubscribed!</string>
+    <string name="activity_feed_gifted_sub">Gifted a subscription!</string>
+    <string name="activity_feed_redeemed">redeemed</string>
+    <string name="activity_feed_months">they have been subscribed for %d month</string>
+    <string name="activity_feed_months_plural">they have been subscribed for %d months</string>
+    <string name="activity_feed_celebrates">celebrates their subscription for %d month!</string>
+    <string name="activity_feed_celebrates_plural">celebrates their subscription for %d months!</string>
+    <string name="activity_feed_empty">No recent activity</string>
+    <string name="activity_feed_load_error">Failed to load activity</string>
+    <!-- Activity Feed Filters -->
+    <string name="activity_filter_all">All</string>
+    <string name="activity_filter_followers">Followers</string>
+    <string name="activity_filter_unfollowers">Unfollowers</string>
+    <string name="activity_filter_subscribers">Subscribers</string>
+    <string name="activity_filter_gifted_subs">Gifted Subs</string>
+    <string name="activity_filter_hosts">Hosts</string>
+    <string name="activity_filter_rewards">Rewards</string>
+    <string name="activity_filter_follower_goals">Follower Goals</string>
+    <string name="activity_filter_subscriber_goals">Subscriber Goals</string>
+    <string name="activity_filter_channel_engagement">Channel Engagement</string>
+
+    <!-- Mod Log -->
+    <string name="mod_log_title">Mod Actions</string>
+    <string name="mod_log_empty">No recent actions</string>
+    <string name="mod_log_load_error">Failed to load actions</string>
+    <string name="mod_log_filter_banned_words">Banned Words</string>
+    <string name="mod_log_filter_bans_unbans">Bans and Unbans</string>
+    <string name="mod_log_filter_category">Category Change</string>
+    <string name="mod_log_filter_chat_mode">Chat Mode Changes</string>
+    <string name="mod_log_filter_language">Language Change</string>
+    <string name="mod_log_filter_mature">Mature Mode Change</string>
+    <string name="mod_log_filter_deleted">Deleted Messages</string>
+    <string name="mod_log_filter_pin_unpin">Pin and Unpin Messages</string>
+    <string name="mod_log_filter_polls">Polls</string>
+    <string name="mod_log_filter_title">Title Change</string>
+    <string name="mod_log_filter_timeouts">User Timeouts</string>
+    <string name="mod_log_banned">banned</string>
+    <string name="mod_log_banned_by">banned by</string>
+    <string name="mod_log_unbanned">unbanned</string>
+    <string name="mod_log_unbanned_by">unbanned by</string>
+    <string name="mod_log_timed_out">timed out</string>
+    <string name="mod_log_timeout_removed">removed timeout for</string>
+    <string name="mod_log_pinned">pinned a message</string>
+    <string name="mod_log_unpinned">unpinned the message</string>
+    <string name="mod_log_deleted">deleted a message</string>
+    <string name="mod_log_word_added">added a banned word</string>
+    <string name="mod_log_word_removed">removed a banned word</string>
+    <string name="mod_log_created_poll">created a poll</string>
+    <string name="mod_log_ended_poll">ended a poll</string>
+    <string name="mod_log_cancelled_poll">cancelled a poll</string>
+    <string name="mod_log_changed_category">changed the category</string>
+    <string name="mod_log_changed_title">updated the title</string>
+    <string name="mod_log_changed_mode">changed chat mode</string>
+    <string name="mod_log_changed_language">changed the language</string>
+    <string name="mod_log_changed_mature">changed mature mode</string>
+
+    <!-- API Errors -->
+    <string name="error_server_unavailable">Sunucu yanıt vermiyor (%1$d). Tekrar deneyin.</string>
+    <string name="error_network_unavailable">Bağlantı hatası. Tekrar deneyin.</string>
+
     <!-- Moderator Actions -->
     <string name="mod_actions_title">Channel Actions</string>
     <string name="mod_slow_mode">Slow Mode</string>
@@ -715,6 +780,7 @@
     <string name="notif_reply_original">↩ You: %1$s</string>
     <string name="notif_mentions_channel">Mentions</string>
     <string name="notif_mentions_channel_desc">Alerts when you are mentioned or replied to</string>
+    <string name="notif_chat_connected">Chat connected</string>
     <string name="chat_settings_floating_emotes">Floating Emotes</string>
     <string name="chat_settings_nick_detection">Nick Detection</string>
     <string name="chat_settings_nick_detection_subtitle">Alert when your name appears without @</string>
@@ -779,6 +845,8 @@
     <string name="mentions_title">Mentions</string>
     <string name="mentions_empty">No mentions yet</string>
     <string name="mentions_count_format">%d messages</string>
+    <string name="mentions_clear_confirm_title">Clear all mentions?</string>
+    <string name="mentions_clear_confirm_msg">This will permanently delete all mention history for this channel.</string>
     <string name="go_to_message">Go to message</string>
     <string name="time_ago_just_now">just now</string>
     <string name="time_ago_minutes">%d min ago</string>

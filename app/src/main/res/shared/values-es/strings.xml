@@ -546,6 +546,71 @@
     <string name="error_user_not_exists">El usuario no existe</string>
     <string name="error_cannot_ban_owner">No puedes banear al propietario del canal</string>
 
+    <!-- Activity Feed -->
+    <string name="activity_feed_title">Feed de actividad</string>
+    <string name="activity_feed_followed">acaba de seguir el canal</string>
+    <string name="activity_feed_unfollowed">dejó de seguir el canal</string>
+    <string name="activity_feed_subscribed">¡Suscrito!</string>
+    <string name="activity_feed_resubscribed">¡Vuelta a suscribirse!</string>
+    <string name="activity_feed_gifted_sub">¡Ha regalado una suscripción!</string>
+    <string name="activity_feed_redeemed">canjeó</string>
+    <string name="activity_feed_months">lleva %d mes suscrito</string>
+    <string name="activity_feed_months_plural">lleva %d meses suscrito</string>
+    <string name="activity_feed_celebrates">¡celebra %d mes de suscripción!</string>
+    <string name="activity_feed_celebrates_plural">¡celebra %d meses de suscripción!</string>
+    <string name="activity_feed_empty">Sin actividad reciente</string>
+    <string name="activity_feed_load_error">Error al cargar actividad</string>
+    <!-- Activity Feed Filters -->
+    <string name="activity_filter_all">Todos</string>
+    <string name="activity_filter_followers">Seguidores</string>
+    <string name="activity_filter_unfollowers">Dejar de seguir</string>
+    <string name="activity_filter_subscribers">Suscriptores</string>
+    <string name="activity_filter_gifted_subs">Subs regalados</string>
+    <string name="activity_filter_hosts">Hosts</string>
+    <string name="activity_filter_rewards">Recompensas</string>
+    <string name="activity_filter_follower_goals">Metas de seguidores</string>
+    <string name="activity_filter_subscriber_goals">Metas de suscriptores</string>
+    <string name="activity_filter_channel_engagement">Participación del canal</string>
+
+    <!-- Mod Log -->
+    <string name="mod_log_title">Acciones de mod</string>
+    <string name="mod_log_empty">Sin acciones recientes</string>
+    <string name="mod_log_load_error">Error al cargar acciones</string>
+    <string name="mod_log_filter_banned_words">Palabras prohibidas</string>
+    <string name="mod_log_filter_bans_unbans">Baneos y desbaneos</string>
+    <string name="mod_log_filter_category">Cambio de categoría</string>
+    <string name="mod_log_filter_chat_mode">Cambios de modo de chat</string>
+    <string name="mod_log_filter_language">Cambio de idioma</string>
+    <string name="mod_log_filter_mature">Cambio de modo adulto</string>
+    <string name="mod_log_filter_deleted">Mensajes eliminados</string>
+    <string name="mod_log_filter_pin_unpin">Fijar y desfijar mensajes</string>
+    <string name="mod_log_filter_polls">Encuestas</string>
+    <string name="mod_log_filter_title">Cambio de título</string>
+    <string name="mod_log_filter_timeouts">Tiempos de espera de usuario</string>
+    <string name="mod_log_banned">baneado</string>
+    <string name="mod_log_banned_by">baneado por</string>
+    <string name="mod_log_unbanned">desbaneado</string>
+    <string name="mod_log_unbanned_by">desbaneado por</string>
+    <string name="mod_log_timed_out">silenciado temporalmente</string>
+    <string name="mod_log_timeout_removed">silencio eliminado para</string>
+    <string name="mod_log_pinned">fijó un mensaje</string>
+    <string name="mod_log_unpinned">desfijó el mensaje</string>
+    <string name="mod_log_deleted">eliminó un mensaje</string>
+    <string name="mod_log_word_added">añadió una palabra prohibida</string>
+    <string name="mod_log_word_removed">eliminó una palabra prohibida</string>
+    <string name="mod_log_created_poll">creó una encuesta</string>
+    <string name="mod_log_ended_poll">terminó una encuesta</string>
+    <string name="mod_log_cancelled_poll">canceló una encuesta</string>
+    <string name="mod_log_changed_category">cambió la categoría</string>
+    <string name="mod_log_changed_title">actualizó el título</string>
+    <string name="mod_log_changed_mode">cambió el modo de chat</string>
+    <string name="mod_log_changed_language">cambió el idioma</string>
+    <string name="mod_log_changed_mature">cambió el modo adulto</string>
+
+    <!-- API Errors -->
+    <string name="error_server_unavailable">El servidor no responde (%1$d). Por favor, inténtalo de nuevo.</string>
+    <string name="error_network_unavailable">Error de conexión. Por favor, inténtalo de nuevo.</string>
+
     <!-- Moderator Actions -->
     <string name="mod_actions_title">Acciones del canal</string>
     <string name="mod_slow_mode">Modo lento</string>

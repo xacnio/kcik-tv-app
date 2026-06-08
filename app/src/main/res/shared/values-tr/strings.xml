@@ -546,6 +546,71 @@
     <string name="error_user_not_exists">Kullanıcı mevcut değil</string>
     <string name="error_cannot_ban_owner">Kanal sahibini yasaklayamazsınız</string>
 
+    <!-- Activity Feed -->
+    <string name="activity_feed_title">Aktivite Akışı</string>
+    <string name="activity_feed_followed">kanalı takip etti</string>
+    <string name="activity_feed_unfollowed">kanalı takipten çıktı</string>
+    <string name="activity_feed_subscribed">Abone oldu!</string>
+    <string name="activity_feed_resubscribed">Yeniden abone oldu!</string>
+    <string name="activity_feed_gifted_sub">Abonelik hediye etti!</string>
+    <string name="activity_feed_redeemed">kullandı</string>
+    <string name="activity_feed_months">%d aydır abone</string>
+    <string name="activity_feed_months_plural">%d aydır abone</string>
+    <string name="activity_feed_celebrates">%d aylık aboneliğini kutluyor!</string>
+    <string name="activity_feed_celebrates_plural">%d aylık aboneliğini kutluyor!</string>
+    <string name="activity_feed_empty">Son aktivite yok</string>
+    <string name="activity_feed_load_error">Aktivite yüklenemedi</string>
+    <!-- Activity Feed Filters -->
+    <string name="activity_filter_all">Tümü</string>
+    <string name="activity_filter_followers">Takipçiler</string>
+    <string name="activity_filter_unfollowers">Takipten Çıkanlar</string>
+    <string name="activity_filter_subscribers">Aboneler</string>
+    <string name="activity_filter_gifted_subs">Hediyeli Abonelikler</string>
+    <string name="activity_filter_hosts">Hostlar</string>
+    <string name="activity_filter_rewards">Ödüller</string>
+    <string name="activity_filter_follower_goals">Takipçi Hedefleri</string>
+    <string name="activity_filter_subscriber_goals">Abone Hedefleri</string>
+    <string name="activity_filter_channel_engagement">Kanal Etkileşimi</string>
+
+    <!-- Mod Log -->
+    <string name="mod_log_title">Mod Eylemleri</string>
+    <string name="mod_log_empty">Son eylem yok</string>
+    <string name="mod_log_load_error">Eylemler yüklenemedi</string>
+    <string name="mod_log_filter_banned_words">Yasaklı Kelimeler</string>
+    <string name="mod_log_filter_bans_unbans">Ban ve Ban Kaldırma</string>
+    <string name="mod_log_filter_category">Kategori Değişikliği</string>
+    <string name="mod_log_filter_chat_mode">Sohbet Modu Değişiklikleri</string>
+    <string name="mod_log_filter_language">Dil Değişikliği</string>
+    <string name="mod_log_filter_mature">Yetişkin Modu Değişikliği</string>
+    <string name="mod_log_filter_deleted">Silinen Mesajlar</string>
+    <string name="mod_log_filter_pin_unpin">Sabitleme ve Kaldırma</string>
+    <string name="mod_log_filter_polls">Anketler</string>
+    <string name="mod_log_filter_title">Başlık Değişikliği</string>
+    <string name="mod_log_filter_timeouts">Kullanıcı Zaman Aşımları</string>
+    <string name="mod_log_banned">yasaklandı</string>
+    <string name="mod_log_banned_by">tarafından yasaklandı</string>
+    <string name="mod_log_unbanned">yasağı kaldırıldı</string>
+    <string name="mod_log_unbanned_by">tarafından yasağı kaldırıldı</string>
+    <string name="mod_log_timed_out">zaman aşımına uğratıldı</string>
+    <string name="mod_log_timeout_removed">zaman aşımı kaldırıldı</string>
+    <string name="mod_log_pinned">bir mesaj sabitledi</string>
+    <string name="mod_log_unpinned">mesajı sabitlemeden kaldırdı</string>
+    <string name="mod_log_deleted">bir mesaj sildi</string>
+    <string name="mod_log_word_added">yasaklı kelime ekledi</string>
+    <string name="mod_log_word_removed">yasaklı kelime kaldırdı</string>
+    <string name="mod_log_created_poll">anket oluşturdu</string>
+    <string name="mod_log_ended_poll">anketi bitirdi</string>
+    <string name="mod_log_cancelled_poll">anketi iptal etti</string>
+    <string name="mod_log_changed_category">kategori değiştirdi</string>
+    <string name="mod_log_changed_title">başlık güncelledi</string>
+    <string name="mod_log_changed_mode">sohbet modunu değiştirdi</string>
+    <string name="mod_log_changed_language">dil değiştirdi</string>
+    <string name="mod_log_changed_mature">yetişkin modunu değiştirdi</string>
+
+    <!-- API Errors -->
+    <string name="error_server_unavailable">Sunucu yanıt vermiyor (%1$d). Tekrar deneyin.</string>
+    <string name="error_network_unavailable">Bağlantı hatası. Tekrar deneyin.</string>
+
     <!-- Moderator Actions -->
     <string name="mod_actions_title">Kanal Eylemleri</string>
     <string name="mod_slow_mode">Yavaş Mod</string>
@@ -715,6 +780,7 @@
     <string name="notif_reply_original">↩ Sen: %1$s</string>
     <string name="notif_mentions_channel">Bahsetmeler</string>
     <string name="notif_mentions_channel_desc">Senden bahsedildiğinde veya yanıtlandığında uyarır</string>
+    <string name="notif_chat_connected">Chat bağlı</string>
     <string name="chat_settings_floating_emotes">Uçan Emojiler</string>
     <string name="chat_settings_nick_detection">Nick Algılama</string>
     <string name="chat_settings_nick_detection_subtitle">@ olmadan ismin geçtiğinde bildir</string>

@@ -546,6 +546,71 @@
     <string name="error_user_not_exists">Benutzer existiert nicht</string>
     <string name="error_cannot_ban_owner">Du kannst den Kanalbesitzer nicht bannen</string>
 
+    <!-- Activity Feed -->
+    <string name="activity_feed_title">Aktivitäts-Feed</string>
+    <string name="activity_feed_followed">folgt jetzt dem Kanal</string>
+    <string name="activity_feed_unfollowed">folgt dem Kanal nicht mehr</string>
+    <string name="activity_feed_subscribed">Hat abonniert!</string>
+    <string name="activity_feed_resubscribed">Hat erneut abonniert!</string>
+    <string name="activity_feed_gifted_sub">Hat ein Abonnement verschenkt!</string>
+    <string name="activity_feed_redeemed">eingelöst</string>
+    <string name="activity_feed_months">seit %d Monat abonniert</string>
+    <string name="activity_feed_months_plural">seit %d Monaten abonniert</string>
+    <string name="activity_feed_celebrates">feiert %d Monat Abonnement!</string>
+    <string name="activity_feed_celebrates_plural">feiert %d Monate Abonnement!</string>
+    <string name="activity_feed_empty">Keine letzten Aktivitäten</string>
+    <string name="activity_feed_load_error">Aktivitäten konnten nicht geladen werden</string>
+    <!-- Activity Feed Filters -->
+    <string name="activity_filter_all">Alle</string>
+    <string name="activity_filter_followers">Follower</string>
+    <string name="activity_filter_unfollowers">Entfollower</string>
+    <string name="activity_filter_subscribers">Abonnenten</string>
+    <string name="activity_filter_gifted_subs">Geschenkte Abos</string>
+    <string name="activity_filter_hosts">Hosts</string>
+    <string name="activity_filter_rewards">Belohnungen</string>
+    <string name="activity_filter_follower_goals">Follower-Ziele</string>
+    <string name="activity_filter_subscriber_goals">Abonnenten-Ziele</string>
+    <string name="activity_filter_channel_engagement">Kanal-Engagement</string>
+
+    <!-- Mod Log -->
+    <string name="mod_log_title">Mod-Aktionen</string>
+    <string name="mod_log_empty">Keine letzten Aktionen</string>
+    <string name="mod_log_load_error">Aktionen konnten nicht geladen werden</string>
+    <string name="mod_log_filter_banned_words">Verbotene Wörter</string>
+    <string name="mod_log_filter_bans_unbans">Sperren und Entsperren</string>
+    <string name="mod_log_filter_category">Kategorieänderung</string>
+    <string name="mod_log_filter_chat_mode">Chat-Modus-Änderungen</string>
+    <string name="mod_log_filter_language">Sprachänderung</string>
+    <string name="mod_log_filter_mature">Altersfreigabe-Änderung</string>
+    <string name="mod_log_filter_deleted">Gelöschte Nachrichten</string>
+    <string name="mod_log_filter_pin_unpin">Anpinnen und Entpinnen</string>
+    <string name="mod_log_filter_polls">Umfragen</string>
+    <string name="mod_log_filter_title">Titeländerung</string>
+    <string name="mod_log_filter_timeouts">Benutzer-Timeouts</string>
+    <string name="mod_log_banned">gesperrt</string>
+    <string name="mod_log_banned_by">gesperrt von</string>
+    <string name="mod_log_unbanned">entsperrt</string>
+    <string name="mod_log_unbanned_by">entsperrt von</string>
+    <string name="mod_log_timed_out">Timeout erhalten</string>
+    <string name="mod_log_timeout_removed">Timeout aufgehoben für</string>
+    <string name="mod_log_pinned">hat eine Nachricht angeheftet</string>
+    <string name="mod_log_unpinned">hat die Nachricht losgelöst</string>
+    <string name="mod_log_deleted">hat eine Nachricht gelöscht</string>
+    <string name="mod_log_word_added">hat ein verbotenes Wort hinzugefügt</string>
+    <string name="mod_log_word_removed">hat ein verbotenes Wort entfernt</string>
+    <string name="mod_log_created_poll">hat eine Umfrage erstellt</string>
+    <string name="mod_log_ended_poll">hat eine Umfrage beendet</string>
+    <string name="mod_log_cancelled_poll">hat eine Umfrage abgebrochen</string>
+    <string name="mod_log_changed_category">hat die Kategorie geändert</string>
+    <string name="mod_log_changed_title">hat den Titel aktualisiert</string>
+    <string name="mod_log_changed_mode">hat den Chat-Modus geändert</string>
+    <string name="mod_log_changed_language">hat die Sprache geändert</string>
+    <string name="mod_log_changed_mature">hat den Altersfreigabe-Modus geändert</string>
+
+    <!-- API Errors -->
+    <string name="error_server_unavailable">Server antwortet nicht (%1$d). Bitte erneut versuchen.</string>
+    <string name="error_network_unavailable">Verbindungsfehler. Bitte erneut versuchen.</string>
+
     <!-- Moderator Actions -->
     <string name="mod_actions_title">Kanalaktionen</string>
     <string name="mod_slow_mode">Slow Mode</string>
