@@ -30,6 +30,7 @@ class FeaturedHeroController(private val activity: MobilePlayerActivity) {
     private var isBound = false
     private var isMuted = true
     private var thumbnailOnlyMode = false
+    private var isUserDragging = false
 
     private val autoAdvanceRunnable = Runnable {
         val p = pager ?: return@Runnable
@@ -46,18 +47,32 @@ class FeaturedHeroController(private val activity: MobilePlayerActivity) {
             currentPosition = position
             updateIndicators(position)
             resetAutoAdvanceTimer()
-            pager?.post { attachPlayerToPage(position) }
+            if (isUserDragging) {
+                // User swipe: defer until the current layout pass is done
+                pager?.post { attachPlayerToPage(position) }
+            } else {
+                // Programmatic/auto-advance: start the stream immediately as animation begins
+                attachPlayerToPage(position)
+            }
             scheduleChatSwitch(position)
         }
 
         override fun onPageScrollStateChanged(state: Int) {
             if (state == ViewPager2.SCROLL_STATE_DRAGGING) {
+                isUserDragging = true
                 previewPlayer.pause()
                 mainHandler.removeCallbacks(autoAdvanceRunnable)
             } else if (state == ViewPager2.SCROLL_STATE_IDLE) {
-                val channel = adapter?.getChannel(currentPosition) ?: return
-                if (!thumbnailOnlyMode && previewPlayer.isWifi()) {
-                    previewPlayer.loadAndPlay(channel.playbackUrl)
+                isUserDragging = false
+                if (!thumbnailOnlyMode) {
+                    // Always re-attach here — guards against wrap-around where the ViewHolder
+                    // for the target page may not have been ready when onPageSelected fired.
+                    attachPlayerToPage(currentPosition)
+                    val count = adapter?.itemCount ?: 0
+                    if (count > 1) {
+                        val next = adapter?.getChannel((currentPosition + 1) % count)
+                        if (next != null) previewPlayer.preloadNext(next.playbackUrl)
+                    }
                 }
                 scheduleAutoAdvance()
             }
@@ -150,6 +165,9 @@ class FeaturedHeroController(private val activity: MobilePlayerActivity) {
     fun updateChannels(channels: List<ChannelItem>) {
         adapter?.updateChannels(channels)
         buildIndicators(channels.size)
+        previewPlayer.reset()
+        currentPosition = 0
+        pager?.setCurrentItem(0, false)
     }
 
     fun currentChannel(): ChannelItem? = adapter?.getChannel(currentPosition)
@@ -172,7 +190,7 @@ class FeaturedHeroController(private val activity: MobilePlayerActivity) {
             previewPlayer.attachTo(vh.playerContainer)
             updateMuteIcon(vh.muteBtn)
             val channel = adapter?.getChannel(currentPosition) ?: return@post
-            if (previewPlayer.isWifi()) previewPlayer.loadAndPlay(channel.playbackUrl)
+            if (previewPlayer.isWifi()) previewPlayer.activateOrLoad(channel.playbackUrl)
             chatPreview?.switchTo(channel.chatroomId, channel.id.toLongOrNull(), force = forceChat)
         }
     }
@@ -180,9 +198,7 @@ class FeaturedHeroController(private val activity: MobilePlayerActivity) {
     fun enterThumbnailMode() {
         if (thumbnailOnlyMode) return
         thumbnailOnlyMode = true
-        // Detach (not just pause) the shared IVS player. pause() left the PlayerView attached
-        // and its container visible, so a paused/black surface stayed on top of the thumbnail
-        // for every page the player had touched.
+        // Detach (not just pause) so the TextureView surface doesn't cover thumbnails.
         previewPlayer.detach()
         chatPreview?.pause()
         chatContainer?.visibility = View.GONE
@@ -247,28 +263,27 @@ class FeaturedHeroController(private val activity: MobilePlayerActivity) {
         isBound = false
     }
 
-    // Attach the shared IVS PlayerView to the currently-visible page's heroPlayerContainer
     private fun attachPlayerToPage(position: Int) {
         val rv = (pager?.getChildAt(0) as? RecyclerView) ?: return
         val vh = (rv.findViewHolderForAdapterPosition(position)
             ?: rv.findViewHolderForLayoutPosition(position)) as? FeaturedHeroAdapter.PageViewHolder
             ?: return
-        // In thumbnail mode, keep the IVS player off the pages entirely so its black surface
-        // never covers a thumbnail. Detaching also frees its previous (now-empty) container.
         if (thumbnailOnlyMode) {
             previewPlayer.detach()
             vh.muteBtn.visibility = View.GONE
+            return
+        }
+        val channel = adapter?.getChannel(position) ?: return
+        // If TextureView is already in the right container, just ensure playback is active
+        if (previewPlayer.textureView.parent == vh.playerContainer) {
+            if (previewPlayer.isWifi()) previewPlayer.activateOrLoad(channel.playbackUrl)
             return
         }
         previewPlayer.detach()
         previewPlayer.attachTo(vh.playerContainer)
         vh.muteBtn.visibility = View.VISIBLE
         updateMuteIcon(vh.muteBtn)
-
-        val channel = adapter?.getChannel(position) ?: return
-        if (previewPlayer.isWifi()) {
-            previewPlayer.loadAndPlay(channel.playbackUrl)
-        }
+        if (previewPlayer.isWifi()) previewPlayer.activateOrLoad(channel.playbackUrl)
     }
 
     private fun scheduleChatSwitch(position: Int) {
@@ -330,7 +345,7 @@ class FeaturedHeroController(private val activity: MobilePlayerActivity) {
 
     private fun toggleMute() {
         isMuted = !isMuted
-        previewPlayer.playerView.player.isMuted = isMuted
+        previewPlayer.isMuted = isMuted
         if (!isMuted) {
             mainHandler.removeCallbacks(autoAdvanceRunnable)
         } else {
