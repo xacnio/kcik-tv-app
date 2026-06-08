@@ -3,8 +3,6 @@ package dev.xacnio.kciktv.mobile.ui.chat
 import android.util.Log
 import android.view.View
 import android.widget.Toast
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -74,35 +72,27 @@ class ActivityFeedManager(private val activity: MobilePlayerActivity) {
         dialog.setContentView(view)
         activity.trackBottomSheet(dialog)
 
-        val scrollView = view.findViewById<androidx.core.widget.NestedScrollView>(R.id.activityFeedScrollView)
-
-        dialog.setOnShowListener { shown ->
-            val sheet = (shown as BottomSheetDialog)
-                .findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
-            sheet?.let { bs ->
-                val behavior = BottomSheetBehavior.from(bs)
-                val screenHeight = activity.resources.displayMetrics.heightPixels
-                behavior.expandedOffset = (screenHeight * 0.35).toInt()
-                behavior.isFitToContents = false
-                behavior.skipCollapsed = true
-                behavior.isHideable = false
-                behavior.isDraggable = false
-                behavior.state = BottomSheetBehavior.STATE_EXPANDED
-                behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-                    override fun onStateChanged(bottomSheet: View, newState: Int) {
-                        if (newState != BottomSheetBehavior.STATE_EXPANDED &&
-                            newState != BottomSheetBehavior.STATE_DRAGGING &&
-                            newState != BottomSheetBehavior.STATE_SETTLING) {
-                            behavior.state = BottomSheetBehavior.STATE_EXPANDED
-                        }
+        val sheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+        sheet?.let { bs ->
+            val behavior = BottomSheetBehavior.from(bs)
+            val screenHeight = activity.resources.displayMetrics.heightPixels
+            behavior.expandedOffset = (screenHeight * 0.35).toInt()
+            behavior.maxHeight = (screenHeight * 0.65).toInt()
+            behavior.isFitToContents = false
+            behavior.skipCollapsed = true
+            behavior.isHideable = false
+            behavior.isDraggable = false
+            behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+                override fun onStateChanged(bottomSheet: View, newState: Int) {
+                    if (newState != BottomSheetBehavior.STATE_EXPANDED &&
+                        newState != BottomSheetBehavior.STATE_DRAGGING &&
+                        newState != BottomSheetBehavior.STATE_SETTLING) {
+                        behavior.state = BottomSheetBehavior.STATE_EXPANDED
                     }
-                    override fun onSlide(bottomSheet: View, slideOffset: Float) {}
-                })
-
-                val navBar = ViewCompat.getRootWindowInsets(activity.window.decorView)
-                    ?.getInsets(WindowInsetsCompat.Type.navigationBars())?.bottom ?: 0
-                scrollView.setPadding(0, 0, 0, navBar)
-            }
+                }
+                override fun onSlide(bottomSheet: View, slideOffset: Float) {}
+            })
         }
 
         val loading = view.findViewById<View>(R.id.activityFeedLoading)
