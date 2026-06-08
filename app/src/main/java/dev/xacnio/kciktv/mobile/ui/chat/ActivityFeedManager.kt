@@ -3,6 +3,8 @@ package dev.xacnio.kciktv.mobile.ui.chat
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -72,6 +74,8 @@ class ActivityFeedManager(private val activity: MobilePlayerActivity) {
         dialog.setContentView(view)
         activity.trackBottomSheet(dialog)
 
+        val scrollView = view.findViewById<androidx.core.widget.NestedScrollView>(R.id.activityFeedScrollView)
+
         dialog.setOnShowListener { shown ->
             val sheet = (shown as BottomSheetDialog)
                 .findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
@@ -94,6 +98,10 @@ class ActivityFeedManager(private val activity: MobilePlayerActivity) {
                     }
                     override fun onSlide(bottomSheet: View, slideOffset: Float) {}
                 })
+
+                val navBar = ViewCompat.getRootWindowInsets(activity.window.decorView)
+                    ?.getInsets(WindowInsetsCompat.Type.navigationBars())?.bottom ?: 0
+                scrollView.setPadding(0, 0, 0, navBar)
             }
         }
 
