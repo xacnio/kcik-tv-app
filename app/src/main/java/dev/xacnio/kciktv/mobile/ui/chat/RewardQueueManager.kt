@@ -142,8 +142,8 @@ class RewardQueueManager(
             sheet?.let { bs ->
                 val behavior = BottomSheetBehavior.from(bs)
                 val screenHeight = activity.resources.displayMetrics.heightPixels
-                behavior.expandedOffset = (screenHeight * 0.35).toInt()
-                behavior.isFitToContents = false
+                behavior.maxHeight = (screenHeight * 0.65).toInt()
+                behavior.isFitToContents = true
                 behavior.skipCollapsed = true
                 behavior.isHideable = false
                 behavior.isDraggable = false
