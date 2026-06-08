@@ -12,6 +12,7 @@ package dev.xacnio.kciktv.mobile.ui.player
 
 import dev.xacnio.kciktv.shared.ui.player.MediaSessionHelper
 
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -19,8 +20,10 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Build
+import android.support.v4.media.session.MediaSessionCompat
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
+import androidx.media.app.NotificationCompat as MediaNotificationCompat
 import com.amazonaws.ivs.player.Player
 import dev.xacnio.kciktv.mobile.MobilePlayerActivity
 import dev.xacnio.kciktv.shared.PlaybackService
@@ -86,102 +89,138 @@ class PlaybackNotificationManager(
         overrideIsPlaying: Boolean? = null,
         ivsPlayer: Player?,
         currentChannel: ChannelItem?,
-        currentProfileBitmap: Bitmap?
+        currentProfileBitmap: Bitmap?,
+        forceService: Boolean = false,
+        sessionToken: MediaSessionCompat.Token? = null
     ) {
         val isPlaying = overrideIsPlaying ?: (ivsPlayer?.state == Player.State.PLAYING)
         val channel = currentChannel
+        val isChatAliveMode = forceService && !isBackgroundAudioEnabled
 
         val notificationIntent = Intent(activity, MobilePlayerActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         }
         val pendingIntent = PendingIntent.getActivity(activity, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
 
-        val deleteIntent = Intent(activity, PlaybackService::class.java).apply {
-            action = "STOP"
-        }
-        val deletePendingIntent = PendingIntent.getService(activity, 100, deleteIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        // Chat-alive notifications repost themselves when dismissed so the user can't swipe them away.
+        val deleteAction = if (isChatAliveMode) "REPOST_CHAT" else "STOP"
+        val deletePendingIntent = PendingIntent.getService(activity, 100,
+            Intent(activity, PlaybackService::class.java).apply { action = deleteAction },
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 
-        // Setup PendingIntents
-        val playPauseIntent = PendingIntent.getBroadcast(activity, CONTROL_TYPE_PLAY_PAUSE + 100,
-            Intent(PIP_CONTROL_ACTION).apply {
-                setPackage(activity.packageName)
-                putExtra(EXTRA_CONTROL_TYPE, CONTROL_TYPE_PLAY_PAUSE)
-                putExtra("from_notification", true)
-            },
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT)
-
-        val stopIntentBroadcast = PendingIntent.getService(activity, 101,
+        val stopIntent = PendingIntent.getService(activity, 101,
             Intent(activity, PlaybackService::class.java).apply { action = "STOP" },
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT)
 
-        // Mute Intent
-        val muteIntent = PendingIntent.getBroadcast(activity, CONTROL_TYPE_MUTE,
-            Intent(PIP_CONTROL_ACTION).apply {
-                setPackage(activity.packageName)
-                putExtra(EXTRA_CONTROL_TYPE, CONTROL_TYPE_MUTE)
-                putExtra("from_notification", true)
-            },
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-
-        // Current Mute State
-        val isMuted = ivsPlayer?.volume == 0f
-        val muteIconRes = if (isMuted) R.drawable.ic_volume_off else R.drawable.ic_volume
-
-        // Collapsed View (No Profile Picture)
-        val remoteViewsCollapsed = RemoteViews(activity.packageName, R.layout.notification_tiktok_style)
-        remoteViewsCollapsed.setImageViewResource(R.id.btn_notification_mute, muteIconRes)
-        remoteViewsCollapsed.setOnClickPendingIntent(R.id.btn_notification_mute, muteIntent)
-
-        val qualityText = ivsPlayer?.quality?.let { "${it.height}p" } ?: ""
-        val notifText = if (qualityText.isNotEmpty()) "${activity.getString(R.string.currently_live)} • $qualityText" else activity.getString(R.string.currently_live)
-
-        remoteViewsCollapsed.setTextViewText(R.id.notification_title, channel?.username ?: "KCIKTV")
-        remoteViewsCollapsed.setTextViewText(R.id.notification_text, notifText)
-        remoteViewsCollapsed.setImageViewResource(R.id.btn_notification_play_pause,
-            if (isPlaying) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play)
-        remoteViewsCollapsed.setOnClickPendingIntent(R.id.btn_notification_play_pause, playPauseIntent)
-        remoteViewsCollapsed.setOnClickPendingIntent(R.id.btn_notification_stop, stopIntentBroadcast)
-
-        // Expanded View (With Profile Picture)
-        val remoteViewsExpanded = RemoteViews(activity.packageName, R.layout.notification_tiktok_style_expanded)
-        remoteViewsExpanded.setImageViewResource(R.id.btn_notification_mute, muteIconRes)
-        remoteViewsExpanded.setOnClickPendingIntent(R.id.btn_notification_mute, muteIntent)
-
-        remoteViewsExpanded.setTextViewText(R.id.notification_title, channel?.username ?: "KCIKTV")
-        remoteViewsExpanded.setTextViewText(R.id.notification_text, notifText)
-
-        if (currentProfileBitmap != null) {
-            remoteViewsExpanded.setImageViewBitmap(R.id.notification_large_icon, currentProfileBitmap)
+        val notifSubtitle = if (isChatAliveMode) {
+            activity.getString(R.string.notif_chat_connected)
         } else {
-            remoteViewsExpanded.setImageViewResource(R.id.notification_large_icon, getThemeIconRes())
+            val qualityText = ivsPlayer?.quality?.let { "${it.height}p" } ?: ""
+            if (qualityText.isNotEmpty()) "${activity.getString(R.string.currently_live)} • $qualityText"
+            else activity.getString(R.string.currently_live)
         }
 
-        remoteViewsExpanded.setImageViewResource(R.id.btn_notification_play_pause,
-            if (isPlaying) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play)
-        remoteViewsExpanded.setOnClickPendingIntent(R.id.btn_notification_play_pause, playPauseIntent)
-        remoteViewsExpanded.setOnClickPendingIntent(R.id.btn_notification_stop, stopIntentBroadcast)
+        val notification: Notification = if (isChatAliveMode) {
+            // Chat-alive: custom RemoteViews without media controls
+            val remoteViewsCollapsed = RemoteViews(activity.packageName, R.layout.notification_tiktok_style)
+            remoteViewsCollapsed.setTextViewText(R.id.notification_title, channel?.username ?: "KCIKTV")
+            remoteViewsCollapsed.setTextViewText(R.id.notification_text, notifSubtitle)
+            remoteViewsCollapsed.setOnClickPendingIntent(R.id.btn_notification_stop, stopIntent)
+            remoteViewsCollapsed.setViewVisibility(R.id.btn_notification_mute, android.view.View.GONE)
+            remoteViewsCollapsed.setViewVisibility(R.id.btn_notification_play_pause, android.view.View.GONE)
 
-        val notification = NotificationCompat.Builder(activity, CHANNEL_ID)
-            .setSmallIcon(getThemeIconRes())
-            .setColor(prefs.themeColor)
-            .setWhen(System.currentTimeMillis())
-            .setCustomContentView(remoteViewsCollapsed)
-            .setCustomBigContentView(remoteViewsExpanded)
-            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
-            .setContentIntent(pendingIntent)
-            .setDeleteIntent(deletePendingIntent)
-            .setOngoing(isPlaying)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setCategory(NotificationCompat.CATEGORY_SERVICE)
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .build()
+            val remoteViewsExpanded = RemoteViews(activity.packageName, R.layout.notification_tiktok_style_expanded)
+            remoteViewsExpanded.setTextViewText(R.id.notification_title, channel?.username ?: "KCIKTV")
+            remoteViewsExpanded.setTextViewText(R.id.notification_text, notifSubtitle)
+            remoteViewsExpanded.setOnClickPendingIntent(R.id.btn_notification_stop, stopIntent)
+            if (currentProfileBitmap != null) {
+                remoteViewsExpanded.setImageViewBitmap(R.id.notification_large_icon, currentProfileBitmap)
+            } else {
+                remoteViewsExpanded.setImageViewResource(R.id.notification_large_icon, getThemeIconRes())
+            }
+            remoteViewsExpanded.setViewVisibility(R.id.btn_notification_mute, android.view.View.GONE)
+            remoteViewsExpanded.setViewVisibility(R.id.btn_notification_play_pause, android.view.View.GONE)
+
+            NotificationCompat.Builder(activity, CHANNEL_ID)
+                .setSmallIcon(getThemeIconRes())
+                .setColor(prefs.themeColor)
+                .setWhen(System.currentTimeMillis())
+                .setCustomContentView(remoteViewsCollapsed)
+                .setCustomBigContentView(remoteViewsExpanded)
+                .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+                .setContentIntent(pendingIntent)
+                .setDeleteIntent(deletePendingIntent)
+                .setOngoing(true)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setCategory(NotificationCompat.CATEGORY_SERVICE)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setGroup("kciktv.playback")
+                .build()
+        } else {
+            // Normal playback: standard MediaStyle notification
+            // Mute and stop are registered as PlaybackState actions in MediaSessionHelper
+            // so they appear in the Android 12+ media widget. The notification shade
+            // also shows them via addAction() below.
+            val isMuted = ivsPlayer?.volume == 0f
+            val muteIntent = PendingIntent.getBroadcast(activity, CONTROL_TYPE_MUTE,
+                Intent(PIP_CONTROL_ACTION).apply {
+                    setPackage(activity.packageName)
+                    putExtra(EXTRA_CONTROL_TYPE, CONTROL_TYPE_MUTE)
+                    putExtra("from_notification", true)
+                },
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+            val playPauseIntent = PendingIntent.getBroadcast(activity, CONTROL_TYPE_PLAY_PAUSE + 100,
+                Intent(PIP_CONTROL_ACTION).apply {
+                    setPackage(activity.packageName)
+                    putExtra(EXTRA_CONTROL_TYPE, CONTROL_TYPE_PLAY_PAUSE)
+                    putExtra("from_notification", true)
+                },
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT)
+
+            val mediaStyle = MediaNotificationCompat.MediaStyle()
+                .setShowActionsInCompactView(0, 1, 2)
+            if (sessionToken != null) {
+                mediaStyle.setMediaSession(sessionToken)
+            }
+
+            NotificationCompat.Builder(activity, CHANNEL_ID)
+                .setSmallIcon(getThemeIconRes())
+                .setContentTitle(channel?.username ?: "KCIKTV")
+                .setContentText(notifSubtitle)
+                .setLargeIcon(currentProfileBitmap)
+                .setColor(prefs.themeColor)
+                .addAction(NotificationCompat.Action(         // action 0: mute (left)
+                    if (isMuted) R.drawable.ic_volume_off else R.drawable.ic_volume,
+                    if (isMuted) "Unmute" else "Mute",
+                    muteIntent
+                ))
+                .addAction(NotificationCompat.Action(         // action 1: play/pause (center)
+                    if (isPlaying) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play,
+                    if (isPlaying) "Pause" else "Play",
+                    playPauseIntent
+                ))
+                .addAction(NotificationCompat.Action(         // action 2: X/stop (right)
+                    R.drawable.ic_close,
+                    "Stop",
+                    stopIntent
+                ))
+                .setStyle(mediaStyle)
+                .setContentIntent(pendingIntent)
+                .setDeleteIntent(deletePendingIntent)
+                .setOngoing(isPlaying)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setCategory(NotificationCompat.CATEGORY_TRANSPORT)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setGroup("kciktv.playback")
+                .build()
+        }
 
         // Create/Update notification
         val notificationManager = activity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(NOTIFICATION_ID, notification)
 
         // Update service even if paused
-        if (isBackgroundAudioEnabled) {
+        if (isBackgroundAudioEnabled || forceService) {
             val serviceIntent = Intent(activity, PlaybackService::class.java).apply {
                 putExtra("notification", notification)
                 putExtra("notificationId", NOTIFICATION_ID)

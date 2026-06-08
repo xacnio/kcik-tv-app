@@ -70,16 +70,7 @@ class MobilePlayerBroadcastManager(private val activity: MobilePlayerActivity) {
                     activity.setForcedQualityLimit("360p")
                 }
                 activity.CONTROL_TYPE_MUTE -> {
-                    val isMuted = activity.ivsPlayer?.volume == 0f
-                    activity.ivsPlayer?.volume = if (isMuted) 1f else 0f
-
-                    // Sync UI
-                    activity.updatePiPUi(overrideIsPlaying = null)
-
-                    // Update Notification
-                    if (activity.isBackgroundAudioEnabled) {
-                        activity.showNotification(overrideIsPlaying = null)
-                    }
+                    activity.playerControlsManager.toggleMute()
                 }
             }
         }

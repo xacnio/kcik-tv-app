@@ -40,14 +40,21 @@ class MediaSessionManager(
                 activity.updatePiPUi(false)
                 if (activity.isBackgroundAudioEnabled) showNotification(false)
             }
+            override fun onMuteRequested() {
+                activity.playerControlsManager.toggleMute()
+            }
+            override fun onStopRequested() {
+                hideNotification()
+            }
         })
         mediaSessionHelper?.setupMediaSession()
     }
 
     fun updateMediaSessionState(overrideIsPlaying: Boolean? = null) {
         val isPlaying = overrideIsPlaying ?: (activity.ivsPlayer?.state == Player.State.PLAYING)
-        mediaSessionHelper?.updateMediaSessionState(isPlaying, activity.currentChannel, activity.currentProfileBitmap)
-        
+        val isMuted = activity.ivsPlayer?.volume == 0f
+        mediaSessionHelper?.updateMediaSessionState(isPlaying, isMuted, activity.currentChannel, activity.currentProfileBitmap)
+
         if (activity.isBackgroundAudioEnabled) {
             showNotification()
         }
@@ -57,12 +64,14 @@ class MediaSessionManager(
         playbackNotificationManager.hideNotification(mediaSessionHelper)
     }
 
-    fun showNotification(overrideIsPlaying: Boolean? = null) {
+    fun showNotification(overrideIsPlaying: Boolean? = null, forceService: Boolean = false) {
         playbackNotificationManager.showNotification(
             overrideIsPlaying,
             activity.ivsPlayer,
             activity.currentChannel,
-            activity.currentProfileBitmap
+            activity.currentProfileBitmap,
+            forceService = forceService,
+            sessionToken = mediaSessionHelper?.getSessionToken()
         )
     }
 

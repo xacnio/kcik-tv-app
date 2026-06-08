@@ -54,15 +54,20 @@ class PlayerControlsManager(private val activity: MobilePlayerActivity) {
     }
 
     /**
-     * Toggles between muted and unmuted states.
+     * Toggles mute and syncs all surfaces: in-app button, PiP, notification, MediaSession.
+     * Uses player.volume as the ground truth so any caller path stays in sync.
      */
     fun toggleMute() {
         ivsPlayer?.let { player ->
-            activity.isMuted = !activity.isMuted
-            player.volume = if (activity.isMuted) 0f else 1f
+            val newMuted = player.volume != 0f
+            activity.isMuted = newMuted
+            player.volume = if (newMuted) 0f else 1f
             binding.muteButton.setImageResource(
-                if (activity.isMuted) R.drawable.ic_volume_off else R.drawable.ic_volume
+                if (newMuted) R.drawable.ic_volume_off else R.drawable.ic_volume
             )
+            activity.updatePiPUi()
+            activity.updateMediaSessionState()
+            if (activity.isBackgroundAudioEnabled) activity.showNotification()
         }
     }
 

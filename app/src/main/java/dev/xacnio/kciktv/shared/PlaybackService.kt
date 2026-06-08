@@ -17,11 +17,14 @@ import android.util.Log
 import dev.xacnio.kciktv.mobile.MobilePlayerActivity
 
 class PlaybackService : Service() {
-    
+
     companion object {
         const val ACTION_STOP_PLAYBACK = "dev.xacnio.kciktv.STOP_PLAYBACK"
     }
-    
+
+    private var lastNotification: Notification? = null
+    private var lastNotificationId: Int = 43
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -32,7 +35,17 @@ class PlaybackService : Service() {
             stopSelf()
             return START_NOT_STICKY
         }
-        
+
+        // Handle REPOST_CHAT: user swiped the chat-alive notification; repost it so it's sticky.
+        if (intent?.action == "REPOST_CHAT") {
+            val notif = lastNotification
+            if (notif != null) {
+                Log.d("PlaybackService", "REPOST_CHAT - reposting chat notification")
+                startForeground(lastNotificationId, notif)
+            }
+            return START_NOT_STICKY
+        }
+
         val notification = if (android.os.Build.VERSION.SDK_INT >= 33) {
             intent?.getParcelableExtra("notification", Notification::class.java)
         } else {
@@ -40,11 +53,13 @@ class PlaybackService : Service() {
             intent?.getParcelableExtra<Notification>("notification")
         }
         val notificationId = intent?.getIntExtra("notificationId", 42) ?: 42
-        
+
         if (notification != null) {
+            lastNotification = notification
+            lastNotificationId = notificationId
             startForeground(notificationId, notification)
         }
-        
+
         return START_NOT_STICKY
     }
 
