@@ -3145,16 +3145,18 @@ class MobilePlayerActivity : FragmentActivity() {
         Log.d(TAG, "  previousScreenId=$previousScreenId, returnToProfileSlug=$returnToProfileSlug")
         Log.d(TAG, "  currentChannel=${currentChannel?.slug}")
         
-        // Enter mini player mode only if the player is actively streaming
+        // Enter mini player mode only if the player is actively streaming (playing or buffering)
         if (!miniPlayerManager.isMiniPlayerMode) {
-            if (isStreamPlaying) {
+            if (isStreamActive) {
                 Log.d(TAG, "  entering mini player mode")
                 enterMiniPlayerMode()
             } else {
-                // Offline/error — fully close the player screen instead of mini player
-                Log.d(TAG, "  stream not playing, closing player screen")
+                // Definitively offline — fully close the player and stop chat
+                Log.d(TAG, "  stream offline, closing player screen")
                 binding.playerScreenContainer.visibility = View.GONE
                 ivsPlayer?.pause()
+                stopChatWebSocket()
+                hideNotification()
             }
         }
         
