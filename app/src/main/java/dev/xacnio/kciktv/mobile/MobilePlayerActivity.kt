@@ -253,6 +253,7 @@ class MobilePlayerActivity : FragmentActivity() {
     internal var currentChatErrorMessage: String? = null // Persist chat error across PiP
     internal var isChatPausedForLowBattery = false
     internal var chatWasDisconnected = false
+    private var keepingChatAliveInBackground = false
 
     // Channels
     internal var allChannels = mutableListOf<ChannelItem>()
@@ -630,6 +631,14 @@ class MobilePlayerActivity : FragmentActivity() {
         dev.xacnio.kciktv.mobile.ui.chat.ModActionsManager(this, repository, prefs, overlayManager)
     }
 
+    internal val activityFeedManager by lazy {
+        dev.xacnio.kciktv.mobile.ui.chat.ActivityFeedManager(this)
+    }
+
+    internal val modLogManager by lazy {
+        dev.xacnio.kciktv.mobile.ui.chat.ModLogManager(this)
+    }
+
     internal val infoPanelManager by lazy {
         dev.xacnio.kciktv.mobile.ui.player.InfoPanelManager(this)
     }
@@ -887,26 +896,26 @@ class MobilePlayerActivity : FragmentActivity() {
                 // Initial visuals
                 updateNavVisuals(0)
 
-                val navButtons = listOf(binding.btnNavHome, binding.btnNavBrowse, binding.btnNavFollowing, binding.btnNavSearch)
+                val navButtons = listOf(binding.btnNavHome, binding.btnNavBrowse, binding.btnNavFollowing)
                 val navIds = listOf(
-                    dev.xacnio.kciktv.R.id.nav_home, 
-                    dev.xacnio.kciktv.R.id.nav_browse, 
-                    dev.xacnio.kciktv.R.id.nav_following, 
-                    dev.xacnio.kciktv.R.id.nav_search
+                    dev.xacnio.kciktv.R.id.nav_home,
+                    dev.xacnio.kciktv.R.id.nav_browse,
+                    dev.xacnio.kciktv.R.id.nav_following
                 )
-                
-                // Click listeners
+
+                // Click listeners for tab buttons (these switch the active tab)
                 for (i in navButtons.indices) {
                     navButtons[i].setOnClickListener {
-                        // Directly trigger navigation logic
                         handleNavigation(navIds[i])
-                        
-                        // Sync invisible BottomNavigationView state
-                        // This triggers OnItemSelectedListener which now calls updateNavVisualsById
                         isNavigationProgrammatic = true
                         binding.mainBottomNavigation.selectedItemId = navIds[i]
                         isNavigationProgrammatic = false
                     }
+                }
+
+                // Search opens an overlay — does not switch the active tab
+                binding.btnNavSearch.setOnClickListener {
+                    searchUiManager.showSearchScreen()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -1115,6 +1124,9 @@ class MobilePlayerActivity : FragmentActivity() {
         }
     }
 
+    internal val isStreamPlaying: Boolean
+        get() = ivsPlayer?.state == Player.State.PLAYING
+
     internal fun enterMiniPlayerMode() {
         miniPlayerManager.enterMiniPlayerMode()
         homeScreenManager.enterThumbnailMode()
@@ -1250,8 +1262,8 @@ class MobilePlayerActivity : FragmentActivity() {
 
     private fun getThemeIconRes(): Int = mediaSessionManager.getThemeIconRes()
 
-    internal fun showNotification(overrideIsPlaying: Boolean? = null) =
-        mediaSessionManager.showNotification(overrideIsPlaying)
+    internal fun showNotification(overrideIsPlaying: Boolean? = null, forceService: Boolean = false) =
+        mediaSessionManager.showNotification(overrideIsPlaying, forceService = forceService)
 
     private fun applySavedLanguage() {
         val savedLang = prefs.language
@@ -1647,8 +1659,6 @@ class MobilePlayerActivity : FragmentActivity() {
         // Mute button
         binding.muteButton.setOnClickListener {
             toggleMute()
-            updatePiPUi(overrideIsPlaying = null)
-            if (isBackgroundAudioEnabled) showNotification()
         }
         // Quality badge tap to open quality selector
         binding.videoQualityBadge.setOnClickListener {
@@ -1740,6 +1750,17 @@ class MobilePlayerActivity : FragmentActivity() {
                     }
                 }
             }
+        }
+
+        // Activity Feed Button
+        binding.activityFeedButton.setOnClickListener {
+            val slug = currentChannel?.slug ?: return@setOnClickListener
+            activityFeedManager.showActivityFeed(slug)
+        }
+
+        // Mod Log Button
+        binding.modLogButton.setOnClickListener {
+            modLogManager.showModLog()
         }
 
         // Moderator Actions Menu Button
@@ -2003,18 +2024,16 @@ class MobilePlayerActivity : FragmentActivity() {
              }
         }
 
-        // Clear mentions for previous channel
-        mentionMessages.clear()
-        lastSeenMentionCount = 0
-        updateMentionsBadge()
-        
         currentChannel = channel
         currentChannelIndex = allChannels.indexOfFirst { it.slug == channel.slug }
         
         // Clear previous channel state
         emoteComboManager.clear()
         floatingEmoteManager.clear()
-        
+
+        // Switch mention context to the new channel (loads per-channel persisted mentions)
+        channel.slug?.let { mentionsManager.switchToChannel(it) }
+
         // Save as last watched
         prefs.lastWatchedChannelSlug = channel.slug
         channel.slug?.let { prefs.saveRecentWatchedSlug(it) }
@@ -2238,7 +2257,7 @@ class MobilePlayerActivity : FragmentActivity() {
         playerManager.loadStreamUrl(channel)
     }
 
-    private val sessionManager = dev.xacnio.kciktv.mobile.ui.session.ChannelSessionManager(this)
+    internal val sessionManager = dev.xacnio.kciktv.mobile.ui.session.ChannelSessionManager(this)
 
     private fun connectToChat(channel: ChannelItem) {
         sessionManager.startChannelSession(channel)
@@ -2555,6 +2574,12 @@ class MobilePlayerActivity : FragmentActivity() {
             }
         }
         
+        // If we started the foreground service just to keep chat alive, stop it now
+        if (keepingChatAliveInBackground) {
+            keepingChatAliveInBackground = false
+            hideNotification()
+        }
+
         // Resume UI updates and flush buffer
         chatUiManager.resumeChatUi()
 
@@ -2621,14 +2646,20 @@ class MobilePlayerActivity : FragmentActivity() {
         // unless explicitly requested or via PiP (which is already handled above)
         val isPlayerVisible = binding.playerScreenContainer.visibility == View.VISIBLE
         
-        val shouldKeepPlaying = (prefs.backgroundAudioEnabled || isBackgroundAudioEnabled) && 
+        val shouldKeepPlaying = (prefs.backgroundAudioEnabled || isBackgroundAudioEnabled) &&
                                isPlayerActive && isPlayerVisible
-                               
+
+        // Keep the process alive when chat is connected (even for offline channels), so the OS
+        // does not kill background WebSocket threads. The notification provides the foreground
+        // service anchor; chat UI is paused to save CPU but the socket stays open.
+        val isChatConnected = ::chatConnectionManager.isInitialized && chatConnectionManager.isConnected()
+        val shouldKeepChatAlive = !shouldKeepPlaying && currentChannel != null && isChatConnected
+
         if (shouldKeepPlaying) {
             showNotification()
             // Enforce 360p for background playback
             setForcedQualityLimit("360p")
-            
+
             // Battery Saver: disconnect chat (shows a "Chat paused" divider) BEFORE
             // pauseChatUi so its background-messages divider is suppressed. Otherwise chat
             // keeps buffering in the background as usual.
@@ -2640,6 +2671,12 @@ class MobilePlayerActivity : FragmentActivity() {
             // Pause UI updates for chat while in background to save CPU/Battery.
             // Data will still be received and buffered.
             chatUiManager.pauseChatUi()
+        } else if (shouldKeepChatAlive) {
+            // Offline channel or stream not playing — start foreground service as an anchor
+            // so Android does not kill background threads holding the chat/viewer WebSockets.
+            keepingChatAliveInBackground = true
+            showNotification(forceService = true)
+            chatUiManager.pauseChatUi()
         } else {
             // Stop playback and notification if we are not staying in background mode
             if (!isInPip) {
@@ -2649,9 +2686,27 @@ class MobilePlayerActivity : FragmentActivity() {
         }
     }
 
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        if (intent?.getBooleanExtra("open_mentions", false) == true) {
+            intent.removeExtra("open_mentions")
+            mainHandler.post { mentionsManager.showMentionsBottomSheet() }
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         homeScreenManager.onResume()
+
+        // Dismiss lingering mention notifications — user is back in the app and will see them
+        mentionsManager.clearMentionNotifications()
+
+        // Handle mention intent (when app freshly started from a notification)
+        if (intent?.getBooleanExtra("open_mentions", false) == true) {
+            intent?.removeExtra("open_mentions")
+            mainHandler.postDelayed({ mentionsManager.showMentionsBottomSheet() }, 600)
+        }
 
         // Ensure UI state matches physical orientation (Fix for persistent split-screen bug)
         val isLandscape = resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
@@ -3082,10 +3137,17 @@ class MobilePlayerActivity : FragmentActivity() {
         Log.d(TAG, "  previousScreenId=$previousScreenId, returnToProfileSlug=$returnToProfileSlug")
         Log.d(TAG, "  currentChannel=${currentChannel?.slug}")
         
-        // Enter mini player mode first
+        // Enter mini player mode only if the player is actively streaming
         if (!miniPlayerManager.isMiniPlayerMode) {
-            Log.d(TAG, "  entering mini player mode")
-            enterMiniPlayerMode()
+            if (isStreamPlaying) {
+                Log.d(TAG, "  entering mini player mode")
+                enterMiniPlayerMode()
+            } else {
+                // Offline/error — fully close the player screen instead of mini player
+                Log.d(TAG, "  stream not playing, closing player screen")
+                binding.playerScreenContainer.visibility = View.GONE
+                ivsPlayer?.pause()
+            }
         }
         
         // Priority Check: If Feed is active (paused in background), return to it
@@ -3329,7 +3391,6 @@ class MobilePlayerActivity : FragmentActivity() {
                 true
             }
             R.id.nav_search -> {
-                if (isHomeScreenVisible) homeScreenManager.onHomeHidden()
                 searchUiManager.showSearchScreen()
                 true
             }
