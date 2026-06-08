@@ -749,4 +749,18 @@ interface ChannelApiService {
     suspend fun getFollowedCategories(
         @Header("Authorization") token: String
     ): Response<List<dev.xacnio.kciktv.shared.data.model.TopCategory>>
+
+    @Headers("Accept: application/json")
+    @GET("api/internal/v1/channels/{slug}/events")
+    suspend fun getChannelEvents(
+        @Path("slug") slug: String,
+        @Header("Authorization") token: String
+    ): Response<dev.xacnio.kciktv.shared.data.model.ChannelEventsResponse>
+
+    @Headers("Accept: application/json")
+    @GET("api/internal/v1/chatrooms/{chatroomId}/events")
+    suspend fun getChatroomEvents(
+        @Path("chatroomId") chatroomId: Long,
+        @Header("Authorization") token: String
+    ): Response<dev.xacnio.kciktv.shared.data.model.ChatroomEventsResponse>
 }

@@ -13,6 +13,7 @@ package dev.xacnio.kciktv.mobile.ui.chat
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.Toast
 import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.TextView
@@ -112,6 +113,21 @@ class RewardQueueManager(
         rebuildChips()
     }
 
+    fun prefetchData() {
+        if (rewards.isNotEmpty()) return
+        activity.lifecycleScope.launch {
+            runCatching {
+                val rewardsResult = fetchRewards()
+                val metaResult = fetchMetadata()
+                withContext(Dispatchers.Main) {
+                    if (rewardsResult != null) { rewards.clear(); rewards.addAll(rewardsResult) }
+                    if (metaResult != null) applyMetadata(metaResult)
+                    rebuildChips()
+                }
+            }.onFailure { Log.w(TAG, "Prefetch failed", it) }
+        }
+    }
+
     // --- Sheet -------------------------------------------------------------------------------
 
     fun showSheet() {
@@ -123,7 +139,26 @@ class RewardQueueManager(
         dialog.setOnShowListener {
             val sheet = (it as BottomSheetDialog)
                 .findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
-            sheet?.let { bs -> BottomSheetBehavior.from(bs).isHideable = false }
+            sheet?.let { bs ->
+                val behavior = BottomSheetBehavior.from(bs)
+                val screenHeight = activity.resources.displayMetrics.heightPixels
+                behavior.expandedOffset = (screenHeight * 0.35).toInt()
+                behavior.isFitToContents = false
+                behavior.skipCollapsed = true
+                behavior.isHideable = false
+                behavior.isDraggable = false
+                behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+                    override fun onStateChanged(bottomSheet: View, newState: Int) {
+                        if (newState != BottomSheetBehavior.STATE_EXPANDED &&
+                            newState != BottomSheetBehavior.STATE_DRAGGING &&
+                            newState != BottomSheetBehavior.STATE_SETTLING) {
+                            behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                        }
+                    }
+                    override fun onSlide(bottomSheet: View, slideOffset: Float) {}
+                })
+            }
         }
 
         flipper = view.findViewById(R.id.rewardQueueFlipper)
@@ -202,18 +237,50 @@ class RewardQueueManager(
         this.dialog = dialog
         dialog.show()
 
-        showLoading(true)
-        activity.lifecycleScope.launch {
-            runCatching {
-                val rewardsResult = fetchRewards()
-                val metaResult = fetchMetadata()
-                withContext(Dispatchers.Main) {
-                    if (rewardsResult != null) { rewards.clear(); rewards.addAll(rewardsResult) }
-                    if (metaResult != null) applyMetadata(metaResult)
-                    rebuildChips()
+        if (rewards.isEmpty()) {
+            showLoading(true)
+            activity.lifecycleScope.launch {
+                runCatching {
+                    val rewardsResult = fetchRewards()
+                    val metaResult = fetchMetadata()
+                    withContext(Dispatchers.Main) {
+                        if (rewardsResult != null) { rewards.clear(); rewards.addAll(rewardsResult) }
+                        if (metaResult != null) applyMetadata(metaResult)
+                        rebuildChips()
+                    }
+                }.onFailure { e ->
+                    Log.w(TAG, "Initial fetch failed", e)
+                    val code = e.message?.removePrefix("API error: ")?.toIntOrNull()
+                    withContext(Dispatchers.Main) {
+                        val msg = if (code != null && code >= 500)
+                            activity.getString(R.string.error_server_unavailable, code)
+                        else activity.getString(R.string.error_network_unavailable)
+                        Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show()
+                    }
                 }
-            }.onFailure { Log.w(TAG, "Initial fetch failed", it) }
-            withContext(Dispatchers.Main) { showLoading(false) }
+                withContext(Dispatchers.Main) { showLoading(false) }
+            }
+        } else {
+            activity.lifecycleScope.launch {
+                runCatching {
+                    val rewardsResult = fetchRewards()
+                    val metaResult = fetchMetadata()
+                    withContext(Dispatchers.Main) {
+                        if (this@RewardQueueManager.dialog == null) return@withContext
+                        if (rewardsResult != null) { rewards.clear(); rewards.addAll(rewardsResult) }
+                        if (metaResult != null) applyMetadata(metaResult)
+                        rebuildChips()
+                    }
+                }.onFailure { e ->
+                    Log.w(TAG, "Background refresh failed", e)
+                    val code = e.message?.removePrefix("API error: ")?.toIntOrNull()
+                    if (code != null && code >= 500) {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(activity, activity.getString(R.string.error_server_unavailable, code), Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -517,7 +584,7 @@ class RewardQueueManager(
     private suspend fun fetchRewards(): List<ChannelReward>? {
         val slug = channelSlug.takeIf { it.isNotEmpty() } ?: return null
         val token = prefs.authToken ?: return null
-        return activity.repository.getCustomRewards(slug, token).getOrNull()
+        return activity.repository.getCustomRewards(slug, token).getOrThrow()
     }
 
     private suspend fun fetchMetadata(): RedemptionMetadataData? {

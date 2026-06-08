@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#141414"
+    android:orientation="vertical">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="14dp">
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:src="@drawable/ic_history"
+            app:tint="@color/brand_green" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="12dp"
+            android:text="@string/mod_log_title"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <ProgressBar
+            android:id="@+id/modLogLoading"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_marginEnd="8dp"
+            android:visibility="gone"
+            android:indeterminateTint="@color/brand_green" />
+
+        <ImageButton
+            android:id="@+id/modLogClose"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_item_ripple"
+            android:src="@drawable/ic_close"
+            android:padding="8dp"
+            app:tint="#AAAAAA" />
+
+    </LinearLayout>
+
+    <!-- Filter chips -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:paddingHorizontal="12dp"
+        android:paddingBottom="6dp">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/modLogChipGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:singleLine="true"
+            app:singleSelection="false">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/modLogChipAll"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/activity_filter_all"
+                android:textColor="@color/text_primary"
+                app:chipBackgroundColor="@color/chip_background_color"
+                app:checkedIconTint="@color/brand_green"
+                android:checked="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/modLogChipBannedWords"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mod_log_filter_banned_words"
+                android:textColor="@color/text_primary"
+                app:chipBackgroundColor="@color/chip_background_color"
+                app:checkedIconTint="@color/brand_green"
+                android:checked="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/modLogChipBansUnbans"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mod_log_filter_bans_unbans"
+                android:textColor="@color/text_primary"
+                app:chipBackgroundColor="@color/chip_background_color"
+                app:checkedIconTint="@color/brand_green"
+                android:checked="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/modLogChipCategory"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mod_log_filter_category"
+                android:textColor="@color/text_primary"
+                app:chipBackgroundColor="@color/chip_background_color"
+                app:checkedIconTint="@color/brand_green"
+                android:checked="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/modLogChipChatMode"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mod_log_filter_chat_mode"
+                android:textColor="@color/text_primary"
+                app:chipBackgroundColor="@color/chip_background_color"
+                app:checkedIconTint="@color/brand_green"
+                android:checked="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/modLogChipLanguage"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mod_log_filter_language"
+                android:textColor="@color/text_primary"
+                app:chipBackgroundColor="@color/chip_background_color"
+                app:checkedIconTint="@color/brand_green"
+                android:checked="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/modLogChipMature"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mod_log_filter_mature"
+                android:textColor="@color/text_primary"
+                app:chipBackgroundColor="@color/chip_background_color"
+                app:checkedIconTint="@color/brand_green"
+                android:checked="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/modLogChipDeleted"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mod_log_filter_deleted"
+                android:textColor="@color/text_primary"
+                app:chipBackgroundColor="@color/chip_background_color"
+                app:checkedIconTint="@color/brand_green"
+                android:checked="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/modLogChipPin"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mod_log_filter_pin_unpin"
+                android:textColor="@color/text_primary"
+                app:chipBackgroundColor="@color/chip_background_color"
+                app:checkedIconTint="@color/brand_green"
+                android:checked="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/modLogChipPolls"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mod_log_filter_polls"
+                android:textColor="@color/text_primary"
+                app:chipBackgroundColor="@color/chip_background_color"
+                app:checkedIconTint="@color/brand_green"
+                android:checked="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/modLogChipTitle"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mod_log_filter_title"
+                android:textColor="@color/text_primary"
+                app:chipBackgroundColor="@color/chip_background_color"
+                app:checkedIconTint="@color/brand_green"
+                android:checked="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/modLogChipTimeouts"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mod_log_filter_timeouts"
+                android:textColor="@color/text_primary"
+                app:chipBackgroundColor="@color/chip_background_color"
+                app:checkedIconTint="@color/brand_green"
+                android:checked="true" />
+
+        </com.google.android.material.chip.ChipGroup>
+
+    </HorizontalScrollView>
+
+    <!-- Content -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="16dp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/modLogRecycler"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/modLogEmpty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="24dp"
+                android:text="@string/mod_log_empty"
+                android:textColor="#777777"
+                android:textSize="14sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/modLogError"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="24dp"
+                android:text="@string/mod_log_load_error"
+                android:textColor="#FF5555"
+                android:textSize="14sp"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</LinearLayout>

@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#141414"
+    android:orientation="vertical">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="14dp">
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:src="@drawable/ic_sparkle"
+            app:tint="@color/brand_green" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="12dp"
+            android:text="@string/activity_feed_title"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <ProgressBar
+            android:id="@+id/activityFeedLoading"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_marginEnd="8dp"
+            android:visibility="gone"
+            android:indeterminateTint="@color/brand_green" />
+
+        <ImageButton
+            android:id="@+id/activityFeedClose"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_item_ripple"
+            android:src="@drawable/ic_close"
+            android:padding="8dp"
+            app:tint="#AAAAAA" />
+
+    </LinearLayout>
+
+    <!-- Filter chips -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:paddingHorizontal="12dp"
+        android:paddingBottom="6dp">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/activityFilterChipGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:singleLine="true"
+            app:singleSelection="false">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filterChipAll"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/activity_filter_all"
+                android:textColor="@color/text_primary"
+                app:chipBackgroundColor="@color/chip_background_color"
+                app:checkedIconTint="@color/brand_green"
+                android:checked="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filterChipFollowers"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/activity_filter_followers"
+                android:textColor="@color/text_primary"
+                app:chipBackgroundColor="@color/chip_background_color"
+                app:checkedIconTint="@color/brand_green"
+                android:checked="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filterChipSubscribers"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/activity_filter_subscribers"
+                android:textColor="@color/text_primary"
+                app:chipBackgroundColor="@color/chip_background_color"
+                app:checkedIconTint="@color/brand_green"
+                android:checked="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filterChipGiftedSubs"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/activity_filter_gifted_subs"
+                android:textColor="@color/text_primary"
+                app:chipBackgroundColor="@color/chip_background_color"
+                app:checkedIconTint="@color/brand_green"
+                android:checked="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filterChipHosts"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/activity_filter_hosts"
+                android:textColor="@color/text_primary"
+                app:chipBackgroundColor="@color/chip_background_color"
+                app:checkedIconTint="@color/brand_green"
+                android:checked="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filterChipRewards"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/activity_filter_rewards"
+                android:textColor="@color/text_primary"
+                app:chipBackgroundColor="@color/chip_background_color"
+                app:checkedIconTint="@color/brand_green"
+                android:checked="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filterChipFollowerGoals"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/activity_filter_follower_goals"
+                android:textColor="@color/text_primary"
+                app:chipBackgroundColor="@color/chip_background_color"
+                app:checkedIconTint="@color/brand_green"
+                android:checked="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filterChipSubscriberGoals"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/activity_filter_subscriber_goals"
+                android:textColor="@color/text_primary"
+                app:chipBackgroundColor="@color/chip_background_color"
+                app:checkedIconTint="@color/brand_green"
+                android:checked="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filterChipChannelEngagement"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/activity_filter_channel_engagement"
+                android:textColor="@color/text_primary"
+                app:chipBackgroundColor="@color/chip_background_color"
+                app:checkedIconTint="@color/brand_green"
+                android:checked="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filterChipUnfollowers"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/activity_filter_unfollowers"
+                android:textColor="@color/text_primary"
+                app:chipBackgroundColor="@color/chip_background_color"
+                app:checkedIconTint="@color/brand_green"
+                android:checked="false" />
+
+        </com.google.android.material.chip.ChipGroup>
+
+    </HorizontalScrollView>
+
+    <!-- Content (scrollable) -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="16dp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/activityFeedRecycler"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/activityFeedEmpty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="24dp"
+                android:text="@string/activity_feed_empty"
+                android:textColor="#777777"
+                android:textSize="14sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/activityFeedError"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="24dp"
+                android:text="@string/activity_feed_load_error"
+                android:textColor="#FF5555"
+                android:textSize="14sp"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</LinearLayout>
