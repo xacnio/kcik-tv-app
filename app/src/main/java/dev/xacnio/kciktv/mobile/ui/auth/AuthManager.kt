@@ -294,13 +294,6 @@ class AuthManager(
         activity.chatUiManager.chatAdapter.isLoggedIn = prefs.isLoggedIn
         
         if (prefs.isLoggedIn) {
-            if (activity.isCheckingBanStatus) {
-                binding.chatInputContainer.visibility = View.INVISIBLE
-                binding.chatBannedOverlay.visibility = View.GONE
-                binding.chatLoginOverlay.visibility = View.GONE
-                return
-            }
-            
             if (activity.isBannedFromCurrentChannel) {
                 binding.chatLoginOverlay.visibility = View.GONE
                 binding.chatBannedOverlay.visibility = View.VISIBLE

@@ -16,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import dev.xacnio.kciktv.mobile.MobilePlayerActivity
 import dev.xacnio.kciktv.R
 import dev.xacnio.kciktv.shared.data.model.ChannelItem
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 /**
@@ -34,12 +35,19 @@ class ChannelLoadManager(private val activity: MobilePlayerActivity) {
      * Loads a channel by its slug and starts playing it.
      */
     fun loadChannelBySlug(slug: String) {
+        val token = prefs.authToken
+
+        // Pre-fetch chat info and /me in parallel — both only need the slug
+        val chatInfoDeferred = activity.lifecycleScope.async { repository.getChatInfo(slug, token) }
+        val userMeDeferred = if (prefs.isLoggedIn && token != null) {
+            activity.lifecycleScope.async { repository.getChannelUserMe(slug, token) }
+        } else null
+
         activity.lifecycleScope.launch {
             activity.showLoading()
 
             val result = repository.getChannelDetails(slug)
             result.onSuccess { channelDetail ->
-                // Create a ChannelItem from the channel detail
                 val newChannel = ChannelItem(
                     id = (channelDetail.id ?: 0L).toString(),
                     slug = channelDetail.slug ?: slug,
@@ -58,9 +66,14 @@ class ChannelLoadManager(private val activity: MobilePlayerActivity) {
                 activity.runOnUiThread {
                     activity.isSubscriptionEnabled = channelDetail.subscriptionEnabled == true
                     activity.hideLoading()
+                    // Pass pre-fetched results so startChannelSession skips duplicate calls
+                    activity.sessionManager.pendingChatInfoDeferred = chatInfoDeferred
+                    activity.sessionManager.pendingUserMeDeferred = userMeDeferred
                     activity.playChannel(newChannel)
                 }
             }.onFailure {
+                chatInfoDeferred.cancel()
+                userMeDeferred?.cancel()
                 activity.runOnUiThread {
                     activity.hideLoading()
                     Toast.makeText(

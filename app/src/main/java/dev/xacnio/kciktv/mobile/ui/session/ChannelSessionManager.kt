@@ -14,13 +14,21 @@ import androidx.lifecycle.lifecycleScope
 import dev.xacnio.kciktv.mobile.MobilePlayerActivity
 import dev.xacnio.kciktv.R
 import dev.xacnio.kciktv.shared.data.model.ChannelItem
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.launch
 import dev.xacnio.kciktv.mobile.ui.chat.ChatStateManager
 import dev.xacnio.kciktv.mobile.ui.chat.ChatUiManager
+import dev.xacnio.kciktv.shared.data.model.ChannelUserMeResponse
+import dev.xacnio.kciktv.shared.data.repository.ChannelRepository
 
 class ChannelSessionManager(private val activity: MobilePlayerActivity) {
 
     private val TAG = "ChannelSessionManager"
+
+    // Set by ChannelLoadManager when it pre-fetches these calls in parallel with getChannelDetails.
+    // Consumed (and cleared) at the start of startChannelSession to avoid duplicate network calls.
+    var pendingChatInfoDeferred: Deferred<Result<ChannelRepository.ChatInfo>>? = null
+    var pendingUserMeDeferred: Deferred<Result<ChannelUserMeResponse>>? = null
 
     fun reconnectForAccountSwitch() {
         val channel = activity.currentChannel ?: return
@@ -72,6 +80,16 @@ class ChannelSessionManager(private val activity: MobilePlayerActivity) {
                             val isMod = activity.isModeratorOrOwner && prefs.isLoggedIn
                             binding.modMenuButton.visibility = if (isMod) View.VISIBLE else View.GONE
                             binding.rewardQueueButton.visibility = if (isMod) View.VISIBLE else View.GONE
+                            binding.activityFeedButton.visibility = if (isMod) View.VISIBLE else View.GONE
+                            binding.modLogButton.visibility = if (isMod) View.VISIBLE else View.GONE
+                            if (isMod) {
+                                val slug = activity.currentChannel?.slug ?: ""
+                                if (slug.isNotEmpty()) {
+                                    activity.activityFeedManager.prefetch(slug)
+                                    activity.rewardQueueManager.prefetchData()
+                                    activity.modLogManager.prefetch()
+                                }
+                            }
                             activity.updateChatLoginState()
                             activity.updateQuickEmoteBar()
                             activity.updateChatroomHint(activity.currentChatroom)
@@ -120,10 +138,12 @@ class ChannelSessionManager(private val activity: MobilePlayerActivity) {
         activity.currentPoll = null
         activity.overlayManager.resetForNewChannel()
         activity.rewardQueueManager.resetForChannel(channel.slug)
+        activity.activityFeedManager.resetCache()
+        activity.modLogManager.resetCache()
 
         // Clear stale emote categories immediately so the quick bar shows shimmer
-        // (not the previous account's emotes) while the new session loads
-        activity.emotePanelManager.emoteCategories = emptyList()
+        // (not the previous channel's emotes) while the new session loads
+        activity.emotePanelManager.resetForNewChannel()
         if (prefs.isLoggedIn) {
             binding.quickEmoteBarContainer.visibility = View.VISIBLE
             binding.quickEmoteShimmer.root.visibility = View.VISIBLE
@@ -143,12 +163,102 @@ class ChannelSessionManager(private val activity: MobilePlayerActivity) {
         binding.chatShimmer.root.visibility = View.VISIBLE
         binding.chatRecyclerView.visibility = View.GONE
         binding.emptyChatText.visibility = View.GONE
-        
+
+        // Reset mod/ban state and hide mod UI immediately for the new channel
+        activity.isModeratorOrOwner = false
+        activity.isChannelOwner = false
+        activity.isBannedFromCurrentChannel = false
+        binding.modMenuButton.visibility = View.GONE
+        binding.rewardQueueButton.visibility = View.GONE
+        binding.activityFeedButton.visibility = View.GONE
+        binding.modLogButton.visibility = View.GONE
+        binding.chatBannedOverlay.visibility = View.GONE
+
+        // Fire /me immediately, parallel to getChatInfo — only needs channel slug
+        activity.isCheckingBanStatus = prefs.isLoggedIn && prefs.authToken != null
+        activity.updateChatLoginState()
+        if (prefs.isLoggedIn && prefs.authToken != null) {
+            val meToken = prefs.authToken!!
+            val capturedUserMeDeferred = pendingUserMeDeferred
+            pendingUserMeDeferred = null
+            activity.userMeJob = activity.lifecycleScope.launch {
+                try {
+                    val meResult = capturedUserMeDeferred?.await()
+                        ?: activity.repository.getChannelUserMe(channel.slug, meToken)
+                    meResult.onSuccess { me ->
+                        val isFollowingMe = me.isFollowing == true
+                        activity.currentIsFollowing = isFollowingMe
+                        activity.isChannelOwner = me.isBroadcaster == true
+                        activity.isModeratorOrOwner = me.isModerator == true || activity.isChannelOwner
+                        activity.isSubscribedToCurrentChannel = me.subscription != null || activity.isChannelOwner
+
+                        state.isModeratorOrOwner = activity.isModeratorOrOwner
+                        state.isChannelOwner = activity.isChannelOwner
+                        state.isSubscribedToCurrentChannel = activity.isSubscribedToCurrentChannel
+                        state.isFollowingCurrentChannel = isFollowingMe
+                        state.followingSince = me.followingSince
+
+                        activity.quickEmoteBarManager.updateSubscriptionStatus(activity.isSubscribedToCurrentChannel)
+
+                        val banInfo = me.banned
+                        activity.isBannedFromCurrentChannel = banInfo != null
+                        activity.isPermanentBan = banInfo?.permanent == true
+                        activity.timeoutExpirationMillis = activity.parseIsoDate(banInfo?.expiresAt)
+
+                        state.setBanStatus(activity.isBannedFromCurrentChannel, activity.isPermanentBan, activity.timeoutExpirationMillis)
+                        state.isCheckingBanStatus = false
+                        activity.isCheckingBanStatus = false
+
+                        if (activity.isBannedFromCurrentChannel) {
+                            activity.addSystemMessage(
+                                activity.getString(if (activity.isPermanentBan) R.string.chat_error_banned else R.string.chat_timed_out_overlay),
+                                R.drawable.ic_block
+                            )
+                        }
+
+                        activity.runOnUiThread {
+                            activity.updateFollowButtonState()
+                            val isMod = activity.isModeratorOrOwner && prefs.isLoggedIn
+                            binding.modMenuButton.visibility = if (isMod) View.VISIBLE else View.GONE
+                            binding.rewardQueueButton.visibility = if (isMod) View.VISIBLE else View.GONE
+                            binding.activityFeedButton.visibility = if (isMod) View.VISIBLE else View.GONE
+                            binding.modLogButton.visibility = if (isMod) View.VISIBLE else View.GONE
+                            if (isMod) {
+                                activity.activityFeedManager.prefetch(channel.slug)
+                                activity.rewardQueueManager.prefetchData()
+                                activity.modLogManager.prefetch()
+                            }
+                            state.currentPrediction?.let { activity.overlayManager.updatePredictionUI(it) }
+                            activity.updateChatLoginState()
+                            activity.updateQuickEmoteBar()
+                            activity.updateChatroomHint(activity.currentChatroom)
+                            val cels = me.celebrations ?: emptyList()
+                            if (cels.isNotEmpty()) {
+                                activity.chatUiManager.handleCelebrations(cels, channel.slug)
+                            }
+                        }
+                    }.onFailure { e ->
+                        Log.e(TAG, "Failed to fetch channel users/me for status", e)
+                        state.isCheckingBanStatus = false
+                        activity.isCheckingBanStatus = false
+                        activity.runOnUiThread { activity.updateChatLoginState() }
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error initiating user/me check", e)
+                    state.isCheckingBanStatus = false
+                    activity.isCheckingBanStatus = false
+                    activity.runOnUiThread { activity.updateChatLoginState() }
+                }
+            }
+        }
+
+        val capturedChatInfoDeferred = pendingChatInfoDeferred
+        pendingChatInfoDeferred = null
         activity.lifecycleScope.launch {
             try {
-                val result = activity.repository.getChatInfo(channel.slug, activity.prefs.authToken)
+                val result = capturedChatInfoDeferred?.await()
+                    ?: activity.repository.getChatInfo(channel.slug, activity.prefs.authToken)
                 result.onSuccess { chatInfo ->
-                    chatInfo.chatroomInfo?.let { state.updateChatroom(it) }
                     state.subscriberBadges = chatInfo.subscriberBadges
                     activity.sentMessageRefs.clear() // Clear queue on channel change
                     
@@ -168,11 +278,6 @@ class ChannelSessionManager(private val activity: MobilePlayerActivity) {
                         activity.emotePanelManager.updateCurrentChannelId(channelIdLong)
                         activity.quickEmoteBarManager.updateCurrentChannelId(channelIdLong)
                     }
-                    
-                    // Set initial chatroom info (modes like slow mode)
-                    activity.runOnUiThread {
-                        activity.updateChatroomHint(chatInfo.chatroomInfo)
-                    }
 
                     // Fetch accurate chat settings from web.kick.com and override stale values
                     val channelId = chatInfo.channelId
@@ -180,7 +285,8 @@ class ChannelSessionManager(private val activity: MobilePlayerActivity) {
                         try {
                             activity.repository.getChatSettings(channelId).onSuccess { settings ->
                                 state.chatSettings = settings
-                                val patched = state.currentChatroom?.copy(
+                                val current = chatInfo.chatroomInfo
+                                val patched = current?.copy(
                                     slowMode = settings.slowMode?.enabled,
                                     slowModeInterval = settings.slowMode?.durationSeconds,
                                     followersMode = settings.followersOnlyMode?.enabled,
@@ -207,102 +313,9 @@ class ChannelSessionManager(private val activity: MobilePlayerActivity) {
                         activity.playbackStatusManager.updateUptimeDisplay()
                     }
 
-                    // Check follow status and ID via getChannelUserInfo (authoritative source)
+                    // Follow status from chatInfo (used for updateContextualChannelInfo below);
+                    // authoritative value comes from the parallel /me call via activity.currentIsFollowing
                     var isFollowing = chatInfo.isFollowing
-                    // Reset moderator/owner status for new channel
-                    activity.isModeratorOrOwner = false
-                    activity.isChannelOwner = false
-                    activity.isBannedFromCurrentChannel = false
-                    activity.isCheckingBanStatus = prefs.isLoggedIn // Start check if logged in
-                    activity.runOnUiThread {
-                        binding.modMenuButton.visibility = View.GONE
-                        binding.rewardQueueButton.visibility = View.GONE
-                        activity.rewardQueueManager.resetForChannel(channel.slug)
-                        binding.chatBannedOverlay.visibility = View.GONE
-                        // Initial update to hide input if checking
-                        activity.updateChatLoginState()
-                    }
-                    
-                    if (prefs.isLoggedIn && prefs.authToken != null) {
-                        try {
-                            val token = prefs.authToken!!
-                            activity.userMeJob = activity.lifecycleScope.launch {
-                                activity.repository.getChannelUserMe(channel.slug, token).onSuccess { me ->
-                                    isFollowing = me.isFollowing == true
-                                    activity.currentIsFollowing = isFollowing
-                                    activity.isChannelOwner = me.isBroadcaster == true
-                                    activity.isModeratorOrOwner = me.isModerator == true || activity.isChannelOwner
-                                    activity.isSubscribedToCurrentChannel = me.subscription != null || activity.isChannelOwner
-                                    
-                                    // Sync to ChatStateManager for ChatUiManager to use
-                                    state.isModeratorOrOwner = activity.isModeratorOrOwner
-                                    state.isChannelOwner = activity.isChannelOwner
-                                    state.isSubscribedToCurrentChannel = activity.isSubscribedToCurrentChannel
-                                    state.isFollowingCurrentChannel = isFollowing
-                                    state.followingSince = me.followingSince
-                                    
-                                    // Update Quick Emote Bar Subscription Status
-                                    activity.quickEmoteBarManager.updateSubscriptionStatus(activity.isSubscribedToCurrentChannel)
-
-                                    // Banned check from /me endpoint
-                                    val banInfo = me.banned
-                                    activity.isBannedFromCurrentChannel = banInfo != null
-                                    activity.isPermanentBan = banInfo?.permanent == true
-                                    activity.timeoutExpirationMillis = activity.parseIsoDate(banInfo?.expiresAt)
-                                    
-                                    // Sync ban status to ChatStateManager
-                                    state.setBanStatus(activity.isBannedFromCurrentChannel, activity.isPermanentBan, activity.timeoutExpirationMillis)
-                                    state.isCheckingBanStatus = false
-                                    
-                                    if (activity.isBannedFromCurrentChannel) {
-                                        activity.addSystemMessage(activity.getString(if (activity.isPermanentBan) R.string.chat_error_banned else R.string.chat_timed_out_overlay), R.drawable.ic_block)
-                                    }
-
-                                    activity.isCheckingBanStatus = false
-                                    activity.runOnUiThread {
-                                        activity.updateFollowButtonState()
-                                        // Update moderator menu button visibility
-                                        val isMod = activity.isModeratorOrOwner && prefs.isLoggedIn
-                                        binding.modMenuButton.visibility = if (isMod) View.VISIBLE else View.GONE
-                                        binding.rewardQueueButton.visibility = if (isMod) View.VISIBLE else View.GONE
-
-                                        // Update prediction UI to reflect new mod status
-                                        state.currentPrediction?.let { activity.overlayManager.updatePredictionUI(it) }
-
-                                        activity.updateChatLoginState()
-
-                                        // Re-render quick emote bar now that subscription status is known.
-                                        // loadChannelEmotes may have already run with the stale (reset) value,
-                                        // so we must re-filter the emote list with the authoritative status here.
-                                        activity.updateQuickEmoteBar()
-
-                                        // Refresh chat hint with user's actual status
-                                        activity.updateChatroomHint(activity.currentChatroom)
-                                        
-                                        // Handle Celebrations
-                                        val cels = me.celebrations ?: emptyList()
-                                        
-                                        if (cels.isNotEmpty()) {
-                                             activity.runOnUiThread {
-                                                 activity.chatUiManager.handleCelebrations(cels, channel.slug)
-                                             }
-                                        }
-                                    }
-                                }.onFailure { e ->
-                                    Log.e(TAG, "Failed to fetch channel users/me for status", e)
-                                    activity.isCheckingBanStatus = false
-                                    activity.runOnUiThread { activity.updateChatLoginState() }
-                                }
-                            }
-                        } catch (e: Exception) {
-                            Log.e(TAG, "Error initiating user/me check", e)
-                            activity.isCheckingBanStatus = false
-                            activity.runOnUiThread { activity.updateChatLoginState() }
-                        }
-                    } else {
-                        activity.isCheckingBanStatus = false
-                        activity.runOnUiThread { activity.updateChatLoginState() }
-                    }
 
                     // If offline and owner, fetch fresh metadata from stream-info API
                     if (!channel.isLive && activity.isChannelOwner) {

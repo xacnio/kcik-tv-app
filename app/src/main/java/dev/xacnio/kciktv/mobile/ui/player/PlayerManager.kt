@@ -604,7 +604,6 @@ class PlayerManager(
                     
                     activity.runOnUiThread {
                         activity.isSubscriptionEnabled = details.subscriptionEnabled == true
-                        activity.updateChatroomHint(details.chatroom)
                         details.livestream?.startTime?.let { startTimeStr ->
                             try {
                                 val sdf = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).apply { timeZone = java.util.TimeZone.getTimeZone("UTC") }
@@ -688,6 +687,10 @@ class PlayerManager(
         activity.runOnUiThread {
             activity.hideLoading()
             activity.isErrorStateActive = true
+            activity.playbackStatusManager.stopUptimeUpdater()
+            activity.playbackStatusManager.streamCreatedAtMillis = null
+            binding.streamTimeBadge.visibility = View.GONE
+            binding.uptimeDivider.visibility = View.GONE
             binding.errorText.text = activity.getString(R.string.stream_offline)
             activity.showOverlay()
             
