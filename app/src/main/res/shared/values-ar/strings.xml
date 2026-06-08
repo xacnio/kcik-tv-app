@@ -780,6 +780,7 @@
     <string name="notif_reply_original">↩ أنت: %1$s</string>
     <string name="notif_mentions_channel">الإشارات</string>
     <string name="notif_mentions_channel_desc">تنبيهات عند الإشارة إليك أو الرد عليك</string>
+    <string name="notif_chat_connected">الدردشة متصلة</string>
     <string name="chat_settings_floating_emotes">رموز عائمة</string>
     <string name="chat_settings_nick_detection">اكتشاف اللقب</string>
     <string name="chat_settings_nick_detection_subtitle">تنبيه عند ظهور اسمك بدون @</string>
@@ -844,6 +845,8 @@
     <string name="mentions_title">الإشارات</string>
     <string name="mentions_empty">لا توجد إشارات بعد</string>
     <string name="mentions_count_format">%d رسائل</string>
+    <string name="mentions_clear_confirm_title">مسح جميع الإشارات؟</string>
+    <string name="mentions_clear_confirm_msg">سيتم حذف سجل الإشارات لهذه القناة بشكل دائم.</string>
     <string name="go_to_message">الانتقال للرسالة</string>
     <string name="time_ago_just_now">الآن</string>
     <string name="time_ago_minutes">منذ %d دقيقة</string>

@@ -780,6 +780,7 @@
     <string name="notif_reply_original">↩ Vous : %1$s</string>
     <string name="notif_mentions_channel">Mentions</string>
     <string name="notif_mentions_channel_desc">Alertes lorsque vous êtes mentionné ou recevez une réponse</string>
+    <string name="notif_chat_connected">Chat connecté</string>
     <string name="chat_settings_floating_emotes">Emotes flottants</string>
     <string name="chat_settings_nick_detection">Détection de pseudo</string>
     <string name="chat_settings_nick_detection_subtitle">Alerte quand votre pseudo apparaît sans @</string>
@@ -844,6 +845,8 @@
     <string name="mentions_title">Mentions</string>
     <string name="mentions_empty">Aucune mention pour l\'instant</string>
     <string name="mentions_count_format">%d messages</string>
+    <string name="mentions_clear_confirm_title">Effacer toutes les mentions ?</string>
+    <string name="mentions_clear_confirm_msg">L\'historique des mentions de ce salon sera définitivement supprimé.</string>
     <string name="go_to_message">Aller au message</string>
     <string name="time_ago_just_now">à l\'instant</string>
     <string name="time_ago_minutes">il y a %d min</string>

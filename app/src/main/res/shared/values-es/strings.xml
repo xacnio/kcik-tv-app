@@ -780,6 +780,7 @@
     <string name="notif_reply_original">↩ Tú: %1$s</string>
     <string name="notif_mentions_channel">Menciones</string>
     <string name="notif_mentions_channel_desc">Avisos cuando te mencionan o responden</string>
+    <string name="notif_chat_connected">Chat conectado</string>
     <string name="chat_settings_floating_emotes">Emotes flotantes</string>
     <string name="chat_settings_nick_detection">Detección de nick</string>
     <string name="chat_settings_nick_detection_subtitle">Alerta cuando tu nombre aparece sin @</string>
@@ -844,6 +845,8 @@
     <string name="mentions_title">Menciones</string>
     <string name="mentions_empty">Sin menciones aún</string>
     <string name="mentions_count_format">%d mensajes</string>
+    <string name="mentions_clear_confirm_title">¿Borrar todas las menciones?</string>
+    <string name="mentions_clear_confirm_msg">Se eliminará permanentemente todo el historial de menciones de este canal.</string>
     <string name="go_to_message">Ir al mensaje</string>
     <string name="time_ago_just_now">ahora mismo</string>
     <string name="time_ago_minutes">hace %d min</string>

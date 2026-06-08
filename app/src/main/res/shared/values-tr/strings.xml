@@ -845,6 +845,8 @@
     <string name="mentions_title">Bahsedilmeler</string>
     <string name="mentions_empty">Henüz bahsedilme yok</string>
     <string name="mentions_count_format">%d mesaj</string>
+    <string name="mentions_clear_confirm_title">Tüm bahsedilmeler silinsin mi?</string>
+    <string name="mentions_clear_confirm_msg">Bu kanal için tüm bahsedilme geçmişi kalıcı olarak silinecek.</string>
     <string name="go_to_message">Mesaja git</string>
     <string name="time_ago_just_now">az önce</string>
     <string name="time_ago_minutes">%d dk önce</string>

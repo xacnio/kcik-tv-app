@@ -780,6 +780,7 @@
     <string name="notif_reply_original">↩ Du: %1$s</string>
     <string name="notif_mentions_channel">Erwähnungen</string>
     <string name="notif_mentions_channel_desc">Hinweise, wenn du erwähnt wirst oder eine Antwort erhältst</string>
+    <string name="notif_chat_connected">Chat verbunden</string>
     <string name="chat_settings_floating_emotes">Schwebende Emotes</string>
     <string name="chat_settings_nick_detection">Nick-Erkennung</string>
     <string name="chat_settings_nick_detection_subtitle">Benachrichtigung wenn dein Name ohne @ erscheint</string>
@@ -844,6 +845,8 @@
     <string name="mentions_title">Erwähnungen</string>
     <string name="mentions_empty">Noch keine Erwähnungen</string>
     <string name="mentions_count_format">%d Nachrichten</string>
+    <string name="mentions_clear_confirm_title">Alle Erwähnungen löschen?</string>
+    <string name="mentions_clear_confirm_msg">Der gesamte Erwähnungsverlauf für diesen Kanal wird dauerhaft gelöscht.</string>
     <string name="go_to_message">Zur Nachricht</string>
     <string name="time_ago_just_now">gerade eben</string>
     <string name="time_ago_minutes">vor %d Min</string>
