@@ -145,6 +145,7 @@ class MiniPlayerManager(private val activity: MobilePlayerActivity) {
         if (isMiniPlayerMode || activity.currentChannel == null) {
             return
         }
+        if (!activity.isStreamActive) return
 
         // CRITICAL: Reset side chat state when entering mini player
         if (activity.fullscreenToggleManager != null) {

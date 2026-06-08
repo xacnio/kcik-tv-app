@@ -73,6 +73,8 @@ class DragToMiniPlayerManager(private val activity: MobilePlayerActivity) {
         if (activity.fullscreenToggleManager.isTheatreMode) return false
         // Don't start if player isn't visible
         if (binding.playerScreenContainer.visibility != View.VISIBLE) return false
+        // Don't enter mini player if stream is definitively offline
+        if (!activity.isStreamActive) return false
 
         dragStartRawX = rawX
         dragStartRawY = rawY

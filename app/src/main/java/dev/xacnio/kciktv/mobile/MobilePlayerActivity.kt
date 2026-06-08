@@ -1127,6 +1127,14 @@ class MobilePlayerActivity : FragmentActivity() {
     internal val isStreamPlaying: Boolean
         get() = ivsPlayer?.state == Player.State.PLAYING
 
+    // True when the stream is in an active state (playing or buffering/starting).
+    // False only when definitively offline (IDLE or ENDED).
+    internal val isStreamActive: Boolean
+        get() {
+            val state = ivsPlayer?.state ?: return false
+            return state != Player.State.IDLE && state != Player.State.ENDED
+        }
+
     internal fun enterMiniPlayerMode() {
         miniPlayerManager.enterMiniPlayerMode()
         homeScreenManager.enterThumbnailMode()

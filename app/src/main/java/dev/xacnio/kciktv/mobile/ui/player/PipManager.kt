@@ -42,10 +42,10 @@ class PipManager(private val activity: MobilePlayerActivity) {
             activity.exitMiniPlayerMode()
         }
 
-        // Enter PIP when user presses home button IF auto-pip is enabled
+        // Enter PIP when user presses home button IF auto-pip is enabled.
+        // Allow if stream is active (playing or buffering); block only when definitively offline.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && prefs.autoPipEnabled) {
-            val isPlaying = ivsPlayer?.state == Player.State.PLAYING
-            if (isPlaying) {
+            if (activity.isStreamActive) {
                 enterPipMode()
             }
         }
@@ -199,9 +199,8 @@ class PipManager(private val activity: MobilePlayerActivity) {
         // Android 12+ (API 31): Enable auto-enter PIP when app goes to background
         // Theatre Mode: Disable auto-enter PiP explicitly to prevent unwanted transitions
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && prefs.autoPipEnabled) {
-            // Theatre mode check removed from autoEnter logic
-            val autoEnter = isPlaying
-            android.util.Log.d("PipManager", "getPipParams: setAutoEnterEnabled($autoEnter) - isPlaying=$isPlaying")
+            val autoEnter = overrideIsPlaying ?: activity.isStreamActive
+            android.util.Log.d("PipManager", "getPipParams: setAutoEnterEnabled($autoEnter)")
             builder.setAutoEnterEnabled(autoEnter)
         }
         
