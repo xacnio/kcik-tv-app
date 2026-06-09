@@ -26,16 +26,19 @@ class ChatConnectionManager(private val activity: MobilePlayerActivity) {
     private val TAG = "ChatConnectionManager"
     private var chatWebSocket: KcikChatWebSocket? = null
     private var mockChatSource: MockChatSource? = null
-    
+
     private val prefs get() = activity.prefs
     private val chatStateManager get() = activity.chatStateManager
     private val chatUiManager get() = activity.chatUiManager
     private val chatEventHandler get() = activity.chatEventHandler
-    
+
     private var chatWasDisconnected = false
-    
-    fun connectToChat(token: String, chatroomId: Long, channelId: Long) {
+    private var currentLivestreamId: Long? = null
+
+    fun connectToChat(token: String, chatroomId: Long, channelId: Long, livestreamId: Long? = null) {
         disconnect()
+
+        currentLivestreamId = livestreamId
 
         if (MockConfig.enabled) {
             chatWasDisconnected = false
@@ -108,7 +111,7 @@ class ChatConnectionManager(private val activity: MobilePlayerActivity) {
                                      val auth = authRes.body()!!.auth
                                      chatWebSocket?.subscribeToPrivateChatroom(socketId, chatroomId, auth)
                                  }
-                                 
+
                                  val userId = prefs.userId
                                  if (userId > 0) {
                                      val pointsChannelName = "private-channelpoints-$userId"
@@ -120,6 +123,20 @@ class ChatConnectionManager(private val activity: MobilePlayerActivity) {
                                      if (pointsAuthRes.isSuccessful && pointsAuthRes.body() != null) {
                                          val auth = pointsAuthRes.body()!!.auth
                                          chatWebSocket?.subscribeToChannelPoints(socketId, userId, auth)
+                                     }
+                                 }
+
+                                 val lsId = currentLivestreamId
+                                 if (lsId != null) {
+                                     val lsChannelName = "private-livestream.$lsId"
+                                     val lsAuthRes = dev.xacnio.kciktv.shared.data.api.RetrofitClient.authService.getPusherAuth(
+                                         "Bearer ${prefs.authToken}",
+                                         socketId,
+                                         lsChannelName
+                                     )
+                                     if (lsAuthRes.isSuccessful && lsAuthRes.body() != null) {
+                                         val auth = lsAuthRes.body()!!.auth
+                                         chatWebSocket?.subscribeToLivestream(socketId, lsId, auth)
                                      }
                                  }
                              } catch (e: Exception) {
@@ -144,7 +161,7 @@ class ChatConnectionManager(private val activity: MobilePlayerActivity) {
                              // Immediately show reconnecting UI before starting new connection
                              activity.binding.chatConnectionProgress.visibility = View.VISIBLE
                              activity.binding.chatConnectionContainer.isClickable = false
-                             connectToChat(token, chatroomId, channelId)
+                             connectToChat(token, chatroomId, channelId, currentLivestreamId)
                          }
                      }
                  }

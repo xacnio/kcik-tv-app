@@ -64,8 +64,7 @@ class ChannelUiManager(private val activity: MobilePlayerActivity) {
         }
         binding.infoMatureBadge.visibility = if (channel.isMature) View.VISIBLE else View.GONE
 
-        val tags = channel.tags?.take(5)?.joinToString(" • ") ?: ""
-        binding.infoTagsText.text = tags
+        binding.infoTagsText.text = buildTagsText(channel)
         binding.infoTagsText.isSelected = true // For Marquee effect
 
         binding.viewerCount.text = dev.xacnio.kciktv.shared.util.FormatUtils.formatViewerCount(
@@ -126,6 +125,34 @@ class ChannelUiManager(private val activity: MobilePlayerActivity) {
                     activity.currentProfileBitmap = null
                 }
             })
+    }
+
+    /**
+     * Updates stream metadata fields (title, category, tags, mature badge) without touching
+     * avatar, viewer count, or uptime. Called when LivestreamUpdated arrives via WebSocket.
+     */
+    fun updateStreamMetadata(channel: ChannelItem) {
+        binding.infoStreamTitle.text = channel.title ?: "Offline"
+
+        if (!channel.categoryName.isNullOrEmpty()) {
+            binding.infoCategoryName.text = channel.categoryName
+            binding.infoCategoryName.visibility = View.VISIBLE
+        } else {
+            binding.infoCategoryName.visibility = View.GONE
+        }
+
+        binding.infoMatureBadge.visibility = if (channel.isMature) View.VISIBLE else View.GONE
+
+        binding.infoTagsText.text = buildTagsText(channel)
+    }
+
+    private fun buildTagsText(channel: ChannelItem): String {
+        val combined = mutableListOf<String>()
+        channel.language?.let { code ->
+            combined.add(activity.getLanguageName(code))
+        }
+        channel.tags?.let { combined.addAll(it) }
+        return combined.take(5).joinToString(" • ")
     }
 
     /**

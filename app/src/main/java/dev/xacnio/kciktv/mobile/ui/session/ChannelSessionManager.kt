@@ -47,7 +47,7 @@ class ChannelSessionManager(private val activity: MobilePlayerActivity) {
         state.stopSlowModeCountdown()
 
         // Reconnect chat and viewer WebSockets with the new account's token
-        activity.chatConnectionManager.connectToChat(prefs.authToken ?: "", chatroomId, channelId)
+        activity.chatConnectionManager.connectToChat(prefs.authToken ?: "", chatroomId, channelId, channel.livestreamId)
         activity.startViewerWebSocket(channelId.toString(), channel.slug, channel.livestreamId?.toString())
 
         // Fetch /me in background to update mod/subscription/ban status
@@ -366,7 +366,7 @@ class ChannelSessionManager(private val activity: MobilePlayerActivity) {
                         activity.chatUiManager.startFlushing()
 
                         Log.d(TAG, "Initiating chat connection: chatroom=${chatInfo.chatroomId}, channel=${chatInfo.channelId}")
-                        activity.chatConnectionManager.connectToChat(prefs.authToken ?: "", chatInfo.chatroomId, chatInfo.channelId)
+                        activity.chatConnectionManager.connectToChat(prefs.authToken ?: "", chatInfo.chatroomId, chatInfo.channelId, channel.livestreamId)
 
                         activity.runOnUiThread {
                             activity.chatAdapter.setSubscriberBadges(state.subscriberBadges)

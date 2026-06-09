@@ -331,3 +331,25 @@ data class CategorySearchDocument(
     @SerializedName("src")
     val src: String?
 )
+
+data class LivestreamUpdatedEventData(
+    @SerializedName("livestream") val livestream: LivestreamUpdatedData?
+)
+
+data class LivestreamUpdatedData(
+    @SerializedName("id") val id: Long?,
+    @SerializedName("session_title") val sessionTitle: String?,
+    @SerializedName("is_live") val isLive: Boolean?,
+    @SerializedName("language") val language: String?,
+    @SerializedName("lang_iso") val langIso: String?,
+    @SerializedName("is_mature") val isMature: Boolean?,
+    @SerializedName("viewer_count") val viewerCount: Int?,
+    @SerializedName("tags") val tags: List<String>?,
+    @SerializedName("categories") val categories: List<LivestreamUpdatedCategory>?
+)
+
+data class LivestreamUpdatedCategory(
+    @SerializedName("id") val id: Long?,
+    @SerializedName("name") val name: String?,
+    @SerializedName("slug") val slug: String?
+)

@@ -1570,6 +1570,27 @@ class MobilePlayerActivity : FragmentActivity() {
         }
     }
 
+    internal fun onLivestreamUpdated(ls: dev.xacnio.kciktv.shared.data.model.LivestreamUpdatedData) {
+        val cat = ls.categories?.firstOrNull()
+        val updated = currentChannel?.copy(
+            title = ls.sessionTitle ?: currentChannel?.title,
+            categoryName = cat?.name ?: currentChannel?.categoryName,
+            categorySlug = cat?.slug ?: currentChannel?.categorySlug,
+            categoryId = cat?.id ?: currentChannel?.categoryId,
+            isMature = ls.isMature ?: currentChannel?.isMature ?: false,
+            // Preserve existing tags if the event sends an empty array — the event fires
+            // for title/category changes too and may not carry the full tag set.
+            tags = ls.tags?.takeIf { it.isNotEmpty() } ?: currentChannel?.tags,
+            language = ls.langIso ?: currentChannel?.language
+        ) ?: return
+        currentChannel = updated
+        val idx = currentChannelIndex
+        if (idx >= 0 && idx < allChannels.size) {
+            allChannels[idx] = updated
+        }
+        channelUiManager.updateStreamMetadata(updated)
+    }
+
     internal fun updateChatOverlayState() {
         overlayManager.updateChatOverlayState()
     }

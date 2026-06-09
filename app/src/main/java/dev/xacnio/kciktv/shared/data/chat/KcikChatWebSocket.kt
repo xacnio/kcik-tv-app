@@ -78,6 +78,7 @@ class KcikChatWebSocket(
     private var currentChatroomId: Long? = null
     private var currentChannelId: Long? = null
     private var currentTvSetupUuid: String? = null
+    private var currentLivestreamId: Long? = null
 
     // Cleared by disconnect() to stop all reconnect loops and drop late in-flight frames.
     private val shouldReconnect = AtomicBoolean(true)
@@ -358,6 +359,14 @@ class KcikChatWebSocket(
         Log.d(TAG, "Requested subscription to channel points: $userId on ${conn.config.base}")
     }
 
+    /** Subscribe to the private livestream channel to receive LivestreamUpdated events, routed by [socketId]. */
+    fun subscribeToLivestream(socketId: String, livestreamId: Long, auth: String) {
+        val conn = connections.firstOrNull { it.socketId == socketId && it.isConnected } ?: return
+        currentLivestreamId = livestreamId
+        conn.send("""{"event":"pusher:subscribe","data":{"auth":"$auth","channel":"private-livestream.$livestreamId"}}""")
+        Log.d(TAG, "Requested subscription to private-livestream: $livestreamId on ${conn.config.base}")
+    }
+
     fun subscribeToTvSetup(uuid: String) {
         currentTvSetupUuid = uuid
         sendToAll(tvSetupMessage(uuid))
@@ -408,6 +417,10 @@ class KcikChatWebSocket(
 
         unsubscribeFromChat()
         unsubscribeFromChannelEvents()
+        currentLivestreamId?.let { id ->
+            sendToAll("""{"event":"pusher:unsubscribe","data":{"channel":"private-livestream.$id"}}""")
+            currentLivestreamId = null
+        }
 
         connections.forEach { it.close() }
         aggregateConnected.set(false)
@@ -737,6 +750,11 @@ class KcikChatWebSocket(
                     // data (no months count, just user_ids). Ignored to avoid a duplicate chat
                     // notification; SubscriptionEvent above is the canonical source.
                     Log.d(TAG, "Ignoring duplicate ChannelSubscriptionEvent — handled via SubscriptionEvent")
+                }
+                "App\\Events\\LivestreamUpdated" -> {
+                    event.data?.let { dataString ->
+                        onEventReceived("App\\Events\\LivestreamUpdated", dataString)
+                    }
                 }
                 "App\\Events\\SetupTvEvent", "SetupTvEvent" -> {
                     event.data?.let { dataString ->

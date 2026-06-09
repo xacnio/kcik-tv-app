@@ -50,6 +50,11 @@ class ChatEventHandler(
             activity.onStreamerIsLive()
             return
         }
+
+        if (event == "App\\Events\\LivestreamUpdated") {
+            handleLivestreamUpdated(data)
+            return
+        }
         
         val current = stateManager.currentChatroom ?: return
         var updated = current
@@ -476,6 +481,21 @@ class ChatEventHandler(
             } else null
         } catch (_: Exception) {
             null
+        }
+    }
+
+    private fun handleLivestreamUpdated(data: String?) {
+        data?.let {
+            try {
+                val eventData = gson.fromJson(it, LivestreamUpdatedEventData::class.java)
+                eventData.livestream?.let { ls ->
+                    runOnUiThread {
+                        activity.onLivestreamUpdated(ls)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error parsing LivestreamUpdated", e)
+            }
         }
     }
 }
