@@ -72,6 +72,12 @@ class ChatAdapter(
     private val animatingViews = mutableSetOf<View>() // Views currently running enter animation
     private var animationType: String = "none"
 
+    private var appTypeface: android.graphics.Typeface? = null
+
+    fun setAppTypeface(typeface: android.graphics.Typeface?) {
+        appTypeface = typeface
+    }
+
     fun setAnimationType(type: String) {
         this.animationType = type
     }
@@ -522,35 +528,19 @@ class ChatAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        return when (viewType) {
-            VIEW_TYPE_SYSTEM -> {
-                SystemViewHolder(inflater.inflate(R.layout.item_chat_system, parent, false))
-            }
-            VIEW_TYPE_INFO -> {
-                InfoViewHolder(inflater.inflate(R.layout.item_chat_info, parent, false))
-            }
-            VIEW_TYPE_RESTORE_BUTTON -> {
-                RestoreButtonViewHolder(inflater.inflate(R.layout.item_chat_restore_button, parent, false))
-            }
-            VIEW_TYPE_LOAD_MISSED -> {
-                RestoreButtonViewHolder(inflater.inflate(R.layout.item_chat_restore_button, parent, false))
-            }
-            VIEW_TYPE_DIVIDER -> {
-                DividerViewHolder(inflater.inflate(R.layout.item_chat_divider, parent, false))
-            }
-            VIEW_TYPE_REWARD -> {
-                RewardViewHolder(inflater.inflate(R.layout.item_chat_reward, parent, false))
-            }
-            VIEW_TYPE_CELEBRATION -> {
-                CelebrationViewHolder(inflater.inflate(R.layout.item_chat_celebration, parent, false))
-            }
-            VIEW_TYPE_GIFT -> {
-                GiftViewHolder(inflater.inflate(R.layout.item_chat_gift, parent, false))
-            }
-            else -> {
-                ChatViewHolder(inflater.inflate(R.layout.item_chat_message, parent, false))
-            }
+        val holder = when (viewType) {
+            VIEW_TYPE_SYSTEM -> SystemViewHolder(inflater.inflate(R.layout.item_chat_system, parent, false))
+            VIEW_TYPE_INFO -> InfoViewHolder(inflater.inflate(R.layout.item_chat_info, parent, false))
+            VIEW_TYPE_RESTORE_BUTTON -> RestoreButtonViewHolder(inflater.inflate(R.layout.item_chat_restore_button, parent, false))
+            VIEW_TYPE_LOAD_MISSED -> RestoreButtonViewHolder(inflater.inflate(R.layout.item_chat_restore_button, parent, false))
+            VIEW_TYPE_DIVIDER -> DividerViewHolder(inflater.inflate(R.layout.item_chat_divider, parent, false))
+            VIEW_TYPE_REWARD -> RewardViewHolder(inflater.inflate(R.layout.item_chat_reward, parent, false))
+            VIEW_TYPE_CELEBRATION -> CelebrationViewHolder(inflater.inflate(R.layout.item_chat_celebration, parent, false))
+            VIEW_TYPE_GIFT -> GiftViewHolder(inflater.inflate(R.layout.item_chat_gift, parent, false))
+            else -> ChatViewHolder(inflater.inflate(R.layout.item_chat_message, parent, false))
         }
+        appTypeface?.let { dev.xacnio.kciktv.shared.ui.font.FontManager.applyToView(holder.itemView, it) }
+        return holder
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {

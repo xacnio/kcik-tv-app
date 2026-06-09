@@ -159,6 +159,10 @@ class AppPreferences(private val context: Context) {
         blockedCategories = current
     }
 
+    var appFont: String
+        get() = prefs.getString("app_font", "default") ?: "default"
+        set(value) = prefs.edit().putString("app_font", value).apply()
+
     var animationsEnabled: Boolean
         get() = prefs.getBoolean("animations_enabled", true)
         set(value) = prefs.edit().putBoolean("animations_enabled", value).apply()

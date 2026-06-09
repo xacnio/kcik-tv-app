@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="64dp"
+    android:background="@drawable/bg_item_ripple"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingHorizontal="20dp">
+
+    <TextView
+        android:id="@+id/fontPreview"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:text="Aa"
+        android:textColor="#CCCCCC"
+        android:textSize="15sp"
+        android:gravity="center"
+        android:background="@drawable/bg_circle_dark" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="16dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/fontName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/fontSource"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#808080"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/fontLoadingSpinner"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/fontStatusIcon"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:visibility="gone"
+        app:tint="#53FC18" />
+
+    <ImageView
+        android:id="@+id/fontDeleteButton"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="4dp"
+        android:padding="6dp"
+        android:src="@drawable/ic_delete"
+        android:background="@drawable/bg_item_ripple"
+        android:visibility="gone"
+        app:tint="#888888" />
+
+</LinearLayout>
