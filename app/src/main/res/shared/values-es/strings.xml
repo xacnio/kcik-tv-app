@@ -179,6 +179,17 @@
     <string name="setting_option">Opción de Ajuste</string>
     <string name="setting_language">Selección de Idioma</string>
     <string name="setting_app_language">Idioma de la App</string>
+    <string name="setting_app_font">Fuente de la App</string>
+    <string name="font_default">Predeterminado</string>
+    <string name="font_section_system">Fuentes del Sistema</string>
+    <string name="font_section_google">Google Fonts</string>
+    <string name="font_category_sans">Sin Serifa (Sans-Serif)</string>
+    <string name="font_category_serif">Con Serifa (Serif)</string>
+    <string name="font_category_display">Display y Escritura</string>
+    <string name="font_category_mono">Monoespaciado</string>
+    <string name="font_source_system">Sistema</string>
+    <string name="font_source_google">Google Fonts</string>
+    <string name="font_download_failed">Error al descargar la fuente. Verifica tu conexión.</string>
     <string name="system_default">Predeterminado del Sistema</string>
     <string name="setting_info_delay">Duración de información</string>
     <string name="setting_transparency">Ajuste de transparencia</string>

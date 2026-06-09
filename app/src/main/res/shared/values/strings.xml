@@ -179,6 +179,17 @@
     <string name="setting_option">Setting Option</string>
     <string name="setting_language">Language Selection</string>
     <string name="setting_app_language">App Language</string>
+    <string name="setting_app_font">App Font</string>
+    <string name="font_default">Default</string>
+    <string name="font_section_system">System Fonts</string>
+    <string name="font_section_google">Google Fonts</string>
+    <string name="font_category_sans">Sans-Serif</string>
+    <string name="font_category_serif">Serif</string>
+    <string name="font_category_display">Display &amp; Handwriting</string>
+    <string name="font_category_mono">Monospace</string>
+    <string name="font_source_system">System</string>
+    <string name="font_source_google">Google Fonts</string>
+    <string name="font_download_failed">Font download failed. Check your connection.</string>
     <string name="system_default">System Default</string>
     <string name="setting_info_delay">Info Display Duration</string>
     <string name="setting_transparency">Transparency Adjustment</string>

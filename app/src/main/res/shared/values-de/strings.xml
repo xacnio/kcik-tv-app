@@ -179,6 +179,17 @@
     <string name="setting_option">Einstellungsoption</string>
     <string name="setting_language">Sprachauswahl</string>
     <string name="setting_app_language">App-Sprache</string>
+    <string name="setting_app_font">App-Schriftart</string>
+    <string name="font_default">Standard</string>
+    <string name="font_section_system">Systemschriftarten</string>
+    <string name="font_section_google">Google Fonts</string>
+    <string name="font_category_sans">Serifenlos</string>
+    <string name="font_category_serif">Serifen</string>
+    <string name="font_category_display">Display &amp; Handschrift</string>
+    <string name="font_category_mono">Festbreit</string>
+    <string name="font_source_system">System</string>
+    <string name="font_source_google">Google Fonts</string>
+    <string name="font_download_failed">Schriftart-Download fehlgeschlagen. Verbindung prüfen.</string>
     <string name="system_default">Systemstandard</string>
     <string name="setting_info_delay">Info-Anzeigedauer</string>
     <string name="setting_transparency">Transparenzanpassung</string>

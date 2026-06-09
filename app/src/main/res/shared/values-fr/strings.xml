@@ -179,6 +179,17 @@
     <string name="setting_option">Option de Paramètre</string>
     <string name="setting_language">Sélection de la Langue</string>
     <string name="setting_app_language">Langue de l\'App</string>
+    <string name="setting_app_font">Police de l\'App</string>
+    <string name="font_default">Par défaut</string>
+    <string name="font_section_system">Polices Système</string>
+    <string name="font_section_google">Google Fonts</string>
+    <string name="font_category_sans">Sans Empattement</string>
+    <string name="font_category_serif">Avec Empattement</string>
+    <string name="font_category_display">Affichage &amp; Écriture</string>
+    <string name="font_category_mono">Monospace</string>
+    <string name="font_source_system">Système</string>
+    <string name="font_source_google">Google Fonts</string>
+    <string name="font_download_failed">Échec du téléchargement. Vérifiez votre connexion.</string>
     <string name="system_default">Par Défaut du Système</string>
     <string name="setting_info_delay">Durée d\'affichage info</string>
     <string name="setting_transparency">Réglage transparence</string>

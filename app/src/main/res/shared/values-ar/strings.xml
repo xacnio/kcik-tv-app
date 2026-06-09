@@ -179,6 +179,17 @@
     <string name="setting_option">خيار الإعداد</string>
     <string name="setting_language">اختيار اللغة</string>
     <string name="setting_app_language">لغة التطبيق</string>
+    <string name="setting_app_font">خط التطبيق</string>
+    <string name="font_default">افتراضي</string>
+    <string name="font_section_system">خطوط النظام</string>
+    <string name="font_section_google">خطوط جوجل</string>
+    <string name="font_category_sans">بلا أرجل (Sans-Serif)</string>
+    <string name="font_category_serif">مع أرجل (Serif)</string>
+    <string name="font_category_display">عرض وخط اليد</string>
+    <string name="font_category_mono">أحادي المسافة</string>
+    <string name="font_source_system">نظام</string>
+    <string name="font_source_google">خطوط جوجل</string>
+    <string name="font_download_failed">فشل تنزيل الخط. تحقق من اتصالك.</string>
     <string name="system_default">الافتراضي للنظام</string>
     <string name="setting_info_delay">مدة عرض المعلومات</string>
     <string name="setting_transparency">ضبط الشفافية</string>

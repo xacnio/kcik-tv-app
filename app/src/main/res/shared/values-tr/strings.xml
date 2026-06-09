@@ -179,6 +179,17 @@
     <string name="setting_option">Ayar Seçeneği</string>
     <string name="setting_language">Dil Seçimi</string>
     <string name="setting_app_language">Uygulama Dili</string>
+    <string name="setting_app_font">Uygulama Fontu</string>
+    <string name="font_default">Varsayılan</string>
+    <string name="font_section_system">Sistem Fontları</string>
+    <string name="font_section_google">Google Fontları</string>
+    <string name="font_category_sans">Tırnaksız (Sans-Serif)</string>
+    <string name="font_category_serif">Tırnaklı (Serif)</string>
+    <string name="font_category_display">Dekoratif &amp; El Yazısı</string>
+    <string name="font_category_mono">Sabit Genişlikli</string>
+    <string name="font_source_system">Sistem</string>
+    <string name="font_source_google">Google Fontları</string>
+    <string name="font_download_failed">Font indirilemedi. Bağlantınızı kontrol edin.</string>
     <string name="system_default">Sistem Varsayılanı</string>
     <string name="setting_info_delay">Bilgi Ekranı Süresi</string>
     <string name="setting_transparency">Saydamlık Ayarı</string>
