@@ -9,11 +9,13 @@
 package dev.xacnio.kciktv.mobile.ui.settings
 
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -36,6 +38,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import dev.xacnio.kciktv.mobile.InternalBrowserSheet
+import dev.xacnio.kciktv.shared.ui.font.FontManager
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
@@ -157,6 +160,13 @@ class SettingsPanelManager(
                 activity.getString(R.string.setting_app_language),
                 getAppLanguageValue()) {
                 showAppLanguageDialog()
+            }
+
+            // App Font
+            addSettingItem(container, R.drawable.ic_text_fields,
+                activity.getString(R.string.setting_app_font),
+                getAppFontValue()) {
+                showFontPickerSheet()
             }
         }
     }
@@ -634,6 +644,12 @@ class SettingsPanelManager(
             else -> SupportedLanguages.getDisplayName(savedLangRaw)
         }
     }
+
+    private fun getAppFontValue(): String {
+        val fontId = prefs.appFont
+        return FontManager.getOption(fontId)?.displayName
+            ?: activity.getString(R.string.font_default)
+    }
     
     private fun getVersionName(): String {
         return try {
@@ -677,6 +693,185 @@ class SettingsPanelManager(
             .show()
     }
     
+    private fun showFontPickerSheet() {
+        showDetailSheet(activity.getString(R.string.setting_app_font)) { container ->
+            val currentFontId = prefs.appFont
+            val density = activity.resources.displayMetrics.density
+
+            fun addSectionHeader(title: String) {
+                val header = TextView(activity).apply {
+                    textSize = 11f
+                    setTextColor(0xFF888888.toInt())
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    ).apply {
+                        topMargin = (12 * density).toInt()
+                        bottomMargin = (4 * density).toInt()
+                        marginStart = (20 * density).toInt()
+                    }
+                    text = title.uppercase()
+                }
+                container.addView(header)
+            }
+
+            fun addFontItem(opt: dev.xacnio.kciktv.shared.ui.font.FontOption) {
+                val isGoogleFont = !opt.isSystem
+                val itemView = LayoutInflater.from(activity)
+                    .inflate(R.layout.item_font_option, container, false)
+                val previewText  = itemView.findViewById<TextView>(R.id.fontPreview)
+                val nameText     = itemView.findViewById<TextView>(R.id.fontName)
+                val sourceText   = itemView.findViewById<TextView>(R.id.fontSource)
+                val spinner      = itemView.findViewById<ProgressBar>(R.id.fontLoadingSpinner)
+                val statusIcon   = itemView.findViewById<ImageView>(R.id.fontStatusIcon)
+                val deleteButton = itemView.findViewById<ImageView>(R.id.fontDeleteButton)
+
+                nameText.text = opt.displayName
+                sourceText.text = if (isGoogleFont)
+                    activity.getString(R.string.font_source_google)
+                else
+                    activity.getString(R.string.font_source_system)
+
+                val fullTypeface: android.graphics.Typeface? = if (!isGoogleFont) {
+                    FontManager.getSystemTypeface(opt.id)
+                } else {
+                    FontManager.getCachedGoogleFont(activity, opt.id)
+                }
+                var previewTypeface: android.graphics.Typeface? = fullTypeface
+                    ?: if (isGoogleFont) FontManager.getCachedPreviewTypeface(activity, opt.id) else null
+
+                fun applyPreview(tf: android.graphics.Typeface) {
+                    previewText.typeface = tf
+                    nameText.typeface = tf
+                }
+                previewTypeface?.let { applyPreview(it) }
+
+                fun refreshStatus() {
+                    val isSelected = opt.id == prefs.appFont
+                    val isFullCached = isGoogleFont && FontManager.isGoogleFontCached(activity, opt.id)
+                    when {
+                        isSelected -> {
+                            statusIcon.setImageResource(R.drawable.ic_check)
+                            statusIcon.imageTintList = ColorStateList.valueOf(0xFF53FC18.toInt())
+                            statusIcon.visibility = View.VISIBLE
+                            deleteButton.visibility = View.GONE
+                        }
+                        isGoogleFont && isFullCached -> {
+                            statusIcon.visibility = View.GONE
+                            deleteButton.visibility = View.VISIBLE
+                        }
+                        isGoogleFont -> {
+                            statusIcon.setImageResource(R.drawable.ic_download)
+                            statusIcon.imageTintList = ColorStateList.valueOf(0xFF888888.toInt())
+                            statusIcon.visibility = View.VISIBLE
+                            deleteButton.visibility = View.GONE
+                        }
+                        else -> {
+                            statusIcon.visibility = View.GONE
+                            deleteButton.visibility = View.GONE
+                        }
+                    }
+                }
+                refreshStatus()
+
+                // Auto-download subset preview if not yet cached
+                if (isGoogleFont && previewTypeface == null) {
+                    FontManager.downloadGoogleFontPreview(activity, opt.id) { tf ->
+                        if (tf != null && previewTypeface == null) {
+                            previewTypeface = tf
+                            applyPreview(tf)
+                        }
+                    }
+                }
+
+                deleteButton.setOnClickListener {
+                    if (opt.id == prefs.appFont) {
+                        // Switch back to default before deleting
+                        prefs.appFont = "default"
+                        activity.currentAppTypeface = null
+                        FontManager.applyToView(activity.binding.root, android.graphics.Typeface.DEFAULT)
+                        activity.chatAdapter.setAppTypeface(null)
+                    }
+                    FontManager.deleteGoogleFont(activity, opt.id)
+                    previewTypeface = null
+                    previewText.typeface = android.graphics.Typeface.DEFAULT
+                    nameText.typeface = android.graphics.Typeface.DEFAULT
+                    refreshStatus()
+                    // Re-trigger background preview download
+                    FontManager.downloadGoogleFontPreview(activity, opt.id) { tf ->
+                        if (tf != null) {
+                            previewTypeface = tf
+                            applyPreview(tf)
+                        }
+                    }
+                }
+
+                itemView.setOnClickListener {
+                    when {
+                        opt.id == prefs.appFont -> {
+                            detailDialog?.dismiss()
+                            showAppearanceSettings()
+                        }
+                        fullTypeface != null -> {
+                            prefs.appFont = opt.id
+                            applyFontToActivity(fullTypeface)
+                            detailDialog?.dismiss()
+                            showAppearanceSettings()
+                        }
+                        else -> {
+                            statusIcon.visibility = View.GONE
+                            deleteButton.visibility = View.GONE
+                            spinner.visibility = View.VISIBLE
+                            itemView.isClickable = false
+                            FontManager.downloadGoogleFont(activity, opt.id) { typeface ->
+                                spinner.visibility = View.GONE
+                                itemView.isClickable = true
+                                if (typeface != null) {
+                                    applyPreview(typeface)
+                                    prefs.appFont = opt.id
+                                    applyFontToActivity(typeface)
+                                    detailDialog?.dismiss()
+                                    showAppearanceSettings()
+                                } else {
+                                    refreshStatus()
+                                    Toast.makeText(activity, R.string.font_download_failed, Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
+                    }
+                }
+
+                container.addView(itemView)
+            }
+
+            addSectionHeader(activity.getString(R.string.font_section_system))
+            FontManager.systemFonts.forEach { addFontItem(it) }
+
+            val googleByCategory = FontManager.googleFonts.groupBy { it.category }
+            val categoryLabels = mapOf(
+                "sans"    to activity.getString(R.string.font_category_sans),
+                "serif"   to activity.getString(R.string.font_category_serif),
+                "display" to activity.getString(R.string.font_category_display),
+                "mono"    to activity.getString(R.string.font_category_mono)
+            )
+            listOf("sans", "serif", "display", "mono").forEach { cat ->
+                googleByCategory[cat]?.let { fonts ->
+                    addSectionHeader(categoryLabels[cat] ?: cat)
+                    fonts.forEach { addFontItem(it) }
+                }
+            }
+        }
+    }
+
+    private fun applyFontToActivity(typeface: android.graphics.Typeface) {
+        // Update factory reference so all future inflations use the new font
+        activity.currentAppTypeface = typeface
+        // Apply to current view hierarchy immediately
+        FontManager.applyToView(activity.binding.root, typeface)
+        // Update chat adapter for recycled ViewHolders
+        activity.chatAdapter.setAppTypeface(typeface)
+    }
+
     private fun showAppLanguageDialog() {
         val languages = SupportedLanguages.getDisplayNamesForDialog(
             activity, 

@@ -215,6 +215,7 @@ class MobilePlayerActivity : FragmentActivity() {
     internal lateinit var prefs: AppPreferences
     internal val repository = ChannelRepository()
     private val updateRepository = dev.xacnio.kciktv.shared.data.repository.UpdateRepository()
+    internal var currentAppTypeface: android.graphics.Typeface? = null
     
     // Analytics (Privacy-focused)
     internal val analytics: AnalyticsManager by lazy { AnalyticsManager.getInstance(this) }
@@ -725,7 +726,52 @@ class MobilePlayerActivity : FragmentActivity() {
         super.attachBaseContext(localizedContext)
     }
 
+    private fun installFontInflaterFactory() {
+        val inflater = android.view.LayoutInflater.from(this)
+        if (inflater.factory2 != null) return
+        // Clone without factory so we can use it for actual view construction
+        // inside the factory callback without recursion.
+        val base = inflater.cloneInContext(this)
+        androidx.core.view.LayoutInflaterCompat.setFactory2(
+            inflater,
+            object : android.view.LayoutInflater.Factory2 {
+                override fun onCreateView(
+                    parent: android.view.View?, name: String,
+                    context: android.content.Context, attrs: android.util.AttributeSet
+                ): android.view.View? {
+                    // Use android.widget. prefix for simple (unqualified) names;
+                    // fully-qualified names (containing '.') need no prefix.
+                    val prefix = if (!name.contains('.')) "android.widget." else null
+                    val view = try {
+                        if (android.os.Build.VERSION.SDK_INT >= 29) {
+                            base.createView(context, name, prefix, attrs)
+                        } else {
+                            @Suppress("DEPRECATION") base.createView(name, prefix, attrs)
+                        }
+                    } catch (_: Exception) { return null }
+                    val tf = currentAppTypeface
+                    if (tf != null && view is android.widget.TextView && view.tag != "brand_font") {
+                        val style = view.typeface?.style ?: android.graphics.Typeface.NORMAL
+                        view.typeface = android.graphics.Typeface.create(tf, style)
+                    }
+                    return view
+                }
+                override fun onCreateView(name: String, context: android.content.Context, attrs: android.util.AttributeSet): android.view.View? =
+                    onCreateView(null, name, context, attrs)
+            }
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Must be before super.onCreate() so the factory is set before any layout inflation.
+        installFontInflaterFactory()
+        val fontId = AppPreferences(this).appFont
+        if (fontId != "default") {
+            currentAppTypeface =
+                dev.xacnio.kciktv.shared.ui.font.FontManager.getSystemTypeface(fontId)
+                ?: dev.xacnio.kciktv.shared.ui.font.FontManager.getCachedGoogleFont(this, fontId)
+        }
+
         super.onCreate(savedInstanceState)
         prefs = AppPreferences(this)
 
@@ -733,10 +779,10 @@ class MobilePlayerActivity : FragmentActivity() {
         // back off auxiliary work when the device gets hot. NOT a quality knob —
         // stream bitrate/resolution stay untouched.
         dev.xacnio.kciktv.shared.util.ThermalMonitor.start(this)
-        
+
         // Apply language settings
         applySavedLanguage()
-        
+
         binding = ActivityMobilePlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -2061,11 +2107,11 @@ class MobilePlayerActivity : FragmentActivity() {
         floatingEmoteManager.clear()
 
         // Switch mention context to the new channel (loads per-channel persisted mentions)
-        channel.slug?.let { mentionsManager.switchToChannel(it) }
+        mentionsManager.switchToChannel(channel.slug)
 
         // Save as last watched
         prefs.lastWatchedChannelSlug = channel.slug
-        channel.slug?.let { prefs.saveRecentWatchedSlug(it) }
+        prefs.saveRecentWatchedSlug(channel.slug)
         
         // Show player screen
         // actionBar visibility is managed by ChannelUiManager (animateActionBarIn/Out)
