@@ -41,16 +41,11 @@ class LiveStoryAdapter(
 
         fun bind(channel: ChannelItem) {
             username.text = channel.username ?: channel.slug ?: ""
-            val picUrl = channel.profilePicUrl
-            if (!picUrl.isNullOrEmpty()) {
-                Glide.with(profilePic)
-                    .load(picUrl)
-                    .transform(CircleCrop())
-                    .placeholder(R.drawable.bg_rounded_circle)
-                    .into(profilePic)
-            } else {
-                profilePic.setImageResource(R.drawable.bg_rounded_circle)
-            }
+            Glide.with(profilePic)
+                .load(channel.getEffectiveProfilePicUrl())
+                .transform(CircleCrop())
+                .placeholder(R.drawable.bg_rounded_circle)
+                .into(profilePic)
             itemView.setOnClickListener { onStoryClick(channel) }
         }
     }
