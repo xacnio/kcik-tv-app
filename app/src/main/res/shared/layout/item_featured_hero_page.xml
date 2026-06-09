@@ -79,7 +79,7 @@
             android:paddingHorizontal="8dp"
             android:paddingVertical="4dp"
             android:text="@string/live_badge"
-            android:textColor="#FFFFFF"
+            android:textColor="#000000"
             android:textSize="10sp"
             android:textStyle="bold" />
 

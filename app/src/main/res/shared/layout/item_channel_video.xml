@@ -56,7 +56,8 @@
                 android:paddingVertical="2dp"
                 android:text="@string/live_badge"
                 android:textAllCaps="true"
-                android:textColor="@android:color/white"
+                android:textColor="#000000"
+                android:textStyle="bold"
                 android:textSize="11sp"
                 android:visibility="gone" />
 
