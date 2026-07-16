@@ -256,6 +256,10 @@ class QuickEmoteBarManager(
         mainHandler.postDelayed({
             updateQuickEmoteBar(showShimmer = false)
         }, 250)
+
+        // Both the bar and the emote panel funnel their clicks here, so refresh the panel's
+        // recents tab from this one place.
+        activity.emotePanelManager.refreshRecents()
     }
     
     /**

@@ -2,7 +2,7 @@
  * File: EmotePanelManager.kt
  *
  * Description: Manages the Emote Picker panel interface.
- * It handles loading emote data, organizing emotes into tabs (Global, Channel, Emoji),
+ * It handles loading emote data, organizing emotes into tabs (Recents, Collectibles, Global, Channel, Emoji),
  * and managing the grid layout and user selection interactions.
  *
  * Author: Xacnio
@@ -37,9 +37,14 @@ class EmotePanelManager(
 ) {
     private companion object {
         const val TAG = "EmotePanelManager"
+
+        /** Matches the quick bar's refresh delay, so tabs settle after the click ripple. */
+        const val RECENTS_REFRESH_DELAY_MS = 250L
     }
 
     internal var emoteCategories: List<dev.xacnio.kciktv.shared.data.model.EmoteCategory> = emptyList()
+    // Tab order shown in the panel: recents, collectibles, global, channels, emojis
+    private var displayCategories: List<dev.xacnio.kciktv.shared.data.model.EmoteCategory> = emptyList()
     private var activeEmoteSlug: String? = null
     private var currentEmoteCategoryIndex = 0
     private var emoteNameToId: Map<String, Long> = emptyMap() // For quick emote name lookup
@@ -48,7 +53,93 @@ class EmotePanelManager(
 
     fun resetForNewChannel() {
         emoteCategories = emptyList()
+        displayCategories = emptyList()
+        currentEmoteCategoryIndex = 0
         activeEmoteSlug = null
+    }
+
+    /**
+     * Builds the "recently used" category from the stored recent emote ids, resolving them
+     * against the emotes the current channel actually offers. Returns null when nothing is
+     * usable yet, so the tab only appears once the user has picked some emotes.
+     */
+    private fun buildRecentsCategory(): dev.xacnio.kciktv.shared.data.model.EmoteCategory? {
+        val channelId = activity.currentChannel?.id?.toLongOrNull()
+        val stored = (channelId?.let { activity.prefs.getChannelRecentEmoteIds(it) })
+            ?: activity.prefs.recentEmoteIds
+        val recentIds = stored?.split(",")?.mapNotNull { it.toLongOrNull() } ?: return null
+        if (recentIds.isEmpty()) return null
+
+        val isSubscribed = activity.chatStateManager.isSubscribedToCurrentChannel
+        val byId = emoteCategories.flatMap { it.emotes }.associateBy { it.id }
+        val recents = recentIds.mapNotNull { byId[it] }
+            .filter { emote ->
+                // Current channel's sub emotes need an active subscription; sub emotes from other
+                // channels are only in the payload because the user is subscribed there.
+                !emote.subscribersOnly || emote.channelId != channelId || isSubscribed
+            }
+            // Already filtered to usable emotes, so clear the flag to keep this a flat
+            // most-recent-first list instead of letting the adapter split off a subscriber section.
+            .map { if (it.subscribersOnly) it.copy(subscribersOnly = false) else it }
+            .take(QuickEmoteBarManager.MAX_STORED_RECENTS)
+
+        if (recents.isEmpty()) return null
+        return dev.xacnio.kciktv.shared.data.model.EmoteCategory(
+            id = "Recents",
+            name = "Recents",
+            emotes = recents,
+            isRecents = true
+        )
+    }
+
+    /**
+     * Rebuilds the recents tab after the stored list changed, so a clicked emote moves to the
+     * front of it. Delayed so the grid does not shift while the click ripple is still running.
+     */
+    fun refreshRecents() {
+        if (!isEmotePanelInitialized) return
+        if (binding.emotePanelContainer.visibility != View.VISIBLE) return
+
+        binding.emotePanelContainer.postDelayed({
+            if (binding.emotePanelContainer.visibility != View.VISIBLE) return@postDelayed
+
+            val hadRecents = displayCategories.firstOrNull()?.isRecents == true
+            val hasRecents = buildRecentsCategory() != null
+
+            if (hadRecents != hasRecents) {
+                // The strip gained or lost its first tab, so shift the selection to stay on the
+                // same category, then rebuild the tabs.
+                currentEmoteCategoryIndex =
+                    (currentEmoteCategoryIndex + if (hasRecents) 1 else -1).coerceAtLeast(0)
+                populateEmotePanel()
+                return@postDelayed
+            }
+
+            displayCategories = buildDisplayCategories()
+            if (hasRecents && currentEmoteCategoryIndex == 0) {
+                val recyclerView = binding.emotePanelContainer
+                    .findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.emoteRecyclerView)
+                (recyclerView?.adapter as? EmoteAdapter)?.setEmotes(displayCategories[0].emotes)
+                recyclerView?.scrollToPosition(0)
+            }
+        }, RECENTS_REFRESH_DELAY_MS)
+    }
+
+    /**
+     * Orders the API categories for the tab strip. sortedBy is stable, so channels keep the
+     * order the API sent them, and any unknown category lands with the channels.
+     */
+    private fun buildDisplayCategories(): List<dev.xacnio.kciktv.shared.data.model.EmoteCategory> {
+        val ordered = emoteCategories.sortedBy { category ->
+            when {
+                category.isCollectibles -> 0
+                category.isGlobal -> 1
+                category.isEmoji -> 3
+                else -> 2
+            }
+        }
+        val recents = buildRecentsCategory()
+        return if (recents != null) listOf(recents) + ordered else ordered
     }
 
     fun toggleEmotePanel(showKeyboardOnClose: Boolean = true) {
@@ -158,8 +249,8 @@ class EmotePanelManager(
             recyclerView.clipToPadding = false
             
             // Populate initial data if empty (fallback)
-             if (emoteCategories.isNotEmpty() && currentEmoteCategoryIndex < emoteCategories.size && emoteAdapter.itemCount == 0) {
-                 emoteAdapter.setEmotes(emoteCategories[currentEmoteCategoryIndex].emotes)
+             if (displayCategories.isNotEmpty() && currentEmoteCategoryIndex < displayCategories.size && emoteAdapter.itemCount == 0) {
+                 emoteAdapter.setEmotes(displayCategories[currentEmoteCategoryIndex].emotes)
             }
         }
         
@@ -380,7 +471,10 @@ class EmotePanelManager(
         }
         
         tabContainer.removeAllViews()
-        
+
+        displayCategories = buildDisplayCategories()
+        if (currentEmoteCategoryIndex >= displayCategories.size) currentEmoteCategoryIndex = 0
+
         // Ensure adapter is ready
         var adapter = recyclerView?.adapter as? dev.xacnio.kciktv.shared.ui.adapter.EmoteAdapter
         if (adapter == null) {
@@ -390,15 +484,15 @@ class EmotePanelManager(
         }
         
         // Initial data set
-        if (emoteCategories.isNotEmpty() && currentEmoteCategoryIndex < emoteCategories.size) {
-            adapter.setEmotes(emoteCategories[currentEmoteCategoryIndex].emotes)
+        if (displayCategories.isNotEmpty() && currentEmoteCategoryIndex < displayCategories.size) {
+            adapter.setEmotes(displayCategories[currentEmoteCategoryIndex].emotes)
         }
         
         // Build Tabs
         val size = (40 * activity.resources.displayMetrics.density).toInt()
         val padding = (8 * activity.resources.displayMetrics.density).toInt()
 
-        emoteCategories.forEachIndexed { index, category ->
+        displayCategories.forEachIndexed { index, category ->
              val tabView = android.widget.ImageView(activity)
              tabView.layoutParams = android.widget.LinearLayout.LayoutParams(size, size)
              tabView.setPadding(padding, padding, padding, padding)
@@ -406,6 +500,10 @@ class EmotePanelManager(
              
              // Load category icon
              when {
+                 category.isRecents -> {
+                     tabView.setImageResource(R.drawable.ic_history)
+                     tabView.setColorFilter(android.graphics.Color.WHITE)
+                 }
                  category.isGlobal -> {
                      tabView.setImageResource(R.drawable.ic_globe)
                      tabView.setColorFilter(android.graphics.Color.WHITE)
@@ -454,7 +552,7 @@ class EmotePanelManager(
                  currentEmoteCategoryIndex = index
                  
                  // Update adapter content
-                 adapter.setEmotes(emoteCategories[index].emotes)
+                 adapter.setEmotes(displayCategories[index].emotes)
                  
                  // Update tab UI
                  for (i in 0 until tabContainer.childCount) {
