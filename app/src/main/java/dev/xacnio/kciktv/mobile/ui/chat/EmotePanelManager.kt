@@ -414,6 +414,10 @@ class EmotePanelManager(
                      tabView.setImageResource(R.drawable.ic_emoji)
                      tabView.setColorFilter(android.graphics.Color.WHITE)
                  }
+                 category.isCollectibles -> {
+                     tabView.setImageResource(R.drawable.ic_collectibles)
+                     tabView.setColorFilter(android.graphics.Color.WHITE)
+                 }
                  else -> {
                      val profilePic = category.profilePic
                      val firstEmoteId = category.emotes.firstOrNull()?.id

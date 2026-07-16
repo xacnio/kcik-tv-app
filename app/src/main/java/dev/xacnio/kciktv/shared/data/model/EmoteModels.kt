@@ -36,6 +36,9 @@ data class EmoteCategory(
     
     val isEmoji: Boolean
         get() = name == "Emojis"
+
+    val isCollectibles: Boolean
+        get() = name == "Collectibles"
     
     val profilePic: String?
         get() = user?.profilePic
