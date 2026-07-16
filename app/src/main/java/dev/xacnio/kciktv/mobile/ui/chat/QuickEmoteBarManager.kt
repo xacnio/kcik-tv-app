@@ -32,6 +32,14 @@ class QuickEmoteBarManager(
     private val prefs: AppPreferences,
     private val mainHandler: Handler
 ) {
+    companion object {
+        /** How many recent emote ids are kept in prefs. Caps the emote panel's recents tab. */
+        const val MAX_STORED_RECENTS = 60
+
+        /** How many recents lead the quick bar before it fills up with the rest of the emotes. */
+        private const val QUICK_BAR_RECENTS = 15
+    }
+
     private lateinit var quickEmoteAdapter: QuickEmoteAdapter
     private var isInitialized = false
     private var revealRunnable: Runnable? = null
@@ -159,7 +167,7 @@ class QuickEmoteBarManager(
         val recentIds = effectiveRecent?.split(",")?.mapNotNull { it.toLongOrNull() } ?: emptyList()
         val recentEmotes = recentIds.mapNotNull { id ->
             allUsableEmotes.find { it.id == id }
-        }.take(15)
+        }.take(QUICK_BAR_RECENTS)
 
         // 3. Combine: Recent first, then others (limit total for performance/UI)
         val finalEmotes = (recentEmotes + allUsableEmotes).distinctBy { it.id }.take(40)
@@ -233,7 +241,7 @@ class QuickEmoteBarManager(
         currentIds.remove(idStr)
         currentIds.add(0, idStr) // Most recent first
         
-        val newRecent = currentIds.take(20).joinToString(",")
+        val newRecent = currentIds.take(MAX_STORED_RECENTS).joinToString(",")
         
         // Always update global to keep it fresh
         prefs.recentEmoteIds = newRecent
