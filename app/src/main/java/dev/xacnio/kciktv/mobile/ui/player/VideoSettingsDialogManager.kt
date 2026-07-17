@@ -28,9 +28,19 @@ class VideoSettingsDialogManager(
 ) {
 
     class QualityViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val badge: TextView = view.findViewById(R.id.qualityBadge)
         val label: TextView = view.findViewById(R.id.qualityLabel)
         val bitrate: TextView = view.findViewById(R.id.qualityBitrate)
         val checkmark: ImageView = view.findViewById(R.id.selectedCheck)
+    }
+
+    /** Maps a stream's vertical resolution to a short tier badge (FHD/HD/SD/LD). */
+    private fun qualityTierLabel(height: Int): String = when {
+        height >= 2160 -> "4K"
+        height >= 1080 -> "FHD"
+        height >= 720 -> "HD"
+        height >= 480 -> "SD"
+        else -> "LD"
     }
 
     private var currentPanelView: View? = null
@@ -212,12 +222,15 @@ class VideoSettingsDialogManager(
                 holder.label.text = label
                 val currentQuality = activity.ivsPlayer?.quality
                 val isAutoMode = activity.ivsPlayer?.isAutoQualityMode == true
+                holder.badge.visibility = View.VISIBLE
                 if (q != null) {
                     holder.bitrate.text = String.format("%.1f Mbps", q.bitrate / 1_000_000.0)
                     holder.bitrate.visibility = View.VISIBLE
+                    holder.badge.text = qualityTierLabel(q.height)
                 } else {
                     holder.bitrate.text = if (currentQuality != null) "${currentQuality.height}p" else ""
                     holder.bitrate.visibility = if (isAutoMode) View.VISIBLE else View.GONE
+                    holder.badge.text = "AUTO"
                 }
                 val userLimit = activity.userSelectedQualityLimit
                 val isSelected = if (q == null) {
@@ -269,6 +282,7 @@ class VideoSettingsDialogManager(
                 holder.label.text = if (s == 1.0f) activity.getString(R.string.speed_normal_1x)
                     else activity.getString(R.string.speed_x_format, s)
                 holder.bitrate.visibility = View.GONE
+                holder.badge.visibility = View.INVISIBLE
                 val currentSpeed = activity.ivsPlayer?.playbackRate ?: 1.0f
                 holder.checkmark.visibility = if (s == currentSpeed) View.VISIBLE else View.GONE
                 holder.checkmark.imageTintList = android.content.res.ColorStateList.valueOf(prefs.themeColor)
