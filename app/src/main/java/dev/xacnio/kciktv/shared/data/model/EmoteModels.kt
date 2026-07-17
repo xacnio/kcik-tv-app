@@ -38,8 +38,10 @@ data class EmoteCategory(
     val isEmoji: Boolean
         get() = name == "Emojis"
 
+    // Prefix rather than an exact match: the category is named "Collectibles" today, but Kick
+    // has been shipping variants of it, so anything starting with it counts.
     val isCollectibles: Boolean
-        get() = name == "Collectibles"
+        get() = name?.startsWith("Collectibles", ignoreCase = true) == true
     
     val profilePic: String?
         get() = user?.profilePic
