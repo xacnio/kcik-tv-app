@@ -219,9 +219,10 @@ class AppPreferences(private val context: Context) {
         get() = prefs.getBoolean("background_audio_enabled", true)
         set(value) = prefs.edit().putBoolean("background_audio_enabled", value).apply()
 
-    var noiseReductionEnabled: Boolean
-        get() = prefs.getBoolean("noise_reduction_enabled", false)
-        set(value) = prefs.edit().putBoolean("noise_reduction_enabled", value).apply()
+    // Noise Reduction (RNNoise) preset: 0=Off, 1=Low, 2=Medium, 3=High, 4=Voice Focus
+    var noiseReductionLevel: Int
+        get() = prefs.getInt("noise_reduction_level", 0)
+        set(value) = prefs.edit().putInt("noise_reduction_level", value.coerceIn(0, 4)).apply()
         
     // Custom EQ Settings (Gain in dB)
     var eqBassGain: Float

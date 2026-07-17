@@ -500,7 +500,7 @@
     <string name="chat_error_timeout">Connection timed out. Please check your internet.</string>
 
     <!-- Audio Modes -->
-    <string name="audio_mode_custom_eq">Custom EQ</string>
+    <string name="audio_mode_custom_eq">Custom EQ &amp; Noise Reduction</string>
 
     <!-- Chat Hints -->
     <string name="chat_hint_subscribers_only">Subscribers only chat</string>
@@ -1094,7 +1094,7 @@
 
     <!-- Custom EQ -->
     <string name="zero_db">0 dB</string>
-    <string name="custom_eq_title">Custom EQ Settings</string>
+    <string name="custom_eq_title">Custom EQ &amp; Noise Reduction</string>
     <string name="eq_preset_flat">Flat</string>
     <string name="eq_preset_bass">Bass</string>
     <string name="eq_preset_vocal">Vocal</string>
@@ -1105,6 +1105,17 @@
     <string name="eq_preset_metal">Metal</string>
     <string name="eq_pre_amp">Pre-Amp Gain</string>
     <string name="eq_reset">Reset</string>
+    <string name="nr_title">Noise Reduction (Experimental)</string>
+    <string name="nr_desc">Suppresses background noise and brings speech forward.</string>
+    <string name="nr_off">Off</string>
+    <string name="nr_low">Low</string>
+    <string name="nr_medium">Medium</string>
+    <string name="nr_high">High</string>
+    <string name="nr_voice">Voice Focus</string>
+    <string name="nr_light">Light</string>
+    <string name="nr_balanced">Balanced</string>
+    <string name="nr_strong">Strong</string>
+    <string name="nr_max">Maximum</string>
 
     <!-- Pinned Messages -->
     <string name="pinned_message_header">PINNED MESSAGE</string>

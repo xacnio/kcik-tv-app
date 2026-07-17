@@ -500,7 +500,7 @@
     <string name="chat_error_timeout">Délai de connexion dépassé. Veuillez vérifier votre connexion internet.</string>
 
     <!-- Audio Modes -->
-    <string name="audio_mode_custom_eq">EQ Personnalisé</string>
+    <string name="audio_mode_custom_eq">EQ et réduction du bruit</string>
 
     <!-- Chat Hints -->
     <string name="chat_hint_subscribers_only">Chat abonnés uniquement</string>
@@ -1094,7 +1094,7 @@
 
     <!-- Custom EQ -->
     <string name="zero_db">0 dB</string>
-    <string name="custom_eq_title">EQ personnalisé</string>
+    <string name="custom_eq_title">EQ et réduction du bruit</string>
     <string name="eq_preset_flat">Plat</string>
     <string name="eq_preset_bass">Basses</string>
     <string name="eq_preset_vocal">Voix</string>
@@ -1105,6 +1105,17 @@
     <string name="eq_preset_metal">Metal</string>
     <string name="eq_pre_amp">Préamplificateur</string>
     <string name="eq_reset">Réinitialiser</string>
+    <string name="nr_title">Réduction du bruit (Expérimental)</string>
+    <string name="nr_desc">Supprime le bruit de fond et met la voix en avant.</string>
+    <string name="nr_off">Désactivé</string>
+    <string name="nr_low">Faible</string>
+    <string name="nr_medium">Moyen</string>
+    <string name="nr_high">Élevé</string>
+    <string name="nr_voice">Focus vocal</string>
+    <string name="nr_light">Léger</string>
+    <string name="nr_balanced">Équilibré</string>
+    <string name="nr_strong">Fort</string>
+    <string name="nr_max">Maximum</string>
 
     <!-- Pinned Messages -->
     <string name="pinned_message_header">MESSAGE ÉPINGLÉ</string>

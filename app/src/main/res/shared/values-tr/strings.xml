@@ -500,7 +500,7 @@
     <string name="chat_error_timeout">Bağlantı zaman aşımına uğradı. Lütfen internetinizi kontrol edin.</string>
 
     <!-- Audio Modes -->
-    <string name="audio_mode_custom_eq">Özel EQ</string>
+    <string name="audio_mode_custom_eq">Özel EQ ve Gürültü Azaltma</string>
 
     <!-- Chat Hints -->
     <string name="chat_hint_subscribers_only">Abonelere özel sohbet</string>
@@ -1094,7 +1094,7 @@
 
     <!-- Custom EQ -->
     <string name="zero_db">0 dB</string>
-    <string name="custom_eq_title">Özel EQ Ayarları</string>
+    <string name="custom_eq_title">Özel EQ ve Gürültü Azaltma</string>
     <string name="eq_preset_flat">Düz</string>
     <string name="eq_preset_bass">Bas</string>
     <string name="eq_preset_vocal">Vokal</string>
@@ -1105,6 +1105,17 @@
     <string name="eq_preset_metal">Metal</string>
     <string name="eq_pre_amp">Ön Kazanç</string>
     <string name="eq_reset">Sıfırla</string>
+    <string name="nr_title">Gürültü Azaltma (Deneysel)</string>
+    <string name="nr_desc">Arka plan gürültüsünü bastırır, konuşmayı öne çıkarır.</string>
+    <string name="nr_off">Kapalı</string>
+    <string name="nr_low">Düşük</string>
+    <string name="nr_medium">Orta</string>
+    <string name="nr_high">Yüksek</string>
+    <string name="nr_voice">Konuşma Odağı</string>
+    <string name="nr_light">Hafif</string>
+    <string name="nr_balanced">Dengeli</string>
+    <string name="nr_strong">Güçlü</string>
+    <string name="nr_max">Maksimum</string>
 
     <!-- Pinned Messages -->
     <string name="pinned_message_header">SABİTLENMİŞ MESAJ</string>

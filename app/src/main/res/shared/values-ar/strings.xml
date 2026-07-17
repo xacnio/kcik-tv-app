@@ -500,7 +500,7 @@
     <string name="chat_error_timeout">انتهت مهلة الاتصال. يرجى التحقق من الإنترنت الخاص بك.</string>
 
     <!-- Audio Modes -->
-    <string name="audio_mode_custom_eq">معادل صوت مخصص</string>
+    <string name="audio_mode_custom_eq">معادل الصوت وتقليل الضوضاء</string>
 
     <!-- Chat Hints -->
     <string name="chat_hint_subscribers_only">الدردشة للمشتركين فقط</string>
@@ -1094,7 +1094,7 @@
 
     <!-- Custom EQ -->
     <string name="zero_db">0 ديسيبل</string>
-    <string name="custom_eq_title">معادل صوت مخصص</string>
+    <string name="custom_eq_title">معادل الصوت وتقليل الضوضاء</string>
     <string name="eq_preset_flat">مسطح</string>
     <string name="eq_preset_bass">باس</string>
     <string name="eq_preset_vocal">صوتي</string>
@@ -1105,6 +1105,17 @@
     <string name="eq_preset_metal">ميتال</string>
     <string name="eq_pre_amp">مضخم أولي</string>
     <string name="eq_reset">إعادة تعيين</string>
+    <string name="nr_title">تقليل الضوضاء (تجريبي)</string>
+    <string name="nr_desc">يكبت ضوضاء الخلفية ويبرز الكلام.</string>
+    <string name="nr_off">إيقاف</string>
+    <string name="nr_low">منخفض</string>
+    <string name="nr_medium">متوسط</string>
+    <string name="nr_high">عالٍ</string>
+    <string name="nr_voice">التركيز على الكلام</string>
+    <string name="nr_light">خفيف</string>
+    <string name="nr_balanced">متوازن</string>
+    <string name="nr_strong">قوي</string>
+    <string name="nr_max">الحد الأقصى</string>
 
     <!-- Pinned Messages -->
     <string name="pinned_message_header">رسالة مثبتة</string>

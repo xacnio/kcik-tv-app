@@ -500,7 +500,7 @@
     <string name="chat_error_timeout">Zeitüberschreitung der Verbindung. Bitte überprüfen Sie Ihr Internet.</string>
 
     <!-- Audio Modes -->
-    <string name="audio_mode_custom_eq">Benutzerdefinierter EQ</string>
+    <string name="audio_mode_custom_eq">EQ &amp; Rauschunterdrückung</string>
 
     <!-- Chat Hints -->
     <string name="chat_hint_subscribers_only">Chat nur für Abonnenten</string>
@@ -1094,7 +1094,7 @@
 
     <!-- Custom EQ -->
     <string name="zero_db">0 dB</string>
-    <string name="custom_eq_title">Benutzerdefinierter EQ</string>
+    <string name="custom_eq_title">EQ &amp; Rauschunterdrückung</string>
     <string name="eq_preset_flat">Flach</string>
     <string name="eq_preset_bass">Bass</string>
     <string name="eq_preset_vocal">Gesang</string>
@@ -1105,6 +1105,17 @@
     <string name="eq_preset_metal">Metal</string>
     <string name="eq_pre_amp">Vorverstärker</string>
     <string name="eq_reset">Zurücksetzen</string>
+    <string name="nr_title">Rauschunterdrückung (Experimentell)</string>
+    <string name="nr_desc">Unterdrückt Hintergrundgeräusche und hebt Sprache hervor.</string>
+    <string name="nr_off">Aus</string>
+    <string name="nr_low">Niedrig</string>
+    <string name="nr_medium">Mittel</string>
+    <string name="nr_high">Hoch</string>
+    <string name="nr_voice">Sprachfokus</string>
+    <string name="nr_light">Leicht</string>
+    <string name="nr_balanced">Ausgewogen</string>
+    <string name="nr_strong">Stark</string>
+    <string name="nr_max">Maximum</string>
 
     <!-- Pinned Messages -->
     <string name="pinned_message_header">ANGEHEFTETE NACHRICHT</string>

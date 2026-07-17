@@ -57,6 +57,17 @@
 -keepclassmembers class com.amazonaws.ivs.** { *; }
 -dontwarn com.amazonaws.ivs.**
 
+# ---------- Pine (ART inline hooking — JNI, reflection-sensitive) ----------
+-keep class top.canyie.pine.** { *; }
+-keepclassmembers class top.canyie.pine.** { *; }
+-dontwarn top.canyie.pine.**
+
+# ---------- AudioNrTap: JNI entry points must keep their names ----------
+-keep class dev.xacnio.kciktv.mobile.ui.player.AudioNrTap { *; }
+-keepclasseswithmembernames class dev.xacnio.kciktv.mobile.ui.player.AudioNrTap {
+    native <methods>;
+}
+
 # ---------- AndroidX / Media3 (in case still referenced) ----------
 -keep class androidx.media3.** { *; }
 -dontwarn androidx.media3.**

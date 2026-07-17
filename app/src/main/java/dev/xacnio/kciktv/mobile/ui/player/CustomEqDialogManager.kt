@@ -90,6 +90,22 @@ class CustomEqDialogManager(
         seekTreble.progress = toProgress(prefs.eqTrebleGain)
         valTreble.text = formatDb(prefs.eqTrebleGain)
 
+        // Noise Reduction (RNNoise) preset selector
+        val spinnerNr = view.findViewById<android.widget.Spinner>(R.id.spinnerNr)
+        val presetNames = AudioNrTap.PRESETS.map { activity.getString(it.nameRes) }
+        val nrAdapter = android.widget.ArrayAdapter(activity, R.layout.spinner_nr_item, presetNames)
+        nrAdapter.setDropDownViewResource(R.layout.spinner_nr_dropdown)
+        spinnerNr.adapter = nrAdapter
+        spinnerNr.setSelection(prefs.noiseReductionLevel.coerceIn(0, AudioNrTap.PRESETS.size - 1), false)
+        spinnerNr.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: android.widget.AdapterView<*>?, v: View?, position: Int, id: Long) {
+                if (position == prefs.noiseReductionLevel) return
+                prefs.noiseReductionLevel = position
+                activity.playerManager.updateAudioProcessing()
+            }
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
+        }
+
         // Listeners
         val listener = object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar, progress: Int, fromUser: Boolean) {

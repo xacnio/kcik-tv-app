@@ -31,6 +31,33 @@
             android:textColor="#FFFFFF" />
     </RelativeLayout>
 
+    <!-- Noise Reduction / Speech Focus -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/nr_title"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:textSize="14sp"
+        android:layout_marginBottom="4dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/nr_desc"
+        android:textColor="#AAAAAA"
+        android:textSize="11sp"
+        android:layout_marginBottom="8dp"/>
+
+    <Spinner
+        android:id="@+id/spinnerNr"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@drawable/bg_chip"
+        android:paddingHorizontal="12dp"
+        android:popupBackground="@drawable/bg_bottom_sheet"
+        android:layout_marginBottom="16dp"/>
+
     <!-- Presets Scroll -->
     <HorizontalScrollView
         android:layout_width="match_parent"

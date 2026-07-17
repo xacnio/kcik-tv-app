@@ -12,9 +12,6 @@ package dev.xacnio.kciktv.mobile.ui.player
 
 import android.content.Context
 import android.media.audiofx.DynamicsProcessing
-import android.media.audiofx.NoiseSuppressor
-import android.media.audiofx.AutomaticGainControl
-import android.media.audiofx.AcousticEchoCanceler
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
@@ -93,8 +90,8 @@ class PlayerManager(
                         activity.playbackNotificationManager.setBackgroundAudioEnabled(true)
                         activity.updateMediaSessionState()
 
-                        // Apply audio processing
-                        if (!CustomEqDialogManager(activity, prefs).allEqSettingsFlat()) {
+                        // Apply audio processing (EQ and/or noise reduction)
+                        if (!CustomEqDialogManager(activity, prefs).allEqSettingsFlat() || prefs.noiseReductionLevel > 0) {
                             updateAudioProcessing()
                         }
 
@@ -456,6 +453,14 @@ class PlayerManager(
     }
 
     fun updateAudioProcessing() {
+        // PoC: when noise reduction is requested, install the ART hook that taps IVS's
+        // decoded PCM at AudioTrackRenderer.render(). Idempotent; independent of API level.
+        AudioNrTap.setPreset(prefs.noiseReductionLevel)
+        if (prefs.noiseReductionLevel > 0) {
+            AudioNrTap.install()
+            ivsPlayer?.let { AudioNrTap.logFormat(it) }
+        }
+
         // DynamicsProcessing is only available on Android 9 (API 28) and above
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
             return
@@ -468,7 +473,7 @@ class PlayerManager(
         }
 
         // Power optimization: if EQ is fully flat, release any existing processor and skip.
-        // Inserting a no-op DynamicsProcessing stage still keeps audio HAL on a hotter path.
+        // (Noise reduction runs via RNNoise on the decoded PCM, independent of DynamicsProcessing.)
         if (CustomEqDialogManager(activity, prefs).allEqSettingsFlat()) {
             if (audioProcessor != null) {
                 try {
@@ -501,9 +506,10 @@ class PlayerManager(
         try {
             // DynamicsProcessing (EQ) - The only effect that works with IVS Player
             if (audioProcessor == null) {
+                // PreEq(5 bands)=Custom EQ, MBC(4 bands)=Noise Reduction expander, Limiter=safety
                 val config = DynamicsProcessing.Config.Builder(
-                    DynamicsProcessing.VARIANT_FAVOR_FREQUENCY_RESOLUTION, 
-                    1, true, 5, true, 1, false, 0, true
+                    DynamicsProcessing.VARIANT_FAVOR_FREQUENCY_RESOLUTION,
+                    1, true, 5, true, 4, false, 0, true
                 ).build()
                 audioProcessor = DynamicsProcessing(10000, sessionId, config)
                 audioProcessor?.enabled = true
@@ -525,11 +531,36 @@ class PlayerManager(
                 eq.getBand(3).apply { cutoffFrequency = 4000f; gain = prefs.eqHighMidGain }
                 eq.getBand(4).apply { cutoffFrequency = 14000f; gain = prefs.eqTrebleGain }
                 processor.setPreEqAllChannelsTo(eq)
-                
-                Log.d(TAG, "EQ updated: PreAmp=${prefs.eqPreAmpGain}, Bass=${prefs.eqBassGain}, LowMid=${prefs.eqLowMidGain}, Mid=${prefs.eqMidGain}, HighMid=${prefs.eqHighMidGain}, Treble=${prefs.eqTrebleGain}")
+
+                // Noise Reduction / Speech Focus runs on the MBC stage (independent of EQ)
+                applyNoiseReduction(processor)
+
+                Log.d(TAG, "EQ updated: PreAmp=${prefs.eqPreAmpGain}, Bass=${prefs.eqBassGain}, LowMid=${prefs.eqLowMidGain}, Mid=${prefs.eqMidGain}, HighMid=${prefs.eqHighMidGain}, Treble=${prefs.eqTrebleGain}, NR=${prefs.noiseReductionLevel}")
             }
         } catch (e: Exception) {
             Log.e(TAG, "Audio Init Failed", e)
+        }
+    }
+
+    /**
+     * Configures the 4-band Multi-Band Compressor as a downward expander / noise-gate to
+     * suppress steady background noise (rumble, hiss, ambient) and bring speech forward.
+     * Bands: 0=0-150Hz (rumble), 1=150-1kHz (body), 2=1-4kHz (speech, least touched),
+     * 3=4-20kHz (hiss). When level==0 all bands are neutral (transparent).
+     *
+     * MbcBand(enabled, cutoffFrequency, attackTime, releaseTime, ratio, threshold,
+     *         kneeWidth, noiseGateThreshold, expanderRatio, preGain, postGain)
+     */
+    private fun applyNoiseReduction(processor: DynamicsProcessing) {
+        // Noise reduction is now handled by RNNoise (AudioNrTap, on the decoded PCM),
+        // which is far more effective than a multi-band expander. Keep the MBC stage
+        // fully neutral so it never double-gates the already-denoised signal.
+        val cutoffs = floatArrayOf(150f, 1000f, 4000f, 20000f)
+        for (i in cutoffs.indices) {
+            val band = DynamicsProcessing.MbcBand(
+                true, cutoffs[i], 5f, 120f, 1f, 0f, 0f, -100f, 1f, 0f, 0f
+            )
+            processor.setMbcBandAllChannelsTo(i, band)
         }
     }
 

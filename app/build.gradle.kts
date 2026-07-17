@@ -31,6 +31,23 @@ android {
         versionCode = 11
         val baseVersion = "2.3.0-beta"
         versionName = "$baseVersion-${getGitHash()}"
+
+        // Native RNNoise noise-suppression library (see src/main/cpp).
+        externalNativeBuild {
+            cmake {
+                cppFlags += ""
+            }
+        }
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
     }
 
     sourceSets {
@@ -122,7 +139,11 @@ dependencies {
     // 1.52.0 ships 16 KB page-aligned native libs (libplayercore.so) — required for
     // Android 15+ devices that use 16 KB memory pages (e.g. Pixel 8/9).
     implementation("com.amazonaws:ivs-player:1.52.0")
-    
+
+    // Pine: in-process ART method hooking (PoC) to tap IVS decoded PCM at
+    // AudioTrackRenderer.render() for AI noise suppression.
+    implementation("top.canyie.pine:core:0.3.0")
+
     // Gson
     implementation("com.google.code.gson:gson:2.11.0")
 
