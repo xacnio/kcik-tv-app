@@ -1451,7 +1451,6 @@ class MobilePlayerActivity : FragmentActivity() {
         playerManager.externalListener = playerListener
         playerManager.setupPlayer()
         playerGestureManager.setupPlayerGestureDetector()
-        setupFollowButton()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -2668,10 +2667,6 @@ class MobilePlayerActivity : FragmentActivity() {
     internal fun getLanguageName(code: String?): String =
         languageFilterManager.getLanguageName(code)
 
-    // ==================== Follow Button Logic ====================
-    
-    internal fun setupFollowButton() = infoPanelManager.setupFollowButton()
-    
     // ==================== WebView Operations ====================
     // All WebView operations are delegated to webViewManager
 

@@ -219,7 +219,6 @@ class VodManager(
         currentVideo = null
         
         // Restore UI elements hidden during VOD
-        activity.binding.infoFollowButton.visibility = View.VISIBLE
         activity.binding.mentionsButton.visibility = View.VISIBLE
         // Reset VOD mode in Chat UI (removes padding)
         activity.chatUiManager.setVodMode(false)
@@ -665,7 +664,6 @@ class VodManager(
         // Log analytics event (anonymous)
         activity.analytics.logVodView()
 
-        binding.infoFollowButton.visibility = View.GONE 
         binding.mentionsButton.visibility = View.GONE
         val playbackUrl = video.source
 
@@ -913,8 +911,7 @@ class VodManager(
         binding.bottomNavGradient.visibility = View.GONE
         activity.isHomeScreenVisible = false
         
-        binding.videoTopBar.visibility = View.GONE   
-        binding.infoFollowButton.visibility = View.GONE
+        binding.videoTopBar.visibility = View.GONE
         binding.mentionsButton.visibility = View.GONE
         activity.showLoading()
         

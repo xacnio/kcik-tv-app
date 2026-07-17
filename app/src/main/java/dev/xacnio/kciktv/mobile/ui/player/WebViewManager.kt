@@ -625,7 +625,6 @@ class WebViewManager(
             activity.runOnUiThread {
                 activity.currentIsFollowing = isFollow
                 activity.updateFollowButtonState()
-                activity.binding.infoFollowButton.isEnabled = true
                 val msg = if (isFollow) activity.getString(R.string.followed) else activity.getString(R.string.unfollowed)
                 Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show()
             }
@@ -635,7 +634,6 @@ class WebViewManager(
         fun onFollowError(error: String) {
             Log.e(TAG, "WebView Follow Error: $error")
             activity.runOnUiThread {
-                activity.binding.infoFollowButton.isEnabled = true
                 Toast.makeText(activity, activity.getString(R.string.error_format, error), Toast.LENGTH_SHORT).show()
             }
         }
@@ -799,9 +797,6 @@ class WebViewManager(
                     if (isCustomCallback) {
                         onError?.invoke(t.message ?: "Unknown Error")
                     } else {
-                        activity.binding.infoFollowLoader.visibility = View.GONE
-                        activity.binding.infoFollowButton.visibility = View.VISIBLE
-                        activity.binding.infoFollowButton.isEnabled = true
                         Toast.makeText(activity, activity.getString(R.string.error_format, t.message), Toast.LENGTH_SHORT).show()
                     }
                     suspendAuthWebView()
@@ -827,13 +822,6 @@ class WebViewManager(
             Log.d(TAG, "Follow result: ok=$success, code=$code, body=$body")
 
             val isCustomCallback = onSuccess != null || onError != null
-
-            // Hide Loader & Show Button only if default behavior
-            if (!isCustomCallback) {
-                activity.binding.infoFollowLoader.visibility = View.GONE
-                activity.binding.infoFollowButton.visibility = View.VISIBLE
-                activity.binding.infoFollowButton.isEnabled = true
-            }
 
             if (success) {
                 activity.currentIsFollowing = isFollow
@@ -887,9 +875,6 @@ class WebViewManager(
             Log.e(TAG, "Error handling follow result", e)
             val isCustomCallback = onSuccess != null || onError != null
             if (!isCustomCallback) {
-                activity.binding.infoFollowLoader.visibility = View.GONE
-                activity.binding.infoFollowButton.visibility = View.VISIBLE
-                activity.binding.infoFollowButton.isEnabled = true
                 Toast.makeText(activity, activity.getString(R.string.error_format, e.message), Toast.LENGTH_SHORT).show()
                 activity.channelProfileManager.updateChannelProfileFollowButton(activity.currentIsFollowing)
             } else {

@@ -2303,47 +2303,10 @@
                 android:src="@drawable/ic_badge_verified"
                 android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="@id/infoChannelName"
-                app:layout_constraintEnd_toStartOf="@id/infoFollowContainer"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/infoChannelName"
                 app:layout_constraintTop_toTopOf="@id/infoChannelName"
                 tools:visibility="visible" />
-
-            <FrameLayout
-                android:id="@+id/infoFollowContainer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintBottom_toBottomOf="@id/infoProfileImage"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@id/infoProfileImage">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/infoFollowButton"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="32dp"
-                    android:minHeight="0dp"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:paddingLeft="12dp"
-                    android:paddingRight="12dp"
-                    android:text="@string/action_follow"
-                    android:textColor="#53fc18"
-                    android:textSize="12sp"
-                    android:visibility="gone"
-                    tools:visibility="visible"
-                    app:strokeColor="#53fc18"
-                    app:strokeWidth="1dp"
-                    app:cornerRadius="16dp" />
-                
-                <ProgressBar
-                    android:id="@+id/infoFollowLoader"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_gravity="center"
-                    android:indeterminate="true"
-                    android:indeterminateTint="#53fc18"
-                    android:visibility="gone" />
-            </FrameLayout>
 
             <TextView
                 android:id="@+id/infoStreamTitle"
@@ -2359,7 +2322,7 @@
                 android:focusableInTouchMode="true"
                 android:textColor="#FFFFFF"
                 android:textSize="13sp"
-                app:layout_constraintEnd_toStartOf="@id/infoFollowContainer"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="@id/infoChannelName"
                 app:layout_constraintTop_toBottomOf="@id/infoChannelName"
                 tools:text="infoStreamTitle" />
