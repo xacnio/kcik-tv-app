@@ -946,6 +946,7 @@ class ChatSettingsSheetManager(
             try {
                 repository.updateChatIdentity(channelId, userId, token, badges, badgesV2, color)
                 hasProfileChanges = false
+                chatStateManager.currentUserSender = chatStateManager.currentUserSender?.copy(color = color)
                 Log.d("ChatSettings", "Profile identity saved successfully")
             } catch (e: Exception) {
                 Log.e("ChatSettings", "Failed to save profile identity: ${e.message}")
