@@ -29,14 +29,28 @@
 
         <ImageButton
             android:id="@+id/modEmoteSettingsButton"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center_vertical"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="12dp"
+            android:padding="8dp"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_settings"
             android:visibility="gone"
-            app:tint="#AAAAAA" />
+            android:tint="#AAAAAA" />
+
+        <!-- Backspace, pinned beside the settings button rather than floating over the grid. -->
+        <ImageButton
+            android:id="@+id/btnDeleteEmote"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center_vertical"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="8dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_backspace"
+            android:contentDescription="@string/delete"
+            android:tint="#AAAAAA" />
     </LinearLayout>
 
     <View
@@ -60,32 +74,11 @@
     </FrameLayout>
 
     <!-- Emote List Area -->
-    <FrameLayout
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/emoteRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <!-- Emote Grid -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/emoteRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:padding="8dp" />
-
-        <!-- Floating Delete Button -->
-        <ImageButton
-            android:id="@+id/btnDeleteEmote"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="16dp"
-            android:background="@drawable/bg_circle"
-            android:backgroundTint="#2A2A2A"
-            android:elevation="6dp"
-            android:padding="12dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_backspace"
-            app:tint="#FF4444" />
-    </FrameLayout>
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:padding="8dp" />
 </LinearLayout>

@@ -134,6 +134,10 @@ dependencies {
     
     // APNG for animated badges (with shared instance caching)
     implementation("com.github.penfeizhou.android.animation:apng:3.0.5")
+
+    // Flexbox: the emote panel packs items of differing widths (collectibles are card-shaped),
+    // which a fixed-cell GridLayoutManager can't do without leaving ragged gaps.
+    implementation("com.google.android.flexbox:flexbox:3.0.0")
     
     // Firebase Analytics (Privacy-focused configuration)
     // Using 32.x for Kotlin 1.9.x compatibility

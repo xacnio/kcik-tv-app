@@ -88,6 +88,36 @@ object EmoteManager {
     private val activeTargets = mutableMapOf<String, Target<*>>()
 
     /**
+     * Emotes drawn at their own aspect ratio instead of squashed into a square — collectibles,
+     * which are card-shaped. See [setAspectRatioEmotes].
+     */
+    private val aspectRatioEmoteIds = Collections.synchronizedSet(mutableSetOf<String>())
+
+    /**
+     * Registers which emotes are card-shaped, by id — the channel's emote categories are the
+     * only place that says which are collectibles, so they push the ids here once loaded.
+     *
+     * @return true if the set changed, meaning stale-shaped cached entries were dropped and
+     *         anything already on screen must be rebound (emotes load in parallel with chat
+     *         history, so history routinely renders before this arrives).
+     */
+    fun setAspectRatioEmotes(ids: Set<String>): Boolean {
+        synchronized(aspectRatioEmoteIds) {
+            if (aspectRatioEmoteIds == ids) return false
+            // Drop any entry already cached with the wrong shape, so it rebuilds on next use.
+            // Cheap: this only fires when the set actually changes, i.e. on channel switch.
+            val changed = (aspectRatioEmoteIds - ids) + (ids - aspectRatioEmoteIds)
+            aspectRatioEmoteIds.clear()
+            aspectRatioEmoteIds.addAll(ids)
+            changed.forEach { emoteEntries.remove(it) }
+            return changed.isNotEmpty()
+        }
+    }
+
+    private fun preservesAspect(emoteId: String): Boolean =
+        synchronized(aspectRatioEmoteIds) { aspectRatioEmoteIds.contains(emoteId) }
+
+    /**
      * Stops every shared emote animation. Call when no chat surface is visible
      * (screen off / app backgrounded) — this halts the per-emote frame decode and
      * the main-thread frame scheduling that otherwise keeps the UI thread busy in
@@ -207,10 +237,31 @@ object EmoteManager {
         val id: String,
         val master: Drawable,
         val size: Int,
-        val category: Category = Category.EMOTE
+        val category: Category = Category.EMOTE,
+        preserveAspect: Boolean = false
     ) {
-        val buffer: Bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
-        private val bufferCanvas = Canvas(buffer)
+        // Buffer is square by default; card-shaped collectibles keep their own aspect instead of
+        // being squashed. Height is the anchor — `size` becomes the art's height and width
+        // follows from its ratio, so a wide card doesn't shrink to fit a square.
+        val bufferWidth: Int
+        val bufferHeight: Int
+        val buffer: Bitmap
+        private val bufferCanvas: Canvas
+
+        init {
+            val artWidth = master.intrinsicWidth
+            val artHeight = master.intrinsicHeight
+            if (preserveAspect && artWidth > 0 && artHeight > 0) {
+                val scale = size.toFloat() / artHeight
+                bufferWidth = (artWidth * scale).toInt().coerceAtLeast(1)
+                bufferHeight = size
+            } else {
+                bufferWidth = size
+                bufferHeight = size
+            }
+            buffer = Bitmap.createBitmap(bufferWidth, bufferHeight, Bitmap.Config.ARGB_8888)
+            bufferCanvas = Canvas(buffer)
+        }
         // Changed to Drawable to support both ProxyDrawable and ScalingProxyDrawable
         val viewers = Collections.synchronizedSet(Collections.newSetFromMap(WeakHashMap<Drawable, Boolean>()))
         private val mainHandler = Handler(Looper.getMainLooper())
@@ -284,7 +335,7 @@ object EmoteManager {
 
         init {
             master.callback = callback
-            master.setBounds(0, 0, size, size)
+            master.setBounds(0, 0, bufferWidth, bufferHeight)
             // Animation is governed purely by the per-surface settings (categoryAnimated),
             // independent of the broader Battery Saver mode — so users can keep emotes
             // animated while Battery Saver trims quality/timers, or vice versa.
@@ -352,12 +403,12 @@ object EmoteManager {
 
         override fun draw(canvas: Canvas) {
             entry.captureFrame()
-            // We draw the pre-captured buffer which is already at entry.size
+            // We draw the pre-captured buffer which is already at its target size
             canvas.drawBitmap(entry.buffer, 0f, 0f, paint)
         }
 
-        override fun getIntrinsicWidth(): Int = entry.size
-        override fun getIntrinsicHeight(): Int = entry.size
+        override fun getIntrinsicWidth(): Int = entry.bufferWidth
+        override fun getIntrinsicHeight(): Int = entry.bufferHeight
 
         override fun setAlpha(alpha: Int) {
             paint.alpha = alpha
@@ -378,14 +429,19 @@ object EmoteManager {
      * This allows all emote instances to share the same animation frame regardless of display size.
      */
     internal class ScalingProxyDrawable(
-        private val entry: EmoteEntry, 
+        private val entry: EmoteEntry,
         view: View,
         private val targetSize: Int
     ) : Drawable() {
         private val paint = Paint(Paint.FILTER_BITMAP_FLAG or Paint.ANTI_ALIAS_FLAG)
         internal val viewRef = WeakReference(view)
-        private val srcRect = Rect(0, 0, entry.size, entry.size)
-        private val dstRect = RectF(0f, 0f, targetSize.toFloat(), targetSize.toFloat())
+        private val srcRect = Rect(0, 0, entry.bufferWidth, entry.bufferHeight)
+
+        // Scale by height, matching how the buffer was sized — width follows from the art's ratio.
+        private val fitScale = targetSize.toFloat() / entry.bufferHeight
+        private val drawnWidth = (entry.bufferWidth * fitScale).toInt().coerceAtLeast(1)
+        private val drawnHeight = targetSize
+        private val dstRect = RectF(0f, 0f, drawnWidth.toFloat(), drawnHeight.toFloat())
 
         fun triggerInvalidation() {
             val view = viewRef.get() ?: return
@@ -400,8 +456,8 @@ object EmoteManager {
             canvas.drawBitmap(entry.buffer, srcRect, dstRect, paint)
         }
 
-        override fun getIntrinsicWidth(): Int = targetSize
-        override fun getIntrinsicHeight(): Int = targetSize
+        override fun getIntrinsicWidth(): Int = drawnWidth
+        override fun getIntrinsicHeight(): Int = drawnHeight
 
         override fun setAlpha(alpha: Int) {
             paint.alpha = alpha
@@ -434,12 +490,14 @@ object EmoteManager {
         // Master size for shared buffer (use largest common size for quality)
         val masterSize = 48
         
+        // Bounds come from the proxy's own intrinsics rather than a square `size`, or a
+        // card-shaped emote would be stretched back out — chat spans size off these bounds.
         // 1. Check if already loaded
         val entry = emoteEntries[key]
         if (entry != null) {
             val proxy = ScalingProxyDrawable(entry, targetView, size)
             entry.attachViewer(proxy)
-            proxy.setBounds(0, 0, size, size)
+            proxy.setBounds(0, 0, proxy.intrinsicWidth, proxy.intrinsicHeight)
             onReady(proxy)
             return
         }
@@ -450,7 +508,7 @@ object EmoteManager {
             pending.add(Pair(WeakReference(targetView), { loadedEntry: EmoteEntry ->
                 val proxy = ScalingProxyDrawable(loadedEntry, targetView, size)
                 loadedEntry.attachViewer(proxy)
-                proxy.setBounds(0, 0, size, size)
+                proxy.setBounds(0, 0, proxy.intrinsicWidth, proxy.intrinsicHeight)
                 onReady(proxy)
             }))
             return
@@ -460,7 +518,7 @@ object EmoteManager {
         sharedPendingCallbacks[key] = mutableListOf(Pair(WeakReference(targetView), { loadedEntry: EmoteEntry ->
             val proxy = ScalingProxyDrawable(loadedEntry, targetView, size)
             loadedEntry.attachViewer(proxy)
-            proxy.setBounds(0, 0, size, size)
+            proxy.setBounds(0, 0, proxy.intrinsicWidth, proxy.intrinsicHeight)
             onReady(proxy)
         }))
 
@@ -690,7 +748,13 @@ object EmoteManager {
         val target = object : CustomTarget<Drawable>(masterSize, masterSize) {
             override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
                 android.util.Log.d("EmoteManager", "✅ Loaded shared emote: $url")
-                val newEntry = EmoteEntry(key, resource, masterSize)
+                // key is the emote id here, which is what marks a collectible.
+                val newEntry = EmoteEntry(
+                    key,
+                    resource,
+                    masterSize,
+                    preserveAspect = preservesAspect(key)
+                )
                 emoteEntries[key] = newEntry
                 
                 // Notify all shared pending callbacks with the EmoteEntry

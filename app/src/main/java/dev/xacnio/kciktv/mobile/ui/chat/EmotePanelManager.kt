@@ -212,55 +212,65 @@ class EmotePanelManager(
         val currentChannelIdLong = activity.currentChannel?.id?.toLongOrNull()
         emoteAdapter.setCurrentChannelId(currentChannelIdLong)
 
-        // Initial Layout Manager (Default span 7)
-        val initialSpanCount = 7
-        val gridLayoutManager = androidx.recyclerview.widget.GridLayoutManager(activity, initialSpanCount)
-        gridLayoutManager.spanSizeLookup = object : androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup() {
-            override fun getSpanSize(position: Int): Int {
-                return if (emoteAdapter.getItemViewType(position) == 1) gridLayoutManager.spanCount else 1
-            }
+        // Flow layout, not a grid: collectible emotes are card-shaped and wider than the rest, and
+        // a fixed-cell grid can only fit them via whole extra cells, leaving ragged holes. Flexbox
+        // packs each item at its own width and wraps.
+        recyclerView.layoutManager = com.google.android.flexbox.FlexboxLayoutManager(activity).apply {
+            flexDirection = com.google.android.flexbox.FlexDirection.ROW
+            flexWrap = com.google.android.flexbox.FlexWrap.WRAP
+            justifyContent = com.google.android.flexbox.JustifyContent.FLEX_START
+            alignItems = com.google.android.flexbox.AlignItems.CENTER
         }
-        recyclerView.layoutManager = gridLayoutManager
 
-        // 2. Post block for Dynamic Width Calculations (Span Count & Padding)
         recyclerView.post {
             if (!recyclerView.isAttachedToWindow) return@post
-            
-            val width = recyclerView.width
-            val displayMetrics = activity.resources.displayMetrics
-            val effectiveWidth = if (width > 0) width else displayMetrics.widthPixels
-            
-            // Correct item width is 40dp + 2dp margin each side = 44dp
-            val itemWidthPx = (44 * displayMetrics.density).toInt() 
-            val spanCount = (effectiveWidth / itemWidthPx).coerceAtLeast(4)
-
-            // Update Span Count
-            if (gridLayoutManager.spanCount != spanCount) {
-                gridLayoutManager.spanCount = spanCount
-                // Re-trigger layout if span changed
-                emoteAdapter.notifyDataSetChanged()
-            }
-            
-            // Center items by adding padding
-            val totalItemWidth = spanCount * itemWidthPx
-            val remainingSpace = effectiveWidth - totalItemWidth
-            val sidePadding = (remainingSpace / 2).coerceAtLeast(0)
-            recyclerView.setPadding(sidePadding, 0, sidePadding, 0)
-            recyclerView.clipToPadding = false
-            
             // Populate initial data if empty (fallback)
-             if (displayCategories.isNotEmpty() && currentEmoteCategoryIndex < displayCategories.size && emoteAdapter.itemCount == 0) {
-                 emoteAdapter.setEmotes(displayCategories[currentEmoteCategoryIndex].emotes)
+            if (displayCategories.isNotEmpty() && currentEmoteCategoryIndex < displayCategories.size && emoteAdapter.itemCount == 0) {
+                emoteAdapter.setEmotes(displayCategories[currentEmoteCategoryIndex].emotes)
             }
         }
-        
+
         // Setup Delete (Backspace) Button
         panel.findViewById<View>(R.id.btnDeleteEmote)?.setOnClickListener {
-            val event = android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN, android.view.KeyEvent.KEYCODE_DEL)
-            binding.chatInput.dispatchKeyEvent(event)
+            // Take out a whole emote if one is sitting before the cursor, otherwise fall back to
+            // a plain backspace.
+            if (!deleteEmoteBeforeCursor()) {
+                val event = android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN, android.view.KeyEvent.KEYCODE_DEL)
+                binding.chatInput.dispatchKeyEvent(event)
+            }
         }
-        
+
         isEmotePanelInitialized = true
+    }
+
+    /**
+     * Removes the emote immediately before the cursor in one press. Emotes are typed into the
+     * input as their bare name, with no tag/span to delete as a unit, so this matches the word
+     * before the cursor against the known emote names instead.
+     *
+     * @return false when there's no emote there, leaving the caller to delete normally.
+     */
+    private fun deleteEmoteBeforeCursor(): Boolean {
+        val editText = binding.chatInput
+        val editable = editText.text ?: return false
+        val cursor = editText.selectionStart
+        // Only for a plain caret: a selection already deletes as a unit.
+        if (cursor <= 0 || cursor != editText.selectionEnd) return false
+
+        // Insertion leaves a trailing space, so look past one.
+        var end = cursor
+        if (editable[end - 1] == ' ') end--
+        if (end <= 0) return false
+
+        val wordStart = editable.lastIndexOf(' ', end - 1) + 1
+        if (wordStart >= end) return false
+
+        val word = editable.subSequence(wordStart, end).toString()
+        if (!emoteNameToId.containsKey(word)) return false
+
+        // Through `cursor`, not `end`, so the trailing space goes with it.
+        editable.delete(wordStart, cursor)
+        return true
     }
 
     private fun updatePanelHeight() {
@@ -287,42 +297,12 @@ class EmotePanelManager(
         emotePickerLayout.layoutParams = params
     }
 
+    /** No-op since the switch to Flexbox — items carry their own width. Kept: still called on rotation/re-open. */
     private fun updateSpanCount() {
-         val recyclerView = binding.emotePanelContainer.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.emoteRecyclerView) ?: return
-         // Recalculate span count on layout updates (e.g. rotation)
-         recyclerView.post {
-             val width = recyclerView.width
-             if (width <= 0) return@post
-             
-             val displayMetrics = activity.resources.displayMetrics
-             // Correct item width is 40dp + 2dp margin each side = 44dp
-             val itemWidthPx = (44 * displayMetrics.density).toInt()
-             
-             val spanCount = (width / itemWidthPx).coerceAtLeast(4)
-             
-             // Center items by adding padding
-             val totalItemWidth = spanCount * itemWidthPx
-             val remainingSpace = width - totalItemWidth
-             val sidePadding = (remainingSpace / 2).coerceAtLeast(0)
-             recyclerView.setPadding(sidePadding, 0, sidePadding, 0)
-             recyclerView.clipToPadding = false
-             
-             val layoutManager = recyclerView.layoutManager as? androidx.recyclerview.widget.GridLayoutManager
-             if (layoutManager != null && layoutManager.spanCount != spanCount) {
-                  layoutManager.spanCount = spanCount
-                  layoutManager.spanSizeLookup.invalidateSpanIndexCache()
-                  // Update SpanSizeLookup to use new spanCount for headers
-                  layoutManager.spanSizeLookup = object : androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup() {
-                        override fun getSpanSize(position: Int): Int {
-                            val adapter = recyclerView.adapter as? dev.xacnio.kciktv.shared.ui.adapter.EmoteAdapter
-                            return if (adapter?.getItemViewType(position) == 1) spanCount else 1
-                        }
-                  }
-                  recyclerView.adapter?.notifyDataSetChanged()
-             }
-         }
+        // Intentionally empty.
     }
-    
+
+
     suspend fun loadChannelEmotes(slug: String) {
         activeEmoteSlug = slug
         // Load from disk cache for instant display
@@ -362,6 +342,27 @@ class EmotePanelManager(
             category.emotes.forEach { emote -> nameMap[emote.name] = emote.id }
         }
         emoteNameToId = nameMap
+
+        // This is the only place that knows which emote ids are card-shaped collectibles, so
+        // hand them to EmoteManager for chat/panel/quick-bar to draw at their true aspect.
+        val aspectChanged = EmoteManager.setAspectRatioEmotes(
+            categories
+                .filter { it.isCollectibles }
+                .flatMap { it.emotes }
+                .map { it.id.toString() }
+                .toSet()
+        )
+        // Chat history usually loads in parallel and renders square before this lands; rebind so
+        // those spans pick up the right shape.
+        if (aspectChanged) {
+            activity.runOnUiThread {
+                try {
+                    activity.chatAdapter.notifyDataSetChanged()
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to refresh chat after emote shapes changed", e)
+                }
+            }
+        }
 
         try {
             activity.chatUiManager.setEmoteMap(nameMap.mapValues { it.value.toString() })

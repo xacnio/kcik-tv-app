@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Quick-emote-bar specific item. emotePlaceholder is a dedicated View (not inside
      ImageView) so it stays visible with zero gaps while Glide/EmoteManager loads. -->
+<!-- wrap_content width with a 40dp floor, so a wide collectible widens its cell instead of
+     overlapping neighbours. The bar scrolls horizontally, so there's room to give. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="40dp"
+    android:layout_width="wrap_content"
+    android:minWidth="40dp"
     android:layout_height="40dp"
     android:layout_margin="2dp"
     android:clipChildren="false"
@@ -33,11 +36,13 @@
 
     </FrameLayout>
 
+    <!-- Height fixed, width follows the art — see item_emote.xml. -->
     <ImageView
         android:id="@+id/emoteImage"
-        android:layout_width="32dp"
+        android:layout_width="wrap_content"
         android:layout_height="32dp"
         android:layout_gravity="center"
+        android:adjustViewBounds="true"
         android:scaleType="fitCenter"
         android:visibility="invisible" />
 

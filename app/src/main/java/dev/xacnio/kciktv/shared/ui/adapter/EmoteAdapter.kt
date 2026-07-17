@@ -74,6 +74,7 @@ class EmoteAdapter(
         }
     }
 
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
             TYPE_SECTION_HEADER -> {
@@ -90,7 +91,12 @@ class EmoteAdapter(
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (val item = items[position]) {
             is EmoteItem.EmoteEntry -> (holder as EmoteViewHolder).bind(item.emote)
-            is EmoteItem.SectionHeader -> (holder as SectionViewHolder).bind(item.titleResId)
+            is EmoteItem.SectionHeader -> {
+                // Full basis puts the header on its own line instead of inline with the emotes.
+                (holder.itemView.layoutParams as? com.google.android.flexbox.FlexboxLayoutManager.LayoutParams)
+                    ?.flexBasisPercent = 1f
+                (holder as SectionViewHolder).bind(item.titleResId)
+            }
         }
     }
 
@@ -123,12 +129,19 @@ class EmoteAdapter(
 
     inner class EmoteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val emoteImage: ImageView = itemView.findViewById(R.id.emoteImage)
+        private val emotePlaceholder: View = itemView.findViewById(R.id.emotePlaceholder)
 
         fun bind(emote: Emote) {
             val size = (40 * itemView.context.resources.displayMetrics.density).toInt()
             // Tag the view with this emote's ID so stale async callbacks can be discarded
             emoteImage.tag = emote.id
             emoteImage.setImageDrawable(null)
+
+            // Reset per bind: this holder is recycled, so it may arrive already revealed from
+            // whatever emote it showed last.
+            emotePlaceholder.visibility = View.VISIBLE
+            emoteImage.visibility = View.INVISIBLE
+
             dev.xacnio.kciktv.shared.ui.utils.EmoteManager.loadSynchronizedEmote(
                 itemView.context,
                 emote.id.toString(),
@@ -137,6 +150,8 @@ class EmoteAdapter(
             ) { sharedDrawable ->
                 if (emoteImage.tag == emote.id) {
                     emoteImage.setImageDrawable(sharedDrawable)
+                    emotePlaceholder.visibility = View.GONE
+                    emoteImage.visibility = View.VISIBLE
                 }
             }
 

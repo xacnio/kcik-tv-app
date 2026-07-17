@@ -1,17 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- wrap_content with a 40dp floor: items flow at their own width, so a card-shaped
+     collectible simply takes the room it needs instead of squashing into a fixed cell. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="40dp"
+    android:layout_width="wrap_content"
+    android:minWidth="40dp"
     android:layout_height="40dp"
     android:layout_margin="2dp"
     android:clipChildren="false"
     android:clickable="true"
     android:focusable="true">
 
+    <!-- Shown until the emote is decoded; a dedicated sibling since the ImageView has no size
+         of its own to fill yet (its width tracks the art). -->
+    <View
+        android:id="@+id/emotePlaceholder"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_quick_emote_placeholder" />
+
+    <!-- Height fixed, width follows the art — a fixed square box would shrink a wide emote to fit its width. -->
     <ImageView
         android:id="@+id/emoteImage"
-        android:layout_width="32dp"
+        android:layout_width="wrap_content"
         android:layout_height="32dp"
         android:layout_gravity="center"
-        android:scaleType="fitCenter" />
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:visibility="invisible" />
 
 </FrameLayout>
