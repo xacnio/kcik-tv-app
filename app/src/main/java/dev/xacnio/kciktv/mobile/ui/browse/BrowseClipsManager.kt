@@ -337,6 +337,8 @@ class BrowseClipsManager(private val activity: MobilePlayerActivity) {
         recycler.clearOnScrollListeners()
         recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                activity.handleBottomNavScroll(recyclerView.computeVerticalScrollOffset())
+
                 val layoutManager = recyclerView.layoutManager ?: return
                 val totalItemCount = layoutManager.itemCount
                 

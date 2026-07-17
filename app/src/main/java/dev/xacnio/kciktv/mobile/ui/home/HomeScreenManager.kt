@@ -279,9 +279,10 @@ class HomeScreenManager(private val activity: MobilePlayerActivity) {
         scrollListenerAttached = true
         val scrollView = binding.homeScreenContainer.homeScrollView
         scrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
-
             val heroVisible = scrollY < heroRoot.height
             if (heroVisible) onHeroScrolledBack() else onHeroScrolledOff()
+            // Replaces MobilePlayerActivity's own listener on this view, so relay it too.
+            activity.handleBottomNavScroll(scrollY)
         }
     }
 

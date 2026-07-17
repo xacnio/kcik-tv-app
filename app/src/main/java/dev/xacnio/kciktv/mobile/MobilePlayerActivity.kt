@@ -336,6 +336,19 @@ class MobilePlayerActivity : FragmentActivity() {
     internal var nextCursor: String? = null
     internal var isLoadingMore = false
 
+    private var bottomNavIsVisible = true
+    private var bottomNavScrollListenerAttached = false
+    private var bottomNavLastScrollY = 0
+
+    // Height + its own bottom margin, so the translated container fully clears the screen edge.
+    private fun bottomNavOffscreenOffset(): Float {
+        val container = binding.bottomNavContainer
+        val bottomMargin = (container.layoutParams as? ConstraintLayout.LayoutParams)?.bottomMargin ?: 0
+        val height = container.height.coerceAtLeast(56.dpToPx(resources))
+        val buffer = 16.dpToPx(resources)
+        return (height + bottomMargin + buffer).toFloat()
+    }
+
     internal var currentIsFollowing = false
     internal var isSubscribedToCurrentChannel = false
     internal var isSubscriptionEnabled = true
@@ -367,6 +380,10 @@ class MobilePlayerActivity : FragmentActivity() {
         }
         binding.bottomNavContainer.visibility = navVisibility
         binding.bottomNavGradient.visibility = navVisibility
+        if (navVisibility == View.VISIBLE) {
+            bottomNavLastScrollY = 0
+            showBottomNav(animated = false)
+        }
             
         if (currentScreen != screen) {
             android.util.Log.d("MobilePlayerNav", "State Change: $currentScreen -> $screen")
@@ -387,6 +404,81 @@ class MobilePlayerActivity : FragmentActivity() {
                 updateNavVisuals(navIndex)
             }
         }
+    }
+
+    // translationY only — gradient is left untouched, stays pinned to the bottom edge.
+    private fun showBottomNav(animated: Boolean = true) {
+        if (binding.bottomNavContainer.visibility != View.VISIBLE) return
+        bottomNavIsVisible = true
+        val container = binding.bottomNavContainer
+        container.animate().cancel()
+        if (animated) {
+            container.animate().translationY(0f).setDuration(180L)
+                .setInterpolator(android.view.animation.DecelerateInterpolator()).start()
+        } else {
+            container.translationY = 0f
+        }
+    }
+
+    private fun hideBottomNav(animated: Boolean = true) {
+        if (binding.bottomNavContainer.visibility != View.VISIBLE) return
+        bottomNavIsVisible = false
+        val container = binding.bottomNavContainer
+        val target = bottomNavOffscreenOffset()
+        container.animate().cancel()
+        if (animated) {
+            container.animate().translationY(target).setDuration(180L)
+                .setInterpolator(android.view.animation.AccelerateInterpolator()).start()
+        } else {
+            container.translationY = target
+        }
+    }
+
+    // Home/Browse re-clear their own scroll listeners on data load, so they call this from
+    // inside those listeners instead of one attached here directly (see setupBottomNavScrollBehavior).
+    internal fun handleBottomNavScroll(currentScrollY: Int) {
+        if (binding.bottomNavContainer.visibility != View.VISIBLE) return
+
+        val deltaY = currentScrollY - bottomNavLastScrollY
+        bottomNavLastScrollY = currentScrollY
+
+        when {
+            deltaY > 8 && currentScrollY > 12 && bottomNavIsVisible -> hideBottomNav()
+            deltaY < -8 && !bottomNavIsVisible -> showBottomNav()
+            currentScrollY <= 0 && !bottomNavIsVisible -> showBottomNav()
+        }
+    }
+
+    private fun setupBottomNavScrollBehavior() {
+        if (bottomNavScrollListenerAttached) return
+        bottomNavScrollListenerAttached = true
+
+        // Fallback for when there's no featured hero to attach HomeScreenManager's own listener.
+        val homeScrollView = binding.homeScreenContainer.homeScrollView
+        homeScrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
+            handleBottomNavScroll(scrollY)
+        }
+
+        val followingScrollView = binding.followingScreenContainer.followingScrollView
+        followingScrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
+            handleBottomNavScroll(scrollY)
+        }
+
+        val searchResultsRecyclerView = binding.searchContainer.findViewById<RecyclerView>(R.id.searchResultsRecyclerView)
+        searchResultsRecyclerView?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                handleBottomNavScroll(recyclerView.computeVerticalScrollOffset())
+            }
+        })
+
+        val searchHistoryRecyclerView = binding.searchContainer.findViewById<RecyclerView>(R.id.searchHistoryRecyclerView)
+        searchHistoryRecyclerView?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                handleBottomNavScroll(recyclerView.computeVerticalScrollOffset())
+            }
+        })
     }
 
     internal var homeDataLoaded = false
@@ -849,6 +941,7 @@ class MobilePlayerActivity : FragmentActivity() {
         // Apply keyboard (IME) insets to chat container so chat input appears above keyboard
         // Apply keyboard (IME) insets to chat container so chat input appears above keyboard
         setupChatContainerInsetsListener()
+        setupBottomNavScrollBehavior()
         
         // --- Custom Spacing Fixes ---
         

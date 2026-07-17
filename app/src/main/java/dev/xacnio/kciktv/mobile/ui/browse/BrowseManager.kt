@@ -978,10 +978,12 @@ class BrowseManager(private val activity: MobilePlayerActivity) {
         recycler.clearOnScrollListeners()
         recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                activity.handleBottomNavScroll(recyclerView.computeVerticalScrollOffset())
+
                 val layoutManager = recyclerView.layoutManager as? LinearLayoutManager ?: return
                 val totalItemCount = layoutManager.itemCount
                 val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
-                
+
                 if (!isBrowseCategoriesLoading && hasMoreBrowseCategories && totalItemCount <= (lastVisibleItem + 5)) {
                     loadBrowseData(isLoadMore = true)
                 }
@@ -1158,6 +1160,8 @@ class BrowseManager(private val activity: MobilePlayerActivity) {
         recyclerView.clearOnScrollListeners()
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                activity.handleBottomNavScroll(recyclerView.computeVerticalScrollOffset())
+
                 val layoutManager = recyclerView.layoutManager
                 val totalItemCount = layoutManager?.itemCount ?: 0
                 val lastVisibleItem = if (layoutManager is GridLayoutManager) {
@@ -1165,7 +1169,7 @@ class BrowseManager(private val activity: MobilePlayerActivity) {
                 } else if (layoutManager is LinearLayoutManager) {
                     layoutManager.findLastVisibleItemPosition()
                 } else -1
-                
+
                 if (!isBrowseLiveLoading && hasMoreBrowseLive && totalItemCount <= (lastVisibleItem + 5) && currentBrowseTab == 0) {
                     loadBrowseLiveChannels(isLoadMore = true)
                 }
