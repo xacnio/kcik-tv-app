@@ -1333,7 +1333,7 @@ class StreamFeedManager(private val activity: MobilePlayerActivity) {
      * Updates the layout constraints for all visible ViewHolders when screen size changes.
      * Should be called from onConfigurationChanged in the activity.
      */
-    fun updateLayout(config: android.content.res.Configuration? = null, width: Int = -1, height: Int = -1) {
+    fun updateLayout(@Suppress("UNUSED_PARAMETER") config: android.content.res.Configuration? = null, width: Int = -1, height: Int = -1) {
         if (!isFeedActive || feedBinding == null) return
         
         // Calculate dimensions if not provided

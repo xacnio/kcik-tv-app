@@ -2010,7 +2010,7 @@ class OverlayManager(
             client = dev.xacnio.kciktv.shared.data.api.RetrofitClient.okHttpClient
         ).apply {
             // Connection state callback for system messages
-            onConnectionStateChanged = { connected, isFirstConnect ->
+            onConnectionStateChanged = { connected, _ ->
                 activity.runOnUiThread {
                     if (connected) {
                         activity.binding.viewerConnectionContainer.visibility = View.GONE
@@ -2312,7 +2312,6 @@ class OverlayManager(
         // Use shared pattern from ChatAdapter to support trailing slashes and consistent behavior
         val urlMatcher = dev.xacnio.kciktv.shared.ui.adapter.ChatAdapter.URL_PATTERN.matcher(builder)
         while (urlMatcher.find()) {
-            val fullUrl = urlMatcher.group()
             var start = urlMatcher.start()
             var end = urlMatcher.end()
             

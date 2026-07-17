@@ -135,7 +135,7 @@ class KcikChatWebSocket(
                 .build()
 
             webSocket = client.newWebSocket(request, object : WebSocketListener() {
-                override fun onOpen(ws: WebSocket, response: Response) {
+                override fun onOpen(webSocket: WebSocket, response: Response) {
                     Log.d(TAG, "[${config.base}] WebSocket connected")
                     isConnected = true
                     reconnectAttempt = 0
@@ -151,20 +151,20 @@ class KcikChatWebSocket(
                     onAnyConnected()
                 }
 
-                override fun onMessage(ws: WebSocket, text: String) {
+                override fun onMessage(webSocket: WebSocket, text: String) {
                     handleMessage(this@Connection, text)
                 }
 
-                override fun onClosing(ws: WebSocket, code: Int, reason: String) {
+                override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
                     Log.d(TAG, "[${config.base}] WebSocket closing: $reason")
                 }
 
-                override fun onClosed(ws: WebSocket, code: Int, reason: String) {
+                override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
                     Log.d(TAG, "[${config.base}] WebSocket closed: $reason")
                     handleDown()
                 }
 
-                override fun onFailure(ws: WebSocket, t: Throwable, response: Response?) {
+                override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
                     Log.e(TAG, "[${config.base}] WebSocket error: ${t.message}")
                     handleDown()
                 }

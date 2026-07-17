@@ -579,8 +579,7 @@ class ChatUiManager(
         // Celebration Interception
         if (isCelebrationMode && currentCelebration != null && currentCelebrationSlug != null) {
              val celebrationId = currentCelebration!!.id
-             val slug = currentCelebrationSlug!!
-             
+
              // Consume immediately with message
              lifecycleScope.launch {
                  val originalText = message

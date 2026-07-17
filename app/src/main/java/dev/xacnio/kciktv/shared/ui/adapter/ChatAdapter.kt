@@ -94,17 +94,12 @@ class ChatAdapter(
     // Removed resetAnimationDelay as it's no longer needed without staggered batching
 
 
-    private fun runEnterAnimation(view: View, position: Int) {
+    private fun runEnterAnimation(view: View, @Suppress("UNUSED_PARAMETER") position: Int) {
         if (!animationsActive()) return
 
         // Track this view as actively animating
         animatingViews.add(view)
 
-        // Safety check to ensure we have valid metrics
-        val metrics = view.resources.displayMetrics
-        val screenWidth = metrics.widthPixels.toFloat()
-        val density = metrics.density
-        
         val endAction = Runnable {
             animatingViews.remove(view)
             // Now that animation completed, remove the ID from pending set
@@ -762,7 +757,6 @@ class ChatAdapter(
             // Regex for https links
             val matcher = URL_PATTERN.matcher(input)
             while (matcher.find()) {
-                val fullUrl = matcher.group()
                 var start = matcher.start()
                 var end = matcher.end()
                 
@@ -1091,7 +1085,6 @@ class ChatAdapter(
         // Detect hyperlinks and make them clickable (without underline)
         val matcher = URL_PATTERN.matcher(builder)
         while (matcher.find()) {
-            val fullUrl = matcher.group()
             var start = matcher.start()
             var end = matcher.end()
             

@@ -1701,8 +1701,7 @@ class PlayerActivity : FragmentActivity() {
                                     var userEmail = ""
                                     var userId: Long? = null
                                     var slug: String? = null
-                                    var chatColor: String? = null
-                                    
+
                                     if (json.has("user")) {
                                         val u = json.getJSONObject("user")
                                         username = u.optString("username", username)
@@ -1738,8 +1737,6 @@ class PlayerActivity : FragmentActivity() {
                                             } else if (userJson.has("profile_pic") && !userJson.isNull("profile_pic")) {
                                                 profilePic = userJson.getString("profile_pic")
                                             }
-                                            chatColor = userJson.optString("chat_color").takeIf { it.isNotEmpty() }
-                                            
                                             val streamerChannel = userJson.optJSONObject("streamer_channel")
                                             slug = streamerChannel?.optString("slug")
                                             if (slug.isNullOrEmpty()) slug = username
@@ -2172,7 +2169,7 @@ class PlayerActivity : FragmentActivity() {
         chatWebSocket?.connect()
     }
 
-    private fun handleChannelEvent(event: String, data: String? = null) {
+    private fun handleChannelEvent(event: String, @Suppress("UNUSED_PARAMETER") data: String? = null) {
         if (event == "App\\Events\\SetupTvEvent") {
             Log.d(TAG, "Received SetupTvEvent! Exchanging token...")
             performTvTokenExchange()
@@ -4393,7 +4390,7 @@ class PlayerActivity : FragmentActivity() {
         if (currentBannerUrl != bannerUrl) {
             binding.offlineBannerView.tag = bannerUrl
             Glide.with(this)
-                .load(bannerUrl ?: defaultThumb)
+                .load(bannerUrl)
                 .centerCrop()
                 .placeholder(binding.offlineBannerView.drawable ?: ColorDrawable(Color.BLACK))
                 .error(Glide.with(this).load(defaultThumb).centerCrop())

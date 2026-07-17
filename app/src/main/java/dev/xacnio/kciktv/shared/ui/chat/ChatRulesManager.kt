@@ -178,7 +178,6 @@ class ChatRulesManager(
         val matcher = urlPattern.matcher(rules)
         
         while (matcher.find()) {
-            val fullUrl = matcher.group()
             var start = matcher.start()
             var end = matcher.end()
             

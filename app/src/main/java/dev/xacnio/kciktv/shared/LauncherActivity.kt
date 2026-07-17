@@ -34,6 +34,7 @@ import kotlinx.coroutines.async
  * - Mobile Phone/Tablet → MobilePlayerActivity (Portrait, Touch optimized)
  */
 class LauncherActivity : FragmentActivity() {
+    @Suppress("DEPRECATION")
     override fun onCreate(savedInstanceState: Bundle?) {
         // Fix for "Black Screen" / Delay when returning from PiP or Background:
         // If the app is already running (we are not index 0 in the stack),
@@ -222,6 +223,7 @@ class LauncherActivity : FragmentActivity() {
             .start()
     }
 
+    @Suppress("DEPRECATION")
     private suspend fun performFinalTransition() {
         val prefs = AppPreferences(this)
         val uiMode = prefs.uiMode

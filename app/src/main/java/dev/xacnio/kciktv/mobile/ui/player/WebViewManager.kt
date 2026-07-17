@@ -675,13 +675,13 @@ class WebViewManager(
                 result.onSuccess { json ->
                     try {
                         val response = com.google.gson.Gson().fromJson(json, dev.xacnio.kciktv.shared.data.model.ChatHistoryResponse::class.java)
-                        continuation.resume(Result.success(response)) { }
+                        continuation.resume(Result.success(response)) { _, _, _ -> }
                     } catch (e: Exception) {
                         Log.e(TAG, "JSON Parse Error on WebView history", e)
-                        continuation.resume(Result.failure(e)) { }
+                        continuation.resume(Result.failure(e)) { _, _, _ -> }
                     }
                 }.onFailure { err ->
-                    continuation.resume(Result.failure(err)) { }
+                    continuation.resume(Result.failure(err)) { _, _, _ -> }
                 }
             }
         }
@@ -961,7 +961,7 @@ class WebViewManager(
     // ==================== VIEWER TOKEN FETCHING ====================
 
     @SuppressLint("SetJavaScriptEnabled")
-    fun startViewerWebSocket(channelId: String, channelSlug: String, livestreamId: String?) {
+    fun startViewerWebSocket(channelId: String, @Suppress("UNUSED_PARAMETER") channelSlug: String, livestreamId: String?) {
         activity.binding.viewerConnectionContainer.visibility = View.VISIBLE
         activity.binding.viewerConnectionProgress.visibility = View.VISIBLE
 
@@ -983,7 +983,7 @@ class WebViewManager(
      * This is called by OverlayManager when viewer websocket needs to reconnect
      */
     @SuppressLint("SetJavaScriptEnabled")
-    fun fetchViewerToken(channelId: String, callback: (String?) -> Unit) {
+    fun fetchViewerToken(@Suppress("UNUSED_PARAMETER") channelId: String, callback: (String?) -> Unit) {
         fetchViewerTokenInternal(callback)
     }
 

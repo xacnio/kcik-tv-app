@@ -357,7 +357,6 @@ class FullscreenToggleManager(private val activity: MobilePlayerActivity) {
         // Calculate fullscreen dimensions (same approach as StreamFeedAdapter.setScaleMode)
         val displayMetrics = activity.resources.displayMetrics
         val screenHeight = displayMetrics.heightPixels
-        val screenWidth = displayMetrics.widthPixels
         (screenHeight * (16f / 9f)).toInt()
 
         // Position chat container at bottom 30% of screen (smaller, will expand on scroll)
@@ -514,7 +513,7 @@ class FullscreenToggleManager(private val activity: MobilePlayerActivity) {
         // --- Create Theatre Top Bar (Always Visible) ---
         if (theatreTopBar == null) {
             theatreTopBar = android.widget.LinearLayout(activity).apply {
-                id = ViewCompat.generateViewId()
+                id = View.generateViewId()
                 orientation = android.widget.LinearLayout.HORIZONTAL
                 layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.WRAP_CONTENT).apply {
                     topToTop = ConstraintLayout.LayoutParams.PARENT_ID
@@ -1217,9 +1216,8 @@ class FullscreenToggleManager(private val activity: MobilePlayerActivity) {
             theatreTopBar?.removeView(settingsBtn)
             val parent = originalSettingsParent!!
             try {
-                val displayDensity = activity.resources.displayMetrics.density
                 settingsBtn.setPadding((8 * displayDensity).toInt(), (8 * displayDensity).toInt(), (8 * displayDensity).toInt(), (8 * displayDensity).toInt())
-                
+
                 val safeIndex = if (originalSettingsIndex >= 0 && originalSettingsIndex <= parent.childCount) originalSettingsIndex else -1
                 parent.addView(settingsBtn, safeIndex, originalSettingsParams)
             } catch (e: Exception) {
@@ -1730,13 +1728,8 @@ class FullscreenToggleManager(private val activity: MobilePlayerActivity) {
         
         val displayMetrics = activity.resources.displayMetrics
         var rootWidth = checkWidth
-        var rootHeight = checkHeight
-        
-        // If dimensions are zero or don't match the actual device orientation (stale after rotate)
-        // use display metrics as a reliable fallback
-        val isLandscapeDevice = displayMetrics.widthPixels > displayMetrics.heightPixels
-        val dimensionsMatch = if (isLandscape) isLandscapeDevice else !isLandscapeDevice
-        
+
+        // If dimensions are zero (stale after rotate) use display metrics as a reliable fallback
         if (rootWidth == 0) rootWidth = displayMetrics.widthPixels
         
         val chat = binding.chatContainer
@@ -1938,9 +1931,8 @@ class FullscreenToggleManager(private val activity: MobilePlayerActivity) {
         val displayMetrics = activity.resources.displayMetrics
         var rootWidth = binding.root.width
         if (rootWidth == 0) rootWidth = displayMetrics.widthPixels
-        val rootHeight = binding.root.height // Not critical for horizontal logic
-        
-        val chatWidth = binding.sideChatContainer.width.takeIf { it > 0 } 
+
+        val chatWidth = binding.sideChatContainer.width.takeIf { it > 0 }
             ?: (350 * displayMetrics.density).toInt()
             
         val currentVideoWidth = binding.videoContainer.width

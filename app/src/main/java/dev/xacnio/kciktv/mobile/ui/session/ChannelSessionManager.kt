@@ -281,7 +281,7 @@ class ChannelSessionManager(private val activity: MobilePlayerActivity) {
 
                     // Fetch accurate chat settings from web.kick.com and override stale values
                     val channelId = chatInfo.channelId
-                    if (channelId != null && channelId > 0) {
+                    if (channelId > 0) {
                         try {
                             activity.repository.getChatSettings(channelId).onSuccess { settings ->
                                 state.chatSettings = settings

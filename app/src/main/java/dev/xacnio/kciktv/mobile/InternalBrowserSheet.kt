@@ -287,22 +287,22 @@ class InternalBrowserSheet : BottomSheetDialogFragment() {
             }
             
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-                val url = request?.url?.toString() ?: return false
-                
-                if (url.startsWith("http://") || url.startsWith("https://")) {
+                val requestUrl = request?.url?.toString() ?: return false
+
+                if (requestUrl.startsWith("http://") || requestUrl.startsWith("https://")) {
                      // Blerp Handling
-                     if (handleBlerpUrl(view?.context ?: requireContext(), url)) {
+                     if (handleBlerpUrl(view?.context ?: requireContext(), requestUrl)) {
                          return true
                      }
                      return false // Stay in WebView for standard pages
                 }
-                
+
                 // Handle Custom Schemes (e.g. snssdk1233://, intent://)
                 try {
-                    val intent = if (url.startsWith("intent://")) {
-                        android.content.Intent.parseUri(url, android.content.Intent.URI_INTENT_SCHEME)
+                    val intent = if (requestUrl.startsWith("intent://")) {
+                        android.content.Intent.parseUri(requestUrl, android.content.Intent.URI_INTENT_SCHEME)
                     } else {
-                        android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))
+                        android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(requestUrl))
                     }
                     
                     intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)

@@ -1514,7 +1514,7 @@ class ClipFeedManager(private val activity: MobilePlayerActivity) {
      * Updates the layout constraints for all visible ViewHolders when screen size changes.
      * Should be called from onConfigurationChanged in the activity.
      */
-    fun updateLayout(config: android.content.res.Configuration? = null, width: Int = -1, height: Int = -1) {
+    fun updateLayout(@Suppress("UNUSED_PARAMETER") config: android.content.res.Configuration? = null, width: Int = -1, height: Int = -1) {
         if (!isFeedActive || feedBinding == null) return
         
         // Calculate dimensions if not provided
@@ -1571,19 +1571,19 @@ class ClipFeedManager(private val activity: MobilePlayerActivity) {
         // Update ViewPager
         val viewPager = feedBinding?.clipFeedViewPager
         val pagerParams = viewPager?.layoutParams as? android.widget.FrameLayout.LayoutParams
-        if (pagerParams != null) {
+        if (viewPager != null && pagerParams != null) {
             pagerParams.width = targetWidth
             pagerParams.gravity = android.view.Gravity.CENTER
-            viewPager?.layoutParams = pagerParams
+            viewPager.layoutParams = pagerParams
         }
-        
+
         // Update Categories
         val categories = feedBinding?.rvCategories
         val catParams = categories?.layoutParams as? android.widget.FrameLayout.LayoutParams
-        if (catParams != null) {
+        if (categories != null && catParams != null) {
             catParams.width = targetWidth
             catParams.gravity = android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL
-            categories?.layoutParams = catParams
+            categories.layoutParams = catParams
         }
     }
 }

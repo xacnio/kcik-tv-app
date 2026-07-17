@@ -107,7 +107,7 @@ class RewardQueueManager(
         rebuildChips()
     }
 
-    fun onRedemptionResolved(redemptionId: String) {
+    fun onRedemptionResolved(@Suppress("UNUSED_PARAMETER") redemptionId: String) {
         rewardCounts[null] = ((rewardCounts[null] ?: 1) - 1).coerceAtLeast(0)
         updateBadge()
         rebuildChips()

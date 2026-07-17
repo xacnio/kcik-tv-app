@@ -294,7 +294,7 @@ class RouletteOverlay(
 
     private fun onLanded(
         root: View,
-        strip: LinearLayout,
+        @Suppress("UNUSED_PARAMETER") strip: LinearLayout,
         jitter: Float,
         itemWidth: Int,
         itemHeight: Int,

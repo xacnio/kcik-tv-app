@@ -180,9 +180,6 @@ class PlayerGestureManager(private val activity: MobilePlayerActivity) {
                 // In landscape, prioritize horizontal swipes for chat (split-view)
                 if (effectiveLandscape) {
                      if (kotlin.math.abs(deltaX) > kotlin.math.abs(deltaY)) {
-                         
-                         val edgeMargin = 24 * activity.resources.displayMetrics.density // 24dp margin
-                         
                          if (deltaX < -30 && !activity.fullscreenToggleManager.isSideChatVisible) {
                              android.util.Log.d("PlayerGesture", "onFling: Open Chat Triggered")
                              // Removing edge check to allow opening chat if app receives the touch

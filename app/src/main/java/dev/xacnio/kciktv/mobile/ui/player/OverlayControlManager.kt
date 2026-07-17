@@ -66,8 +66,6 @@ class OverlayControlManager(private val activity: MobilePlayerActivity) {
         val isTablet = activity.resources.getBoolean(R.bool.is_tablet)
         val isSideChatVisible = try { activity.fullscreenToggleManager.isSideChatVisible } catch (e: Exception) { false }
 
-        val isPortrait = activity.resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_PORTRAIT
-
         // Determine which panels to show
         val showInfoPanel = !isTheatreMode
         val shouldShowActionBar = if (isTheatreMode || (isTablet && isSideChatVisible)) {

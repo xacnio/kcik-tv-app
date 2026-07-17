@@ -766,10 +766,6 @@ class ChannelProfileManager(
         val videosHeader = layout.videosSection.getChildAt(0) // Header layout
         
         // Setup Videos Tab RecyclerView (Grid)
-        val isTablet = activity.resources.getBoolean(R.bool.is_tablet)
-        val tabletSpanCount = activity.resources.getInteger(R.integer.grid_span_count)
-        val spanCount = if (isTablet) tabletSpanCount else 2
-        
         // Update layout manager or create if null
         setupResponsiveGrid(allVideosRecyclerView)
         val spacing = 8.dpToPx(activity.resources)
@@ -910,10 +906,6 @@ class ChannelProfileManager(
         val clipsHeader = layout.clipsSection.getChildAt(0) // Header layout
         
         // Setup Grid for Clips Tab
-        val isTablet = activity.resources.getBoolean(R.bool.is_tablet)
-        val tabletSpanCount = activity.resources.getInteger(R.integer.grid_span_count)
-        val spanCount = if (isTablet) tabletSpanCount else 2
-        
         setupResponsiveGrid(allClipsRecyclerView)
         val spacing = 8.dpToPx(activity.resources)
         allClipsRecyclerView.setPadding(spacing, spacing, spacing, spacing)

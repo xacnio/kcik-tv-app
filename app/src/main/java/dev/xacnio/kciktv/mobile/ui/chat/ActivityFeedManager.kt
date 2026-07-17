@@ -207,7 +207,7 @@ class ActivityFeedManager(private val activity: MobilePlayerActivity) {
         if (isPrefetching) {
             loading.visibility = View.VISIBLE
             dialog.show()
-            val token = prefs.authToken ?: return
+            if (prefs.authToken.isNullOrEmpty()) return
             activity.lifecycleScope.launch {
                 try {
                     prefetchJob?.join()

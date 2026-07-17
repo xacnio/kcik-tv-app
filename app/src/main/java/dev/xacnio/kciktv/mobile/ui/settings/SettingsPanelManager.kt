@@ -695,7 +695,6 @@ class SettingsPanelManager(
     
     private fun showFontPickerSheet() {
         showDetailSheet(activity.getString(R.string.setting_app_font)) { container ->
-            val currentFontId = prefs.appFont
             val density = activity.resources.displayMetrics.density
 
             fun addSectionHeader(title: String) {

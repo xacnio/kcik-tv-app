@@ -50,12 +50,11 @@ class MiniChatAdapter(private val isCompact: Boolean = true) : RecyclerView.Adap
 
     override fun onBindViewHolder(holder: MsgVH, position: Int) {
         val msg = items[position]
-        val sender = msg.sender ?: return
         bindMessage(holder.text, msg)
     }
 
     private fun bindMessage(tv: TextView, msg: ChatMessage) {
-        val sender = msg.sender ?: return
+        val sender = msg.sender
         tv.tag = msg.id  // guard against stale async callbacks
 
         val badgeSize = (tv.textSize * 1.25f).toInt()
@@ -91,7 +90,7 @@ class MiniChatAdapter(private val isCompact: Boolean = true) : RecyclerView.Adap
 
 
         val usernameStart = builder.length
-        builder.append(sender.username ?: "")
+        builder.append(sender.username)
         val usernameEnd = builder.length
         val nameColor = try {
             sender.color?.let { Color.parseColor(it) } ?: Color.parseColor("#53FC18")
@@ -104,7 +103,7 @@ class MiniChatAdapter(private val isCompact: Boolean = true) : RecyclerView.Adap
 
 
         val msgStartIndex = builder.length
-        val content = msg.content ?: ""
+        val content = msg.content
         val emotePlaceholders = mutableListOf<Triple<Int, Int, String>>() // start, end, emoteId
 
         val sb = StringBuilder()
@@ -158,7 +157,6 @@ class MiniChatAdapter(private val isCompact: Boolean = true) : RecyclerView.Adap
     private val animatedItems = mutableSetOf<String>()
 
     fun append(msg: ChatMessage, maxSize: Int = 20) {
-        if (msg.sender == null || msg.content == null) return
         items.add(msg)
         if (items.size > maxSize) {
             items.removeAt(0)

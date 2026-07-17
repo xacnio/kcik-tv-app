@@ -99,10 +99,8 @@ class MiniPlayerManager(private val activity: MobilePlayerActivity) {
         activity.stopPlayer()
         
         // CRITICAL: Reset side chat state to prevent "Stuck Split Screen" bug
-        if (activity.fullscreenToggleManager != null) {
-            activity.fullscreenToggleManager.cleanupSideChat(forceReset = true)
-        }
-        
+        activity.fullscreenToggleManager.cleanupSideChat(forceReset = true)
+
         // Clean up Chat UI state
         activity.chatUiManager.resumeChatUi()
         activity.chatUiManager.reset()
@@ -148,10 +146,8 @@ class MiniPlayerManager(private val activity: MobilePlayerActivity) {
         if (!activity.isStreamActive) return
 
         // CRITICAL: Reset side chat state when entering mini player
-        if (activity.fullscreenToggleManager != null) {
-            activity.fullscreenToggleManager.cleanupSideChat(forceReset = true)
-        }
-        
+        activity.fullscreenToggleManager.cleanupSideChat(forceReset = true)
+
         // Hide chat rules if visible
         activity.chatRulesManager.dismiss()
 

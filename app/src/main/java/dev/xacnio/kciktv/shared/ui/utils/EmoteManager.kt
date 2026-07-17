@@ -708,7 +708,7 @@ object EmoteManager {
      * Bypasses PNG URL check and directly attempts APNG load.
      */
     fun loadBadgeSynchronized(
-        context: Context,
+        @Suppress("UNUSED_PARAMETER") context: Context,
         url: String,
         size: Int,
         targetView: View,

@@ -569,24 +569,24 @@ class StreamFeedAdapter(
          */
         fun applyInsetsPadding(statusBarHeight: Int, navBarHeight: Int) {
             // Update top margin for stream preview (status bar padding)
-            binding.streamPreviewContainer?.let { container ->
+            binding.streamPreviewContainer.let { container ->
                 val params = container.layoutParams as? androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
                 val density = container.context.resources.displayMetrics.density
                 val defaultTopMargin = (64 * density).toInt()
                 params?.topMargin = defaultTopMargin + statusBarHeight
                 container.layoutParams = params
             }
-            
+
             // Update bottom margins for UI elements (nav bar padding)
-            binding.bottomInfoContainer?.let { container ->
+            binding.bottomInfoContainer.let { container ->
                 val params = container.layoutParams as? androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
                 params?.bottomMargin = 32 + navBarHeight // Original 32dp + nav bar
                 container.layoutParams = params
             }
-            
-            binding.actionsContainer?.let { container ->
+
+            binding.actionsContainer.let { container ->
                 val params = container.layoutParams as? androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
-                params?.bottomMargin = 80 + navBarHeight // Original 80dp + nav bar  
+                params?.bottomMargin = 80 + navBarHeight // Original 80dp + nav bar
                 container.layoutParams = params
             }
         }

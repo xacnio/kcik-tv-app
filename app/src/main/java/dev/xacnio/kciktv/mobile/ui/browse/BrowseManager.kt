@@ -1513,8 +1513,8 @@ class BrowseManager(private val activity: MobilePlayerActivity) {
         }
         
         activity.lifecycleScope.launch(Dispatchers.IO) {
-            val token = prefs.authToken ?: return@launch
-            val result = repository.getFollowedCategories(token)
+            val authToken = prefs.authToken ?: return@launch
+            val result = repository.getFollowedCategories(authToken)
             val followedList = result.getOrNull()
             
             if (followedList != null) {

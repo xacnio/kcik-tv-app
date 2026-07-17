@@ -82,21 +82,21 @@ object DialogUtils {
         val bestResolve = packageManager.resolveActivity(viewIntent, PackageManager.MATCH_DEFAULT_ONLY)
         val bestPkg = bestResolve?.activityInfo?.packageName
         
-        if (bestPkg != null && bestPkg != context.packageName && bestPkg != "android" && !bestPkg.contains("resolver") && !browserPackages.contains(bestPkg)) {
+        if (bestResolve != null && bestPkg != null && bestPkg != context.packageName && bestPkg != "android" && !bestPkg.contains("resolver") && !browserPackages.contains(bestPkg)) {
             // We have a clear winner (the system's preferred app)
             val targetIntent = Intent(Intent.ACTION_VIEW, uri)
             targetIntent.setPackage(bestPkg)
             targetIntent.addCategory(Intent.CATEGORY_BROWSABLE)
             targetIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            
+
             val appIcon = try {
-                bestResolve?.loadIcon(packageManager) ?: packageManager.getApplicationIcon(bestPkg)
+                bestResolve.loadIcon(packageManager) ?: packageManager.getApplicationIcon(bestPkg)
             } catch (e: Exception) {
                 null
             }
 
             val appLabel = try {
-                bestResolve?.loadLabel(packageManager)?.toString() ?: packageManager.getApplicationInfo(bestPkg, 0).loadLabel(packageManager).toString()
+                bestResolve.loadLabel(packageManager)?.toString() ?: packageManager.getApplicationInfo(bestPkg, 0).loadLabel(packageManager).toString()
             } catch (e: Exception) {
                 ""
             }
@@ -386,7 +386,7 @@ object DialogUtils {
                         if (!finalFavicon.isNullOrBlank()) {
                             previewFavicon.visibility = android.view.View.VISIBLE
                             com.bumptech.glide.Glide.with(context)
-                                .load(finalFavicon as String)
+                                .load(finalFavicon)
                                 .into(previewFavicon)
                         } else {
                             previewFavicon.visibility = android.view.View.GONE
@@ -591,7 +591,6 @@ object DialogUtils {
                 val activity = findMobilePlayerActivity(context)
                 if (activity != null) {
                      if (url.contains("blerp.com/x/")) {
-                         val prefs = dev.xacnio.kciktv.shared.data.prefs.AppPreferences(context)
                          if (prefs.blerpEnabled) {
                              activity.cachedBlerpFragment = dev.xacnio.kciktv.mobile.BlerpBottomSheetFragment.newInstance(url)
                              activity.cachedBlerpFragment?.show(activity.supportFragmentManager, "blerp_sheet")
@@ -688,7 +687,7 @@ object DialogUtils {
                                          if (realName.isNotEmpty()) previewTitle?.text = realName
                                          if (profilePic != null) {
                                              Glide.with(context).load(profilePic).circleCrop().into(previewImage!!)
-                                             previewImage?.setColorFilter(null)
+                                             previewImage.setColorFilter(null)
                                          }
                                      }
                                  }
@@ -807,7 +806,6 @@ object DialogUtils {
             if (activity != null) {
                 // Intercept Blerp Logic Here to avoid double-opening
                 if (url.contains("blerp.com/x/")) {
-                     val prefs = dev.xacnio.kciktv.shared.data.prefs.AppPreferences(context)
                      if (prefs.blerpEnabled) {
                          activity.cachedBlerpFragment = dev.xacnio.kciktv.mobile.BlerpBottomSheetFragment.newInstance(url)
                          activity.cachedBlerpFragment?.show(activity.supportFragmentManager, "blerp_sheet")

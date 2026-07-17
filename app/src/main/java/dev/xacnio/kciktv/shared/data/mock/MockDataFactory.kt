@@ -258,7 +258,7 @@ object MockDataFactory {
     // ------------------------------------------------------------------
 
     fun buildTopCategories(): List<TopCategory> =
-        MockDataPools.categories.mapIndexed { i, cat ->
+        MockDataPools.categories.mapIndexed { _, cat ->
             val rng = Random(cat.id)
             TopCategory(
                 id = cat.id,
@@ -313,7 +313,7 @@ object MockDataFactory {
                 )
             )
         }
-        val categoryHits = (0 until 3).map { i ->
+        val categoryHits = (0 until 3).map { _ ->
             val cat = MockDataPools.categories[rng.nextInt(MockDataPools.categories.size)]
             SearchHit(
                 SearchDocument(

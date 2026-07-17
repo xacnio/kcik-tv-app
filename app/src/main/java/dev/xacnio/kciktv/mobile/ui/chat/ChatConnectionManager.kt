@@ -145,7 +145,7 @@ class ChatConnectionManager(private val activity: MobilePlayerActivity) {
                          }
                      }
                  },
-                 onReconnecting = { current, max ->
+                 onReconnecting = { _, _ ->
                      activity.runOnUiThread {
                          activity.binding.chatConnectionContainer.visibility = View.VISIBLE
                          activity.binding.chatConnectionProgress.visibility = View.VISIBLE

@@ -40,7 +40,7 @@ class LiveStoryAdapter(
         private val username: TextView = itemView.findViewById(R.id.liveStoryUsername)
 
         fun bind(channel: ChannelItem) {
-            username.text = channel.username ?: channel.slug ?: ""
+            username.text = channel.username
             Glide.with(profilePic)
                 .load(channel.getEffectiveProfilePicUrl())
                 .transform(CircleCrop())

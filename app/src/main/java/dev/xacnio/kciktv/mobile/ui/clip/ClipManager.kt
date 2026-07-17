@@ -147,7 +147,7 @@ class ClipManager(
         }
     }
 
-    private fun createClipViaWebView(targetId: String, token: String, dialog: BottomSheetDialog, sheetView: View, isDvrVideo: Boolean, startTimeSeconds: Int? = null, channelSlug: String) {
+    private fun createClipViaWebView(targetId: String, token: String, dialog: BottomSheetDialog, sheetView: View, isDvrVideo: Boolean, startTimeSeconds: Int? = null, @Suppress("UNUSED_PARAMETER") channelSlug: String) {
         val apiUrl = if (isDvrVideo) "https://kick.com/api/internal/v1/videos/$targetId/clips" else "https://kick.com/api/internal/v1/livestreams/$targetId/clips"
         val apiBody = if (isDvrVideo) "{\"start_time\": $startTimeSeconds, \"duration\": 180}" else "{\"duration\": 180}"
 

@@ -326,7 +326,7 @@ class FollowingManager(private val activity: MobilePlayerActivity) {
         }
     }
 
-    private fun setupFollowingLiveAdapter(recyclerView: RecyclerView?, config: android.content.res.Configuration? = null) {
+    private fun setupFollowingLiveAdapter(recyclerView: RecyclerView?, @Suppress("UNUSED_PARAMETER") config: android.content.res.Configuration? = null) {
         if (recyclerView == null) return
         
         // Responsive Layout based on available width
@@ -478,7 +478,7 @@ class FollowingManager(private val activity: MobilePlayerActivity) {
         }
     }
 
-    private fun setupFollowingOfflineAdapter(recyclerView: RecyclerView?, config: android.content.res.Configuration? = null) {
+    private fun setupFollowingOfflineAdapter(recyclerView: RecyclerView?, @Suppress("UNUSED_PARAMETER") config: android.content.res.Configuration? = null) {
         if (recyclerView == null) return
         
         // Responsive Layout based on available width

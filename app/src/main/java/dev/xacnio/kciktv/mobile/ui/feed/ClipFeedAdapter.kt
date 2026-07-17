@@ -653,32 +653,29 @@ class ClipFeedAdapter(
          */
         fun applyInsetsPadding(statusBarHeight: Int, navBarHeight: Int) {
             // Update top margins for header elements (status bar padding)
-            binding.ivScaleType?.let { view ->
+            binding.ivScaleType.let { view ->
                 val params = view.layoutParams as? androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
                 params?.topMargin = 8 + statusBarHeight // Original 8dp + status bar
                 view.layoutParams = params
             }
-            
-            binding.headerFilterContainer?.let { view ->
-                val params = view.layoutParams as? androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
-                // headerFilterContainer uses constraintTop_toTopOf="@id/ivScaleType" so no need to modify
-            }
-            
+
+            // headerFilterContainer uses constraintTop_toTopOf="@id/ivScaleType" so no need to modify
+
             // Update bottom margins for UI elements (nav bar padding)
-            binding.bottomInfoContainer?.let { container ->
+            binding.bottomInfoContainer.let { container ->
                 val params = container.layoutParams as? androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
                 params?.bottomMargin = 4 + navBarHeight // Original 4dp + nav bar
                 container.layoutParams = params
             }
-            
-            binding.actionsContainer?.let { container ->
+
+            binding.actionsContainer.let { container ->
                 val params = container.layoutParams as? androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
-                params?.bottomMargin = 120 + navBarHeight // Original 120dp + nav bar  
+                params?.bottomMargin = 120 + navBarHeight // Original 120dp + nav bar
                 container.layoutParams = params
             }
-            
+
             // Apply to seekbar
-            binding.clipSeekBar?.let { seekBar ->
+            binding.clipSeekBar.let { seekBar ->
                 val params = seekBar.layoutParams as? androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
                 params?.bottomMargin = navBarHeight
                 seekBar.layoutParams = params
