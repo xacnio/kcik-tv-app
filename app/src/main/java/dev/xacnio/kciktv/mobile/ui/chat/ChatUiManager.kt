@@ -528,7 +528,7 @@ class ChatUiManager(
 
         // Emote processing and Recent Emote Tracking
         val usedEmotes = mutableListOf<dev.xacnio.kciktv.shared.data.model.Emote>()
-        
+
         // Use a simpler regex or manual parsing for reliability
         val words = message.split(" ")
         val processedWords = words.map { word ->
@@ -569,7 +569,7 @@ class ChatUiManager(
              }
         }
         
-        message = processedWords.joinToString(" ")
+        message = joinPreservingEmoteRuns(processedWords)
         message = message.trim()
         
         val chatroomId = chatStateManager.currentChatroomId ?: return
@@ -743,6 +743,27 @@ class ChatUiManager(
 
     private fun handleClipClick(clipId: String) {
         activity.vodManager.playClipById(clipId)
+    }
+
+    /**
+     * Rejoins the outgoing message, dropping the space only between two adjacent emote tags so a
+     * run of them renders as one unbroken strip. Runs after words are turned into
+     * [emote:id:name] tags, since that's what makes an emote recognisable here.
+     */
+    private fun joinPreservingEmoteRuns(words: List<String>): String {
+        fun isEmoteTag(word: String) = word.startsWith("[emote:") && word.endsWith("]")
+
+        val builder = StringBuilder()
+        words.forEachIndexed { index, word ->
+            if (index > 0) {
+                val previous = words[index - 1]
+                // Empty entries come from runs of spaces the user actually typed; leave those be.
+                val bothEmotes = isEmoteTag(previous) && isEmoteTag(word)
+                if (!bothEmotes) builder.append(' ')
+            }
+            builder.append(word)
+        }
+        return builder.toString()
     }
 
     private fun scrollToRepliedMessage(originalId: String) {
