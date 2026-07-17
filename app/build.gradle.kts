@@ -28,8 +28,8 @@ android {
         applicationId = "dev.xacnio.kciktv"
         minSdk = 23
         targetSdk = 34
-        versionCode = 11
-        val baseVersion = "2.3.0-beta"
+        versionCode = 12
+        val baseVersion = "2.4.0-beta"
         versionName = "$baseVersion-${getGitHash()}"
 
         // Native RNNoise noise-suppression library (see src/main/cpp).
