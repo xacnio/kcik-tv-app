@@ -208,7 +208,8 @@ class MobilePlayerActivity : FragmentActivity() {
         SEARCH,
         CHANNEL_PROFILE,
         STREAM_FEED,
-        CLIP_FEED
+        CLIP_FEED,
+        COLLECTIBLES
     }
 
     internal lateinit var binding: ActivityMobilePlayerBinding
@@ -292,6 +293,8 @@ class MobilePlayerActivity : FragmentActivity() {
     internal lateinit var playerStatsSheetManager: dev.xacnio.kciktv.mobile.ui.player.PlayerStatsSheetManager
     internal lateinit var loyaltyPointsManager: dev.xacnio.kciktv.mobile.ui.player.LoyaltyPointsManager
     internal lateinit var webViewManager: dev.xacnio.kciktv.mobile.ui.player.WebViewManager
+    internal lateinit var dailyRewardManager: dev.xacnio.kciktv.mobile.ui.reward.DailyRewardManager
+    internal lateinit var collectiblesManager: dev.xacnio.kciktv.mobile.ui.collectibles.CollectiblesManager
     // Tracks login state across onResume() boundaries. If this flips, the auth WebView's KPSDK
     // session was initialized for a different identity (or none) — see WebViewManager.resetForAuthStateChange.
     private var lastKnownLoggedIn: Boolean = false
@@ -856,6 +859,13 @@ class MobilePlayerActivity : FragmentActivity() {
             windowInsets
         }
 
+        // Collectibles: it covers the global header, so it owns its own status bar padding
+        ViewCompat.setOnApplyWindowInsetsListener(binding.collectiblesContainer.root) { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(view.paddingLeft, insets.top, view.paddingRight, insets.bottom)
+            windowInsets
+        }
+
         // Browse & Following: Add navigation bar padding to bottom of scrollable content
         val bottomPaddingViews = listOf(
             binding.browseScreenContainer.browseCategoriesRecycler,
@@ -1068,6 +1078,8 @@ class MobilePlayerActivity : FragmentActivity() {
         playerStatsSheetManager = dev.xacnio.kciktv.mobile.ui.player.PlayerStatsSheetManager(this)
         loyaltyPointsManager = dev.xacnio.kciktv.mobile.ui.player.LoyaltyPointsManager(this, prefs)
         webViewManager = dev.xacnio.kciktv.mobile.ui.player.WebViewManager(this, prefs)
+        dailyRewardManager = dev.xacnio.kciktv.mobile.ui.reward.DailyRewardManager(this, binding, prefs, repository, lifecycleScope)
+        collectiblesManager = dev.xacnio.kciktv.mobile.ui.collectibles.CollectiblesManager(this, binding, prefs, repository, lifecycleScope)
         mentionsManager.onReplyClick = ::prepareReply
         mentionsManager.onGoToMessageClick = { message -> scrollToRepliedMessage(message.id) }
         playerManager.resetPlayer()
@@ -1679,6 +1691,10 @@ class MobilePlayerActivity : FragmentActivity() {
 
     internal fun updateUserHeaderState() {
         authManager.updateUserHeaderState()
+        // Re-check whenever the header is rebuilt, since login state may have changed.
+        if (::dailyRewardManager.isInitialized) {
+            dailyRewardManager.refreshRewardAvailability()
+        }
     }
 
     private fun updateLoginButtonState() {
@@ -1709,6 +1725,9 @@ class MobilePlayerActivity : FragmentActivity() {
         // Settings Button (Visible when logged out)
         binding.mobileSettingsBtn.setOnClickListener {
             settingsPanelManager.showSettingsPanel()
+        }
+        binding.mobileDailyRewardBtn.setOnClickListener {
+            dailyRewardManager.showDailyRewardDialog()
         }
         // Video settings button on video overlay (Top Right)
         binding.videoSettingsButton.setOnClickListener {
@@ -2493,6 +2512,8 @@ class MobilePlayerActivity : FragmentActivity() {
 
     private fun showAccountPopupMenu(anchor: View) = accountPopupManager.showAccountPopupMenu(anchor)
 
+    internal fun showCollectiblesScreen() = collectiblesManager.show()
+
     @SuppressLint("InflateParams")
     internal fun showChatSettingsSheet(startOnProfile: Boolean = false) {
         chatSettingsSheetManager.showChatSettingsSheet(startOnProfile)
@@ -3045,6 +3066,11 @@ class MobilePlayerActivity : FragmentActivity() {
                         hideSettingsPanel()
                         return@handleOnBackPressed
                     }
+                    collectiblesManager.isVisible -> {
+                        Log.d(TAG, "BACK: Branch -> collectiblesVisible -> close()")
+                        collectiblesManager.close()
+                        return@handleOnBackPressed
+                    }
                     searchUiManager.handleBack() -> {
                         Log.d(TAG, "BACK: Branch -> searchUiManager.handleBack() handled it")
                         return@handleOnBackPressed
@@ -3185,6 +3211,7 @@ class MobilePlayerActivity : FragmentActivity() {
         Log.d(TAG, "openChannel() called: slug=${channel.slug}, isLive=${channel.isLive}")
         Log.d(TAG, "  before: returnToProfileSlug=$returnToProfileSlug, isChannelProfileVisible=${channelProfileManager.isChannelProfileVisible}")
         homeScreenManager.onHomeHidden()
+        if (::collectiblesManager.isInitialized) collectiblesManager.hide()
         
         // Only set returnToProfileSlug if coming from profile screen
         // For other screens (Home, Browse, etc.), we don't want to return to profile
@@ -3396,7 +3423,10 @@ class MobilePlayerActivity : FragmentActivity() {
         if (::channelProfileManager.isInitialized) {
             channelProfileManager.isChannelProfileVisible = false
         }
-        
+        if (::collectiblesManager.isInitialized) {
+            collectiblesManager.hide()
+        }
+
         if (!miniPlayerManager.isMiniPlayerMode) {
             binding.playerScreenContainer.visibility = View.GONE
             updateNavigationBarColor(false) // Set navigation bar to transparent for home screen

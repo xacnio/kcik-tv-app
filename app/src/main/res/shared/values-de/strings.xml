@@ -1285,4 +1285,44 @@
     <string name="code_label">Bestätigungscode</string>
     <string name="qr_confirm_instruction">Wenn der folgende Code mit dem auf Ihrem TV angezeigten übereinstimmt, klicken Sie auf Bestätigen, um fortzufahren.</string>
     <string name="tv_qr_login">QR-Login für TV</string>
+    <!-- Daily Reward -->
+    <string name="daily_reward_title">Tägliche Belohnung abholen</string>
+    <string name="daily_reward_description">Hol dir deine tägliche Belohnung für die Chance auf einen großen Gewinn! Emotes und Abzeichen warten auf dich.</string>
+    <string name="daily_reward_view_rewards_link">Belohnungen ansehen</string>
+    <string name="daily_reward_already_have">Diese Belohnung hast du bereits!</string>
+    <string name="daily_reward_congrats">Glückwunsch!</string>
+    <string name="daily_reward_duplicate_note">Doppelte Belohnungen werden automatisch in Levelfortschritt umgewandelt</string>
+    <string name="daily_reward_claimed_button">Abgeholt</string>
+    <string name="daily_reward_claim_button">Abholen</string>
+    <string name="daily_reward_claiming_button">Wird abgeholt…</string>
+    <string name="daily_reward_locked_button">Gesperrt</string>
+    <string name="daily_reward_load_error">Die heutige Belohnung konnte nicht geladen werden</string>
+    <string name="daily_reward_simulate_unavailable">Für die Wiederholung braucht es erst eine echte Belohnung — versuch es nach der morgigen</string>
+    <string name="daily_reward_resets_at">Tägliche Belohnung wird zurückgesetzt am %s</string>
+    <string name="daily_reward_rarity_title">Belohnungsseltenheit</string>
+    <string name="daily_reward_consolation_hours_minutes">+%1$dh %2$dm Wiedergabezeit für Level</string>
+    <string name="daily_reward_consolation_minutes">+%1$dm Wiedergabezeit für Level</string>
+    <string name="daily_reward_locked_progress_hours_minutes">%1$dh %2$dm bis zur Freischaltung</string>
+    <string name="daily_reward_locked_progress_minutes">%dm bis zur Freischaltung</string>
+    <string name="rarity_common">Common</string>
+    <string name="rarity_uncommon">Uncommon</string>
+    <string name="rarity_rare">Rare</string>
+    <string name="rarity_epic">Epic</string>
+    <string name="rarity_legendary">Legendary</string>
+    <string name="rarity_mythic">Mythic</string>
+    <!-- Collectibles -->
+    <string name="collectibles_title">Sammelobjekte</string>
+    <string name="collectibles_description">Schau täglich ein wenig zu, um deine Belohnung freizuschalten, und dreh dann für die Chance auf ein Emote oder Abzeichen. Alles, was du bisher gezogen hast, findest du hier — Duplikate werden zu Wiedergabezeit.</string>
+    <string name="collectibles_inventory">Inventar</string>
+    <string name="collectibles_unlocked_count">%1$d von %2$d freigeschaltet</string>
+    <string name="collectibles_sort_by">Sortieren:</string>
+    <string name="collectibles_sort_rarity">Seltenheit</string>
+    <string name="collectibles_sort_type">Typ</string>
+    <string name="collectibles_sort_unlocked">Freigeschaltet</string>
+    <string name="collectibles_group_unlocked">Freigeschaltet</string>
+    <string name="collectibles_group_locked">Gesperrt</string>
+    <string name="collectibles_type_emote">Emotes</string>
+    <string name="collectibles_type_badge">Abzeichen</string>
+    <string name="collectibles_locked">Gesperrt</string>
+    <string name="collectibles_load_error">Sammelobjekte konnten nicht geladen werden</string>
 </resources>

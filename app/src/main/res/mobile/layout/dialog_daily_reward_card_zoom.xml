@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/zoomScrimRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#D9000000"
+    android:clickable="true"
+    android:focusable="true">
+
+    <FrameLayout
+        android:id="@+id/zoomCardFrame"
+        android:layout_width="260dp"
+        android:layout_height="340dp"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_reward_card_frame"
+        android:clickable="true"
+        android:clipToOutline="true">
+
+        <ImageView
+            android:id="@+id/zoomCardImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="14dp"
+            android:scaleType="fitCenter" />
+
+        <!-- Diagonal light-sweep effect, animated across the card once it settles -->
+        <View
+            android:id="@+id/zoomShineView"
+            android:layout_width="90dp"
+            android:layout_height="620dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_card_shine"
+            android:rotation="35"
+            android:visibility="invisible" />
+
+        <!-- Hold-to-shatter hover. Inside the frame so clipToOutline keeps it within the card's
+             rounded corners; once it covers the card, the card breaks. -->
+        <dev.xacnio.kciktv.shared.ui.widget.HoldBubbleView
+            android:id="@+id/zoomHoldBubble"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="invisible" />
+    </FrameLayout>
+
+</FrameLayout>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rouletteRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- The backdrop is its own layer, not the root: fading the root would fade the flying card
+         with it, and the card has to stay solid all the way into the modal. -->
+    <View
+        android:id="@+id/rouletteScrim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#E6000000" />
+
+    <!-- Reel, edge fades and pointer fade out together once the spin lands -->
+    <FrameLayout
+        android:id="@+id/rouletteReelGroup"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <FrameLayout
+            android:id="@+id/rouletteViewport"
+            android:layout_width="match_parent"
+            android:layout_height="230dp"
+            android:layout_gravity="center">
+
+            <LinearLayout
+                android:id="@+id/rouletteStrip"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal" />
+        </FrameLayout>
+
+        <View
+            android:layout_width="72dp"
+            android:layout_height="230dp"
+            android:layout_gravity="start|center_vertical"
+            android:background="@drawable/bg_roulette_fade_left" />
+
+        <View
+            android:layout_width="72dp"
+            android:layout_height="230dp"
+            android:layout_gravity="end|center_vertical"
+            android:background="@drawable/bg_roulette_fade_right" />
+
+        <View
+            android:id="@+id/roulettePointer"
+            android:layout_width="2dp"
+            android:layout_height="250dp"
+            android:layout_gravity="center"
+            android:background="@color/brand_green" />
+    </FrameLayout>
+
+    <!-- Light sweep over the winner; clip box is sized to the card at runtime -->
+    <FrameLayout
+        android:id="@+id/rouletteShineClip"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:layout_gravity="center"
+        android:visibility="invisible">
+
+        <View
+            android:id="@+id/rouletteShine"
+            android:layout_width="70dp"
+            android:layout_height="520dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_card_shine"
+            android:rotation="35" />
+    </FrameLayout>
+
+    <!-- The winner's card art, flown from the reel into the modal once the spin settles -->
+    <ImageView
+        android:id="@+id/rouletteFlyer"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:layout_gravity="center"
+        android:scaleType="fitCenter"
+        android:visibility="invisible" />
+
+</FrameLayout>

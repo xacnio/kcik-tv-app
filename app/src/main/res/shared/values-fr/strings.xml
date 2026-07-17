@@ -1285,4 +1285,44 @@
     <string name="code_label">Code de confirmation</string>
     <string name="qr_confirm_instruction">Si le code suivant correspond à celui affiché sur votre TV, cliquez sur confirmer pour continuer.</string>
     <string name="tv_qr_login">Connexion QR pour TV</string>
+    <!-- Daily Reward -->
+    <string name="daily_reward_title">Réclamer votre récompense quotidienne</string>
+    <string name="daily_reward_description">Réclamez votre récompense quotidienne pour tenter de gagner gros ! Emotes et badges sont à gagner.</string>
+    <string name="daily_reward_view_rewards_link">Voir les récompenses</string>
+    <string name="daily_reward_already_have">Vous possédez déjà cette récompense !</string>
+    <string name="daily_reward_congrats">Félicitations !</string>
+    <string name="daily_reward_duplicate_note">Les récompenses en double sont automatiquement converties en progression de niveau</string>
+    <string name="daily_reward_claimed_button">Réclamé</string>
+    <string name="daily_reward_claim_button">Réclamer</string>
+    <string name="daily_reward_claiming_button">Réclamation…</string>
+    <string name="daily_reward_locked_button">Verrouillé</string>
+    <string name="daily_reward_load_error">Impossible de charger la récompense du jour</string>
+    <string name="daily_reward_simulate_unavailable">La relecture nécessite une vraie récompense — réessayez après celle de demain</string>
+    <string name="daily_reward_resets_at">La récompense quotidienne se réinitialise le %s</string>
+    <string name="daily_reward_rarity_title">Rareté de la récompense</string>
+    <string name="daily_reward_consolation_hours_minutes">+%1$dh %2$dm de temps de visionnage pour le Niveau</string>
+    <string name="daily_reward_consolation_minutes">+%1$dm de temps de visionnage pour le Niveau</string>
+    <string name="daily_reward_locked_progress_hours_minutes">%1$dh %2$dm avant déblocage</string>
+    <string name="daily_reward_locked_progress_minutes">%dm avant déblocage</string>
+    <string name="rarity_common">Common</string>
+    <string name="rarity_uncommon">Uncommon</string>
+    <string name="rarity_rare">Rare</string>
+    <string name="rarity_epic">Epic</string>
+    <string name="rarity_legendary">Legendary</string>
+    <string name="rarity_mythic">Mythic</string>
+    <!-- Collectibles -->
+    <string name="collectibles_title">Objets de collection</string>
+    <string name="collectibles_description">Regardez un peu chaque jour pour débloquer votre récompense, puis lancez la roue pour tenter d\'obtenir une emote ou un badge. Tout ce que vous avez tiré est ici — les doublons deviennent du temps de visionnage.</string>
+    <string name="collectibles_inventory">Inventaire</string>
+    <string name="collectibles_unlocked_count">%1$d sur %2$d débloqués</string>
+    <string name="collectibles_sort_by">Trier par :</string>
+    <string name="collectibles_sort_rarity">Rareté</string>
+    <string name="collectibles_sort_type">Type</string>
+    <string name="collectibles_sort_unlocked">Débloqués</string>
+    <string name="collectibles_group_unlocked">Débloqués</string>
+    <string name="collectibles_group_locked">Verrouillés</string>
+    <string name="collectibles_type_emote">Emotes</string>
+    <string name="collectibles_type_badge">Badges</string>
+    <string name="collectibles_locked">Verrouillé</string>
+    <string name="collectibles_load_error">Impossible de charger les objets de collection</string>
 </resources>

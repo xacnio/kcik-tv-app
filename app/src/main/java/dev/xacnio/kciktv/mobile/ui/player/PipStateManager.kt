@@ -269,6 +269,10 @@ class PipStateManager(private val activity: MobilePlayerActivity) {
                 activity.clipFeedManager.restoreVisibility()
                 binding.mobileHeader.visibility = View.GONE
             }
+            MobilePlayerActivity.AppScreen.COLLECTIBLES -> {
+                binding.collectiblesContainer.root.visibility = View.VISIBLE
+                binding.mobileHeader.visibility = View.GONE
+            }
 
         }
 

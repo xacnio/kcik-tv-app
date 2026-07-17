@@ -9,11 +9,15 @@
 package dev.xacnio.kciktv.shared.data.api
 
 import dev.xacnio.kciktv.shared.data.model.ChatHistoryResponse
+import dev.xacnio.kciktv.shared.data.model.ChallengesResponse
+import dev.xacnio.kciktv.shared.data.model.ClaimChallengeResponse
+import dev.xacnio.kciktv.shared.data.model.CollectiblesResponse
 import dev.xacnio.kciktv.shared.data.model.LiveStreamsResponse
 import dev.xacnio.kciktv.shared.data.model.UserLevelResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 import dev.xacnio.kciktv.shared.data.api.LiveStreamsApiService
@@ -85,5 +89,35 @@ interface LiveStreamsApiService {
     suspend fun getUserLevel(
         @Header("Authorization") token: String
     ): Response<UserLevelResponse>
+
+    /**
+     * Returns the authenticated user's active gamification challenges (e.g. daily reward).
+     */
+    @retrofit2.http.Headers("Accept: application/json")
+    @GET("api/v1/gamification/challenges")
+    suspend fun getChallenges(
+        @Header("Authorization") token: String
+    ): Response<ChallengesResponse>
+
+    /**
+     * Claims a gamification challenge and rolls its reward. Returns the roulette reel items
+     * plus the winning item, to be animated client-side.
+     */
+    @retrofit2.http.Headers("Accept: application/json")
+    @POST("api/v1/gamification/challenges/{id}/claim")
+    suspend fun claimChallenge(
+        @Path("id") challengeId: String,
+        @Header("Authorization") token: String
+    ): Response<ClaimChallengeResponse>
+
+    /**
+     * Returns the full collectible card catalog (every emote/badge card), each flagged with
+     * whether the authenticated user already owns it.
+     */
+    @retrofit2.http.Headers("Accept: application/json")
+    @GET("api/v1/gamification/collectibles")
+    suspend fun getCollectibles(
+        @Header("Authorization") token: String
+    ): Response<CollectiblesResponse>
 
 }

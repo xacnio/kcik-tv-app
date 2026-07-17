@@ -2,4 +2,5 @@
 <resources>
     <bool name="is_tablet">false</bool>
     <integer name="grid_span_count">2</integer>
+    <integer name="collectibles_span_count">3</integer>
 </resources>

@@ -1285,4 +1285,44 @@
     <string name="code_label">Confirmation Code</string>
     <string name="qr_confirm_instruction">If the following code matches the one displayed on your TV, click confirm to proceed.</string>
     <string name="tv_qr_login">QR Login for TV</string>
+    <!-- Daily Reward -->
+    <string name="daily_reward_title">Claim Your Daily Reward</string>
+    <string name="daily_reward_description">Claim your daily reward for a chance to win big! Emotes and badges are up for grabs.</string>
+    <string name="daily_reward_view_rewards_link">View Rewards</string>
+    <string name="daily_reward_already_have">You Already Have This Reward!</string>
+    <string name="daily_reward_congrats">Congratulations!</string>
+    <string name="daily_reward_duplicate_note">Duplicate rewards are automatically converted into level progress</string>
+    <string name="daily_reward_claimed_button">Claimed</string>
+    <string name="daily_reward_claim_button">Claim</string>
+    <string name="daily_reward_claiming_button">Claiming…</string>
+    <string name="daily_reward_locked_button">Locked</string>
+    <string name="daily_reward_load_error">Couldn\'t load today\'s reward</string>
+    <string name="daily_reward_simulate_unavailable">Replay needs a real claim first — try again after tomorrow\'s reward</string>
+    <string name="daily_reward_resets_at">Daily Reward resets at %s</string>
+    <string name="daily_reward_rarity_title">Reward Rarity</string>
+    <string name="daily_reward_consolation_hours_minutes">+%1$dh %2$dm watch time to Level</string>
+    <string name="daily_reward_consolation_minutes">+%1$dm watch time to Level</string>
+    <string name="daily_reward_locked_progress_hours_minutes">%1$dh %2$dm left to unlock</string>
+    <string name="daily_reward_locked_progress_minutes">%dm left to unlock</string>
+    <string name="rarity_common">Common</string>
+    <string name="rarity_uncommon">Uncommon</string>
+    <string name="rarity_rare">Rare</string>
+    <string name="rarity_epic">Epic</string>
+    <string name="rarity_legendary">Legendary</string>
+    <string name="rarity_mythic">Mythic</string>
+    <!-- Collectibles -->
+    <string name="collectibles_title">Collectibles</string>
+    <string name="collectibles_description">Watch a bit each day to unlock your daily reward, then spin it for a shot at an emote or a badge. Everything you\'ve pulled so far lives here — duplicates turn into watch time instead.</string>
+    <string name="collectibles_inventory">Inventory</string>
+    <string name="collectibles_unlocked_count">%1$d of %2$d Unlocked</string>
+    <string name="collectibles_sort_by">Sort by:</string>
+    <string name="collectibles_sort_rarity">Rarity</string>
+    <string name="collectibles_sort_type">Type</string>
+    <string name="collectibles_sort_unlocked">Unlocked</string>
+    <string name="collectibles_group_unlocked">Unlocked</string>
+    <string name="collectibles_group_locked">Locked</string>
+    <string name="collectibles_type_emote">Emotes</string>
+    <string name="collectibles_type_badge">Badges</string>
+    <string name="collectibles_locked">Locked</string>
+    <string name="collectibles_load_error">Couldn\'t load collectibles</string>
 </resources>

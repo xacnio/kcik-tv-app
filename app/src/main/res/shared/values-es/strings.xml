@@ -1285,4 +1285,44 @@
     <string name="code_label">Código de confirmación</string>
     <string name="qr_confirm_instruction">Si el siguiente código coincide con el que se muestra en tu TV, haz clic en confirmar para continuar.</string>
     <string name="tv_qr_login">Inicio QR para TV</string>
+    <!-- Daily Reward -->
+    <string name="daily_reward_title">Reclama tu recompensa diaria</string>
+    <string name="daily_reward_description">¡Reclama tu recompensa diaria para tener la oportunidad de ganar en grande! Hay emotes e insignias en juego.</string>
+    <string name="daily_reward_view_rewards_link">Ver recompensas</string>
+    <string name="daily_reward_already_have">¡Ya tienes esta recompensa!</string>
+    <string name="daily_reward_congrats">¡Felicidades!</string>
+    <string name="daily_reward_duplicate_note">Las recompensas duplicadas se convierten automáticamente en progreso de nivel</string>
+    <string name="daily_reward_claimed_button">Reclamado</string>
+    <string name="daily_reward_claim_button">Reclamar</string>
+    <string name="daily_reward_claiming_button">Reclamando…</string>
+    <string name="daily_reward_locked_button">Bloqueado</string>
+    <string name="daily_reward_load_error">No se pudo cargar la recompensa de hoy</string>
+    <string name="daily_reward_simulate_unavailable">Para repetir hace falta una recompensa real; inténtalo tras la de mañana</string>
+    <string name="daily_reward_resets_at">La recompensa diaria se reinicia el %s</string>
+    <string name="daily_reward_rarity_title">Rareza de la recompensa</string>
+    <string name="daily_reward_consolation_hours_minutes">+%1$dh %2$dm de tiempo de visualización para el Nivel</string>
+    <string name="daily_reward_consolation_minutes">+%1$dm de tiempo de visualización para el Nivel</string>
+    <string name="daily_reward_locked_progress_hours_minutes">Faltan %1$dh %2$dm para desbloquear</string>
+    <string name="daily_reward_locked_progress_minutes">Faltan %dm para desbloquear</string>
+    <string name="rarity_common">Common</string>
+    <string name="rarity_uncommon">Uncommon</string>
+    <string name="rarity_rare">Rare</string>
+    <string name="rarity_epic">Epic</string>
+    <string name="rarity_legendary">Legendary</string>
+    <string name="rarity_mythic">Mythic</string>
+    <!-- Collectibles -->
+    <string name="collectibles_title">Coleccionables</string>
+    <string name="collectibles_description">Mira un rato cada día para desbloquear tu recompensa diaria y gírala para conseguir un emote o una insignia. Todo lo que has sacado está aquí; los repetidos se convierten en tiempo de visualización.</string>
+    <string name="collectibles_inventory">Inventario</string>
+    <string name="collectibles_unlocked_count">%1$d de %2$d desbloqueados</string>
+    <string name="collectibles_sort_by">Ordenar por:</string>
+    <string name="collectibles_sort_rarity">Rareza</string>
+    <string name="collectibles_sort_type">Tipo</string>
+    <string name="collectibles_sort_unlocked">Desbloqueados</string>
+    <string name="collectibles_group_unlocked">Desbloqueados</string>
+    <string name="collectibles_group_locked">Bloqueados</string>
+    <string name="collectibles_type_emote">Emotes</string>
+    <string name="collectibles_type_badge">Insignias</string>
+    <string name="collectibles_locked">Bloqueado</string>
+    <string name="collectibles_load_error">No se pudieron cargar los coleccionables</string>
 </resources>

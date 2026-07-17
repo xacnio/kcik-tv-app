@@ -61,7 +61,18 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-
+        <!-- No tint: ic_daily_reward is already white, and swaps to a full-colour animation when claimable. -->
+        <ImageButton
+            android:id="@+id/mobileDailyRewardBtn"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_daily_reward"
+            android:padding="10dp"
+            android:scaleType="fitCenter"
+            android:visibility="gone"
+            android:contentDescription="@string/daily_reward_title" />
 
         <!-- Profile Picture -->
         <com.google.android.material.imageview.ShapeableImageView
@@ -368,6 +379,20 @@
     <include
         android:id="@+id/channelProfileContainer"
         layout="@layout/layout_channel_profile"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintWidth_max="@dimen/max_content_width"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:elevation="10dp" />
+
+    <!-- Collectibles Container -->
+    <include
+        android:id="@+id/collectiblesContainer"
+        layout="@layout/layout_collectibles"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:visibility="gone"

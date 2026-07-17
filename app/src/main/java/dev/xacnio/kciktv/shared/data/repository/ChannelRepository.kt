@@ -2011,6 +2011,45 @@ class ChannelRepository {
             Result.failure(e)
         }
     }
+
+    suspend fun getChallenges(token: String): Result<List<dev.xacnio.kciktv.shared.data.model.DailyChallenge>> = withContext(Dispatchers.IO) {
+        try {
+            val response = liveStreamsService.getChallenges("Bearer $token")
+            if (response.isSuccessful && response.body()?.data != null) {
+                Result.success(response.body()!!.data!!)
+            } else {
+                Result.failure(Exception("API error: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun claimChallenge(challengeId: String, token: String): Result<dev.xacnio.kciktv.shared.data.model.ClaimChallengeData> = withContext(Dispatchers.IO) {
+        try {
+            val response = liveStreamsService.claimChallenge(challengeId, "Bearer $token")
+            if (response.isSuccessful && response.body()?.data != null) {
+                Result.success(response.body()!!.data!!)
+            } else {
+                Result.failure(Exception("API error: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getCollectibles(token: String): Result<List<dev.xacnio.kciktv.shared.data.model.CollectibleCard>> = withContext(Dispatchers.IO) {
+        try {
+            val response = liveStreamsService.getCollectibles("Bearer $token")
+            if (response.isSuccessful && response.body()?.data != null) {
+                Result.success(response.body()!!.data!!)
+            } else {
+                Result.failure(Exception("API error: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
 
 

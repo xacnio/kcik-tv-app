@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Full-screen: the background is this view's own scrim, not a window dim, so it covers edge
+     to edge including behind the system bars. Vertical padding comes from window insets at runtime. -->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F2000000"
+    android:paddingHorizontal="24dp"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- Header Icon -->
+    <ImageView
+        android:id="@+id/rewardHeaderIcon"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:padding="7dp"
+        android:background="@drawable/bg_circle_dark"
+        android:src="@drawable/ic_daily_reward"
+        app:tint="@color/brand_green"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/rewardTitleText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:text="@string/daily_reward_title"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="@id/rewardHeaderIcon"
+        app:layout_constraintBottom_toBottomOf="@id/rewardHeaderIcon"
+        app:layout_constraintStart_toEndOf="@id/rewardHeaderIcon"
+        app:layout_constraintEnd_toStartOf="@id/btnCloseDailyReward" />
+
+    <!-- Close Button -->
+    <ImageButton
+        android:id="@+id/btnCloseDailyReward"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:padding="6dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_close"
+        android:tint="@color/white"
+        android:contentDescription="@string/close"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Description with inline "View Rewards" link (link span appended at runtime) -->
+    <TextView
+        android:id="@+id/rewardDescriptionText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="22dp"
+        android:textColor="#B5B5B5"
+        android:textSize="15sp"
+        android:lineSpacingExtra="5dp"
+        app:layout_constraintTop_toBottomOf="@id/rewardHeaderIcon"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Reward area: takes every bit of height left between the blurb and the controls, so the
+         card is shown as large as the screen allows. -->
+    <FrameLayout
+        android:id="@+id/rewardCardFrame"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="26dp"
+        android:layout_marginBottom="26dp"
+        android:background="@drawable/bg_reward_card_area"
+        android:clipToOutline="true"
+        app:layout_constraintTop_toBottomOf="@id/rewardDescriptionText"
+        app:layout_constraintBottom_toTopOf="@id/rewardRarityChipsRow"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Initial network fetch -->
+        <ProgressBar
+            android:id="@+id/rewardLoadingProgress"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:layout_gravity="center"
+            android:indeterminateTint="@color/brand_green" />
+
+        <!-- Fetch failed -->
+        <TextView
+            android:id="@+id/rewardErrorText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/daily_reward_load_error"
+            android:textColor="#B5B5B5"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:visibility="gone" />
+
+        <!-- Spin reveal placeholder -->
+        <View
+            android:id="@+id/rewardSpinSquare"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_rarity_square"
+            android:visibility="gone" />
+
+        <!-- Collectible cards marquee: all known cards scrolling sideways in a continuous loop,
+             shown dimmed as a teaser of what can be won -->
+        <FrameLayout
+            android:id="@+id/rewardLockedCardsViewport"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:id="@+id/rewardLockedCardsStrip"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical"
+                android:alpha="0.45"
+                android:orientation="horizontal" />
+        </FrameLayout>
+
+        <!-- Resolved reward: card image on top, result text stacked below it (not overlapping,
+             so the card art stays visible) -->
+        <LinearLayout
+            android:id="@+id/rewardResolvedContent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+
+            <FrameLayout
+                android:id="@+id/rewardCardImageBox"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+
+                <!-- Padding keeps the card off the full height of this box; startCardShine reads it back when sizing the sweep. -->
+                <ImageView
+                    android:id="@+id/rewardCardImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="38dp"
+                    android:scaleType="fitCenter"
+                    android:alpha="0"
+                    android:visibility="invisible"
+                    android:contentDescription="@string/daily_reward_title" />
+
+                <!-- Light sweep played across the card once it lands. Resized at runtime to the
+                     art's actual drawn rect, or it would spill out of the card into the empty
+                     space fitCenter leaves around it. -->
+                <FrameLayout
+                    android:id="@+id/rewardCardShineClip"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:layout_gravity="center"
+                    android:visibility="invisible">
+
+                    <!-- Long enough to cross the whole card at 35°; clipped to the card's rect, so over-length costs nothing. -->
+                    <View
+                        android:id="@+id/rewardCardShine"
+                        android:layout_width="60dp"
+                        android:layout_height="800dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_card_shine"
+                        android:rotation="35" />
+                </FrameLayout>
+            </FrameLayout>
+
+            <LinearLayout
+                android:id="@+id/rewardResultOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:paddingHorizontal="12dp"
+                android:paddingTop="18dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/rewardResultTitleText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/white"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:gravity="center" />
+
+                <LinearLayout
+                    android:id="@+id/rewardConsolationRow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/rewardConsolationText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/brand_green"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:id="@+id/rewardConsolationBadge"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginStart="6dp" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/rewardDuplicateNoteText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/daily_reward_duplicate_note"
+                    android:textColor="#8A8A8A"
+                    android:textSize="13sp"
+                    android:lineSpacingExtra="2dp"
+                    android:gravity="center" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Locked / in-progress overlay. Sits low in the frame so the cards marquee, which
+             aligns itself just above the progress bar, gets room to run. -->
+        <LinearLayout
+            android:id="@+id/rewardLockedOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="8dp"
+            android:visibility="gone">
+
+            <!-- android:tint, not app:tint — this activity is a FragmentActivity, so there's no
+                 AppCompat inflater and app:tint would be ignored, leaving ic_lock its native black. -->
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_lock"
+                android:tint="@color/white" />
+
+            <TextView
+                android:id="@+id/rewardLockedProgressText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:gravity="center" />
+
+            <ProgressBar
+                android:id="@+id/rewardLockedProgressBar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="7dp"
+                android:layout_marginTop="16dp"
+                android:max="100"
+                android:progressTint="@color/brand_green"
+                android:progressBackgroundTint="#333333" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- Rarity legend chips (tap to view breakdown) -->
+    <LinearLayout
+        android:id="@+id/rewardRarityChipsRow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:paddingVertical="6dp"
+        app:layout_constraintBottom_toTopOf="@id/btnClaimDailyReward"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Claim button -->
+    <Button
+        android:id="@+id/btnClaimDailyReward"
+        android:layout_width="0dp"
+        android:layout_height="54dp"
+        android:layout_marginTop="20dp"
+        android:backgroundTint="#3A3A3A"
+        android:enabled="false"
+        android:text="@string/daily_reward_claimed_button"
+        android:textColor="#AAAAAA"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textAllCaps="false"
+        app:layout_constraintBottom_toTopOf="@id/rewardResetsAtText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Resets-at footer -->
+    <TextView
+        android:id="@+id/rewardResetsAtText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:textColor="#8A8A8A"
+        android:textSize="13sp"
+        android:gravity="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

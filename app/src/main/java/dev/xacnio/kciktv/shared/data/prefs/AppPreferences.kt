@@ -276,6 +276,18 @@ class AppPreferences(private val context: Context) {
         get() = prefs.getBoolean("chat_show_seconds", false)
         set(value) = prefs.edit().putBoolean("chat_show_seconds", value).apply()
 
+    // Id of the last daily reward challenge whose spin-reveal animation has already played,
+    // so reopening the dialog the same day shows the settled result instantly instead of replaying it.
+    var lastAnimatedDailyRewardId: String?
+        get() = prefs.getString("last_animated_daily_reward_id", null)
+        set(value) = prefs.edit().putString("last_animated_daily_reward_id", value).apply()
+
+    // Reel from the last successful claim, as JSON — the only way to replay a spin with its
+    // real shield art, since the claim endpoint refuses an already-claimed challenge.
+    var lastRouletteReelJson: String?
+        get() = prefs.getString("last_roulette_reel", null)
+        set(value) = prefs.edit().putString("last_roulette_reel", value).apply()
+
     var chatTextSize: Float
         get() = prefs.getFloat("chat_text_size", 14f)
         set(value) = prefs.edit().putFloat("chat_text_size", value).apply()

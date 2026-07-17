@@ -1285,4 +1285,44 @@
     <string name="code_label">رمز التأكيد</string>
     <string name="qr_confirm_instruction">إذا كان الرمز التالي يطابق الرمز المعروض على التلفزيون، انقر فوق تأكيد للمتابعة.</string>
     <string name="tv_qr_login">تسجيل QR للتلفزيون</string>
+    <!-- Daily Reward -->
+    <string name="daily_reward_title">احصل على مكافأتك اليومية</string>
+    <string name="daily_reward_description">احصل على مكافأتك اليومية لفرصة الفوز بجائزة كبيرة! هناك إيموجيهات وشارات بانتظارك.</string>
+    <string name="daily_reward_view_rewards_link">عرض المكافآت</string>
+    <string name="daily_reward_already_have">لديك هذه المكافأة بالفعل!</string>
+    <string name="daily_reward_congrats">تهانينا!</string>
+    <string name="daily_reward_duplicate_note">يتم تحويل المكافآت المكررة تلقائيًا إلى تقدم في المستوى</string>
+    <string name="daily_reward_claimed_button">تم الاستلام</string>
+    <string name="daily_reward_claim_button">استلام</string>
+    <string name="daily_reward_claiming_button">جارٍ الاستلام…</string>
+    <string name="daily_reward_locked_button">مقفل</string>
+    <string name="daily_reward_load_error">تعذر تحميل مكافأة اليوم</string>
+    <string name="daily_reward_simulate_unavailable">إعادة العرض تحتاج مكافأة حقيقية أولًا — جرّب بعد مكافأة الغد</string>
+    <string name="daily_reward_resets_at">يتم إعادة تعيين المكافأة اليومية في %s</string>
+    <string name="daily_reward_rarity_title">ندرة المكافأة</string>
+    <string name="daily_reward_consolation_hours_minutes">+%1$dس %2$dد وقت مشاهدة للمستوى</string>
+    <string name="daily_reward_consolation_minutes">+%1$dد وقت مشاهدة للمستوى</string>
+    <string name="daily_reward_locked_progress_hours_minutes">%1$dس %2$dد متبقية لفتح القفل</string>
+    <string name="daily_reward_locked_progress_minutes">%dد متبقية لفتح القفل</string>
+    <string name="rarity_common">Common</string>
+    <string name="rarity_uncommon">Uncommon</string>
+    <string name="rarity_rare">Rare</string>
+    <string name="rarity_epic">Epic</string>
+    <string name="rarity_legendary">Legendary</string>
+    <string name="rarity_mythic">Mythic</string>
+    <!-- Collectibles -->
+    <string name="collectibles_title">المقتنيات</string>
+    <string name="collectibles_description">شاهد قليلًا كل يوم لفتح مكافأتك اليومية، ثم أدر العجلة لفرصة الحصول على إيموجي أو شارة. كل ما حصلت عليه حتى الآن موجود هنا — والمكرر يتحول إلى وقت مشاهدة.</string>
+    <string name="collectibles_inventory">المخزون</string>
+    <string name="collectibles_unlocked_count">تم فتح %1$d من %2$d</string>
+    <string name="collectibles_sort_by">ترتيب حسب:</string>
+    <string name="collectibles_sort_rarity">الندرة</string>
+    <string name="collectibles_sort_type">النوع</string>
+    <string name="collectibles_sort_unlocked">المفتوحة</string>
+    <string name="collectibles_group_unlocked">مفتوحة</string>
+    <string name="collectibles_group_locked">مقفلة</string>
+    <string name="collectibles_type_emote">الإيموجيهات</string>
+    <string name="collectibles_type_badge">الشارات</string>
+    <string name="collectibles_locked">مقفل</string>
+    <string name="collectibles_load_error">تعذر تحميل المقتنيات</string>
 </resources>

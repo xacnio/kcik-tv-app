@@ -1285,4 +1285,44 @@
     <string name="code_label">Onay Kodu</string>
     <string name="qr_confirm_instruction">Aşağıdaki kod TV\'nizde gösterilenle eşleşiyorsa, devam etmek için onayla\'ya tıklayın.</string>
     <string name="tv_qr_login">TV için QR Giriş</string>
+    <!-- Daily Reward -->
+    <string name="daily_reward_title">Günlük Ödülünü Al</string>
+    <string name="daily_reward_description">Büyük kazanma şansı için günlük ödülünü al! Emote\'lar ve rozetler seni bekliyor.</string>
+    <string name="daily_reward_view_rewards_link">Ödülleri Görüntüle</string>
+    <string name="daily_reward_already_have">Bu Ödüle Zaten Sahipsin!</string>
+    <string name="daily_reward_congrats">Tebrikler!</string>
+    <string name="daily_reward_duplicate_note">Tekrarlanan ödüller otomatik olarak seviye ilerlemesine dönüştürülür</string>
+    <string name="daily_reward_claimed_button">Alındı</string>
+    <string name="daily_reward_claim_button">Al</string>
+    <string name="daily_reward_claiming_button">Alınıyor…</string>
+    <string name="daily_reward_locked_button">Kilitli</string>
+    <string name="daily_reward_load_error">Bugünkü ödül yüklenemedi</string>
+    <string name="daily_reward_simulate_unavailable">Tekrar oynatmak için önce gerçek bir ödül alman gerek — yarınki ödülden sonra dene</string>
+    <string name="daily_reward_resets_at">Günlük Ödül %s tarihinde sıfırlanır</string>
+    <string name="daily_reward_rarity_title">Ödül Nadirliği</string>
+    <string name="daily_reward_consolation_hours_minutes">+%1$ds %2$dd izlenme süresi Seviyeye eklendi</string>
+    <string name="daily_reward_consolation_minutes">+%1$dd izlenme süresi Seviyeye eklendi</string>
+    <string name="daily_reward_locked_progress_hours_minutes">Kilidi açmak için %1$ds %2$dd kaldı</string>
+    <string name="daily_reward_locked_progress_minutes">Kilidi açmak için %dd kaldı</string>
+    <string name="rarity_common">Common</string>
+    <string name="rarity_uncommon">Uncommon</string>
+    <string name="rarity_rare">Nadir</string>
+    <string name="rarity_epic">Epic</string>
+    <string name="rarity_legendary">Efsanevi</string>
+    <string name="rarity_mythic">Mythic</string>
+    <!-- Collectibles -->
+    <string name="collectibles_title">Koleksiyon</string>
+    <string name="collectibles_description">Her gün biraz yayın izleyip günlük ödülünün kilidini aç, sonra çevir ve emote ya da rozet kap. Şimdiye kadar çıkardığın her şey burada — aynısı tekrar çıkarsa izlenme süresine dönüşür.</string>
+    <string name="collectibles_inventory">Envanter</string>
+    <string name="collectibles_unlocked_count">%2$d parçadan %1$d tanesi açıldı</string>
+    <string name="collectibles_sort_by">Sırala:</string>
+    <string name="collectibles_sort_rarity">Nadirlik</string>
+    <string name="collectibles_sort_type">Tür</string>
+    <string name="collectibles_sort_unlocked">Açılma durumu</string>
+    <string name="collectibles_group_unlocked">Açıldı</string>
+    <string name="collectibles_group_locked">Kilitli</string>
+    <string name="collectibles_type_emote">Emote\'lar</string>
+    <string name="collectibles_type_badge">Rozetler</string>
+    <string name="collectibles_locked">Kilitli</string>
+    <string name="collectibles_load_error">Koleksiyon yüklenemedi</string>
 </resources>

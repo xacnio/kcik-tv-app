@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Borderless, invisible fill. Exists only to give the card area a rounded outline for
+     clipToOutline — a view with no background has no outline, and the cards marquee would then
+     spill past its bounds. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#00000000" />
+    <corners android:radius="14dp" />
+</shape>

@@ -261,6 +261,7 @@ class AuthManager(
     fun updateUserHeaderState() {
         if (prefs.isLoggedIn) {
             binding.mobileProfilePic.visibility = View.VISIBLE
+            binding.mobileDailyRewardBtn.visibility = View.VISIBLE
             binding.mobileLoginBtn.visibility = View.GONE
             binding.mobileSettingsBtn.visibility = View.GONE
             
@@ -280,6 +281,7 @@ class AuthManager(
                 .into(binding.mobileProfilePic)
         } else {
             binding.mobileProfilePic.visibility = View.GONE
+            binding.mobileDailyRewardBtn.visibility = View.GONE
             binding.mobileLoginBtn.visibility = View.VISIBLE
             binding.mobileSettingsBtn.visibility = View.VISIBLE
         }

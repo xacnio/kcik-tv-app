@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0E0E0E"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- Header: back + title -->
+    <LinearLayout
+        android:id="@+id/collectiblesHeader"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="8dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageButton
+            android:id="@+id/btnCollectiblesBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="10dp"
+            android:src="@drawable/ic_arrow_back"
+            android:contentDescription="@string/back"
+            android:tint="@color/white" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@string/collectibles_title"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <ImageButton
+            android:id="@+id/btnCollectiblesClose"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="10dp"
+            android:src="@drawable/ic_close"
+            android:contentDescription="@string/close"
+            android:tint="@color/white" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/collectiblesHeaderDivider"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="#262626"
+        app:layout_constraintTop_toBottomOf="@id/collectiblesHeader"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/collectiblesRecyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:paddingHorizontal="10dp"
+        android:paddingBottom="24dp"
+        android:clipToPadding="false"
+        android:scrollbars="none"
+        app:layout_constraintTop_toBottomOf="@id/collectiblesHeaderDivider"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <include
+        android:id="@+id/collectiblesShimmer"
+        layout="@layout/layout_collectibles_shimmer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/collectiblesHeaderDivider"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/collectiblesError"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/collectibles_load_error"
+        android:textColor="#AAAAAA"
+        android:textSize="13sp"
+        android:gravity="center"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/collectiblesHeaderDivider"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
