@@ -677,6 +677,7 @@ class ChatUiManager(
                 }
 
                 chatAdapter.updateMessageStatus(messageRef, MessageStatus.SENT)
+                activity.currentChannel?.id?.toLongOrNull()?.let { activity.chatIdentityManager.randomizeNameColorAfterMessage(it) }
             } else {
                 chatAdapter.updateMessageStatus(messageRef, MessageStatus.FAILED)
                 result.onFailure { e ->

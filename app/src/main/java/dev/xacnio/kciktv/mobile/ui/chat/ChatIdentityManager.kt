@@ -30,8 +30,43 @@ class ChatIdentityManager(
     private val chatStateManager: ChatStateManager,
     private val onSubscriptionUpdate: () -> Unit
 ) {
-    private companion object {
-        const val TAG = "ChatIdentityManager"
+    companion object {
+        private const val TAG = "ChatIdentityManager"
+
+        val PROFILE_COLORS = listOf(
+            "#FFD899", "#FFC466", "#FF9D00", "#FBCFD8", "#F2708A", "#E9113C", "#DEB2FF", "#BC66FF",
+            "#B9D6F6", "#72ACED", "#1475E1", "#BAFEA3", "#75FD46", "#93EBE0", "#31D6C2", "#00CCB3",
+
+            "#00F1FF", "#4CFF75", "#55FFC7", "#6F87FF", "#AAA9FF", "#BDFF28", "#E26EFF", "#E4D88F",
+            "#E5FFAB", "#FEA0CF", "#FF2C56", "#FF4117", "#FF55B3", "#FFA600", "#FFAE76", "#FFFFFF"
+        )
+    }
+
+    /**
+     * If enabled in settings, swaps the current user's chat name color to a different random
+     * color from the profile palette and persists it. Called after a chat message is sent.
+     */
+    fun randomizeNameColorAfterMessage(channelId: Long) {
+        if (!prefs.chatRandomizeNameColorOnSend) return
+        val userId = prefs.userId
+        val token = prefs.authToken
+        if (channelId == 0L || userId <= 0L || token == null) return
+
+        val sender = chatStateManager.currentUserSender ?: return
+        val currentColor = sender.color
+        val newColor = PROFILE_COLORS.filter { !it.equals(currentColor, ignoreCase = true) }.random()
+
+        chatStateManager.currentUserSender = sender.copy(color = newColor)
+
+        scope.launch {
+            try {
+                val badges = sender.badges?.map { it.type } ?: emptyList()
+                val badgesV2 = sender.badgesV2?.mapNotNull { it.name } ?: emptyList()
+                repository.updateChatIdentity(channelId, userId, token, badges, badgesV2, newColor)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to randomize name color", e)
+            }
+        }
     }
 
     fun fetchChatIdentity(channelId: Long) {

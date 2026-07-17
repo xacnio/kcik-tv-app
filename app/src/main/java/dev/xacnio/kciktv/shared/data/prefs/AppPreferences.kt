@@ -569,6 +569,11 @@ class AppPreferences(private val context: Context) {
         get() = prefs.getBoolean("chat_use_name_color_for_highlight", false)
         set(value) = prefs.edit().putBoolean("chat_use_name_color_for_highlight", value).apply()
 
+    // When true, the user's name color randomly changes to a different color after each sent chat message.
+    var chatRandomizeNameColorOnSend: Boolean
+        get() = prefs.getBoolean("chat_randomize_name_color_on_send", false)
+        set(value) = prefs.edit().putBoolean("chat_randomize_name_color_on_send", value).apply()
+
     // When true, highlighted messages are shown with a translucent filled background of the
     // highlight colour instead of just a coloured border.
     var highlightFillBackground: Boolean

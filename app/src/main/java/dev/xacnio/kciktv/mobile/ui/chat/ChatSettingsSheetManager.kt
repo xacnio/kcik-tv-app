@@ -60,13 +60,7 @@ class ChatSettingsSheetManager(
     private var availableProfileBadges = mutableListOf<ChatIdentityBadge>()
     private var isProfileIdentityLoaded = false
 
-    private val profileColors = listOf(
-        "#FFD899", "#FFC466", "#FF9D00", "#FBCFD8", "#F2708A", "#E9113C", "#DEB2FF", "#BC66FF",
-        "#B9D6F6", "#72ACED", "#1475E1", "#BAFEA3", "#75FD46", "#93EBE0", "#31D6C2", "#00CCB3",
-
-        "#00F1FF", "#4CFF75", "#55FFC7", "#6F87FF", "#AAA9FF", "#BDFF28", "#E26EFF", "#E4D88F",
-        "#E5FFAB", "#FEA0CF", "#FF2C56", "#FF4117", "#FF55B3", "#FFA600", "#FFAE76", "#FFFFFF"
-    )
+    private val profileColors = ChatIdentityManager.PROFILE_COLORS
 
     private var currentTextSize: Float = 14f
     private var currentEmoteScale: Float = 1.0f
@@ -575,13 +569,35 @@ class ChatSettingsSheetManager(
         val profileLevelProgress = view.findViewById<android.widget.ProgressBar>(R.id.profileLevelProgress)
         val profileLevelProgressText = view.findViewById<TextView>(R.id.profileLevelProgressText)
         val profileWatchTimeText = view.findViewById<TextView>(R.id.profileWatchTimeText)
+        val switchRandomNameColor = view.findViewById<SwitchCompat>(R.id.switchRandomNameColor)
 
         val channelId = activity.currentChannel?.id?.toLongOrNull() ?: 0L
         val userId = prefs.userId
         val token = prefs.authToken
 
+        val themeColor = prefs.themeColor
+        switchRandomNameColor.trackTintList = android.content.res.ColorStateList(
+            arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
+            intArrayOf(themeColor, 0xFF333333.toInt())
+        )
+        switchRandomNameColor.thumbTintList = android.content.res.ColorStateList(
+            arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
+            intArrayOf(themeColor, 0xFFFFFFFF.toInt())
+        )
+        switchRandomNameColor.setOnCheckedChangeListener(null)
+        switchRandomNameColor.isChecked = prefs.chatRandomizeNameColorOnSend
+        switchRandomNameColor.setOnCheckedChangeListener { _, isChecked ->
+            prefs.chatRandomizeNameColorOnSend = isChecked
+        }
+
         if (channelId == 0L || userId == 0L || token == null) return
         currentIdentityChannelId = channelId
+
+        // The color may have changed outside this sheet (e.g. randomized after sending a
+        // message) — resync from the live identity so the grid highlights the true current color.
+        if (!hasProfileChanges) {
+            chatStateManager.currentUserSender?.color?.let { profileSelectedColor = it }
+        }
 
         val viewerUsername = prefs.username ?: "User"
         previewUsername.text = viewerUsername
@@ -589,6 +605,15 @@ class ChatSettingsSheetManager(
         fun updatePreview() {
             previewUsername.setTextColor(Color.parseColor(profileSelectedColor))
             updatePreviewBadges(previewBadgeLayout, profileSelectedBadges, availableProfileBadges, profileSelectedBadgesV2, availableBadgesV2)
+        }
+
+        fun refreshColorGridCheckmarks() {
+            val targetColor = try { Color.parseColor(profileSelectedColor) } catch (e: Exception) { null }
+            for (i in 0 until gridColors.childCount) {
+                val child = gridColors.getChildAt(i) as android.widget.FrameLayout
+                val bgColor = child.getChildAt(0).backgroundTintList?.defaultColor
+                child.getChildAt(1).visibility = if (targetColor != null && bgColor == targetColor) View.VISIBLE else View.GONE
+            }
         }
 
         // Color grid
@@ -629,15 +654,13 @@ class ChatSettingsSheetManager(
                 profileSelectedColor = color
                 hasProfileChanges = true
                 updatePreview()
-                for (i in 0 until gridColors.childCount) {
-                    val child = gridColors.getChildAt(i) as android.widget.FrameLayout
-                    child.getChildAt(1).visibility = View.GONE
-                }
-                check.visibility = View.VISIBLE
+                refreshColorGridCheckmarks()
             }
 
             gridColors.addView(frame)
         }
+
+        refreshColorGridCheckmarks()
 
         // Badges adapter
         val adapter = object : RecyclerView.Adapter<ProfileBadgeViewHolder>() {
@@ -786,15 +809,7 @@ class ChatSettingsSheetManager(
                             emptyChannelBadges.visibility =
                                 if (availableProfileBadges.isEmpty()) View.VISIBLE else View.GONE
                             updatePreview()
-
-                            for (i in 0 until gridColors.childCount) {
-                                val child = gridColors.getChildAt(i) as android.widget.FrameLayout
-                                val childBg = child.getChildAt(0)
-                                val childCheck = child.getChildAt(1)
-                                val bgColor = childBg.backgroundTintList?.defaultColor
-                                val targetColor = Color.parseColor(profileSelectedColor)
-                                childCheck.visibility = if (bgColor == targetColor) View.VISIBLE else View.GONE
-                            }
+                            refreshColorGridCheckmarks()
                         }
                     }
                 } catch (e: Exception) {

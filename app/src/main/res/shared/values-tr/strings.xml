@@ -773,6 +773,8 @@
     <string name="chat_identity_no_badges">Rozet bulunmuyor</string>
     <string name="chat_identity_badges">Rozetler</string>
     <string name="chat_identity_color">İsim Rengi</string>
+    <string name="chat_identity_random_color">Mesaj Sonrası Rastgele Renk</string>
+    <string name="chat_identity_random_color_subtitle">Her mesaj gönderdiğinizde isim renginiz otomatik olarak başka bir renge değişir</string>
     <string name="chat_font_size">Yazı Boyutu</string>
     <string name="chat_emote_size">Emote Boyutu</string>
     <string name="chat_section_sizes">Boyutlar</string>

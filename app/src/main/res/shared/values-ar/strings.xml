@@ -773,6 +773,8 @@
     <string name="chat_identity_no_badges">لا توجد شارات</string>
     <string name="chat_identity_badges">الشارات</string>
     <string name="chat_identity_color">لون الاسم</string>
+    <string name="chat_identity_random_color">لون عشوائي بعد الإرسال</string>
+    <string name="chat_identity_random_color_subtitle">يغيّر لون اسمك تلقائيًا إلى لون مختلف عند إرسال كل رسالة</string>
     <string name="chat_font_size">حجم الخط</string>
     <string name="chat_emote_size">حجم الرموز</string>
     <string name="chat_section_sizes">Sizes</string>

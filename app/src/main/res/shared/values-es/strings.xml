@@ -773,6 +773,8 @@
     <string name="chat_identity_no_badges">No hay insignias disponibles</string>
     <string name="chat_identity_badges">Insignias</string>
     <string name="chat_identity_color">Color del nombre</string>
+    <string name="chat_identity_random_color">Color aleatorio tras enviar</string>
+    <string name="chat_identity_random_color_subtitle">Cambia automáticamente el color de tu nombre cada vez que envías un mensaje</string>
     <string name="chat_font_size">Tamaño de fuente</string>
     <string name="chat_emote_size">Tamaño de emotes</string>
     <string name="chat_section_sizes">Sizes</string>
