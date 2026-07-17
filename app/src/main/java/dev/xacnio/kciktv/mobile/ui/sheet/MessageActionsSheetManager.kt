@@ -194,13 +194,9 @@ class MessageActionsSheetManager(private val activity: MobilePlayerActivity) {
                     val badgeSize = (18 * activity.resources.displayMetrics.density).toInt()
                     val margin = (4 * activity.resources.displayMetrics.density).toInt()
                     
-                    u.badges?.sortedBy { it.sortOrder ?: Int.MAX_VALUE }?.forEach { badge ->
-                        BadgeRenderUtils.renderSingleBadgeIntoSheet(
-                            activity, badgesContainer, badge, badgeSize, margin, chatStateManager.subscriberBadges
-                        )
-                    }
-                    BadgeRenderUtils.renderBadgesV2IntoSheet(
-                        activity, badgesContainer, sender.badgesV2, badgeSize, margin
+                    BadgeRenderUtils.renderAllBadgesIntoSheet(
+                        activity, badgesContainer, u.badges, sender.badgesV2,
+                        badgeSize, margin, chatStateManager.subscriberBadges
                     )
 
                     // Follow Date & Sub Info
