@@ -62,7 +62,10 @@ class ChatSettingsSheetManager(
 
     private val profileColors = listOf(
         "#FFD899", "#FFC466", "#FF9D00", "#FBCFD8", "#F2708A", "#E9113C", "#DEB2FF", "#BC66FF",
-        "#B9D6F6", "#72ACED", "#1475E1", "#BAFEA3", "#75FD46", "#93EBE0", "#31D6C2", "#00CCB3"
+        "#B9D6F6", "#72ACED", "#1475E1", "#BAFEA3", "#75FD46", "#93EBE0", "#31D6C2", "#00CCB3",
+
+        "#00F1FF", "#4CFF75", "#55FFC7", "#6F87FF", "#AAA9FF", "#BDFF28", "#E26EFF", "#E4D88F",
+        "#E5FFAB", "#FEA0CF", "#FF2C56", "#FF4117", "#FF55B3", "#FFA600", "#FFAE76", "#FFFFFF"
     )
 
     private var currentTextSize: Float = 14f
