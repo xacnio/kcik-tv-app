@@ -940,7 +940,10 @@ class ChatAdapter(
                     "verified"   -> R.drawable.ic_badge_verified
                     "staff"      -> R.drawable.ic_badge_staff
                     "og"         -> R.drawable.ic_badge_og
-                    "sub_gifter" -> R.drawable.ic_badge_sub_gifter
+                    // badges_v2 has no gift count; prefer its own image_url, fall back to lowest tier.
+                    "sub_gifter" -> if (badge.imageUrl.isNullOrEmpty()) {
+                        dev.xacnio.kciktv.shared.ui.utils.BadgeRenderUtils.subGifterBadge(null)
+                    } else null
                     "sidekick"   -> R.drawable.ic_badge_sidekick
                     "bot"        -> R.drawable.ic_badge_bot
                     else         -> null
@@ -1033,7 +1036,10 @@ class ChatAdapter(
                     }
                 }
                 "sub_gifter" -> {
-                    val d = androidx.core.content.ContextCompat.getDrawable(context, R.drawable.ic_badge_sub_gifter)?.mutate()
+                    // Art varies by how many subs they've gifted.
+                    val res = dev.xacnio.kciktv.shared.ui.utils.BadgeRenderUtils
+                        .subGifterBadge(badge.count ?: badge.text?.toIntOrNull())
+                    val d = androidx.core.content.ContextCompat.getDrawable(context, res)?.mutate()
                     if (d != null) {
                         d.setBounds(0, 0, badgeSize, badgeSize)
                         builder.append("  ")
@@ -1685,7 +1691,10 @@ class ChatAdapter(
                     "verified"   -> R.drawable.ic_badge_verified
                     "staff"      -> R.drawable.ic_badge_staff
                     "og"         -> R.drawable.ic_badge_og
-                    "sub_gifter" -> R.drawable.ic_badge_sub_gifter
+                    // badges_v2 has no gift count; prefer its own image_url, fall back to lowest tier.
+                    "sub_gifter" -> if (badge.imageUrl.isNullOrEmpty()) {
+                        dev.xacnio.kciktv.shared.ui.utils.BadgeRenderUtils.subGifterBadge(null)
+                    } else null
                     "sidekick"   -> R.drawable.ic_badge_sidekick
                     "bot"        -> R.drawable.ic_badge_bot
                     else         -> null
@@ -1812,8 +1821,10 @@ class ChatAdapter(
                     }
                 }
                 "sub_gifter" -> {
-
-                    val d = androidx.core.content.ContextCompat.getDrawable(context, R.drawable.ic_badge_sub_gifter)?.mutate()
+                    // Art varies by how many subs they've gifted.
+                    val res = dev.xacnio.kciktv.shared.ui.utils.BadgeRenderUtils
+                        .subGifterBadge(badge.count ?: badge.text?.toIntOrNull())
+                    val d = androidx.core.content.ContextCompat.getDrawable(context, res)?.mutate()
                     if (d != null) {
                         d.setBounds(0, 0, badgeSize, badgeSize)
                         builder.append("  ")

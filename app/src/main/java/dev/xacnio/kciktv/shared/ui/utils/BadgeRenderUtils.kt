@@ -23,7 +23,27 @@ import dev.xacnio.kciktv.shared.ui.utils.ApngBadgeManager
  * Utility object for rendering chat badges into views
  */
 object BadgeRenderUtils {
-    
+
+    /** Gift-count thresholds, descending, so the first match is the highest tier reached. */
+    private val SUB_GIFTER_TIERS = listOf(
+        500 to R.drawable.ic_badge_sub_gifter_500,
+        200 to R.drawable.ic_badge_sub_gifter_200,
+        100 to R.drawable.ic_badge_sub_gifter_100,
+        50 to R.drawable.ic_badge_sub_gifter_50,
+        25 to R.drawable.ic_badge_sub_gifter_25,
+        10 to R.drawable.ic_badge_sub_gifter_10,
+        5 to R.drawable.ic_badge_sub_gifter_5,
+        1 to R.drawable.ic_badge_sub_gifter_1
+    )
+
+    /** Highest tier at or below [count]; falls back to the lowest tier when count is missing. */
+    fun subGifterBadge(count: Int?): Int {
+        val gifts = count ?: 0
+        return SUB_GIFTER_TIERS.firstOrNull { (threshold, _) -> gifts >= threshold }?.second
+            ?: R.drawable.ic_badge_sub_gifter_1
+    }
+
+
     /**
      * Renders a single badge into the container with optional inactive styling
      * 
@@ -52,10 +72,9 @@ object BadgeRenderUtils {
         params.setMargins(0, 0, margin, 0)
         imageView.layoutParams = params
         
-        // Apply gray filter if inactive
         if (!isActive) {
             val matrix = ColorMatrix()
-            matrix.setSaturation(0f) // Grayscale
+            matrix.setSaturation(0f)
             imageView.colorFilter = ColorMatrixColorFilter(matrix)
             imageView.alpha = 0.5f
         }
@@ -69,7 +88,7 @@ object BadgeRenderUtils {
             "staff" -> imageView.setImageResource(R.drawable.ic_badge_staff)
             "og" -> imageView.setImageResource(R.drawable.ic_badge_og)
             "founder" -> imageView.setImageResource(R.drawable.ic_badge_founder)
-            "sub_gifter" -> imageView.setImageResource(R.drawable.ic_badge_sub_gifter)
+            "sub_gifter" -> imageView.setImageResource(subGifterBadge(badge.count))
             "vip" -> imageView.setImageResource(R.drawable.ic_badge_vip)
             "sidekick" -> imageView.setImageResource(R.drawable.ic_badge_sidekick)
             "bot" -> imageView.setImageResource(R.drawable.ic_badge_bot)
@@ -98,41 +117,69 @@ object BadgeRenderUtils {
         }
     }
 
-    fun renderBadgesV2IntoSheet(
+    /** Renders one badges_v2 entry. Split out so badges can be merged with the v1 list and sorted together. */
+    fun renderSingleBadgeV2IntoSheet(
         context: Context,
         container: LinearLayout?,
-        badgesV2: List<ChatBadgeV2>?,
+        badge: ChatBadgeV2,
         size: Int,
         margin: Int
     ) {
         if (container == null) return
-        badgesV2
-            ?.filter { it.selected == true }
-            ?.sortedBy { it.sortOrder ?: Int.MAX_VALUE }
-            ?.forEach { badge ->
-                val iv = ImageView(context)
-                val params = LinearLayout.LayoutParams(size, size)
-                params.setMargins(0, 0, margin, 0)
-                iv.layoutParams = params
-                iv.scaleType = ImageView.ScaleType.FIT_CENTER
-                container.addView(iv)
 
-                val drawableRes = when (badge.name) {
-                    "verified"   -> R.drawable.ic_badge_verified
-                    "staff"      -> R.drawable.ic_badge_staff
-                    "og"         -> R.drawable.ic_badge_og
-                    "sub_gifter" -> R.drawable.ic_badge_sub_gifter
-                    "sidekick"   -> R.drawable.ic_badge_sidekick
-                    "bot"        -> R.drawable.ic_badge_bot
-                    else         -> null
-                }
-                if (drawableRes != null) {
-                    iv.setImageResource(drawableRes)
-                } else if (!badge.imageUrl.isNullOrEmpty()) {
-                    Glide.with(context).load(badge.imageUrl).into(iv)
-                } else {
-                    container.removeView(iv)
-                }
-            }
+        val iv = ImageView(context)
+        val params = LinearLayout.LayoutParams(size, size)
+        params.setMargins(0, 0, margin, 0)
+        iv.layoutParams = params
+        iv.scaleType = ImageView.ScaleType.FIT_CENTER
+        container.addView(iv)
+
+        val drawableRes = when (badge.name) {
+            "verified"   -> R.drawable.ic_badge_verified
+            "staff"      -> R.drawable.ic_badge_staff
+            "og"         -> R.drawable.ic_badge_og
+            // badges_v2 has no gift count; prefer its own image_url, fall back to lowest tier
+            "sub_gifter" -> if (badge.imageUrl.isNullOrEmpty()) subGifterBadge(null) else null
+            "sidekick"   -> R.drawable.ic_badge_sidekick
+            "bot"        -> R.drawable.ic_badge_bot
+            else         -> null
+        }
+        if (drawableRes != null) {
+            iv.setImageResource(drawableRes)
+        } else if (!badge.imageUrl.isNullOrEmpty()) {
+            Glide.with(context).load(badge.imageUrl).into(iv)
+        } else {
+            container.removeView(iv)
+        }
+    }
+
+    /** Renders v1 and v2 badges as one row, interleaved and ordered by sort_order across both lists. */
+    fun renderAllBadgesIntoSheet(
+        context: Context,
+        container: LinearLayout?,
+        badges: List<ChannelUserBadge>?,
+        badgesV2: List<ChatBadgeV2>?,
+        size: Int,
+        margin: Int,
+        subscriberBadges: Map<Int, String> = emptyMap()
+    ) {
+        if (container == null) return
+
+        // Deferred so both lists can be interleaved before anything is added to the container.
+        val entries = mutableListOf<Pair<Int, () -> Unit>>()
+
+        badges?.forEach { badge ->
+            entries.add((badge.sortOrder ?: Int.MAX_VALUE) to {
+                renderSingleBadgeIntoSheet(context, container, badge, size, margin, subscriberBadges)
+            })
+        }
+        badgesV2?.filter { it.selected == true }?.forEach { badge ->
+            entries.add((badge.sortOrder ?: Int.MAX_VALUE) to {
+                renderSingleBadgeV2IntoSheet(context, container, badge, size, margin)
+            })
+        }
+
+        entries.sortBy { it.first }
+        entries.forEach { it.second() }
     }
 }

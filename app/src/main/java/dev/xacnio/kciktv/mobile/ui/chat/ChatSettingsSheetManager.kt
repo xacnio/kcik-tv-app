@@ -738,7 +738,10 @@ class ChatSettingsSheetManager(
                                         "verified"   -> iv.setImageResource(R.drawable.ic_badge_verified)
                                         "staff"      -> iv.setImageResource(R.drawable.ic_badge_staff)
                                         "og"         -> iv.setImageResource(R.drawable.ic_badge_og)
-                                        "sub_gifter" -> iv.setImageResource(R.drawable.ic_badge_sub_gifter)
+                                        "sub_gifter" -> iv.setImageResource(
+                                            dev.xacnio.kciktv.shared.ui.utils.BadgeRenderUtils
+                                                .subGifterBadge(subGifterGiftCount())
+                                        )
                                         "sidekick"   -> iv.setImageResource(R.drawable.ic_badge_sidekick)
                                         "bot"        -> iv.setImageResource(R.drawable.ic_badge_bot)
                                         else         -> {
@@ -849,7 +852,8 @@ class ChatSettingsSheetManager(
                         "verified"   -> R.drawable.ic_badge_verified
                         "staff"      -> R.drawable.ic_badge_staff
                         "og"         -> R.drawable.ic_badge_og
-                        "sub_gifter" -> R.drawable.ic_badge_sub_gifter
+                        "sub_gifter" -> dev.xacnio.kciktv.shared.ui.utils.BadgeRenderUtils
+                            .subGifterBadge(subGifterGiftCount())
                         "sidekick"   -> R.drawable.ic_badge_sidekick
                         "bot"        -> R.drawable.ic_badge_bot
                         else         -> null
@@ -881,6 +885,10 @@ class ChatSettingsSheetManager(
         entries.forEach { it.second() }
     }
 
+    /** badges_v2 carries no gift count, so recover it from the v1 badge list for the same identity. */
+    private fun subGifterGiftCount(): Int? =
+        availableProfileBadges.find { it.type == "sub_gifter" }?.count
+
     private fun getBadgeUrl(type: String?, count: Int?): Any? {
         if (type == null) return null
         return when (type) {
@@ -891,6 +899,10 @@ class ChatSettingsSheetManager(
             "verified" -> R.drawable.ic_badge_verified
             "founder" -> R.drawable.ic_badge_founder
             "staff" -> R.drawable.ic_badge_staff
+            // Without a case here these fell through to the kick.com/badges URL below, which 404s.
+            "sub_gifter" -> dev.xacnio.kciktv.shared.ui.utils.BadgeRenderUtils.subGifterBadge(count)
+            "sidekick" -> R.drawable.ic_badge_sidekick
+            "bot" -> R.drawable.ic_badge_bot
             "subscriber" -> {
                 val months = count ?: 1
                 chatStateManager.subscriberBadges.keys.filter { it <= months }

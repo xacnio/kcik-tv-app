@@ -73,7 +73,8 @@ class MiniChatAdapter(private val isCompact: Boolean = true) : RecyclerView.Adap
                 "founder"      -> R.drawable.ic_badge_founder
                 "staff"        -> R.drawable.ic_badge_staff
                 "subscriber"   -> R.drawable.ic_badge_subscriber_default
-                "sub_gifter"   -> R.drawable.ic_badge_sub_gifter
+                "sub_gifter"   -> dev.xacnio.kciktv.shared.ui.utils.BadgeRenderUtils
+                    .subGifterBadge(badge.count)
                 "sidekick"     -> R.drawable.ic_badge_sidekick
                 "bot"          -> R.drawable.ic_badge_bot
                 else           -> null
