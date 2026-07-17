@@ -38,6 +38,9 @@ class QuickEmoteBarManager(
 
         /** How many recents lead the quick bar before it fills up with the rest of the emotes. */
         private const val QUICK_BAR_RECENTS = 15
+
+        // Caps the bar's open time — every entry is a live decode the reveal waits on.
+        private const val QUICK_BAR_MAX = 20
     }
 
     private lateinit var quickEmoteAdapter: QuickEmoteAdapter
@@ -170,7 +173,7 @@ class QuickEmoteBarManager(
         }.take(QUICK_BAR_RECENTS)
 
         // 3. Combine: Recent first, then others (limit total for performance/UI)
-        val finalEmotes = (recentEmotes + allUsableEmotes).distinctBy { it.id }.take(40)
+        val finalEmotes = (recentEmotes + allUsableEmotes).distinctBy { it.id }.take(QUICK_BAR_MAX)
 
         // Strategy: keep shimmer visible while images load, reveal RecyclerView only when
         // the threshold number of images is loaded, or when the 1000ms failsafe timeout fires.
