@@ -1308,7 +1308,6 @@
     <string name="daily_reward_claiming_button">Wird abgeholt…</string>
     <string name="daily_reward_locked_button">Gesperrt</string>
     <string name="daily_reward_load_error">Die heutige Belohnung konnte nicht geladen werden</string>
-    <string name="daily_reward_simulate_unavailable">Für die Wiederholung braucht es erst eine echte Belohnung — versuch es nach der morgigen</string>
     <string name="daily_reward_resets_at">Tägliche Belohnung wird zurückgesetzt am %s</string>
     <string name="daily_reward_rarity_title">Belohnungsseltenheit</string>
     <string name="daily_reward_consolation_hours_minutes">+%1$dh %2$dm Wiedergabezeit für Level</string>

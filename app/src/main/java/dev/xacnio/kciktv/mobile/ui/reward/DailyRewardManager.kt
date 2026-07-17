@@ -371,10 +371,6 @@ class DailyRewardManager(
         challenge.winner?.cardUrl?.let { Glide.with(activity).load(it).into(cardImage) }
         cardImage.visibility = View.VISIBLE
         cardImage.setOnClickListener { showEnlargedCard(challenge) }
-        cardImage.setOnLongClickListener {
-            simulateRoulette(dialogView, challenge)
-            true
-        }
 
         val consolation = challenge.consolation
         if (consolation != null) {
@@ -1049,14 +1045,6 @@ class DailyRewardManager(
             result.onSuccess { claimData ->
                 // Claimed — the header button goes back to its plain icon.
                 setRewardAvailable(false)
-                // Keep the reel so the long-press simulation can replay it with real shield art.
-                if (claimData.roulette.isNotEmpty()) {
-                    prefs.lastRouletteReelJson = try {
-                        com.google.gson.Gson().toJson(claimData.roulette)
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Failed to store roulette reel", e); null
-                    }
-                }
                 if (claimData.roulette.isEmpty()) {
                     // No reel to animate (shouldn't normally happen) — go straight to the result.
                     loadingProgress.visibility = View.GONE
@@ -1078,47 +1066,6 @@ class DailyRewardManager(
     }
 
     /**
-     * Long-pressing an already-resolved card replays the reel from the last real claim (kept in
-     * prefs). The claim endpoint rejects an already-claimed challenge, and the reel's shield art
-     * exists nowhere else in the API, so this is the only way to see the spin again.
-     */
-    private fun simulateRoulette(dialogView: View, challenge: DailyChallenge) {
-        val winner = challenge.winner
-        val winnerId = winner?.id
-        val stored = storedRouletteReel()
-        if (winner == null || winnerId == null || stored == null || stored.none { it.id == winnerId }) {
-            Log.w(TAG, "Nothing to simulate the roulette with")
-            android.widget.Toast.makeText(
-                activity,
-                R.string.daily_reward_simulate_unavailable,
-                android.widget.Toast.LENGTH_SHORT
-            ).show()
-            return
-        }
-
-        val claimData = dev.xacnio.kciktv.shared.data.model.ClaimChallengeData(
-            challengeId = challenge.id,
-            consolation = challenge.consolation,
-            roulette = stored,
-            winner = winner
-        )
-        resetCardStateViews(dialogView)
-        runRouletteReel(dialogView, challenge, claimData)
-    }
-
-    private fun storedRouletteReel(): List<dev.xacnio.kciktv.shared.data.model.RouletteItem>? {
-        val json = prefs.lastRouletteReelJson ?: return null
-        return try {
-            com.google.gson.Gson()
-                .fromJson(json, Array<dev.xacnio.kciktv.shared.data.model.RouletteItem>::class.java)
-                ?.toList()
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to read stored roulette reel", e)
-            null
-        }
-    }
-
-    /**
      * Hands the reel to the full-screen overlay, which spins over a dark scrim and flies the
      * winner into this modal's card slot — the reveal here doesn't re-animate.
      */
@@ -1128,6 +1075,8 @@ class DailyRewardManager(
         claimData: dev.xacnio.kciktv.shared.data.model.ClaimChallengeData
     ) {
         val cardImage = dialogView.findViewById<View>(R.id.rewardCardImage)
+        val cardBox = dialogView.findViewById<View>(R.id.rewardCardImageBox)
+        val resultOverlay = dialogView.findViewById<View>(R.id.rewardResultOverlay)
         val loadingProgress = dialogView.findViewById<View>(R.id.rewardLoadingProgress)
         val resolved = challenge.copy(
             winner = claimData.winner,
@@ -1145,14 +1094,18 @@ class DailyRewardManager(
                 winner = claimData.winner,
                 targetView = cardImage
             ) {
-                // The modal is already resolved underneath; the flyer just lands on top of it.
+                // Only reveal once the flyer has landed here — any earlier and it glimpses
+                // through before the overlay's scrim has actually painted a frame.
+                cardBox.visibility = View.VISIBLE
+                resultOverlay.visibility = View.VISIBLE
             }
 
-            // Settle the modal now, after the overlay's window is up so it isn't glimpsed. The
-            // flyer targets this card slot, and measuring it before the result text is laid out
-            // (while the slot's weight=1 still claims the whole frame) would size it far too large.
+            // Populated but kept invisible (not gone, so it still measures for the flyer's
+            // landing target) until the overlay's callback above reveals it.
             prefs.lastAnimatedDailyRewardId = challenge.id
             populateResolvedCard(dialogView, resolved, animate = false)
+            cardBox.visibility = View.INVISIBLE
+            resultOverlay.visibility = View.INVISIBLE
         }
     }
 

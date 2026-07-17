@@ -1308,7 +1308,6 @@
     <string name="daily_reward_claiming_button">Reclamando…</string>
     <string name="daily_reward_locked_button">Bloqueado</string>
     <string name="daily_reward_load_error">No se pudo cargar la recompensa de hoy</string>
-    <string name="daily_reward_simulate_unavailable">Para repetir hace falta una recompensa real; inténtalo tras la de mañana</string>
     <string name="daily_reward_resets_at">La recompensa diaria se reinicia el %s</string>
     <string name="daily_reward_rarity_title">Rareza de la recompensa</string>
     <string name="daily_reward_consolation_hours_minutes">+%1$dh %2$dm de tiempo de visualización para el Nivel</string>

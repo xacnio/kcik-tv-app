@@ -283,12 +283,6 @@ class AppPreferences(private val context: Context) {
         get() = prefs.getString("last_animated_daily_reward_id", null)
         set(value) = prefs.edit().putString("last_animated_daily_reward_id", value).apply()
 
-    // Reel from the last successful claim, as JSON — the only way to replay a spin with its
-    // real shield art, since the claim endpoint refuses an already-claimed challenge.
-    var lastRouletteReelJson: String?
-        get() = prefs.getString("last_roulette_reel", null)
-        set(value) = prefs.edit().putString("last_roulette_reel", value).apply()
-
     var chatTextSize: Float
         get() = prefs.getFloat("chat_text_size", 14f)
         set(value) = prefs.edit().putFloat("chat_text_size", value).apply()

@@ -1308,7 +1308,6 @@
     <string name="daily_reward_claiming_button">Claiming…</string>
     <string name="daily_reward_locked_button">Locked</string>
     <string name="daily_reward_load_error">Couldn\'t load today\'s reward</string>
-    <string name="daily_reward_simulate_unavailable">Replay needs a real claim first — try again after tomorrow\'s reward</string>
     <string name="daily_reward_resets_at">Daily Reward resets at %s</string>
     <string name="daily_reward_rarity_title">Reward Rarity</string>
     <string name="daily_reward_consolation_hours_minutes">+%1$dh %2$dm watch time to Level</string>

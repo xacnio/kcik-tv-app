@@ -1308,7 +1308,6 @@
     <string name="daily_reward_claiming_button">Réclamation…</string>
     <string name="daily_reward_locked_button">Verrouillé</string>
     <string name="daily_reward_load_error">Impossible de charger la récompense du jour</string>
-    <string name="daily_reward_simulate_unavailable">La relecture nécessite une vraie récompense — réessayez après celle de demain</string>
     <string name="daily_reward_resets_at">La récompense quotidienne se réinitialise le %s</string>
     <string name="daily_reward_rarity_title">Rareté de la récompense</string>
     <string name="daily_reward_consolation_hours_minutes">+%1$dh %2$dm de temps de visionnage pour le Niveau</string>

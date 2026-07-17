@@ -1308,7 +1308,6 @@
     <string name="daily_reward_claiming_button">جارٍ الاستلام…</string>
     <string name="daily_reward_locked_button">مقفل</string>
     <string name="daily_reward_load_error">تعذر تحميل مكافأة اليوم</string>
-    <string name="daily_reward_simulate_unavailable">إعادة العرض تحتاج مكافأة حقيقية أولًا — جرّب بعد مكافأة الغد</string>
     <string name="daily_reward_resets_at">يتم إعادة تعيين المكافأة اليومية في %s</string>
     <string name="daily_reward_rarity_title">ندرة المكافأة</string>
     <string name="daily_reward_consolation_hours_minutes">+%1$dس %2$dد وقت مشاهدة للمستوى</string>
