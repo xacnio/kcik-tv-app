@@ -201,12 +201,52 @@ const IdentityScreen = () => (
   </div>
 );
 
+// ===== Engagement screen: Daily Reward claim (dialog_daily_reward.xml) =====
+
+const rarityColors = ['#9E9E9E', '#4CAF50', '#2D9CDB', '#F5455C', '#FF9800', '#7B61FF'];
+
+const RewardScreen = () => (
+  <div className="flex h-full flex-col items-center px-5 pb-4 pt-7 text-center" style={{ background: '#000' }}>
+    <div className="grid h-9 w-9 place-items-center rounded-full" style={{ background: 'rgba(255,255,255,0.08)' }}>
+      <Gift size={17} weight="fill" className="text-brand-500" />
+    </div>
+    <div className="mt-3 text-[13px] font-bold text-white">Claim Your Daily Reward</div>
+    <div className="mt-1.5 px-1 text-[10px] leading-snug" style={{ color: C.sub2 }}>
+      Watch a bit each day for a shot at an emote or badge.
+    </div>
+
+    <div
+      className="relative mt-4 flex w-[104px] items-center justify-center overflow-hidden rounded-xl"
+      style={{
+        aspectRatio: '128/169',
+        background: 'linear-gradient(160deg, rgba(123,97,255,0.35), rgba(123,97,255,0.05))',
+        border: '1px solid rgba(123,97,255,0.55)',
+      }}
+    >
+      <Medal size={28} weight="fill" style={{ color: '#7B61FF' }} />
+    </div>
+
+    <div className="mt-4 flex items-center gap-1.5">
+      {rarityColors.map((c) => (
+        <span key={c} className="h-2.5 w-2.5 rounded-[3px]" style={{ background: c }} />
+      ))}
+    </div>
+
+    <div className="mt-auto w-full pt-4">
+      <div className="w-full rounded-md py-2.5 text-[12px] font-bold text-black" style={{ background: C.green }}>
+        Claim
+      </div>
+      <div className="mt-2 text-[9px]" style={{ color: C.sub }}>Resets in 6h 12m</div>
+    </div>
+  </div>
+);
+
 const ShotScreen = ({ src }) => (
   <img src={src} alt="" loading="lazy" className="h-full w-full object-cover object-top" />
 );
 
-const SCREENS = { chat: ChatScreen, identity: IdentityScreen, settings: SettingsScreen };
-const SCREEN_BG = { chat: C.bg };
+const SCREENS = { chat: ChatScreen, identity: IdentityScreen, settings: SettingsScreen, rewards: RewardScreen };
+const SCREEN_BG = { chat: C.bg, rewards: '#000' };
 
 export default function FeatureMock({ mock, shotSrc }) {
   const Screen = mock ? SCREENS[mock] : null;
