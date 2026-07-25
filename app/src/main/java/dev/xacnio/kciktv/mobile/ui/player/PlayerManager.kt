@@ -600,11 +600,14 @@ class PlayerManager(
             activity.cachedBlerpFragment = null
             activity.runOnUiThread { binding.blerpButton.visibility = View.GONE }
 
-            // Fetch Blerp URL using new GraphQL API
-            repository.getBlerpUrl(channel.slug).onSuccess { blerpUrl ->
-                if (!blerpUrl.isNullOrEmpty()) {
-                    activity.currentBlerpUrl = blerpUrl
-                    activity.runOnUiThread { binding.blerpButton.visibility = if (prefs.blerpEnabled) View.VISIBLE else View.GONE }
+            // Fetch Blerp URL using new GraphQL API. Runs in its own child coroutine so this
+            // non-essential third-party lookup can't delay fetching the actual playback URL below.
+            launch {
+                repository.getBlerpUrl(channel.slug).onSuccess { blerpUrl ->
+                    if (!blerpUrl.isNullOrEmpty()) {
+                        activity.currentBlerpUrl = blerpUrl
+                        activity.runOnUiThread { binding.blerpButton.visibility = if (prefs.blerpEnabled) View.VISIBLE else View.GONE }
+                    }
                 }
             }
 
