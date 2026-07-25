@@ -2327,8 +2327,8 @@ class MobilePlayerActivity : FragmentActivity() {
         
         // Update adapter selection
 
-        // Show info panel and overlay for a few seconds
-        showOverlay()
+        // Show info panel for a few seconds, but not the play/pause/rewind controls yet.
+        showOverlay(showControls = false)
 
         // Check for Chat Rules
         chatRulesManager.checkAndShowRules(channel)
@@ -2642,7 +2642,7 @@ class MobilePlayerActivity : FragmentActivity() {
 
     private fun toggleOverlay() = overlayControlManager.toggleOverlay()
 
-    internal fun showOverlay() = overlayControlManager.showOverlay()
+    internal fun showOverlay(showControls: Boolean = true) = overlayControlManager.showOverlay(showControls)
 
     internal fun hideOverlay() = overlayControlManager.hideOverlay()
 

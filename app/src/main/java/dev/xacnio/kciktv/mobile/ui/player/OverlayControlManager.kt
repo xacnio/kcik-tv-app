@@ -43,8 +43,11 @@ class OverlayControlManager(private val activity: MobilePlayerActivity) {
 
     /**
      * Shows the player overlay with all controls.
+     *
+     * @param showControls Reveal the center play/pause + rewind/forward overlay. False for the
+     * brief auto-reveal on channel open, until the user actually taps the screen.
      */
-    fun showOverlay() {
+    fun showOverlay(showControls: Boolean = true) {
         // Don't show overlay in mini player or PiP mode
         if (miniPlayerManager.isMiniPlayerMode || activity.isInPictureInPictureMode) return
 
@@ -59,7 +62,7 @@ class OverlayControlManager(private val activity: MobilePlayerActivity) {
         } else {
             binding.errorOverlay.visibility = View.GONE
             binding.retryButton.visibility = View.GONE
-            binding.playPauseOverlay.visibility = View.VISIBLE
+            binding.playPauseOverlay.visibility = if (showControls) View.VISIBLE else View.GONE
         }
 
         val isTheatreMode = try { activity.fullscreenToggleManager.isTheatreMode } catch (e: Exception) { false }
