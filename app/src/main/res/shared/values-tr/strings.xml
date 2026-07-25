@@ -464,6 +464,7 @@
     <string name="history_load_failed_web">Geçmiş yüklenemedi (Web)</string>
     <string name="error_occurred">Bir hata oluştu</string>
     <string name="error_format">Hata: %s</string>
+    <string name="error_view_details">Detayları gör</string>
     <string name="link_open_failed">Link açılamadı</string>
     <string name="video_load_failed">Video yüklenemedi</string>
     <string name="error_open_link">Bağlantı açılırken hata oluştu</string>

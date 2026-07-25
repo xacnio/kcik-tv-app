@@ -2231,6 +2231,9 @@ class MobilePlayerActivity : FragmentActivity() {
         
         val wasPlayerVisible = binding.playerScreenContainer.visibility == View.VISIBLE
         binding.playerScreenContainer.visibility = View.VISIBLE
+        // Cover the video area the instant the container appears — no gap for a stale frame.
+        binding.loadingOverlay.visibility = View.VISIBLE
+        binding.loadingOverlay.bringToFront()
         updateNavigationBarColor(true) // Set navigation bar to black for player screen
         
         val hideOtherScreens = {
@@ -2270,10 +2273,10 @@ class MobilePlayerActivity : FragmentActivity() {
         }
 
         isHomeScreenVisible = false
-        
+
         // Log analytics event (anonymous - no channel data)
         analytics.logChannelView()
-        
+
         showLoading()
         updateChannelUI(channel)
 

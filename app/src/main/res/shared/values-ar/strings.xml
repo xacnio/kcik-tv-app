@@ -464,6 +464,7 @@
     <string name="history_load_failed_web">فشل تحميل السجل (ويب)</string>
     <string name="error_occurred">حدث خطأ</string>
     <string name="error_format">خطأ: %s</string>
+    <string name="error_view_details">عرض التفاصيل</string>
     <string name="link_open_failed">تعذر فتح الرابط</string>
     <string name="video_load_failed">تعذر تحميل الفيديو</string>
     <string name="error_open_link">خطأ في فتح الرابط</string>

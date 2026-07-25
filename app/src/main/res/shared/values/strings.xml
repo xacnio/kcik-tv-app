@@ -464,6 +464,7 @@
     <string name="history_load_failed_web">Failed to load history (Web)</string>
     <string name="error_occurred">An error occurred</string>
     <string name="error_format">Error: %s</string>
+    <string name="error_view_details">View details</string>
     <string name="link_open_failed">Could not open link</string>
     <string name="video_load_failed">Video could not be loaded</string>
     <string name="error_open_link">Error opening link</string>

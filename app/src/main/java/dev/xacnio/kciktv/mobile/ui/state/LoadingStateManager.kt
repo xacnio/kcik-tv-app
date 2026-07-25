@@ -32,7 +32,7 @@ class LoadingStateManager(private val activity: MobilePlayerActivity) {
      * Shows the loading indicator and overlay.
      */
     fun showLoading() {
-        binding.loadingIndicator.visibility = View.VISIBLE
+        activity.playerManager.startBufferingSpinner()
         binding.loadingOverlay.visibility = View.VISIBLE
     }
 
@@ -40,7 +40,7 @@ class LoadingStateManager(private val activity: MobilePlayerActivity) {
      * Hides the loading indicator and overlay.
      */
     fun hideLoading() {
-        binding.loadingIndicator.visibility = View.GONE
+        activity.playerManager.stopBufferingSpinner()
         binding.loadingOverlay.visibility = View.GONE
     }
 }

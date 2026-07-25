@@ -101,6 +101,9 @@ class PlayerControlsManager(private val activity: MobilePlayerActivity) {
 
             // Reset UI
             binding.playerView.visibility = View.GONE
+            // Actually detach the PlayerView, not just hide it — the decoder keeps compositing to
+            // its Surface until the view is truly detached (View.GONE alone doesn't do that).
+            (binding.playerView.parent as? android.view.ViewGroup)?.removeView(binding.playerView)
             binding.actionBar.visibility = View.GONE
             binding.chatContainer.visibility = View.GONE
             binding.offlineBanner.visibility = View.VISIBLE

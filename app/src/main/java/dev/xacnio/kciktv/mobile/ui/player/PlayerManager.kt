@@ -10,6 +10,7 @@
  */
 package dev.xacnio.kciktv.mobile.ui.player
 
+import android.animation.ObjectAnimator
 import android.content.Context
 import android.media.audiofx.DynamicsProcessing
 import android.net.ConnectivityManager
@@ -64,18 +65,55 @@ class PlayerManager(
     // Track loading operations so they can be cancelled
     private var loadStreamJob: Job? = null
 
+    // True from resetPlayer() until PLAYING. Re-attaching the listener replays a stale IDLE from
+    // the pause() just before it — this guard stops that from clearing the loading cover early.
+    private var isLoadingNewChannel = false
+
+    private var bufferingSpinnerAnimator: ObjectAnimator? = null
+
+    fun startBufferingSpinner() {
+        if (bufferingSpinnerAnimator != null) return
+        binding.bufferingLogo.visibility = View.VISIBLE
+        // Force white regardless of theme/inflater tint quirks — the drawable's own fill is brand green.
+        androidx.core.widget.ImageViewCompat.setImageTintList(
+            binding.bufferingLogo, android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE)
+        )
+        bufferingSpinnerAnimator = ObjectAnimator.ofPropertyValuesHolder(
+            binding.bufferingLogo,
+            android.animation.PropertyValuesHolder.ofFloat(View.SCALE_X, 1f, 1.15f),
+            android.animation.PropertyValuesHolder.ofFloat(View.SCALE_Y, 1f, 1.15f)
+        ).apply {
+            duration = 900L
+            repeatCount = android.animation.ValueAnimator.INFINITE
+            repeatMode = android.animation.ValueAnimator.REVERSE
+            interpolator = android.view.animation.AccelerateDecelerateInterpolator()
+            start()
+        }
+    }
+
+    fun stopBufferingSpinner() {
+        bufferingSpinnerAnimator?.cancel()
+        bufferingSpinnerAnimator = null
+        binding.bufferingLogo.visibility = View.GONE
+        binding.bufferingLogo.scaleX = 1f
+        binding.bufferingLogo.scaleY = 1f
+    }
+
     private val playerListener = object : Player.Listener() {
         override fun onStateChanged(state: Player.State) {
             activity.runOnUiThread {
                 when (state) {
                     Player.State.PLAYING -> {
+                        isLoadingNewChannel = false
                         activity.hideLoading()
+                        stopBufferingSpinner()
                         activity.isErrorStateActive = false
                         // Audio-only keeps the player view hidden behind the placeholder — don't
                         // let a PLAYING transition (rebuffer recovery, resume, etc.) undo that.
                         if (!isAudioOnlyActive) binding.playerView.visibility = View.VISIBLE
                         binding.offlineBanner.visibility = View.GONE
                         binding.errorOverlay.visibility = View.GONE
+                        binding.errorDetailsButton.visibility = View.GONE
                         binding.playPauseButton.setImageResource(R.drawable.ic_pause)
 
                         // Keep screen on while playing
@@ -123,11 +161,17 @@ class PlayerManager(
                     Player.State.BUFFERING -> {
                         hideInternalSpinners(binding.playerView)
                         binding.playerView.visibility = View.VISIBLE
-                        binding.loadingIndicator.visibility = View.VISIBLE
-                        binding.loadingOverlay.visibility = View.GONE
+                        binding.loadingIndicator.visibility = View.GONE
+                        // loadingOverlay is owned by showLoading()/hideLoading() only — clearing it
+                        // here exposed the previous channel's last frame during a fresh switch.
+                        startBufferingSpinner()
                     }
                     Player.State.IDLE -> {
-                        activity.hideLoading()
+                        // Ignore a stale IDLE replayed by re-attaching the listener in resetPlayer().
+                        if (!isLoadingNewChannel) {
+                            activity.hideLoading()
+                            stopBufferingSpinner()
+                        }
                         binding.playPauseButton.setImageResource(R.drawable.ic_play_arrow)
                         activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                         // Drop the frame rate hint so the system can return to its
@@ -136,6 +180,7 @@ class PlayerManager(
                     }
                     Player.State.ENDED -> {
                         activity.hideLoading()
+                        stopBufferingSpinner()
                         binding.playPauseButton.setImageResource(R.drawable.ic_play_arrow)
                         applyDisplayFrameRate(0f)
                     }
@@ -149,6 +194,7 @@ class PlayerManager(
 
         override fun onError(exception: com.amazonaws.ivs.player.PlayerException) {
             activity.runOnUiThread {
+                isLoadingNewChannel = false
                 Log.e(TAG, "Player Error: ${exception.message} (${exception.code})")
 
                 // Log analytics event (anonymous - just error type/code)
@@ -158,12 +204,23 @@ class PlayerManager(
                     val channel = activity.currentChannel
                     showOfflineState(channel?.offlineBannerUrl, null, channel?.getEffectiveOfflineBannerUrl())
                 } else {
+                    val fullMessage = activity.getString(R.string.error_format, exception.message)
                     binding.errorOverlay.visibility = View.VISIBLE
-                    binding.errorText.text = activity.getString(R.string.error_format, exception.message)
+                    binding.errorText.text = fullMessage
                     binding.retryButton.visibility = View.VISIBLE
                     binding.loadingIndicator.visibility = View.GONE
                     binding.playerView.visibility = View.INVISIBLE
                     activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+                    // errorText is capped at 2 lines — offer the full message via a dialog instead.
+                    binding.errorDetailsButton.visibility = View.VISIBLE
+                    binding.errorDetailsButton.setOnClickListener {
+                        androidx.appcompat.app.AlertDialog.Builder(activity)
+                            .setTitle(R.string.error_view_details)
+                            .setMessage(fullMessage)
+                            .setPositiveButton(android.R.string.ok, null)
+                            .show()
+                    }
                 }
             }
         }
@@ -331,6 +388,8 @@ class PlayerManager(
         try {
             forcedQualityLimit = null
             manualMaxQuality = null
+            isLoadingNewChannel = true
+            // Not stopping the buffering spinner here — showLoading() already started it.
 
             // Drop the display refresh-rate hint before tearing down — listener removal
             // below means the IDLE state callback that would normally clear it won't
@@ -339,13 +398,18 @@ class PlayerManager(
 
             ivsPlayer?.removeListener(playerListener)
             ivsPlayer?.pause()
-            
+
             // Safe access - may not be initialized during onCreate
             activity.isBackgroundAudioEnabled = false
             androidx.core.app.NotificationManagerCompat.from(activity).cancel(101)
 
+            // Detach + re-add PlayerView on every reset — the old decoder keeps compositing to its
+            // Surface until something actually tears it down, which View.GONE alone doesn't do.
+            (binding.playerView.parent as? ViewGroup)?.removeView(binding.playerView)
+            binding.videoContainer.addView(binding.playerView, 0)
             binding.playerView.visibility = View.INVISIBLE
             binding.errorOverlay.visibility = View.GONE
+            binding.errorDetailsButton.visibility = View.GONE
             binding.offlineBanner.visibility = View.GONE
             binding.retryButton.visibility = View.GONE
             activity.isErrorStateActive = false
@@ -817,6 +881,7 @@ class PlayerManager(
 
     fun showOfflineState(bannerUrl: String?, bannerSrc: String?, defaultBannerUrl: String?, bannerSrcset: String? = null) {
         activity.runOnUiThread {
+            isLoadingNewChannel = false
             activity.hideLoading()
             activity.isErrorStateActive = true
             activity.playbackStatusManager.stopUptimeUpdater()

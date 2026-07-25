@@ -65,7 +65,7 @@ class ChannelLoadManager(private val activity: MobilePlayerActivity) {
 
                 activity.runOnUiThread {
                     activity.isSubscriptionEnabled = channelDetail.subscriptionEnabled == true
-                    activity.hideLoading()
+                    // Not calling hideLoading() here — playChannel() below re-shows it itself.
                     // Pass pre-fetched results so startChannelSession skips duplicate calls
                     activity.sessionManager.pendingChatInfoDeferred = chatInfoDeferred
                     activity.sessionManager.pendingUserMeDeferred = userMeDeferred

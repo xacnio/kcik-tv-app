@@ -535,6 +535,7 @@
             android:background="#99000000"
             android:gravity="center"
             android:orientation="vertical"
+            android:paddingHorizontal="24dp"
             android:visibility="gone">
 
             <ImageView
@@ -545,12 +546,27 @@
 
             <TextView
                 android:id="@+id/errorText"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="@string/stream_offline"
                 android:textColor="#FFFFFF"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:gravity="center"
+                android:maxLines="2"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/errorDetailsButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/error_view_details"
+                android:textColor="#AAAAAA"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:padding="4dp"
+                android:visibility="gone" />
 
             <Button
                 android:id="@+id/retryButton"
@@ -561,6 +577,19 @@
                 android:text="@string/retry"
                 android:textColor="#000000" />
         </LinearLayout>
+
+        <!-- Buffering Spinner: faint rotating Kick mark shown in place of the thin loading bar
+             while the player is buffering, instead of leaving the frozen/stuttering video bare. -->
+        <ImageView
+            android:id="@+id/bufferingLogo"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_gravity="center"
+            android:alpha="0.3"
+            android:src="@drawable/ic_kick_k_norm"
+            android:tint="#FFFFFF"
+            app:tint="#FFFFFF"
+            android:visibility="gone" />
 
         <!-- Play/Pause & Seek Controls Overlay -->
         <FrameLayout
