@@ -75,6 +75,8 @@ class DragToMiniPlayerManager(private val activity: MobilePlayerActivity) {
         if (binding.playerScreenContainer.visibility != View.VISIBLE) return false
         // Don't enter mini player if stream is definitively offline
         if (!activity.isStreamActive) return false
+        // Don't start if the error overlay (retry/details) is showing — nothing to minimize to
+        if (activity.isErrorStateActive) return false
 
         dragStartRawX = rawX
         dragStartRawY = rawY
@@ -95,6 +97,7 @@ class DragToMiniPlayerManager(private val activity: MobilePlayerActivity) {
         if (activity.isFullscreen) return false
         if (activity.resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) return false
         if (activity.fullscreenToggleManager.isTheatreMode) return false
+        if (activity.isErrorStateActive) return false
 
         val deltaX = rawX - dragStartRawX
         val deltaY = rawY - dragStartRawY
