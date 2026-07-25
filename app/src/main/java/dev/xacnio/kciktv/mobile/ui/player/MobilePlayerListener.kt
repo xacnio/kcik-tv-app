@@ -154,7 +154,11 @@ class MobilePlayerListener(private val activity: MobilePlayerActivity) : Player.
     override fun onDurationChanged(duration: Long) {}
     override fun onQualityChanged(quality: Quality) {
         activity.runOnUiThread {
-            activity.binding.videoQualityBadge.text = activity.getString(R.string.video_quality_format, quality.height, quality.framerate.toInt())
+            activity.binding.videoQualityBadge.text = if (quality.height <= 0 || activity.playerManager.isAudioOnlyActive) {
+                activity.getString(R.string.quality_audio_only)
+            } else {
+                activity.getString(R.string.video_quality_format, quality.height, quality.framerate.toInt())
+            }
             // Verify if new quality respects mobile data limits
             activity.checkAndApplyQualityLimit()
             

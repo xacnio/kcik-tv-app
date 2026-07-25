@@ -115,7 +115,9 @@ class PlaybackNotificationManager(
         val notifSubtitle = if (isChatAliveMode) {
             activity.getString(R.string.notif_chat_connected)
         } else {
-            val qualityText = ivsPlayer?.quality?.let { "${it.height}p" } ?: ""
+            val qualityText = ivsPlayer?.quality?.let {
+                if (it.height <= 0 || activity.playerManager.isAudioOnlyActive) activity.getString(R.string.quality_audio_only) else "${it.height}p"
+            } ?: ""
             if (qualityText.isNotEmpty()) "${activity.getString(R.string.currently_live)} • $qualityText"
             else activity.getString(R.string.currently_live)
         }

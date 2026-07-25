@@ -35,6 +35,17 @@ class PipManager(private val activity: MobilePlayerActivity) {
      * Handles user leave hint to potentially enter PiP mode.
      */
     fun handleUserLeaveHint() {
+        // Audio-only already has no video to show — a PiP window would just be an empty/frozen
+        // box. Skip it and go straight to background audio, same as the PiP "Audio Only" action.
+        if (activity.playerManager.isAudioOnlyActive) {
+            activity.isExplicitAudioSwitch = true
+            activity.isBackgroundAudioEnabled = true
+            activity.showNotification(true)
+            activity.moveTaskToBack(true)
+            activity.updateMediaSessionState(true)
+            return
+        }
+
         // Ensure we exit mini-player mode before entering PIP to avoid UI glitches
         if (activity.miniPlayerManager.isMiniPlayerMode) {
             // Signal to PipStateManager that we were in mini-player mode before exiting it here
@@ -199,7 +210,7 @@ class PipManager(private val activity: MobilePlayerActivity) {
         // Android 12+ (API 31): Enable auto-enter PIP when app goes to background
         // Theatre Mode: Disable auto-enter PiP explicitly to prevent unwanted transitions
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && prefs.autoPipEnabled) {
-            val autoEnter = overrideIsPlaying ?: activity.isStreamActive
+            val autoEnter = !activity.playerManager.isAudioOnlyActive && (overrideIsPlaying ?: activity.isStreamActive)
             android.util.Log.d("PipManager", "getPipParams: setAutoEnterEnabled($autoEnter)")
             builder.setAutoEnterEnabled(autoEnter)
         }

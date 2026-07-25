@@ -1497,6 +1497,9 @@ class FullscreenToggleManager(private val activity: MobilePlayerActivity) {
         // Update PiP state to re-enable auto-PiP
         Log.d("FullscreenToggleManager", "exitTheatreMode: Updating PiP UI to re-enable auto-PiP")
         activity.updatePiPUi()
+
+        // Re-apply the audio-only placeholder/shrink — the video container restore above resets it.
+        activity.playerManager.updateAudioOnlyVisual(activity.playerManager.isAudioOnlyActive)
     }
 
     /**
@@ -1634,6 +1637,7 @@ class FullscreenToggleManager(private val activity: MobilePlayerActivity) {
             }
             fullscreenManager.isFullscreen = false
             updateFullscreenButtonState()
+            activity.playerManager.updateAudioOnlyVisual(activity.playerManager.isAudioOnlyActive)
             return // EARLY RETURN FOR TABLETS!
         }
 
@@ -1658,6 +1662,7 @@ class FullscreenToggleManager(private val activity: MobilePlayerActivity) {
         activity.channelUiManager.updateChatPaddingForPanels(false)
         fullscreenManager.isFullscreen = false
         updateFullscreenButtonState()
+        activity.playerManager.updateAudioOnlyVisual(activity.playerManager.isAudioOnlyActive)
 
         binding.root.post {
             transitionTargets.forEachIndexed { i, v -> v.layoutTransition = savedTransitions[i] }

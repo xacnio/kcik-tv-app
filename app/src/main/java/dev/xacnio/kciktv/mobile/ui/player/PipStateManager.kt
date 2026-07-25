@@ -349,6 +349,10 @@ class PipStateManager(private val activity: MobilePlayerActivity) {
 
             // Restore chatroom hint
             activity.updateChatroomHint(activity.currentChatroom)
+
+            // Re-apply the audio-only placeholder/shrink — the branches above reset the video
+            // container to their own layout (16:9, fullscreen, or mini-player) regardless of it.
+            activity.playerManager.updateAudioOnlyVisual(activity.playerManager.isAudioOnlyActive)
         }
 
         // 3. Restore settings panel if it was visible

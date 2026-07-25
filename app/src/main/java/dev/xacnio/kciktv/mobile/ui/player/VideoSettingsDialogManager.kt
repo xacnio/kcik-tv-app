@@ -161,13 +161,21 @@ class VideoSettingsDialogManager(
         fun updateQualityValue() {
             val currentQuality = activity.ivsPlayer?.quality
             val isAuto = activity.ivsPlayer?.isAutoQualityMode == true
-            qualityValueText.text = if (prefs.dynamicQualityEnabled) {
-                if (activity.userSelectedQualityLimit != null)
-                    activity.getString(R.string.auto_quality_with_limit, activity.userSelectedQualityLimit?.height)
-                else
-                    activity.getString(R.string.auto_quality)
-            } else {
-                if (isAuto) activity.getString(R.string.auto_quality) else "${currentQuality?.height}p"
+            val userLimit = activity.userSelectedQualityLimit
+            qualityValueText.text = when {
+                // Audio-only (genuine or synthesized from the lowest real quality) is always
+                // pinned directly rather than used as an ABR cap — reflect that regardless of
+                // the dynamic quality setting or which underlying quality it resolved to.
+                activity.playerManager.isAudioOnlyActive -> activity.getString(R.string.quality_audio_only)
+                prefs.dynamicQualityEnabled -> {
+                    if (userLimit != null)
+                        activity.getString(R.string.auto_quality_with_limit, userLimit.height)
+                    else
+                        activity.getString(R.string.auto_quality)
+                }
+                isAuto -> activity.getString(R.string.auto_quality)
+                (currentQuality?.height ?: 0) <= 0 -> activity.getString(R.string.quality_audio_only)
+                else -> "${currentQuality?.height}p"
             }
         }
         updateQualityValue()
@@ -209,59 +217,104 @@ class VideoSettingsDialogManager(
         val qualityRecycler = view.findViewById<RecyclerView>(R.id.qualityRecyclerView)
         qualityRecycler.layoutManager = LinearLayoutManager(activity)
         val qualities = activity.ivsPlayer?.qualities?.sortedByDescending { it.height } ?: emptyList()
-        val qualityItems = mutableListOf<Pair<Quality?, String>>()
-        qualityItems.add(Pair(null, activity.getString(R.string.auto_quality)))
-        qualities.forEach { q -> qualityItems.add(Pair(q, "${q.height}p${q.framerate.toInt()}")) }
+        val realQualities = qualities.filter { it.height > 0 }
+        // Not every channel's manifest has a genuine no-video "audio_only" rendition — when it
+        // doesn't, synthesize the option (see PlayerManager.resolveAudioOnlyQuality). isAudioOnly
+        // is a separate tag rather than inferred from height, since a synthesized entry shares
+        // its Quality with a real row above.
+        val audioOnlyTarget = activity.playerManager.resolveAudioOnlyQuality()
+        val qualityItems = mutableListOf<Triple<Quality?, String, Boolean>>()
+        qualityItems.add(Triple(null, activity.getString(R.string.auto_quality), false))
+        realQualities.forEach { q -> qualityItems.add(Triple(q, "${q.height}p${q.framerate.toInt()}", false)) }
+        audioOnlyTarget?.let { qualityItems.add(Triple(it, activity.getString(R.string.quality_audio_only), true)) }
 
         qualityRecycler.adapter = object : RecyclerView.Adapter<QualityViewHolder>() {
             override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int) =
                 QualityViewHolder(activity.layoutInflater.inflate(R.layout.item_quality_option, parent, false))
 
             override fun onBindViewHolder(holder: QualityViewHolder, position: Int) {
-                val (q, label) = qualityItems[position]
+                val (q, label, isAudioOnlyItem) = qualityItems[position]
                 holder.label.text = label
                 val currentQuality = activity.ivsPlayer?.quality
                 val isAutoMode = activity.ivsPlayer?.isAutoQualityMode == true
+                val isAudioOnlyActive = activity.playerManager.isAudioOnlyActive
                 holder.badge.visibility = View.VISIBLE
-                if (q != null) {
+                if (isAudioOnlyItem) {
+                    // A genuine audio_only track (q.height <= 0) has no video, so its bitrate is
+                    // meaningful on its own. A synthetic one is really a real video quality with
+                    // the picture hidden — make that explicit rather than showing its full bitrate,
+                    // which would misleadingly read like a lean audio-only number.
+                    holder.bitrate.text = if (q != null && q.height <= 0) {
+                        String.format("%.1f Mbps", q.bitrate / 1_000_000.0)
+                    } else {
+                        activity.getString(R.string.quality_audio_only_synthetic, q?.height ?: 0)
+                    }
+                    holder.bitrate.visibility = View.VISIBLE
+                    holder.badge.text = "AUD"
+                } else if (q != null) {
                     holder.bitrate.text = String.format("%.1f Mbps", q.bitrate / 1_000_000.0)
                     holder.bitrate.visibility = View.VISIBLE
                     holder.badge.text = qualityTierLabel(q.height)
                 } else {
-                    holder.bitrate.text = if (currentQuality != null) "${currentQuality.height}p" else ""
+                    val liveHeight = currentQuality?.height ?: 0
+                    holder.bitrate.text = when {
+                        currentQuality == null -> ""
+                        isAudioOnlyActive -> activity.getString(R.string.quality_audio_only)
+                        else -> "${liveHeight}p"
+                    }
                     holder.bitrate.visibility = if (isAutoMode) View.VISIBLE else View.GONE
                     holder.badge.text = "AUTO"
                 }
                 val userLimit = activity.userSelectedQualityLimit
-                val isSelected = if (q == null) {
-                    if (prefs.dynamicQualityEnabled) userLimit == null else isAutoMode
-                } else {
-                    if (prefs.dynamicQualityEnabled) q.bitrate == userLimit?.bitrate && q.height == userLimit.height
-                    else q.bitrate == currentQuality?.bitrate && q.height == currentQuality.height && !isAutoMode
+                val isSelected = when {
+                    isAudioOnlyItem -> isAudioOnlyActive
+                    q == null -> !isAudioOnlyActive && (if (prefs.dynamicQualityEnabled) userLimit == null else isAutoMode)
+                    else -> !isAudioOnlyActive && (
+                        if (prefs.dynamicQualityEnabled) q.bitrate == userLimit?.bitrate && q.height == userLimit.height
+                        else q.bitrate == currentQuality?.bitrate && q.height == currentQuality.height && !isAutoMode
+                    )
                 }
                 holder.checkmark.visibility = if (isSelected) View.VISIBLE else View.GONE
                 holder.checkmark.imageTintList = android.content.res.ColorStateList.valueOf(prefs.themeColor)
                 holder.itemView.setOnClickListener {
-                    if (q == null) {
-                        activity.userSelectedQualityLimit = null
-                        activity.ivsPlayer?.isAutoQualityMode = true
-                        activity.checkAndApplyQualityLimit()
-                        activity.analytics.logFeatureUsed("quality_auto")
-                    } else {
-                        activity.userSelectedQualityLimit = q
-                        activity.analytics.logFeatureUsed("quality_${q.height}p")
-                        if (prefs.dynamicQualityEnabled) {
+                    when {
+                        isAudioOnlyItem -> {
+                            activity.playerManager.updateAudioOnlyVisual(true)
+                            val resolved = activity.playerManager.resolveAudioOnlyQuality()
+                            if (resolved != null) {
+                                activity.userSelectedQualityLimit = resolved
+                                activity.ivsPlayer?.isAutoQualityMode = false
+                                activity.ivsPlayer?.quality = resolved
+                            }
+                            activity.analytics.logFeatureUsed("quality_audio_only")
+                        }
+                        q == null -> {
+                            activity.userSelectedQualityLimit = null
                             activity.ivsPlayer?.isAutoQualityMode = true
-                            activity.ivsPlayer?.setAutoMaxQuality(q)
                             activity.checkAndApplyQualityLimit()
-                        } else {
-                            activity.ivsPlayer?.isAutoQualityMode = false
-                            activity.ivsPlayer?.quality = q
-                            activity.checkAndApplyQualityLimit()
+                            activity.analytics.logFeatureUsed("quality_auto")
+                            activity.playerManager.updateAudioOnlyVisual(false)
+                        }
+                        else -> {
+                            activity.userSelectedQualityLimit = q
+                            activity.analytics.logFeatureUsed("quality_${q.height}p")
+                            if (prefs.dynamicQualityEnabled) {
+                                activity.ivsPlayer?.isAutoQualityMode = true
+                                activity.ivsPlayer?.setAutoMaxQuality(q)
+                                activity.checkAndApplyQualityLimit()
+                            } else {
+                                activity.ivsPlayer?.isAutoQualityMode = false
+                                activity.ivsPlayer?.quality = q
+                                activity.checkAndApplyQualityLimit()
+                            }
+                            activity.playerManager.updateAudioOnlyVisual(false)
                         }
                     }
                     updateQualityValue()
-                    q?.let { activity.binding.videoQualityBadge.text = "${it.height}p${it.framerate.toInt()}" }
+                    when {
+                        isAudioOnlyItem -> activity.binding.videoQualityBadge.text = activity.getString(R.string.quality_audio_only)
+                        q != null -> activity.binding.videoQualityBadge.text = "${q.height}p${q.framerate.toInt()}"
+                    }
                     dismissPanel()
                 }
             }

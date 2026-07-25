@@ -365,6 +365,9 @@ class MiniPlayerManager(private val activity: MobilePlayerActivity) {
 
         // Update chat padding to account for potentially restored panels
         activity.channelUiManager.updateChatPaddingForPanels(false)
+
+        // Re-apply the audio-only placeholder/shrink — the 16:9 restore above resets it.
+        activity.playerManager.updateAudioOnlyVisual(activity.playerManager.isAudioOnlyActive)
     }
 
     /**

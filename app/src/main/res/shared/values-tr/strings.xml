@@ -446,6 +446,7 @@
     <string name="quality_auto">Otomatik</string>
     <string name="quality_auto_description">Bağlantınız için en iyi kalite</string>
     <string name="quality_audio_only">Sadece Ses</string>
+    <string name="quality_audio_only_synthetic">%dp kalitesinden oynatılacak</string>
     <string name="auto_quality_with_limit">Otomatik (%dp)</string>
     <string name="speed_normal_1x">Normal (1x)</string>
     <string name="speed_x_format">%sx</string>

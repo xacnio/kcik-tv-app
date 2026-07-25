@@ -23,6 +23,7 @@ import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import androidx.constraintlayout.widget.ConstraintLayout
 import com.amazonaws.ivs.player.Player
 import com.amazonaws.ivs.player.Quality
 import dev.xacnio.kciktv.mobile.MobilePlayerActivity
@@ -70,7 +71,9 @@ class PlayerManager(
                     Player.State.PLAYING -> {
                         activity.hideLoading()
                         activity.isErrorStateActive = false
-                        binding.playerView.visibility = View.VISIBLE
+                        // Audio-only keeps the player view hidden behind the placeholder — don't
+                        // let a PLAYING transition (rebuffer recovery, resume, etc.) undo that.
+                        if (!isAudioOnlyActive) binding.playerView.visibility = View.VISIBLE
                         binding.offlineBanner.visibility = View.GONE
                         binding.errorOverlay.visibility = View.GONE
                         binding.playPauseButton.setImageResource(R.drawable.ic_pause)
@@ -85,6 +88,11 @@ class PlayerManager(
 
                         // Check mobile data quality limit
                         checkAndApplyQualityLimit()
+                        // Now that the manifest is loaded and qualities are known, make sure
+                        // audio-only is actually pinned to a real (or synthetic) target — the
+                        // best-effort pin issued in resetPlayer() may have referenced a quality
+                        // name that doesn't exist on this channel's manifest.
+                        reapplyAudioOnlyIfNeeded()
 
                         // Update background audio & MediaSession
                         activity.playbackNotificationManager.setBackgroundAudioEnabled(true)
@@ -345,10 +353,21 @@ class PlayerManager(
             ivsPlayer = binding.playerView.player
             binding.playerView.controlsEnabled = false
 
-            val isAutoDesired = userSelectedQualityLimit == null || prefs.dynamicQualityEnabled
+            // Audio-only has no video track, so it can't be reached by capping the ABR ladder —
+            // it must always be a hard pin, even while Dynamic Quality is on. This is a
+            // best-effort pin by quality *name* — the new channel's manifest isn't loaded yet,
+            // so it may not resolve to anything meaningful; reapplyAudioOnlyIfNeeded() corrects
+            // it once qualities are actually known (see onStateChanged: PLAYING).
+            val userLimit = userSelectedQualityLimit
+            val isAutoDesired = when {
+                isAudioOnlyActive -> false
+                userLimit == null -> true
+                else -> prefs.dynamicQualityEnabled
+            }
             ivsPlayer?.isAutoQualityMode = isAutoDesired
 
-            userSelectedQualityLimit?.let { if (!isAutoDesired) ivsPlayer?.quality = it }
+            userLimit?.let { if (!isAutoDesired) ivsPlayer?.quality = it }
+            updateAudioOnlyVisual(isAudioOnlyActive)
 
             // Default buffer strategy: Low Latency for Live, High Buffer for VOD/Clip/DVR
             val isLiveMode = activity.vodManager.currentPlaybackMode == dev.xacnio.kciktv.mobile.ui.player.VodManager.PlaybackMode.LIVE && activity.dvrPlaybackUrl == null
@@ -444,12 +463,91 @@ class PlayerManager(
                  if (targetQuality != manualMaxQuality || (ivsPlayer?.quality?.height ?: 0) > effectiveLimitHeight) {
                       manualMaxQuality = targetQuality
                       ivsPlayer?.setAutoMaxQuality(targetQuality)
-                      // Only switch mode if we are effectively exceeding the limit
-                      if (ivsPlayer?.isAutoQualityMode == false && (ivsPlayer?.quality?.height ?: 0) > effectiveLimitHeight) {
+                      // Only switch mode if we are effectively exceeding the limit. Never while
+                      // audio-only is active: auto mode can never reach a video-less rendition on
+                      // its own, and the currently *playing* quality lags a just-issued pin by up
+                      // to a segment, so checking it here would otherwise bounce a fresh pin
+                      // straight back to auto before it has a chance to converge.
+                      if (!isAudioOnlyActive && ivsPlayer?.isAutoQualityMode == false && (ivsPlayer?.quality?.height ?: 0) > effectiveLimitHeight) {
                            ivsPlayer?.isAutoQualityMode = true
                       }
                  }
              }
+    }
+
+    /**
+     * The audio-only rendition has no video track, so the surface either freezes on the last
+     * decoded frame or shows nothing useful. Hide it behind a placeholder (channel avatar +
+     * label) instead so it's clear audio-only is intentional rather than the stream being stuck.
+     */
+    private var audioOnlyShrunk = false
+    var isAudioOnlyActive = false
+        private set
+
+    /**
+     * Not every channel's manifest carries a genuine no-video "audio_only" rendition. When one
+     * isn't present, fall back to a real quality instead. Measured across a sample channel's
+     * ladder, audio bitrate scales down with video bitrate here (unlike Twitch, where audio stays
+     * constant): 160p carried ~51 kbps AAC, 360p ~65 kbps, 480p ~163 kbps (matching the genuine
+     * audio-only track). The lowest tier's audio is noticeably degraded, so use one tier up —
+     * still a large bandwidth cut from full quality, but with clearly better audio than the floor.
+     */
+    fun resolveAudioOnlyQuality(): Quality? {
+        val qualities = ivsPlayer?.qualities ?: return null
+        qualities.firstOrNull { it.height <= 0 }?.let { return it }
+        val realQualities = qualities.filter { it.height > 0 }.sortedBy { it.height }
+        return realQualities.getOrNull(1) ?: realQualities.firstOrNull()
+    }
+
+    /**
+     * Re-pins audio-only once the current channel's qualities are actually known. The pin issued
+     * from resetPlayer() (before the manifest loads) is by quality *name*, carried over from
+     * whatever channel was playing before — that name may not exist here, in which case IVS falls
+     * back to some other quality on its own (observed: lowest real tier) rather than failing.
+     * This corrects it to a quality we deliberately picked.
+     */
+    fun reapplyAudioOnlyIfNeeded() {
+        if (!isAudioOnlyActive) return
+        val resolved = resolveAudioOnlyQuality() ?: return
+        if (ivsPlayer?.quality?.name != resolved.name) {
+            ivsPlayer?.isAutoQualityMode = false
+            ivsPlayer?.quality = resolved
+            userSelectedQualityLimit = resolved
+        }
+    }
+
+    fun updateAudioOnlyVisual(active: Boolean) {
+        isAudioOnlyActive = active
+        binding.playerView.visibility = if (active) View.INVISIBLE else View.VISIBLE
+        binding.audioOnlyPlaceholder.visibility = if (active) View.VISIBLE else View.GONE
+        if (active) {
+            Glide.with(activity)
+                .load(activity.currentChannel?.getEffectiveProfilePicUrl())
+                .circleCrop()
+                .into(binding.audioOnlyAvatar)
+        }
+
+        // Shrink the player to a compact strip so chat gets the freed-up space — but only in the
+        // default embedded layout. Fullscreen/theatre/mini-player/PiP each already own this
+        // container's sizing, so leave those alone rather than fighting their own logic.
+        val inDefaultLayout = !activity.fullscreenManager.isFullscreen &&
+            !activity.fullscreenToggleManager.isTheatreMode &&
+            !activity.miniPlayerManager.isMiniPlayerMode &&
+            !activity.isInPictureInPictureMode
+        val params = binding.videoContainer.layoutParams as? ConstraintLayout.LayoutParams
+        if (active && inDefaultLayout) {
+            if (params != null) {
+                params.dimensionRatio = "16:5"
+                binding.videoContainer.layoutParams = params
+                audioOnlyShrunk = true
+            }
+        } else if (audioOnlyShrunk) {
+            if (params != null) {
+                params.dimensionRatio = "16:9"
+                binding.videoContainer.layoutParams = params
+            }
+            audioOnlyShrunk = false
+        }
     }
 
     fun updateAudioProcessing() {

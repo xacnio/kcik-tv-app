@@ -446,6 +446,7 @@
     <string name="quality_auto">Automatique</string>
     <string name="quality_auto_description">Meilleure qualité pour votre connexion</string>
     <string name="quality_audio_only">Audio Uniquement</string>
+    <string name="quality_audio_only_synthetic">Sera lu depuis le %dp</string>
     <string name="auto_quality_with_limit">Auto (max. %s)</string>
     <string name="speed_normal_1x">Normal (1x)</string>
     <string name="speed_x_format">%sx</string>

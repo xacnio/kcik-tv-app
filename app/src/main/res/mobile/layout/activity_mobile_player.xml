@@ -498,6 +498,35 @@
             android:scaleType="centerCrop"
             android:visibility="gone" />
 
+        <!-- Audio-Only Placeholder: shown instead of the frozen last video frame while the
+             audio-only quality is selected (that HLS rendition carries no video track). -->
+        <LinearLayout
+            android:id="@+id/audioOnlyPlaceholder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#000000"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/audioOnlyAvatar"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:scaleType="centerCrop"
+                android:background="@drawable/bg_circle_placeholder" />
+
+            <TextView
+                android:id="@+id/audioOnlyLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/quality_audio_only"
+                android:textColor="#CCFFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
         <!-- Error Overlay -->
         <LinearLayout
             android:id="@+id/errorOverlay"
