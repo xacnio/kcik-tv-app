@@ -1979,10 +1979,10 @@ class ChannelRepository {
             val response = blerpService.getBlerpUsername(request)
             
             if (response.isSuccessful && response.body() != null) {
-                val blerpUsername = response.body()?.data?.soundEmotes?.currentStreamerPage?.streamerBlerpUser?.username
-                
-                if (!blerpUsername.isNullOrEmpty()) {
-                    val blerpUrl = "https://blerp.com/x/$blerpUsername"
+                val blerpUrlKey = response.body()?.data?.soundEmotes?.currentStreamerPage?.streamerBlerpUser?.urlKey
+
+                if (!blerpUrlKey.isNullOrEmpty()) {
+                    val blerpUrl = "https://blerp.com/x/$blerpUrlKey"
                     Log.d(TAG, "Blerp URL found for $kickUsername: $blerpUrl")
                     Result.success(blerpUrl)
                 } else {

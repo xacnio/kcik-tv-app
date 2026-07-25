@@ -36,7 +36,7 @@ data class BlerpGraphQLRequest(
   soundEmotes {
     currentStreamerPage(kickUsername: ${'$'}kickUsername) {
       streamerBlerpUser {
-        username
+        urlKey
       }
     }
   }
@@ -64,5 +64,5 @@ data class BlerpStreamerPage(
 )
 
 data class BlerpUser(
-    val username: String?
+    val urlKey: String?
 )
