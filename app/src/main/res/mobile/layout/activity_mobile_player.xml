@@ -1157,17 +1157,23 @@
         </FrameLayout>
 
         <!-- Pinned Message & Poll Stack Area -->
-        <FrameLayout
+        <LinearLayout
             android:id="@+id/chatOverlayContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="12dp"
             android:layout_marginTop="8dp"
+            android:orientation="vertical"
+            app:layout_constraintTop_toTopOf="parent">
+
+        <dev.xacnio.kciktv.mobile.ui.chat.OverlayPagerLayout
+            android:id="@+id/overlayPager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:clipChildren="true"
             android:clipToPadding="true"
             android:clickable="true"
-            android:focusable="true"
-            app:layout_constraintTop_toTopOf="parent">
+            android:focusable="true">
 
             <!-- Pinned Message Area -->
             <com.google.android.material.card.MaterialCardView
@@ -1795,9 +1801,20 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
 
+        </dev.xacnio.kciktv.mobile.ui.chat.OverlayPagerLayout>
 
-
-        </FrameLayout>
+            <!-- Page indicator; sits below the cards so no card elevation can cover it -->
+            <LinearLayout
+                android:id="@+id/overlayDots"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="6dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                tools:visibility="visible" />
+        </LinearLayout>
 
         <!-- Celebration Banner (Sticky Bottom) -->
         <include

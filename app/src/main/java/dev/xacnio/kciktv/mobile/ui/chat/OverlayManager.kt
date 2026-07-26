@@ -124,8 +124,8 @@ class OverlayManager(
         binding.restorePinnedMessage.visibility = View.GONE
         binding.restorePoll.visibility = View.GONE
 
-        overlayNavDots?.visibility = View.GONE
-        overlayNavDots?.removeAllViews()
+        binding.overlayDots.visibility = View.GONE
+        binding.overlayDots.removeAllViews()
 
         updateChatOverlayState()
     }
@@ -176,8 +176,6 @@ class OverlayManager(
 
     var lastOverlayHideTime: Long = 0
     var lastHiddenViewType: String = ""
-
-    private var overlayNavDots: android.widget.LinearLayout? = null
 
     private fun buildActiveItems(): List<String> {
         val hasPinned = activity.chatStateManager.isPinnedMessageActive && !activity.chatStateManager.isPinnedMessageHiddenByManual
@@ -247,13 +245,25 @@ class OverlayManager(
         updateOverlayDots(activeItems, primary)
     }
 
-    fun swapOverlayStack() {
+    fun swapOverlayStack() = navigateRelative(1)
+
+    /** Swipe-up dismissal for whichever card is on top. */
+    private fun hidePrimaryOverlayManually() {
+        when (activity.chatStateManager.primaryOverlayItem) {
+            "pinned" -> hidePinnedMessageManually()
+            "poll" -> hidePollManually()
+            "prediction" -> hidePredictionManually()
+        }
+    }
+
+    /** Moves [delta] cards along the active list, wrapping at either end. */
+    private fun navigateRelative(delta: Int) {
         val activeItems = buildActiveItems()
         if (activeItems.size <= 1) return
         val currentIndex = activeItems.indexOf(activity.chatStateManager.primaryOverlayItem).coerceAtLeast(0)
-        val nextIndex = (currentIndex + 1) % activeItems.size
-        val newKey = activeItems[nextIndex]
-        activity.runOnUiThread { navigateToOverlay(newKey, fromRight = true) }
+        val size = activeItems.size
+        val nextIndex = ((currentIndex + delta) % size + size) % size
+        activity.runOnUiThread { navigateToOverlay(activeItems[nextIndex], fromRight = delta > 0) }
     }
 
     private fun navigateToOverlay(newKey: String, fromRight: Boolean) {
@@ -266,8 +276,9 @@ class OverlayManager(
             return
         }
 
-        val dp = activity.resources.displayMetrics.density
-        val slideOffset = (36 * dp)
+        // Slide a full width so a drag continues from where the finger left the card
+        val slideOffset = binding.overlayPager.width.toFloat()
+            .takeIf { it > 0f } ?: (300 * activity.resources.displayMetrics.density)
         val outDir = if (fromRight) -slideOffset else slideOffset
         val inDir = if (fromRight) slideOffset else -slideOffset
 
@@ -308,53 +319,27 @@ class OverlayManager(
     }
 
     private fun updateOverlayDots(activeItems: List<String>, primaryKey: String) {
+        val dots = binding.overlayDots
         if (activeItems.size <= 1) {
-            overlayNavDots?.visibility = View.GONE
+            dots.visibility = View.GONE
+            dots.removeAllViews()
             return
         }
 
         val dp = activity.resources.displayMetrics.density
-        val container = binding.chatOverlayContainer
-
-        val dots = overlayNavDots ?: run {
-            val ll = android.widget.LinearLayout(activity)
-            ll.orientation = android.widget.LinearLayout.HORIZONTAL
-            ll.gravity = android.view.Gravity.CENTER_VERTICAL
-            // Dark pill background so dots are always visible against any card color
-            val pill = android.graphics.drawable.GradientDrawable().apply {
-                shape = android.graphics.drawable.GradientDrawable.RECTANGLE
-                cornerRadius = (12 * dp)
-                setColor(android.graphics.Color.parseColor("#CC000000"))
-            }
-            ll.background = pill
-            ll.setPadding((7 * dp).toInt(), (5 * dp).toInt(), (7 * dp).toInt(), (5 * dp).toInt())
-            ll.elevation = (4 * dp)
-
-            val lp = android.widget.FrameLayout.LayoutParams(
-                android.widget.FrameLayout.LayoutParams.WRAP_CONTENT,
-                android.widget.FrameLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                // Top-right corner of the card, slightly inset
-                gravity = android.view.Gravity.TOP or android.view.Gravity.END
-                topMargin = (8 * dp).toInt()
-                rightMargin = (8 * dp).toInt()
-            }
-            container.addView(ll, lp)
-            overlayNavDots = ll
-            ll
-        }
-
         dots.visibility = View.VISIBLE
         dots.removeAllViews()
 
         activeItems.forEachIndexed { index, key ->
             val isActive = key == primaryKey
-            val dotSize = (7 * dp).toInt()
+            // Active page reads as a pill, the others as plain dots
             val dot = View(activity)
-            val lp = android.widget.LinearLayout.LayoutParams(dotSize, dotSize).apply {
-                if (index > 0) leftMargin = (5 * dp).toInt()
+            dot.layoutParams = android.widget.LinearLayout.LayoutParams(
+                (if (isActive) 16 * dp else 6 * dp).toInt(),
+                (6 * dp).toInt()
+            ).apply {
+                if (index > 0) leftMargin = (4 * dp).toInt()
             }
-            dot.layoutParams = lp
 
             val color = when (key) {
                 "pinned" -> android.graphics.Color.parseColor("#53FC18")
@@ -362,20 +347,18 @@ class OverlayManager(
                 "prediction" -> android.graphics.Color.parseColor("#FF9800")
                 else -> android.graphics.Color.WHITE
             }
-            val drawable = android.graphics.drawable.GradientDrawable().apply {
-                shape = android.graphics.drawable.GradientDrawable.OVAL
+            dot.background = android.graphics.drawable.GradientDrawable().apply {
+                shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                cornerRadius = (3 * dp)
                 setColor(color)
             }
-            dot.background = drawable
-            dot.alpha = if (isActive) 1f else 0.30f
-            dot.scaleX = if (isActive) 1f else 0.85f
-            dot.scaleY = if (isActive) 1f else 0.85f
+            dot.alpha = if (isActive) 1f else 0.35f
 
             dot.setOnClickListener {
                 val activeNow = buildActiveItems()
                 val currentIdx = activeNow.indexOf(activity.chatStateManager.primaryOverlayItem)
                 val targetIdx = activeNow.indexOf(key)
-                if (key != activity.chatStateManager.primaryOverlayItem) {
+                if (targetIdx >= 0 && key != activity.chatStateManager.primaryOverlayItem) {
                     navigateToOverlay(key, fromRight = targetIdx > currentIdx)
                 }
             }
@@ -2112,19 +2095,15 @@ class OverlayManager(
         window?.setLayout(width, android.view.ViewGroup.LayoutParams.WRAP_CONTENT)
     }
 
-    @android.annotation.SuppressLint("ClickableViewAccessibility")
     private fun setupOverlayTouchListeners() {
-        // Setup detector for Pinned Message
-        val pinnedDetector = createGestureDetector(binding.pinnedMessageContainer)
-        binding.pinnedMessageContainer.setOnTouchListener { _, event -> pinnedDetector.onTouchEvent(event); true }
-        
-        // Setup detector for Poll
-        val pollDetector = createGestureDetector(binding.pollContainer)
-        binding.pollContainer.setOnTouchListener { _, event -> pollDetector.onTouchEvent(event); true }
-        
-        // Setup detector for Prediction
-        val predictionDetector = createGestureDetector(binding.predictionContainer)
-        binding.predictionContainer.setOnTouchListener { _, event -> predictionDetector.onTouchEvent(event); true }
+        binding.overlayPager.apply {
+            pageCount = { buildActiveItems().size }
+            activePage = { viewForOverlay(activity.chatStateManager.primaryOverlayItem) }
+            onNext = { navigateRelative(1) }
+            onPrev = { navigateRelative(-1) }
+            // Hiding has to go through the manual flag, otherwise the card is re-shown right away
+            onDismiss = { hidePrimaryOverlayManually() }
+        }
     }
 
     fun showOverlayView(view: View) {
@@ -2181,50 +2160,6 @@ class OverlayManager(
             .start()
     }
 
-    private fun createGestureDetector(view: View): android.view.GestureDetector {
-        return android.view.GestureDetector(activity, object : android.view.GestureDetector.SimpleOnGestureListener() {
-            override fun onDown(e: android.view.MotionEvent): Boolean = true
-
-            override fun onLongPress(e: android.view.MotionEvent) {
-                if (view == binding.pinnedMessageContainer && activity.isModeratorOrOwner) {
-                    showUnpinConfirmationDialog()
-                }
-            }
-
-            override fun onFling(e1: android.view.MotionEvent?, e2: android.view.MotionEvent, velocityX: Float, velocityY: Float): Boolean {
-                if (e1 == null) return false
-                val deltaX = e2.x - e1.x
-                val deltaY = e2.y - e1.y
-                // Horizontal swipe: navigate between overlays
-                if (kotlin.math.abs(deltaX) > kotlin.math.abs(deltaY) &&
-                    kotlin.math.abs(deltaX) > 60 && kotlin.math.abs(velocityX) > 80) {
-                    val activeItems = buildActiveItems()
-                    if (activeItems.size <= 1) return false
-                    val currentIdx = activeItems.indexOf(activity.chatStateManager.primaryOverlayItem).coerceAtLeast(0)
-                    if (deltaX < 0) { // swipe left → next
-                        val next = activeItems[(currentIdx + 1) % activeItems.size]
-                        activity.runOnUiThread { navigateToOverlay(next, fromRight = true) }
-                    } else { // swipe right → previous
-                        val prev = activeItems[(currentIdx - 1 + activeItems.size) % activeItems.size]
-                        activity.runOnUiThread { navigateToOverlay(prev, fromRight = false) }
-                    }
-                    return true
-                }
-                // Vertical swipe up → dismiss (hide manually)
-                if (deltaY < -80 && kotlin.math.abs(deltaY) > kotlin.math.abs(deltaX) && kotlin.math.abs(velocityY) > 80) {
-                    hideOverlayView(view)
-                    return true
-                }
-                return false
-            }
-
-            override fun onSingleTapConfirmed(e: android.view.MotionEvent): Boolean {
-                view.performClick()
-                return true
-            }
-        })
-    }
-    
     /**
      * Cleanup all resources - call this in Activity onDestroy
      */

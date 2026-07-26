@@ -604,8 +604,6 @@ class MobilePlayerActivity : FragmentActivity() {
         get() = chatStateManager.currentPrediction
         set(value) { chatStateManager.currentPrediction = value }
         
-    private lateinit var overlayGestureDetector: android.view.GestureDetector
-    
     // Blerp Persistence Cache
     internal var cachedBlerpFragment: BlerpBottomSheetFragment? = null
     internal val blerpCleanupHandler = Handler(Looper.getMainLooper())
@@ -1836,10 +1834,6 @@ class MobilePlayerActivity : FragmentActivity() {
         overlayManager.updateChatOverlayState()
     }
 
-    private fun swapOverlayStack() {
-        overlayManager.swapOverlayStack()
-    }
-
     internal fun updatePollUI(poll: dev.xacnio.kciktv.shared.data.model.PollData) {
         overlayManager.updatePollUI(poll)
     }
@@ -2050,40 +2044,8 @@ class MobilePlayerActivity : FragmentActivity() {
             rewardQueueManager.showSheet()
         }
 
-        // Initialize Gesture Detector for ViewFlipper (Pinned/Poll Swipe)
-        overlayGestureDetector = android.view.GestureDetector(this, object : android.view.GestureDetector.SimpleOnGestureListener() {
-            override fun onDown(e: android.view.MotionEvent): Boolean {
-                return true
-            }
-
-            override fun onFling(
-                e1: android.view.MotionEvent?,
-                e2: android.view.MotionEvent,
-                velocityX: Float,
-                velocityY: Float
-            ): Boolean {
-                val e1Val = e1 ?: return false
-                val diffY = e2.y - e1Val.y
-                val diffX = e2.x - e1Val.x
-                
-// Log.d("OverlayStack", "onFling: diffX=$diffX, diffY=$diffY, vX=$velocityX, vY=$velocityY")
-                
-                // HIGH sensitivity flings for switching stack
-                if (kotlin.math.abs(diffY) > 20 || kotlin.math.abs(diffX) > 20) {
-                    if (kotlin.math.abs(velocityX) > 50 || kotlin.math.abs(velocityY) > 50) {
-// Log.d("OverlayStack", "Fling detected, swapping!")
-                        swapOverlayStack()
-                        return true
-                    }
-                }
-                
-                return false
-            }
-        })
         // Layout Toggle Button
     }
-
-    private var isTrackingOverlayGesture = false
 
     override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {
         // Auto-close emote panel when touching outside
@@ -2109,22 +2071,6 @@ class MobilePlayerActivity : FragmentActivity() {
             }
         }
 
-        if (::overlayGestureDetector.isInitialized && binding.chatOverlayContainer.visibility == View.VISIBLE) {
-            val rect = android.graphics.Rect()
-            binding.chatOverlayContainer.getGlobalVisibleRect(rect)
-            
-            if (ev.action == android.view.MotionEvent.ACTION_DOWN) {
-                isTrackingOverlayGesture = rect.contains(ev.rawX.toInt(), ev.rawY.toInt())
-            }
-            
-            if (isTrackingOverlayGesture) {
-                overlayGestureDetector.onTouchEvent(ev)
-            }
-            
-            if (ev.action == android.view.MotionEvent.ACTION_UP || ev.action == android.view.MotionEvent.ACTION_CANCEL) {
-                isTrackingOverlayGesture = false
-            }
-        }
         return super.dispatchTouchEvent(ev)
     }
 
