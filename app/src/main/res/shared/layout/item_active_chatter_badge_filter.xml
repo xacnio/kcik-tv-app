@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Badge filter entry: badge art, or a text label when there is none to draw -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="32dp"
+    android:layout_marginEnd="6dp"
+    android:background="@drawable/bg_badge_filter_item"
+    android:clickable="true"
+    android:focusable="true"
+    android:minWidth="38dp">
+
+    <LinearLayout
+        android:id="@+id/badgeFilterIcons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingHorizontal="9dp" />
+
+    <TextView
+        android:id="@+id/badgeFilterLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:paddingHorizontal="12dp"
+        android:singleLine="true"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        tools:text="All"
+        tools:visibility="visible" />
+
+</FrameLayout>

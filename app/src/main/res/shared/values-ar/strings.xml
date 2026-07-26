@@ -1339,4 +1339,45 @@
     <string name="collectibles_type_badge">الشارات</string>
     <string name="collectibles_locked">مقفل</string>
     <string name="collectibles_load_error">تعذر تحميل المقتنيات</string>
+
+    <!-- Active Chatters -->
+    <string name="active_chatters_title">المتفاعلون في الدردشة</string>
+    <string name="active_chatters_search_hint">ابحث عن مشاهد…</string>
+    <string name="active_chatters_empty">لم يكتب أحد بعد</string>
+    <string name="active_chatters_no_results">لا أحد يطابق هذه المرشحات</string>
+    <string name="active_chatters_summary">%1$d مشارك · %2$d رسالة</string>
+    <string name="active_chatters_message_count">%d رسالة</string>
+    <string name="active_chatters_chip_format">%1$s (%2$d)</string>
+    <string name="active_chatters_grouping">التجميع</string>
+    <string name="active_chatters_grouping_role">الدور</string>
+    <string name="active_chatters_grouping_activity">النشاط</string>
+    <string name="active_chatters_grouping_none">بدون</string>
+    <string name="active_chatters_group_moderators">المشرفون</string>
+    <string name="active_chatters_group_vips">كبار الشخصيات</string>
+    <string name="active_chatters_group_ogs">الأعضاء القدامى</string>
+    <string name="active_chatters_group_viewers">المشاهدون</string>
+    <string name="active_chatters_activity_high">نشط جدًا (10+ رسائل)</string>
+    <string name="active_chatters_activity_medium">نشط (3-9 رسائل)</string>
+    <string name="active_chatters_activity_low">قليل النشاط (1-2 رسالة)</string>
+    <string name="active_chatters_activity_silent">لم يكتب بعد</string>
+    <string name="badge_name_broadcaster">المذيع</string>
+    <string name="badge_name_moderator">مشرف</string>
+    <string name="badge_name_vip">VIP</string>
+    <string name="badge_name_og">OG</string>
+    <string name="badge_name_subscriber">مشترك</string>
+    <string name="badge_name_sub_gifter">مهدي الاشتراكات</string>
+    <string name="badge_name_founder">مؤسس</string>
+    <string name="badge_name_verified">موثّق</string>
+    <string name="badge_name_staff">فريق Kick</string>
+    <string name="badge_name_sidekick">Sidekick</string>
+    <string name="badge_name_bot">بوت</string>
+    <string name="badge_name_none">بدون شارة</string>
+    <string name="active_chatters_grouping_badge">الشارة</string>
+    <string name="active_chatters_grouping_alphabet">أ-ي</string>
+    <string name="active_chatters_sort">ترتيب</string>
+    <string name="active_chatters_sort_messages">الرسائل</string>
+    <string name="active_chatters_sort_name">الاسم</string>
+    <string name="active_chatters_sort_level">المستوى</string>
+    <string name="active_chatters_sort_recent">آخر ظهور</string>
+    <string name="active_chatters_sort_direction">عكس الترتيب</string>
 </resources>

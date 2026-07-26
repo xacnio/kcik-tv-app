@@ -102,7 +102,9 @@ class ChatIdentityManager(
                                         name = it.name,
                                         imageUrl = it.imageUrl,
                                         selected = it.selected,
-                                        sortOrder = it.sortOrder
+                                        sortOrder = it.sortOrder,
+                                        badgeType = it.badgeType,
+                                        metadata = it.metadata
                                     )
                                 }
                         )

@@ -153,6 +153,45 @@ object BadgeRenderUtils {
         }
     }
 
+    /**
+     * Renders a chat sender's badges into [container], clearing it first so it is safe to
+     * call from a recycled list row. Same v2-then-v1 ordering the chat lines use.
+     */
+    fun renderChatSenderBadges(
+        context: Context,
+        container: LinearLayout?,
+        badges: List<dev.xacnio.kciktv.shared.data.model.ChatBadge>?,
+        badgesV2: List<ChatBadgeV2>?,
+        size: Int,
+        margin: Int,
+        subscriberBadges: Map<Int, String> = emptyMap()
+    ) {
+        if (container == null) return
+        container.removeAllViews()
+
+        badgesV2?.filter { it.selected == true }
+            ?.sortedBy { it.sortOrder ?: Int.MAX_VALUE }
+            ?.forEach { renderSingleBadgeV2IntoSheet(context, container, it, size, margin) }
+
+        badges?.forEach { badge ->
+            renderSingleBadgeIntoSheet(
+                context,
+                container,
+                ChannelUserBadge(
+                    type = badge.type,
+                    text = badge.text,
+                    count = badge.count ?: badge.text?.toIntOrNull(),
+                    active = true
+                ),
+                size,
+                margin,
+                subscriberBadges
+            )
+        }
+        container.visibility = if (container.childCount == 0) android.view.View.GONE
+            else android.view.View.VISIBLE
+    }
+
     /** Renders v1 and v2 badges as one row, interleaved and ordered by sort_order across both lists. */
     fun renderAllBadgesIntoSheet(
         context: Context,

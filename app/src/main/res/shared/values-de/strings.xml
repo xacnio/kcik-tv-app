@@ -1339,4 +1339,45 @@
     <string name="collectibles_type_badge">Abzeichen</string>
     <string name="collectibles_locked">Gesperrt</string>
     <string name="collectibles_load_error">Sammelobjekte konnten nicht geladen werden</string>
+
+    <!-- Active Chatters -->
+    <string name="active_chatters_title">Aktive Chatter</string>
+    <string name="active_chatters_search_hint">Zuschauer suchen…</string>
+    <string name="active_chatters_empty">Noch hat niemand geschrieben</string>
+    <string name="active_chatters_no_results">Niemand passt zu diesen Filtern</string>
+    <string name="active_chatters_summary">%1$d Chatter · %2$d Nachrichten</string>
+    <string name="active_chatters_message_count">%d Nachrichten</string>
+    <string name="active_chatters_chip_format">%1$s (%2$d)</string>
+    <string name="active_chatters_grouping">Gruppierung</string>
+    <string name="active_chatters_grouping_role">Rolle</string>
+    <string name="active_chatters_grouping_activity">Aktivität</string>
+    <string name="active_chatters_grouping_none">Keine</string>
+    <string name="active_chatters_group_moderators">Moderatoren</string>
+    <string name="active_chatters_group_vips">VIPs</string>
+    <string name="active_chatters_group_ogs">OGs</string>
+    <string name="active_chatters_group_viewers">Zuschauer</string>
+    <string name="active_chatters_activity_high">Sehr aktiv (10+ Nachrichten)</string>
+    <string name="active_chatters_activity_medium">Aktiv (3-9 Nachrichten)</string>
+    <string name="active_chatters_activity_low">Wenig aktiv (1-2 Nachrichten)</string>
+    <string name="active_chatters_activity_silent">Hat noch nichts geschrieben</string>
+    <string name="badge_name_broadcaster">Streamer</string>
+    <string name="badge_name_moderator">Moderator</string>
+    <string name="badge_name_vip">VIP</string>
+    <string name="badge_name_og">OG</string>
+    <string name="badge_name_subscriber">Abonnent</string>
+    <string name="badge_name_sub_gifter">Abo-Schenker</string>
+    <string name="badge_name_founder">Gründer</string>
+    <string name="badge_name_verified">Verifiziert</string>
+    <string name="badge_name_staff">Staff</string>
+    <string name="badge_name_sidekick">Sidekick</string>
+    <string name="badge_name_bot">Bot</string>
+    <string name="badge_name_none">Kein Abzeichen</string>
+    <string name="active_chatters_grouping_badge">Abzeichen</string>
+    <string name="active_chatters_grouping_alphabet">A-Z</string>
+    <string name="active_chatters_sort">Sortieren</string>
+    <string name="active_chatters_sort_messages">Nachrichten</string>
+    <string name="active_chatters_sort_name">Name</string>
+    <string name="active_chatters_sort_level">Level</string>
+    <string name="active_chatters_sort_recent">Zuletzt gesehen</string>
+    <string name="active_chatters_sort_direction">Sortierung umkehren</string>
 </resources>

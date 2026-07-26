@@ -97,7 +97,10 @@ data class ChatBadgeV2(
     @com.google.gson.annotations.SerializedName("name") val name: String?,
     @com.google.gson.annotations.SerializedName("image_url") val imageUrl: String?,
     @com.google.gson.annotations.SerializedName("selected") val selected: Boolean?,
-    @com.google.gson.annotations.SerializedName("sort_order") val sortOrder: Int?
+    @com.google.gson.annotations.SerializedName("sort_order") val sortOrder: Int?,
+    @com.google.gson.annotations.SerializedName("badge_type") val badgeType: String? = null,
+    // Only place a chat payload exposes the viewer's level.
+    @com.google.gson.annotations.SerializedName("metadata") val metadata: BadgeV2Metadata? = null
 )
 
 /**

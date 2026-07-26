@@ -56,13 +56,14 @@ class ChatUiManager(
     private val lifecycleScope: LifecycleCoroutineScope
 ) {
     private val TAG = "ChatUiManager"
+    private val MENTION_SUGGESTION_LIMIT = 5
     private val mainHandler = Handler(Looper.getMainLooper())
     
     val chatAdapter: ChatAdapter
     private lateinit var commandSuggestionsAdapter: CommandSuggestionsAdapter
     private lateinit var userSuggestionAdapter: UserSuggestionAdapter
-    private val recentChatUsers = mutableSetOf<String>()
-    
+    private val activeChattersStore get() = activity.activeChattersStore
+
     internal var isChatAutoScrollEnabled = true
     private var clearedMessages = listOf<ChatMessage>()
     private var emoteNameToId = mapOf<String, String>() // This should be populated if needed
@@ -888,15 +889,7 @@ class ChatUiManager(
         lastItemCount = totalItems
         
         val lastMessage = chatAdapter.currentList.lastOrNull()
-        
-        // Store sender for mentions - exclude system messages
-        if (lastMessage?.type == MessageType.CHAT || lastMessage?.type == MessageType.REWARD || lastMessage?.type == MessageType.CELEBRATION) {
-            lastMessage.sender.username.let { 
-                 recentChatUsers.remove(it)
-                 recentChatUsers.add(it)
-            }
-        }
-        
+
         val isOwnMessage = lastMessage?.sender?.username?.equals(prefs.username, ignoreCase = true) == true
         
         val shouldScroll = isOwnMessage || isChatAutoScrollEnabled
@@ -954,20 +947,18 @@ class ChatUiManager(
         
         if (word.startsWith("@")) {
             val query = word.substring(1).lowercase()
-            
-            // Build candidates list: Recent users (newest first) + Channel Owner at the bottom
-            val recents = recentChatUsers.toList().reversed()
+
+            // Build candidates list: Recent chatters (newest first) + Channel Owner at the bottom
+            val recents = activeChattersStore.mentionCandidates(query, MENTION_SUGGESTION_LIMIT)
             val owner = activity.currentChannel?.username ?: activity.currentChannel?.slug
-            
-            val candidates = if (!owner.isNullOrEmpty()) {
-                (recents + owner).distinct()
-            } else {
-                recents
-            }
-            
-            val matches = candidates.filter { it.lowercase().startsWith(query) }
-                .take(5) // Limit suggestions
-                
+
+            val ownerMatches = !owner.isNullOrEmpty() &&
+                owner.lowercase().startsWith(query) &&
+                recents.none { it.equals(owner, ignoreCase = true) }
+            val candidates = if (ownerMatches) recents + owner!! else recents
+
+            val matches = candidates.take(MENTION_SUGGESTION_LIMIT)
+
             if (matches.isNotEmpty()) {
                 userSuggestionAdapter.updateUsers(matches)
                 binding.commandSuggestionsRecycler.adapter = userSuggestionAdapter
@@ -1217,7 +1208,8 @@ class ChatUiManager(
         chatAdapter.clearMessages()
         clearedMessages = emptyList()
         incomingMessageBuffer.clear()
-        
+        activeChattersStore.clear()
+
         // Reset Input
         binding.chatInput.text?.clear()
         binding.chatSendContainer.visibility = View.GONE
@@ -1441,10 +1433,13 @@ class ChatUiManager(
     }
 
     fun handleIncomingMessage(message: ChatMessage) {
+        // Before the paused/dropped paths below, so counts stay right while chat is hidden
+        activeChattersStore.record(message)
+
         val isPip = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
             activity.isInPictureInPictureMode else false
         val isPaused = activity.miniPlayerManager.isMiniPlayerMode || isPip || isChatUiPaused
-        
+
         if (isPaused) {
             // If low battery mode is active and chat is paused, we don't buffer at all (completely drop)
             if (activity.isChatPausedForLowBattery) {
@@ -1647,11 +1642,9 @@ class ChatUiManager(
                                 }
                             })
 
-                            // Populate recent users for mention suggestions
-                            messages.forEach { msg ->
-                                recentChatUsers.add(msg.sender.username)
-                            }
-                            
+                            // History seeds the chatter list too, not just live messages
+                            activeChattersStore.recordAll(messages)
+
                             binding.chatJumpToBottom.visibility = View.GONE
                             binding.emptyChatText.visibility = View.GONE
                         }
@@ -1753,8 +1746,8 @@ class ChatUiManager(
                                     activity.emoteComboManager.processMessage(msg.content)
                                     activity.floatingEmoteManager.processMessage(msg.content)
                                 }
-                                recentChatUsers.add(msg.sender.username)
                             }
+                            activeChattersStore.recordAll(messages)
 
                             chatAdapter.addMessages(toAdd, deduplicate = true, animate = false, onCommit = {
                                 handleMessageAdded()

@@ -628,6 +628,20 @@ class AppPreferences(private val context: Context) {
         get() = prefs.getInt("chat_emote_fps", 30)
         set(value) = prefs.edit().putInt("chat_emote_fps", value).apply()
 
+    // How the Active Chatters panel splits its list — a ChatterGrouping name.
+    var activeChattersGrouping: String
+        get() = prefs.getString("active_chatters_grouping", "ROLE") ?: "ROLE"
+        set(value) = prefs.edit().putString("active_chatters_grouping", value).apply()
+
+    // Ordering within each Active Chatters section — a ChatterSort name.
+    var activeChattersSort: String
+        get() = prefs.getString("active_chatters_sort", "MESSAGES") ?: "MESSAGES"
+        set(value) = prefs.edit().putString("active_chatters_sort", value).apply()
+
+    var activeChattersSortDescending: Boolean
+        get() = prefs.getBoolean("active_chatters_sort_desc", true)
+        set(value) = prefs.edit().putBoolean("active_chatters_sort_desc", value).apply()
+
     var subscriberBadgesAnimated: Boolean
         get() = prefs.getBoolean("subscriber_badges_animated", true)
         set(value) = prefs.edit().putBoolean("subscriber_badges_animated", value).apply()

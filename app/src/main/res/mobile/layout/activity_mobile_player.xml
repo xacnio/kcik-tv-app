@@ -2623,6 +2623,19 @@
                 tools:visibility="visible" />
         </FrameLayout>
 
+        <!-- Active Chatters Button -->
+        <ImageButton
+            android:id="@+id/activeChattersButton"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/bg_item_ripple"
+            android:contentDescription="@string/active_chatters_title"
+            android:padding="8dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_people"
+            app:tint="#FFFFFF" />
+
         <!-- Activity Feed Button (Only visible to Mods/Owners) -->
         <ImageButton
             android:id="@+id/activityFeedButton"

@@ -827,6 +827,15 @@ class MobilePlayerActivity : FragmentActivity() {
         dev.xacnio.kciktv.mobile.ui.chat.ModLogManager(this)
     }
 
+    /** Session-scoped record of who has chatted. */
+    internal val activeChattersStore by lazy {
+        dev.xacnio.kciktv.mobile.ui.chat.ActiveChattersStore()
+    }
+
+    internal val activeChattersManager by lazy {
+        dev.xacnio.kciktv.mobile.ui.chat.ActiveChattersManager(this)
+    }
+
     internal val infoPanelManager by lazy {
         dev.xacnio.kciktv.mobile.ui.player.InfoPanelManager(this)
     }
@@ -2020,6 +2029,11 @@ class MobilePlayerActivity : FragmentActivity() {
                     }
                 }
             }
+        }
+
+        // Active Chatters Button
+        binding.activeChattersButton.setOnClickListener {
+            activeChattersManager.showSheet()
         }
 
         // Activity Feed Button

@@ -1339,4 +1339,45 @@
     <string name="collectibles_type_badge">Rozetler</string>
     <string name="collectibles_locked">Kilitli</string>
     <string name="collectibles_load_error">Koleksiyon yüklenemedi</string>
+
+    <!-- Active Chatters -->
+    <string name="active_chatters_title">Aktif Sohbetçiler</string>
+    <string name="active_chatters_search_hint">İzleyici ara…</string>
+    <string name="active_chatters_empty">Henüz kimse sohbete yazmadı</string>
+    <string name="active_chatters_no_results">Bu filtrelere uyan kimse yok</string>
+    <string name="active_chatters_summary">%1$d kişi · %2$d mesaj</string>
+    <string name="active_chatters_message_count">%d mesaj</string>
+    <string name="active_chatters_chip_format">%1$s (%2$d)</string>
+    <string name="active_chatters_grouping">Gruplama</string>
+    <string name="active_chatters_grouping_role">Rol</string>
+    <string name="active_chatters_grouping_activity">Aktiflik</string>
+    <string name="active_chatters_grouping_none">Yok</string>
+    <string name="active_chatters_group_moderators">Moderatörler</string>
+    <string name="active_chatters_group_vips">VIP\'ler</string>
+    <string name="active_chatters_group_ogs">OG\'ler</string>
+    <string name="active_chatters_group_viewers">İzleyiciler</string>
+    <string name="active_chatters_activity_high">Çok aktif (10+ mesaj)</string>
+    <string name="active_chatters_activity_medium">Aktif (3-9 mesaj)</string>
+    <string name="active_chatters_activity_low">Az aktif (1-2 mesaj)</string>
+    <string name="active_chatters_activity_silent">Henüz yazmadı</string>
+    <string name="badge_name_broadcaster">Yayıncı</string>
+    <string name="badge_name_moderator">Moderatör</string>
+    <string name="badge_name_vip">VIP</string>
+    <string name="badge_name_og">OG</string>
+    <string name="badge_name_subscriber">Abone</string>
+    <string name="badge_name_sub_gifter">Abonelik Hediye Eden</string>
+    <string name="badge_name_founder">Kurucu</string>
+    <string name="badge_name_verified">Onaylı</string>
+    <string name="badge_name_staff">Kick Ekibi</string>
+    <string name="badge_name_sidekick">Sidekick</string>
+    <string name="badge_name_bot">Bot</string>
+    <string name="badge_name_none">Rozetsiz</string>
+    <string name="active_chatters_grouping_badge">Rozet</string>
+    <string name="active_chatters_grouping_alphabet">A-Z</string>
+    <string name="active_chatters_sort">Sırala</string>
+    <string name="active_chatters_sort_messages">Mesaj</string>
+    <string name="active_chatters_sort_name">İsim</string>
+    <string name="active_chatters_sort_level">Seviye</string>
+    <string name="active_chatters_sort_recent">Son görülme</string>
+    <string name="active_chatters_sort_direction">Sıralamayı ters çevir</string>
 </resources>
