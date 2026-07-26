@@ -1051,6 +1051,8 @@ class OverlayManager(
         ))
         
         view.findViewById<View>(R.id.closeButton)?.setOnClickListener { predictionBottomSheet?.dismiss() }
+        // Tracked so mini player / PiP transitions dismiss it along with every other sheet
+        predictionBottomSheet?.let { activity.trackBottomSheet(it) }
         updatePredictionBottomSheetUI(prediction)
         predictionBottomSheet?.show()
     }
@@ -1415,7 +1417,9 @@ class OverlayManager(
                 Toast.makeText(activity, activity.getString(R.string.invalid_amount), Toast.LENGTH_SHORT).show()
             }
         }
-        
+
+        // Same tracking as the prediction sheet it opens from
+        betDialog?.let { activity.trackBottomSheet(it) }
         betDialog?.show()
     }
 
