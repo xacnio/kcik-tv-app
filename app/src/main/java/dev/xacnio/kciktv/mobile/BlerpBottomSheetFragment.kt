@@ -20,6 +20,8 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
+import androidx.webkit.WebViewCompat
+import androidx.webkit.WebViewFeature
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -179,7 +181,11 @@ class BlerpBottomSheetFragment : BottomSheetDialogFragment() {
 
     override fun onDismiss(dialog: android.content.DialogInterface) {
         super.onDismiss(dialog)
-        (activity as? MobilePlayerActivity)?.startBlerpCleanupTimer()
+        (activity as? MobilePlayerActivity)?.let {
+            it.startBlerpCleanupTimer()
+            // The viewer may have just signed in, which is what the ticker was missing
+            it.ensureBlerpEarnTicker()
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -201,6 +207,24 @@ class BlerpBottomSheetFragment : BottomSheetDialogFragment() {
             cookieManager.setAcceptCookie(true)
             cookieManager.setAcceptThirdPartyCookies(this, true)
 
+            addJavascriptInterface(PointsBridge(), POINTS_BRIDGE_NAME)
+
+            // Blerp's bundle grabs window.fetch on load, so the patch must run before page scripts
+            if (WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
+                try {
+                    WebViewCompat.addDocumentStartJavaScript(
+                        this,
+                        POINTS_INTERCEPTOR_SCRIPT,
+                        setOf("https://blerp.com", "https://*.blerp.com")
+                    )
+                    android.util.Log.d("BlerpSheet", "Registered document start interceptor")
+                } catch (e: Exception) {
+                    android.util.Log.w("BlerpSheet", "Could not register document start script", e)
+                }
+            } else {
+                android.util.Log.w("BlerpSheet", "DOCUMENT_START_SCRIPT unsupported, using late injection")
+            }
+
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                     return false
@@ -211,8 +235,11 @@ class BlerpBottomSheetFragment : BottomSheetDialogFragment() {
                         // Reinforce cookies on navigation start
                         injectCookies()
                     }
+                    injectPointsInterceptor(view)
                 }
                 override fun onPageFinished(view: WebView?, url: String?) {
+                    injectPointsInterceptor(view)
+
                     if (_binding != null) {
                         binding.blerpProgress.visibility = View.GONE
                         CookieManager.getInstance().flush()
@@ -341,6 +368,31 @@ class BlerpBottomSheetFragment : BottomSheetDialogFragment() {
         }
     }
 
+    /** Keeps the Blerp button in sync with points the sheet's own requests report. */
+    private inner class PointsBridge {
+        @android.webkit.JavascriptInterface
+        fun onPointsChanged(points: Int) {
+            (activity as? MobilePlayerActivity)?.updateBlerpPointsBadge(points)
+        }
+
+        @android.webkit.JavascriptInterface
+        fun onManualRewardChanged(available: Boolean) {
+            (activity as? MobilePlayerActivity)?.updateBlerpManualRewardHint(available)
+        }
+
+        @android.webkit.JavascriptInterface
+        fun onDebug(message: String) {
+            android.util.Log.d("BlerpSheet", "js: $message")
+        }
+    }
+
+    /** Late-injection fallback for WebViews without DOCUMENT_START_SCRIPT support. */
+    private fun injectPointsInterceptor(view: WebView?) {
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) return
+        val webView = view ?: persistentWebView ?: return
+        webView.evaluateJavascript(POINTS_INTERCEPTOR_SCRIPT, null)
+    }
+
     private fun injectCookies() {
         val webView = persistentWebView ?: return
         try {
@@ -435,6 +487,108 @@ class BlerpBottomSheetFragment : BottomSheetDialogFragment() {
     }
 
     companion object {
+        private const val POINTS_BRIDGE_NAME = "KickTvBlerpBridge"
+
+        /**
+         * Wraps fetch and XHR to read point balances out of Blerp's GraphQL responses. Has to live
+         * in the page: shouldInterceptRequest never sees response bodies.
+         */
+        private val POINTS_INTERCEPTOR_SCRIPT = """
+            (function() {
+              if (window.__kickTvBlerpHooked) return;
+              window.__kickTvBlerpHooked = true;
+
+              var ENDPOINT = 'api.blerp.com/graphql';
+
+              function log(message) {
+                try { $POINTS_BRIDGE_NAME.onDebug(message); } catch (e) {}
+              }
+
+              // The ChannelViewerEdge sits at a different depth per operation, so walk for it
+              function findEdge(node, depth) {
+                if (!node || typeof node !== 'object' || depth > 12) return null;
+                if (Array.isArray(node)) {
+                  for (var i = 0; i < node.length; i++) {
+                    var found = findEdge(node[i], depth + 1);
+                    if (found !== null) return found;
+                  }
+                  return null;
+                }
+                if (typeof node.points === 'number' &&
+                    (node.__typename === 'ChannelViewerEdge' || 'lastIncrementedAt' in node)) {
+                  return node;
+                }
+                for (var key in node) {
+                  var nested = findEdge(node[key], depth + 1);
+                  if (nested !== null) return nested;
+                }
+                return null;
+              }
+
+              function report(text) {
+                try {
+                  var edge = findEdge(JSON.parse(text), 0);
+                  if (!edge) return;
+                  log('points=' + edge.points + ' showManual=' + edge.showManualButton);
+                  $POINTS_BRIDGE_NAME.onPointsChanged(edge.points);
+                  if (typeof edge.showManualButton === 'boolean') {
+                    $POINTS_BRIDGE_NAME.onManualRewardChanged(edge.showManualButton);
+                  }
+                } catch (e) {
+                  log('report failed: ' + e);
+                }
+              }
+
+              var originalFetch = window.fetch;
+              if (originalFetch) {
+                window.fetch = function() {
+                  var args = arguments;
+                  var target = args[0];
+                  var url = (typeof target === 'string') ? target : ((target && target.url) || '');
+                  return originalFetch.apply(this, args).then(function(response) {
+                    if (url.indexOf(ENDPOINT) === -1) return response;
+                    if (!response.body || response.status === 204 || response.status === 205) {
+                      return response;
+                    }
+                    // Read the body and hand the page a fresh Response; clone() never resolved here
+                    return response.text().then(function(text) {
+                      report(text);
+                      var replacement = new Response(text, {
+                        status: response.status,
+                        statusText: response.statusText,
+                        headers: response.headers
+                      });
+                      try {
+                        Object.defineProperty(replacement, 'url', { value: response.url });
+                      } catch (e) {}
+                      return replacement;
+                    }, function(err) {
+                      log('body read failed: ' + err);
+                      return response;
+                    });
+                  });
+                };
+              }
+
+              var originalOpen = XMLHttpRequest.prototype.open;
+              XMLHttpRequest.prototype.open = function(method, url) {
+                this.__kickTvUrl = url;
+                return originalOpen.apply(this, arguments);
+              };
+
+              var originalSend = XMLHttpRequest.prototype.send;
+              XMLHttpRequest.prototype.send = function() {
+                var xhr = this;
+                xhr.addEventListener('load', function() {
+                  if (xhr.__kickTvUrl && String(xhr.__kickTvUrl).indexOf(ENDPOINT) !== -1) {
+                    report(xhr.responseText);
+                  }
+                });
+                return originalSend.apply(this, arguments);
+              };
+            })();
+        """.trimIndent()
+
         fun newInstance(url: String): BlerpBottomSheetFragment {
             return BlerpBottomSheetFragment().apply {
                 arguments = Bundle().apply {

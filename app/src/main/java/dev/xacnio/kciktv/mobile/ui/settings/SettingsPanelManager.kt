@@ -181,9 +181,11 @@ class SettingsPanelManager(
                 prefs.blerpEnabled = isEnabled
                 // Update button visibility immediately
                 if (isEnabled && !activity.currentBlerpUrl.isNullOrEmpty()) {
-                    binding.blerpButton.visibility = View.VISIBLE
+                    binding.blerpButtonContainer.visibility = View.VISIBLE
+                    activity.ensureBlerpEarnTicker()
                 } else {
-                    binding.blerpButton.visibility = View.GONE
+                    binding.blerpButtonContainer.visibility = View.GONE
+                    activity.stopBlerpEarnTicker()
                 }
             }
         }

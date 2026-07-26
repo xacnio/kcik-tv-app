@@ -757,18 +757,33 @@ class PlayerManager(
         
         loadStreamJob = lifecycleScope.launch {
             activity.currentBlerpUrl = null
+            activity.currentBlerpOwnerId = null
+            activity.currentBlerpPointsDisabled = false
+            activity.currentBlerpStandardMs = null
+            activity.updateBlerpManualRewardHint(false)
+            activity.stopBlerpEarnTicker()
             activity.blerpCleanupHandler.removeCallbacks(activity.blerpCleanupRunnable)
             activity.cachedBlerpFragment?.let { if (it.isAdded) it.dismissAllowingStateLoss() }
             activity.cachedBlerpFragment = null
-            activity.runOnUiThread { binding.blerpButton.visibility = View.GONE }
+            activity.runOnUiThread {
+                binding.blerpButtonContainer.visibility = View.GONE
+                binding.blerpPointsBadge.visibility = View.GONE
+            }
 
-            // Fetch Blerp URL using new GraphQL API. Runs in its own child coroutine so this
+            // Fetch Blerp info using new GraphQL API. Runs in its own child coroutine so this
             // non-essential third-party lookup can't delay fetching the actual playback URL below.
             launch {
-                repository.getBlerpUrl(channel.slug).onSuccess { blerpUrl ->
-                    if (!blerpUrl.isNullOrEmpty()) {
-                        activity.currentBlerpUrl = blerpUrl
-                        activity.runOnUiThread { binding.blerpButton.visibility = if (prefs.blerpEnabled) View.VISIBLE else View.GONE }
+                repository.getBlerpInfo(channel.slug, prefs.savedBlerpCookies).onSuccess { blerpInfo ->
+                    if (blerpInfo != null) {
+                        activity.currentBlerpUrl = blerpInfo.url
+                        activity.currentBlerpOwnerId = blerpInfo.channelOwnerId
+                        activity.currentBlerpPointsDisabled = blerpInfo.channelPointsDisabled
+                        activity.currentBlerpStandardMs = blerpInfo.standardMs
+                        activity.runOnUiThread { binding.blerpButtonContainer.visibility = if (prefs.blerpEnabled) View.VISIBLE else View.GONE }
+                        activity.updateBlerpPointsBadge(blerpInfo.points)
+                        activity.updateBlerpManualRewardHint(blerpInfo.showManualButton)
+
+                        blerpInfo.channelOwnerId?.let { activity.startBlerpEarnTicker(it) }
                     }
                 }
             }

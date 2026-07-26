@@ -97,6 +97,18 @@ object Constants {
     }
     
     /**
+     * Blerp
+     */
+    object Blerp {
+        // Matches the channelViewerEdge standardMS Blerp's own extension ticks on
+        const val EARN_INTERVAL_MS = 600_000L // 10 minutes
+        // Added to the cooldown Blerp reports so a retry doesn't land on the boundary again
+        const val EARN_RETRY_MARGIN_MS = 2_000L
+        // Consecutive failures before the ticker stops
+        const val EARN_MAX_FAILURES = 3
+    }
+
+    /**
      * Network
      */
     object Network {

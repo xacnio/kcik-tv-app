@@ -99,6 +99,9 @@ class PlayerControlsManager(private val activity: MobilePlayerActivity) {
             // Stop chat flushing
             activity.chatUiManager.stopFlushing()
 
+            // Viewer is no longer watching, so stop earning points
+            activity.stopBlerpEarnTicker()
+
             // Reset UI
             binding.playerView.visibility = View.GONE
             // Actually detach the PlayerView, not just hide it — the decoder keeps compositing to

@@ -178,7 +178,9 @@ class ChannelUiManager(private val activity: MobilePlayerActivity) {
             // Hide live-only overlays
             binding.chatOverlayContainer.visibility = View.GONE
             binding.pinnedGiftsBlur.visibility = View.GONE
-            binding.blerpButton.visibility = View.GONE
+            binding.blerpButtonContainer.visibility = View.GONE
+            // Blerp only credits presence on a live channel
+            activity.stopBlerpEarnTicker()
             binding.pollContainer.visibility = View.GONE
             binding.predictionContainer.visibility = View.GONE
 
@@ -219,6 +221,9 @@ class ChannelUiManager(private val activity: MobilePlayerActivity) {
 
             // Stop VOD chat replay
             vodManager.stopVodChatReplay()
+
+            // Back on the live stream, so resume earning points
+            activity.ensureBlerpEarnTicker()
         }
     }
 

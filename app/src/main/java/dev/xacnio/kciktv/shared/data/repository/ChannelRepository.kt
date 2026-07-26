@@ -1966,25 +1966,41 @@ class ChannelRepository {
     }
 
     /**
-     * Fetches Blerp URL for a specific channel using GraphQL API
-     * Returns the full Blerp URL (https://blerp.com/x/{username}) if available
+     * Fetches Blerp info for a specific channel using GraphQL API
+     * Returns null if the channel has no Blerp soundboard.
      */
-    suspend fun getBlerpUrl(kickUsername: String): Result<String?> = withContext(Dispatchers.IO) {
+    suspend fun getBlerpInfo(kickUsername: String, blerpCookies: String?): Result<dev.xacnio.kciktv.shared.data.api.BlerpChannelInfo?> = withContext(Dispatchers.IO) {
         try {
             val blerpService = RetrofitClient.blerpService
             val request = dev.xacnio.kciktv.shared.data.api.BlerpGraphQLRequest(
                 variables = dev.xacnio.kciktv.shared.data.api.BlerpVariables(kickUsername = kickUsername)
             )
-            
-            val response = blerpService.getBlerpUsername(request)
-            
+
+            val response = blerpService.getBlerpUsername(
+                authorization = extractBlerpToken(blerpCookies)?.let { "Bearer $it" },
+                cookie = blerpCookies,
+                body = request
+            )
+
             if (response.isSuccessful && response.body() != null) {
-                val blerpUrlKey = response.body()?.data?.soundEmotes?.currentStreamerPage?.streamerBlerpUser?.urlKey
+                val page = response.body()?.data?.soundEmotes?.currentStreamerPage
+                val streamer = page?.streamerBlerpUser
+                val blerpUrlKey = streamer?.soundEmotesObject?.urlKey
 
                 if (!blerpUrlKey.isNullOrEmpty()) {
                     val blerpUrl = "https://blerp.com/x/$blerpUrlKey"
-                    Log.d(TAG, "Blerp URL found for $kickUsername: $blerpUrl")
-                    Result.success(blerpUrl)
+                    val pointsDisabled = streamer.soundEmotesObject?.channelPointsDisabled == true
+                    Log.d(TAG, "Blerp URL found for $kickUsername: $blerpUrl (ownerId: ${streamer.id}, pointsDisabled: $pointsDisabled)")
+                    Result.success(
+                        dev.xacnio.kciktv.shared.data.api.BlerpChannelInfo(
+                            url = blerpUrl,
+                            channelOwnerId = streamer.id,
+                            channelPointsDisabled = pointsDisabled,
+                            points = page.channelViewerEdge?.points,
+                            showManualButton = page.channelViewerEdge?.showManualButton == true,
+                            standardMs = page.channelViewerEdge?.standardMS
+                        )
+                    )
                 } else {
                     Log.d(TAG, "No Blerp user found for $kickUsername")
                     Result.success(null)
@@ -1997,6 +2013,77 @@ class ChannelRepository {
             Log.e(TAG, "Blerp API Exception: ${e.message}")
             Result.success(null) // Fail gracefully, don't crash for Blerp
         }
+    }
+
+    /** Fires one channel point tick, authenticated with the Blerp session from the WebView. */
+    suspend fun earnBlerpPoints(channelOwnerId: String, blerpCookies: String?): dev.xacnio.kciktv.shared.data.api.BlerpEarnResult = withContext(Dispatchers.IO) {
+        val token = extractBlerpToken(blerpCookies)
+        if (token == null && blerpCookies.isNullOrEmpty()) {
+            Log.d(TAG, "Blerp earn skipped: no Blerp session stored")
+            return@withContext dev.xacnio.kciktv.shared.data.api.BlerpEarnResult.Failed
+        }
+        try {
+            val request = dev.xacnio.kciktv.shared.data.api.BlerpEarnRequest(
+                variables = dev.xacnio.kciktv.shared.data.api.BlerpEarnVariables(channelOwnerId = channelOwnerId)
+            )
+
+            val response = RetrofitClient.blerpService.earnSnoots(
+                authorization = token?.let { "Bearer $it" },
+                cookie = blerpCookies,
+                body = request
+            )
+
+            val body = response.body()
+            val error = body?.errors?.firstOrNull()?.message
+            if (error != null) {
+                val retryAfterMs = parseBlerpCooldown(error)
+                if (retryAfterMs != null) {
+                    Log.d(TAG, "Blerp earn on cooldown, retrying in ${retryAfterMs}ms")
+                    return@withContext dev.xacnio.kciktv.shared.data.api.BlerpEarnResult.TooEarly(retryAfterMs)
+                }
+                Log.w(TAG, "Blerp earn error: $error")
+                return@withContext dev.xacnio.kciktv.shared.data.api.BlerpEarnResult.Failed
+            }
+            if (!response.isSuccessful) {
+                Log.w(TAG, "Blerp earn HTTP error: ${response.code()}")
+                return@withContext dev.xacnio.kciktv.shared.data.api.BlerpEarnResult.Failed
+            }
+
+            val result = body?.data?.soundEmotes?.earningSnoots
+            Log.d(TAG, "Blerp earned ${result?.pointsIncremented} points (total: ${result?.channelViewerEdge?.points})")
+            dev.xacnio.kciktv.shared.data.api.BlerpEarnResult.Earned(
+                pointsIncremented = result?.pointsIncremented,
+                totalPoints = result?.channelViewerEdge?.points,
+                intervalMs = result?.channelViewerEdge?.standardMS,
+                showManualButton = result?.channelViewerEdge?.showManualButton == true
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Blerp earn exception: ${e.message}")
+            dev.xacnio.kciktv.shared.data.api.BlerpEarnResult.Failed
+        }
+    }
+
+    /** Reads the wait out of "Cannot increment points yet! Please wait 22.111 seconds." */
+    private fun parseBlerpCooldown(errorMessage: String): Long? {
+        val seconds = Regex("""wait\s+([\d.]+)\s+seconds""", RegexOption.IGNORE_CASE)
+            .find(errorMessage)
+            ?.groupValues
+            ?.get(1)
+            ?.toDoubleOrNull() ?: return null
+        return (seconds * 1000).toLong()
+    }
+
+    /** Finds the Blerp session JWT in a raw cookie header, matching on shape not cookie name. */
+    private fun extractBlerpToken(blerpCookies: String?): String? {
+        val cookies = blerpCookies ?: return null
+        for (cookie in cookies.split(";")) {
+            val nameValue = cookie.trim()
+            val separator = nameValue.indexOf('=')
+            if (separator <= 0) continue
+            val value = nameValue.substring(separator + 1).trim()
+            if (value.startsWith("eyJ") && value.count { it == '.' } == 2) return value
+        }
+        return null
     }
 
     suspend fun getUserLevel(token: String): Result<dev.xacnio.kciktv.shared.data.model.UserLevelData> = withContext(Dispatchers.IO) {

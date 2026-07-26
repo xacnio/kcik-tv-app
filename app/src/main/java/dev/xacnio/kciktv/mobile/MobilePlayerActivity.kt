@@ -628,7 +628,98 @@ class MobilePlayerActivity : FragmentActivity() {
     fun cancelBlerpCleanupTimer() {
         blerpCleanupHandler.removeCallbacks(blerpCleanupRunnable)
     }
-    
+
+    // Blerp channel points ticker
+    internal var currentBlerpOwnerId: String? = null
+    internal var currentBlerpPointsDisabled = false
+    // Reward cadence reported by the channel (standardMS)
+    internal var currentBlerpStandardMs: Long? = null
+    private var blerpEarnJob: kotlinx.coroutines.Job? = null
+
+    /** Shows the viewer's point balance on the Blerp button, or hides it when there is none. */
+    fun updateBlerpPointsBadge(points: Int?) {
+        runOnUiThread {
+            if (points == null || currentBlerpPointsDisabled) {
+                binding.blerpPointsBadge.visibility = View.GONE
+            } else {
+                binding.blerpPointsBadge.text = dev.xacnio.kciktv.shared.util.FormatUtils.formatViewerCount(points)
+                binding.blerpPointsBadge.visibility = View.VISIBLE
+            }
+        }
+    }
+
+    /** Highlights the Blerp button while a manual reward is waiting to be claimed in the sheet. */
+    fun updateBlerpManualRewardHint(available: Boolean) {
+        val show = available && !currentBlerpPointsDisabled
+        runOnUiThread {
+            binding.blerpButton.setBackgroundResource(
+                if (show) R.drawable.bg_item_ripple_green else R.drawable.bg_item_ripple
+            )
+            // Dark icon reads against the bright background
+            binding.blerpButton.imageTintList = android.content.res.ColorStateList.valueOf(
+                if (show) 0xFF000000.toInt() else 0xFFFFFFFF.toInt()
+            )
+        }
+    }
+
+    /**
+     * Mirrors the Blerp extension's watch-time reward: one tick per standardMS while the player
+     * screen is alive. Always restarts the interval, so call it when the channel changes.
+     */
+    fun startBlerpEarnTicker(channelOwnerId: String) {
+        stopBlerpEarnTicker()
+        if (!prefs.blerpEnabled) return
+        // Nothing to earn if the streamer turned channel points off
+        if (currentBlerpPointsDisabled) return
+        // Without a session there is no viewer to credit
+        if (prefs.savedBlerpCookies.isNullOrEmpty()) return
+
+        blerpEarnJob = lifecycleScope.launch {
+            var nextDelayMs = currentBlerpStandardMs ?: Constants.Blerp.EARN_INTERVAL_MS
+            var failures = 0
+            while (true) {
+                // Earn after the interval, not before: the points are for watch time
+                kotlinx.coroutines.delay(nextDelayMs)
+
+                nextDelayMs = when (val result = repository.earnBlerpPoints(channelOwnerId, prefs.savedBlerpCookies)) {
+                    is dev.xacnio.kciktv.shared.data.api.BlerpEarnResult.Earned -> {
+                        failures = 0
+                        result.totalPoints?.let { updateBlerpPointsBadge(it) }
+                        updateBlerpManualRewardHint(result.showManualButton)
+                        // Prefer the channel's own cadence when Blerp reports one
+                        result.intervalMs?.also { currentBlerpStandardMs = it }
+                            ?: currentBlerpStandardMs
+                            ?: Constants.Blerp.EARN_INTERVAL_MS
+                    }
+                    // Beat the cooldown; wait out what's left plus a margin
+                    is dev.xacnio.kciktv.shared.data.api.BlerpEarnResult.TooEarly -> {
+                        failures = 0
+                        result.retryAfterMs + Constants.Blerp.EARN_RETRY_MARGIN_MS
+                    }
+                    dev.xacnio.kciktv.shared.data.api.BlerpEarnResult.Failed -> {
+                        // Expired session or a dead endpoint won't fix itself, so stop retrying
+                        if (++failures >= Constants.Blerp.EARN_MAX_FAILURES) {
+                            Log.w(TAG, "Blerp earn giving up after $failures failures")
+                            return@launch
+                        }
+                        currentBlerpStandardMs ?: Constants.Blerp.EARN_INTERVAL_MS
+                    }
+                }
+            }
+        }
+    }
+
+    /** Resumes ticking only if idle, so returning from VOD doesn't discard accumulated watch time. */
+    fun ensureBlerpEarnTicker() {
+        if (blerpEarnJob?.isActive == true) return
+        currentBlerpOwnerId?.let { startBlerpEarnTicker(it) }
+    }
+
+    fun stopBlerpEarnTicker() {
+        blerpEarnJob?.cancel()
+        blerpEarnJob = null
+    }
+
     // Bottom Sheet
 
     internal val activeBottomSheets = mutableListOf<com.google.android.material.bottomsheet.BottomSheetDialog>()
