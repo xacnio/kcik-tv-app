@@ -1,12 +1,14 @@
 # Privacy Policy
 
-**Last Updated:** February 13, 2026
+**Last Updated:** July 26, 2026
 
 ## 1. Introduction
 
 KCIKTV ("we", "our", or "us") is an open-source Android TV and mobile client for the streaming platform Kick.com. We are committed to protecting your privacy and ensuring transparency about how your data is handled.
 
 **Key Point:** KCIKTV is a third-party client. We do not own or operate Kick.com. When you use this app, you are also interacting with Kick's services directly.
+
+**Disclaimer:** KCIKTV is an unofficial, independent project — **not affiliated with, authorized by, or endorsed by Kick.com, Blerp, or any other service it connects to**. All trademarks belong to their respective owners and are used for identification only.
 
 ## 2. Information We Collect
 

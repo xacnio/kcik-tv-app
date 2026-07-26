@@ -5,6 +5,11 @@ An unofficial client for the Kick.com streaming platform. Designed for both **An
 [![Build and Release](https://github.com/xacnio/kcik-tv-app/actions/workflows/release.yml/badge.svg)](https://github.com/xacnio/kcik-tv-app/actions/workflows/release.yml)
 [![Website](https://img.shields.io/badge/Website-KCIKTV-53FC18)](https://xacnio.github.io/kcik-tv-app/)
 
+## ⚠️ Disclaimer
+
+Unofficial, independent project — **not affiliated with, authorized by, or endorsed by Kick.com, Blerp, or any other service it connects to**. All trademarks belong to their respective owners and are used for identification only.
+
+It hosts no content of its own; it is an alternative client for publicly reachable endpoints. Provided "as is", with no warranty — you are responsible for complying with each platform's Terms of Service.
 
 ## 🌟 Features & Usage
 
