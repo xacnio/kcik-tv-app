@@ -325,7 +325,6 @@ class DragToMiniPlayerManager(private val activity: MobilePlayerActivity) {
                 when (activity.screenBeforePlayer) {
                     MobilePlayerActivity.AppScreen.STREAM_FEED -> activity.streamFeedManager.feedRootView
                     MobilePlayerActivity.AppScreen.CLIP_FEED -> activity.clipFeedManager.feedRootView
-                    MobilePlayerActivity.AppScreen.SEARCH -> binding.searchContainer
                     MobilePlayerActivity.AppScreen.BROWSE -> binding.browseScreenContainer.root
                     MobilePlayerActivity.AppScreen.FOLLOWING -> binding.followingScreenContainer.root
                     MobilePlayerActivity.AppScreen.CHANNEL_PROFILE -> binding.channelProfileContainer.root

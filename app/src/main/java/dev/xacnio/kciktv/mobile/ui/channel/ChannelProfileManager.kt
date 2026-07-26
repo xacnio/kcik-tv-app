@@ -103,8 +103,8 @@ class ChannelProfileManager(
         
         // Capture previous screen state if fresh open AND not restoring
         if (!isChannelProfileVisible && !isRestore) {
+            // The search overlay is skipped on purpose: what matters is the screen underneath it
             previousContainerId = when {
-                binding.searchContainer.visibility == View.VISIBLE -> R.id.searchContainer
                 activity.browseManager.isCategoryDetailsVisible -> R.id.categoryDetailsContainer
                 binding.browseScreenContainer.root.visibility == View.VISIBLE -> R.id.browseScreenContainer
                 binding.followingScreenContainer.root.visibility == View.VISIBLE -> R.id.followingScreenContainer
@@ -235,12 +235,6 @@ class ChannelProfileManager(
                 binding.categoryDetailsContainer.root.bringToFront()
                 binding.mobileHeader.visibility = View.GONE
                 activity.setCurrentScreen(MobilePlayerActivity.AppScreen.CATEGORY_DETAILS)
-            }
-            R.id.searchContainer -> {
-                binding.searchContainer.visibility = View.VISIBLE
-                binding.searchContainer.bringToFront()
-                binding.mobileHeader.visibility = View.VISIBLE
-                activity.setCurrentScreen(MobilePlayerActivity.AppScreen.SEARCH)
             }
             else -> {
                 // Default to Home

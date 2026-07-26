@@ -816,7 +816,7 @@ class ClipFeedManager(private val activity: MobilePlayerActivity) {
             binding.browseScreenContainer.root.visibility == View.VISIBLE -> binding.browseScreenContainer.root
             binding.channelProfileContainer.root.visibility == View.VISIBLE -> binding.channelProfileContainer.root
             binding.followingScreenContainer.root.visibility == View.VISIBLE -> binding.followingScreenContainer.root
-            binding.searchContainer.visibility == View.VISIBLE -> binding.searchContainer
+            // The search overlay is skipped on purpose: what matters is the screen underneath it
             else -> null
         }
 

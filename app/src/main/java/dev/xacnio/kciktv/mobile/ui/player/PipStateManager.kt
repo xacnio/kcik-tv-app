@@ -223,8 +223,7 @@ class PipStateManager(private val activity: MobilePlayerActivity) {
         val navVisibility = when (screenBeforePip) {
             MobilePlayerActivity.AppScreen.HOME,
             MobilePlayerActivity.AppScreen.BROWSE,
-            MobilePlayerActivity.AppScreen.FOLLOWING,
-            MobilePlayerActivity.AppScreen.SEARCH -> View.VISIBLE
+            MobilePlayerActivity.AppScreen.FOLLOWING -> View.VISIBLE
             else -> View.GONE
         }
         binding.bottomNavContainer.visibility = navVisibility
@@ -252,10 +251,6 @@ class PipStateManager(private val activity: MobilePlayerActivity) {
             MobilePlayerActivity.AppScreen.CHANNEL_PROFILE -> {
                 binding.channelProfileContainer.root.visibility = View.VISIBLE
                 binding.mobileHeader.visibility = View.VISIBLE
-            }
-            MobilePlayerActivity.AppScreen.SEARCH -> {
-                binding.searchContainer.visibility = View.VISIBLE
-                binding.mobileHeader.visibility = View.GONE
             }
             MobilePlayerActivity.AppScreen.CATEGORY_DETAILS -> {
                 binding.categoryDetailsContainer.root.visibility = View.VISIBLE

@@ -200,12 +200,13 @@ import dev.xacnio.kciktv.BuildConfig
 class MobilePlayerActivity : FragmentActivity() {
 
     // Navigation State Enum
+    // Search is deliberately absent: it is an overlay above whichever screen is showing, so it
+    // never becomes the current screen and is never restored as one.
     enum class AppScreen {
         HOME,
         BROWSE,
         CATEGORY_DETAILS,
         FOLLOWING,
-        SEARCH,
         CHANNEL_PROFILE,
         STREAM_FEED,
         CLIP_FEED,
@@ -374,8 +375,7 @@ class MobilePlayerActivity : FragmentActivity() {
         val navVisibility = when (screen) {
             AppScreen.HOME,
             AppScreen.BROWSE,
-            AppScreen.FOLLOWING,
-            AppScreen.SEARCH -> View.VISIBLE
+            AppScreen.FOLLOWING -> View.VISIBLE
             else -> View.GONE
         }
         binding.bottomNavContainer.visibility = navVisibility
@@ -388,6 +388,10 @@ class MobilePlayerActivity : FragmentActivity() {
         if (currentScreen != screen) {
             android.util.Log.d("MobilePlayerNav", "State Change: $currentScreen -> $screen")
             currentScreen = screen
+
+            // Navigating away closes the search overlay for good — clearing its input and keyboard,
+            // not just hiding it, so it can't reappear over the wrong screen
+            if (::searchUiManager.isInitialized) searchUiManager.closeSearch()
             
             // Log screen view (anonymous - only screen name)
             analytics.logScreenView(screen.name)
@@ -397,7 +401,6 @@ class MobilePlayerActivity : FragmentActivity() {
                 AppScreen.HOME -> 0
                 AppScreen.BROWSE, AppScreen.CATEGORY_DETAILS -> 1
                 AppScreen.FOLLOWING -> 2
-                AppScreen.SEARCH -> 3
                 else -> -1
             }
             if (navIndex >= 0) {
@@ -1406,10 +1409,6 @@ class MobilePlayerActivity : FragmentActivity() {
                     screenBeforePlayer = AppScreen.CATEGORY_DETAILS
                     returnToProfileSlug = null
                 }
-                binding.searchContainer.visibility == View.VISIBLE -> {
-                    screenBeforePlayer = AppScreen.SEARCH
-                    returnToProfileSlug = null
-                }
                 binding.browseScreenContainer.root.visibility == View.VISIBLE -> {
                     screenBeforePlayer = AppScreen.BROWSE
                     returnToProfileSlug = null
@@ -2174,7 +2173,7 @@ class MobilePlayerActivity : FragmentActivity() {
             binding.categoryDetailsContainer.root.visibility == View.VISIBLE -> R.id.categoryDetailsContainer
             binding.browseScreenContainer.root.visibility == View.VISIBLE -> R.id.browseScreenContainer
             binding.followingScreenContainer.root.visibility == View.VISIBLE -> R.id.followingScreenContainer
-            binding.searchContainer.visibility == View.VISIBLE -> R.id.searchContainer
+            // The search overlay is skipped on purpose: what matters is the screen underneath it
             else -> R.id.homeScreenContainer
         }
 
@@ -2410,9 +2409,6 @@ class MobilePlayerActivity : FragmentActivity() {
             if (binding.browseScreenContainer.root.visibility == View.VISIBLE) {
                  screenBeforePlayer = AppScreen.BROWSE
                  previousScreenId = R.id.browseScreenContainer
-            } else if (binding.searchContainer.visibility == View.VISIBLE) {
-                 screenBeforePlayer = AppScreen.SEARCH
-                 previousScreenId = R.id.searchContainer
             }
         }
 
@@ -2464,9 +2460,6 @@ class MobilePlayerActivity : FragmentActivity() {
             if (binding.browseScreenContainer.root.visibility == View.VISIBLE) {
                  screenBeforePlayer = AppScreen.BROWSE
                  previousScreenId = R.id.browseScreenContainer
-            } else if (binding.searchContainer.visibility == View.VISIBLE) {
-                 screenBeforePlayer = AppScreen.SEARCH
-                 previousScreenId = R.id.searchContainer
             }
         }
 
@@ -3220,7 +3213,7 @@ class MobilePlayerActivity : FragmentActivity() {
                         // If in Profile with mini player, go back to Home while keeping mini player
                         if (channelProfileManager.isChannelProfileVisible) {
                              Log.d(TAG, "BACK: isMiniPlayerMode + profileVisible -> close profile, show home, keep mini player")
-                             // Close profile correctly, respecting previous container (e.g. Search)
+                             // Close profile correctly, respecting previous container
                              channelProfileManager.closeChannelProfile()
                         } else if (browseManager.isCategoryDetailsVisible) {
                              Log.d(TAG, "BACK: isMiniPlayerMode + categoryVisible -> close category details")
@@ -3232,10 +3225,6 @@ class MobilePlayerActivity : FragmentActivity() {
                         } else if (binding.followingScreenContainer.root.visibility == View.VISIBLE) {
                              Log.d(TAG, "BACK: isMiniPlayerMode + followingVisible -> showHomeScreen")
                              showHomeScreen()
-                        } else if (binding.searchContainer.visibility == View.VISIBLE) {
-                             Log.d(TAG, "BACK: isMiniPlayerMode + searchVisible -> showHomeScreen")
-                             showHomeScreen()
-
                         } else if (binding.homeScreenContainer.root.visibility == View.VISIBLE) {
                              Log.d(TAG, "BACK: isMiniPlayerMode + homeVisible -> exit app")
                              // Already on home screen with mini player - exit app
@@ -3408,7 +3397,6 @@ class MobilePlayerActivity : FragmentActivity() {
                 AppScreen.CATEGORY_DETAILS -> targetScreenId = R.id.categoryDetailsContainer
                 AppScreen.BROWSE -> targetScreenId = R.id.browseScreenContainer
                 AppScreen.FOLLOWING -> targetScreenId = R.id.followingScreenContainer
-                AppScreen.SEARCH -> targetScreenId = R.id.searchContainer
                 AppScreen.CHANNEL_PROFILE -> targetScreenId = R.id.channelProfileContainer
                 AppScreen.HOME -> targetScreenId = R.id.homeScreenContainer
                 else -> {
@@ -3476,12 +3464,6 @@ class MobilePlayerActivity : FragmentActivity() {
                 binding.playerScreenContainer.bringToFront()
                 
                 setCurrentScreen(AppScreen.FOLLOWING)
-            }
-            R.id.searchContainer -> {
-                Log.d(TAG, "  returning to search")
-                binding.searchContainer.visibility = View.VISIBLE
-                binding.playerScreenContainer.bringToFront()
-                setCurrentScreen(AppScreen.SEARCH)
             }
             R.id.channelProfileContainer -> {
                 // Return to channel profile (original behavior)

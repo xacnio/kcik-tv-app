@@ -1180,16 +1180,14 @@ class BrowseManager(private val activity: MobilePlayerActivity) {
 
     private var previousContainerId: Int = R.id.browseScreenContainer
 
-    fun openCategoryDetails(category: TopCategory, fromHome: Boolean = false, fromSearch: Boolean = false) {
+    fun openCategoryDetails(category: TopCategory, fromHome: Boolean = false) {
         // Capture previous screen state if fresh open
         if (!isCategoryDetailsVisible) {
             val isHomeVisible = binding.homeScreenContainer.root.visibility == View.VISIBLE
             val isFollowingVisible = binding.followingScreenContainer.root.visibility == View.VISIBLE
-            val isSearchVisible = binding.searchContainer.visibility == View.VISIBLE
-            
+
+            // The search overlay is skipped on purpose: what matters is the screen underneath it
             previousContainerId = when {
-                fromSearch -> R.id.searchContainer
-                isSearchVisible -> R.id.searchContainer
                 isHomeVisible || fromHome -> R.id.homeScreenContainer
                 isFollowingVisible -> R.id.followingScreenContainer
                 else -> R.id.browseScreenContainer
@@ -1336,13 +1334,13 @@ class BrowseManager(private val activity: MobilePlayerActivity) {
         }
     }
 
-    fun openCategoryBySlug(slug: String, fromSearch: Boolean = false) {
+    fun openCategoryBySlug(slug: String) {
         activity.lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val result = repository.getSubcategoryDetails(slug)
                 result.onSuccess { category ->
                     withContext(Dispatchers.Main) {
-                        openCategoryDetails(category, fromSearch = fromSearch)
+                        openCategoryDetails(category)
                     }
                 }.onFailure {
                     withContext(Dispatchers.Main) {
@@ -1367,12 +1365,7 @@ class BrowseManager(private val activity: MobilePlayerActivity) {
         binding.categoryDetailsContainer.root.visibility = View.GONE
         binding.mobileHeader.visibility = View.VISIBLE
         
-        if (previousContainerId == R.id.searchContainer) {
-            binding.browseScreenContainer.root.visibility = View.GONE
-            binding.searchContainer.visibility = View.VISIBLE
-            binding.searchContainer.bringToFront()
-            activity.setCurrentScreen(MobilePlayerActivity.AppScreen.SEARCH)
-        } else if (previousContainerId == R.id.homeScreenContainer) {
+        if (previousContainerId == R.id.homeScreenContainer) {
             binding.browseScreenContainer.root.visibility = View.GONE
             binding.homeScreenContainer.root.visibility = View.VISIBLE
             activity.isHomeScreenVisible = true

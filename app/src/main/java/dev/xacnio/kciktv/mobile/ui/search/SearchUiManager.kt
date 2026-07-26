@@ -130,7 +130,7 @@ class SearchUiManager(private val activity: MobilePlayerActivity) {
                     "category" -> {
                         closeSearch()
                         item.categoryItem?.let { cat ->
-                            activity.browseManager.openCategoryBySlug(cat.slug, fromSearch = true)
+                            activity.browseManager.openCategoryBySlug(cat.slug)
                         }
                     }
                 }
@@ -186,7 +186,7 @@ class SearchUiManager(private val activity: MobilePlayerActivity) {
                                 is SearchResultItem.CategoryResult -> {
                                     prefs.addSearchHistoryEntry(AppPreferences.HistoryEntry(type = "category", categoryItem = item))
                                     closeSearch()
-                                    activity.browseManager.openCategoryBySlug(item.slug, fromSearch = true)
+                                    activity.browseManager.openCategoryBySlug(item.slug)
                                 }
                                 is SearchResultItem.TagResult -> {
                                     Toast.makeText(activity, activity.getString(R.string.tag_format, item.label), Toast.LENGTH_SHORT).show()
