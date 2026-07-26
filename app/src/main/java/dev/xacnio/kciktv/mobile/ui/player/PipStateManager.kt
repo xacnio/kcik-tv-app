@@ -219,8 +219,14 @@ class PipStateManager(private val activity: MobilePlayerActivity) {
         val binding = activity.binding
         Log.d(TAG, "restoreUiFromPip: wasMini=$wasMiniPlayerModeBeforePip, screen=$screenBeforePip")
 
+        // screenBeforePip holds whatever screen was behind the player, since the player is not an
+        // AppScreen of its own. That screen only belongs on top of a mini player — bringing it back
+        // under a full player would leave it covering the player, so keep it hidden in that case.
+        // Closing the player later runs returnToPreviousScreen(), which restores it properly.
+        val restoringFullPlayer = !wasMiniPlayerModeBeforePip && activity.currentChannel != null
+
         // Restore bottom navigation visibility based on the screen context
-        val navVisibility = when (screenBeforePip) {
+        val navVisibility = if (restoringFullPlayer) View.GONE else when (screenBeforePip) {
             MobilePlayerActivity.AppScreen.HOME,
             MobilePlayerActivity.AppScreen.BROWSE,
             MobilePlayerActivity.AppScreen.FOLLOWING -> View.VISIBLE
@@ -235,40 +241,41 @@ class PipStateManager(private val activity: MobilePlayerActivity) {
         }
 
         // 1. First, restore the background screen based on original context
-        when (screenBeforePip) {
-            MobilePlayerActivity.AppScreen.HOME -> {
-                binding.homeScreenContainer.root.visibility = View.VISIBLE
-                binding.mobileHeader.visibility = View.VISIBLE
+        if (!restoringFullPlayer) {
+            when (screenBeforePip) {
+                MobilePlayerActivity.AppScreen.HOME -> {
+                    binding.homeScreenContainer.root.visibility = View.VISIBLE
+                    binding.mobileHeader.visibility = View.VISIBLE
+                }
+                MobilePlayerActivity.AppScreen.BROWSE -> {
+                    binding.browseScreenContainer.root.visibility = View.VISIBLE
+                    binding.mobileHeader.visibility = View.VISIBLE
+                }
+                MobilePlayerActivity.AppScreen.FOLLOWING -> {
+                    binding.followingScreenContainer.root.visibility = View.VISIBLE
+                    binding.mobileHeader.visibility = View.VISIBLE
+                }
+                MobilePlayerActivity.AppScreen.CHANNEL_PROFILE -> {
+                    binding.channelProfileContainer.root.visibility = View.VISIBLE
+                    binding.mobileHeader.visibility = View.VISIBLE
+                }
+                MobilePlayerActivity.AppScreen.CATEGORY_DETAILS -> {
+                    binding.categoryDetailsContainer.root.visibility = View.VISIBLE
+                    binding.mobileHeader.visibility = View.GONE
+                }
+                MobilePlayerActivity.AppScreen.STREAM_FEED -> {
+                    activity.streamFeedManager.restoreVisibility()
+                    binding.mobileHeader.visibility = View.GONE
+                }
+                MobilePlayerActivity.AppScreen.CLIP_FEED -> {
+                    activity.clipFeedManager.restoreVisibility()
+                    binding.mobileHeader.visibility = View.GONE
+                }
+                MobilePlayerActivity.AppScreen.COLLECTIBLES -> {
+                    binding.collectiblesContainer.root.visibility = View.VISIBLE
+                    binding.mobileHeader.visibility = View.GONE
+                }
             }
-            MobilePlayerActivity.AppScreen.BROWSE -> {
-                binding.browseScreenContainer.root.visibility = View.VISIBLE
-                binding.mobileHeader.visibility = View.VISIBLE
-            }
-            MobilePlayerActivity.AppScreen.FOLLOWING -> {
-                binding.followingScreenContainer.root.visibility = View.VISIBLE
-                binding.mobileHeader.visibility = View.VISIBLE
-            }
-            MobilePlayerActivity.AppScreen.CHANNEL_PROFILE -> {
-                binding.channelProfileContainer.root.visibility = View.VISIBLE
-                binding.mobileHeader.visibility = View.VISIBLE
-            }
-            MobilePlayerActivity.AppScreen.CATEGORY_DETAILS -> {
-                binding.categoryDetailsContainer.root.visibility = View.VISIBLE
-                binding.mobileHeader.visibility = View.GONE
-            }
-            MobilePlayerActivity.AppScreen.STREAM_FEED -> {
-                activity.streamFeedManager.restoreVisibility()
-                binding.mobileHeader.visibility = View.GONE
-            }
-            MobilePlayerActivity.AppScreen.CLIP_FEED -> {
-                activity.clipFeedManager.restoreVisibility()
-                binding.mobileHeader.visibility = View.GONE
-            }
-            MobilePlayerActivity.AppScreen.COLLECTIBLES -> {
-                binding.collectiblesContainer.root.visibility = View.VISIBLE
-                binding.mobileHeader.visibility = View.GONE
-            }
-
         }
 
         // 2. Then restore the Player state (Mini or Full)
@@ -291,10 +298,12 @@ class PipStateManager(private val activity: MobilePlayerActivity) {
             binding.root.postDelayed({
                 activity.miniPlayerManager.refreshInteractions()
             }, 100)
-        } else if (activity.currentChannel != null) {
+        } else if (restoringFullPlayer) {
             // Restore as Full Player
             binding.mobileHeader.visibility = View.GONE
             binding.playerScreenContainer.visibility = View.VISIBLE
+            // Nothing may draw over the player — screens opened earlier were brought to front
+            binding.playerScreenContainer.bringToFront()
             binding.chatContainer.visibility = View.VISIBLE
             binding.bottomSheetCoordinator.visibility = View.VISIBLE
             
