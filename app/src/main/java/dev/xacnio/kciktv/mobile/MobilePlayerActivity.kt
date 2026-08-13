@@ -970,6 +970,7 @@ class MobilePlayerActivity : FragmentActivity() {
 
         super.onCreate(savedInstanceState)
         prefs = AppPreferences(this)
+        dev.xacnio.kciktv.shared.data.api.RetrofitClient.refreshProxy(prefs)
 
         // Subscribe to thermal pressure so FloatingEmote/EmoteCombo/chat-flush can
         // back off auxiliary work when the device gets hot. NOT a quality knob —

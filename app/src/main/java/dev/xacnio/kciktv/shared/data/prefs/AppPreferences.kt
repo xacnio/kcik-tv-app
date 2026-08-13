@@ -872,4 +872,41 @@ class AppPreferences(private val context: Context) {
     fun resetTrustedDomains() {
         prefs.edit().remove("trusted_domains").apply()
     }
+
+    // === Network Proxy (Advanced) ===
+    // Only applied to kick.com, web.kick.com and search.kick.com traffic.
+
+    var proxyEnabled: Boolean
+        get() = prefs.getBoolean("proxy_enabled", false)
+        set(value) = prefs.edit().putBoolean("proxy_enabled", value).apply()
+
+    /** "http" or "socks5" */
+    var proxyType: String
+        get() = prefs.getString("proxy_type", "socks5") ?: "socks5"
+        set(value) = prefs.edit().putString("proxy_type", value).apply()
+
+    /**
+     * "critical" (default) routes only the channel/video API endpoints that Kick can
+     * geo-block (api/v2/channels, api/v1/channels, api/v1/video) through the proxy.
+     * "all" routes every kick.com/web.kick.com/search.kick.com API call through it.
+     */
+    var proxyScope: String
+        get() = prefs.getString("proxy_scope", "critical") ?: "critical"
+        set(value) = prefs.edit().putString("proxy_scope", value).apply()
+
+    var proxyHost: String
+        get() = prefs.getString("proxy_host", "") ?: ""
+        set(value) = prefs.edit().putString("proxy_host", value).apply()
+
+    var proxyPort: Int
+        get() = prefs.getInt("proxy_port", 0)
+        set(value) = prefs.edit().putInt("proxy_port", value).apply()
+
+    var proxyUsername: String?
+        get() = getStringSafe("proxy_username", null)
+        set(value) = putStringSafe("proxy_username", value)
+
+    var proxyPassword: String?
+        get() = getStringSafe("proxy_password", null)
+        set(value) = putStringSafe("proxy_password", value)
 }

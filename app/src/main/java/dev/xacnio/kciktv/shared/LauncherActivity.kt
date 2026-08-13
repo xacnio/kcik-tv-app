@@ -45,8 +45,9 @@ class LauncherActivity : FragmentActivity() {
         ) {
             // Activity is already transparent from Manifest theme, so just redirect.
             super.onCreate(savedInstanceState)
-            
+
             val prefs = AppPreferences(this)
+            dev.xacnio.kciktv.shared.data.api.RetrofitClient.refreshProxy(prefs)
             val uiMode = prefs.uiMode
             val targetActivity = when (uiMode) {
                 "tv" -> PlayerActivity::class.java
@@ -86,6 +87,7 @@ class LauncherActivity : FragmentActivity() {
         lifecycleScope.launch {
             // Start background tasks immediately in parallel
             val prefs = AppPreferences(this@LauncherActivity)
+            dev.xacnio.kciktv.shared.data.api.RetrofitClient.refreshProxy(prefs)
             val repository = ChannelRepository()
 
             // Propagate mock mode before any network call is made.

@@ -283,6 +283,37 @@
     <string name="trusted_domain_remove_confirm">Supprimer %s des domaines de confiance ?</string>
     <string name="add">Add</string>
 
+    <!-- Proxy Settings -->
+    <string name="settings_proxy">Proxy</string>
+    <string name="proxy_status_disabled">Désactivé</string>
+    <string name="proxy_status_enabled">%1$s • %2$s:%3$d</string>
+    <string name="proxy_enable">Activer le proxy</string>
+    <string name="proxy_enable_desc">Achemine le trafic de kick.com, web.kick.com et search.kick.com via le proxy ci-dessous</string>
+    <string name="proxy_protocol">Protocole</string>
+    <string name="proxy_protocol_socks5">SOCKS5 (Recommandé)</string>
+    <string name="proxy_protocol_http">HTTP</string>
+    <string name="proxy_host">Hôte</string>
+    <string name="proxy_host_hint">ex. 127.0.0.1 ou proxy.example.com</string>
+    <string name="proxy_port">Port</string>
+    <string name="proxy_port_hint">ex. 1080</string>
+    <string name="proxy_not_set">Non défini</string>
+    <string name="proxy_username">Nom d\'utilisateur</string>
+    <string name="proxy_username_desc">Facultatif — laisser vide si non requis</string>
+    <string name="proxy_password">Mot de passe</string>
+    <string name="proxy_password_desc">Facultatif — laisser vide si non requis</string>
+    <string name="proxy_password_set">Défini</string>
+    <string name="proxy_invalid_host">Veuillez saisir un hôte valide</string>
+    <string name="proxy_invalid_port">Veuillez saisir un port valide (1-65535)</string>
+    <string name="proxy_saved">Paramètres du proxy enregistrés</string>
+    <string name="proxy_test">Tester le proxy</string>
+    <string name="proxy_testing">Test de la connexion du proxy…</string>
+    <string name="proxy_test_success">Succès ! Connecté en %1$dms</string>
+    <string name="proxy_test_failed">Échec : %1$s</string>
+    <string name="proxy_scope">Portée du proxy</string>
+    <string name="proxy_scope_desc">Le mode critique n\'achemine via le proxy que les points d\'accès de chaîne et de vidéo que Kick peut géo-bloquer ; le reste passe en direct. Le mode « Tout » achemine chaque appel API vers kick.com, web.kick.com et search.kick.com via le proxy.</string>
+    <string name="proxy_scope_critical">Points d\'accès critiques uniquement (Recommandé)</string>
+    <string name="proxy_scope_all">Tout le trafic de l\'API Kick</string>
+
     <!-- Settings Options -->
     <string name="pip_automatic">Automatique</string>
     <string name="pip_manual">Bouton uniquement</string>

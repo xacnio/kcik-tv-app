@@ -288,7 +288,300 @@ class SettingsPanelManager(
                 emojiIcon = "🔐") {
                 clearBlerpAuth()
             }
+
+            // Proxy
+            addSettingItem(container, null,
+                activity.getString(R.string.settings_proxy),
+                getProxyStatusValue(),
+                emojiIcon = "🛡️") {
+                showProxySettingsSheet()
+            }
         }
+    }
+
+    private fun getProxyStatusValue(): String {
+        return if (prefs.proxyEnabled && prefs.proxyHost.isNotBlank() && prefs.proxyPort in 1..65535) {
+            val typeLabel = if (prefs.proxyType == dev.xacnio.kciktv.shared.data.api.ProxyConfig.TYPE_SOCKS5) "SOCKS5" else "HTTP"
+            activity.getString(R.string.proxy_status_enabled, typeLabel, prefs.proxyHost, prefs.proxyPort)
+        } else {
+            activity.getString(R.string.proxy_status_disabled)
+        }
+    }
+
+    private fun refreshProxySheet() {
+        detailDialog?.dismiss()
+        showProxySettingsSheet()
+    }
+
+    private fun showProxySettingsSheet() {
+        showDetailSheet(activity.getString(R.string.settings_proxy)) { container ->
+            // Enable Toggle
+            addToggleSetting(container, R.drawable.ic_security,
+                activity.getString(R.string.proxy_enable),
+                activity.getString(R.string.proxy_enable_desc),
+                prefs.proxyEnabled) { isEnabled ->
+                prefs.proxyEnabled = isEnabled
+                dev.xacnio.kciktv.shared.data.api.RetrofitClient.refreshProxy(prefs)
+            }
+
+            // Protocol
+            val typeLabel = if (prefs.proxyType == dev.xacnio.kciktv.shared.data.api.ProxyConfig.TYPE_SOCKS5)
+                activity.getString(R.string.proxy_protocol_socks5)
+            else
+                activity.getString(R.string.proxy_protocol_http)
+
+            addSettingItem(container, null,
+                activity.getString(R.string.proxy_protocol),
+                typeLabel,
+                emojiIcon = "🔀") {
+                showProxyProtocolDialog()
+            }
+
+            // Scope
+            val scopeLabel = if (prefs.proxyScope == dev.xacnio.kciktv.shared.data.api.ProxyConfig.SCOPE_ALL)
+                activity.getString(R.string.proxy_scope_all)
+            else
+                activity.getString(R.string.proxy_scope_critical)
+
+            addSettingItem(container, null,
+                activity.getString(R.string.proxy_scope),
+                scopeLabel,
+                emojiIcon = "🎯") {
+                showProxyScopeDialog()
+            }
+
+            TextView(activity).apply {
+                text = activity.getString(R.string.proxy_scope_desc)
+                textSize = 12f
+                setTextColor(0xFF888888.toInt())
+                val density = activity.resources.displayMetrics.density
+                setPadding((20 * density).toInt(), (2 * density).toInt(), (20 * density).toInt(), (12 * density).toInt())
+                container.addView(this)
+            }
+
+            // Host
+            addSettingItem(container, null,
+                activity.getString(R.string.proxy_host),
+                prefs.proxyHost.ifBlank { activity.getString(R.string.proxy_not_set) },
+                emojiIcon = "🌐") {
+                showProxyTextInputDialog(
+                    title = activity.getString(R.string.proxy_host),
+                    hint = activity.getString(R.string.proxy_host_hint),
+                    initialValue = prefs.proxyHost,
+                    isPassword = false
+                ) { value ->
+                    val host = value.trim()
+                        .removePrefix("http://")
+                        .removePrefix("https://")
+                        .removePrefix("socks5://")
+                        .trimEnd('/')
+                    if (host.isBlank()) {
+                        Toast.makeText(activity, R.string.proxy_invalid_host, Toast.LENGTH_SHORT).show()
+                        return@showProxyTextInputDialog
+                    }
+                    prefs.proxyHost = host
+                    dev.xacnio.kciktv.shared.data.api.RetrofitClient.refreshProxy(prefs)
+                    refreshProxySheet()
+                }
+            }
+
+            // Port
+            addSettingItem(container, null,
+                activity.getString(R.string.proxy_port),
+                if (prefs.proxyPort in 1..65535) prefs.proxyPort.toString() else activity.getString(R.string.proxy_not_set),
+                emojiIcon = "🔢") {
+                showProxyTextInputDialog(
+                    title = activity.getString(R.string.proxy_port),
+                    hint = activity.getString(R.string.proxy_port_hint),
+                    initialValue = if (prefs.proxyPort > 0) prefs.proxyPort.toString() else "",
+                    isPassword = false,
+                    isNumeric = true
+                ) { value ->
+                    val port = value.trim().toIntOrNull()
+                    if (port == null || port !in 1..65535) {
+                        Toast.makeText(activity, R.string.proxy_invalid_port, Toast.LENGTH_SHORT).show()
+                        return@showProxyTextInputDialog
+                    }
+                    prefs.proxyPort = port
+                    dev.xacnio.kciktv.shared.data.api.RetrofitClient.refreshProxy(prefs)
+                    refreshProxySheet()
+                }
+            }
+
+            // Username (optional)
+            addSettingItem(container, null,
+                activity.getString(R.string.proxy_username),
+                prefs.proxyUsername?.takeIf { it.isNotBlank() } ?: activity.getString(R.string.proxy_username_desc),
+                emojiIcon = "👤") {
+                showProxyTextInputDialog(
+                    title = activity.getString(R.string.proxy_username),
+                    hint = activity.getString(R.string.proxy_username),
+                    initialValue = prefs.proxyUsername ?: "",
+                    isPassword = false
+                ) { value ->
+                    prefs.proxyUsername = value.trim().ifBlank { null }
+                    dev.xacnio.kciktv.shared.data.api.RetrofitClient.refreshProxy(prefs)
+                    refreshProxySheet()
+                }
+            }
+
+            // Password (optional)
+            addSettingItem(container, null,
+                activity.getString(R.string.proxy_password),
+                if (!prefs.proxyPassword.isNullOrBlank()) activity.getString(R.string.proxy_password_set) else activity.getString(R.string.proxy_password_desc),
+                emojiIcon = "🔑") {
+                showProxyTextInputDialog(
+                    title = activity.getString(R.string.proxy_password),
+                    hint = activity.getString(R.string.proxy_password),
+                    initialValue = prefs.proxyPassword ?: "",
+                    isPassword = true
+                ) { value ->
+                    prefs.proxyPassword = value.ifBlank { null }
+                    dev.xacnio.kciktv.shared.data.api.RetrofitClient.refreshProxy(prefs)
+                    refreshProxySheet()
+                }
+            }
+
+            // Test connection
+            addSettingItem(container, null,
+                activity.getString(R.string.proxy_test),
+                null,
+                emojiIcon = "🧪") {
+                testProxyConnection()
+            }
+        }
+    }
+
+    private fun testProxyConnection() {
+        val host = prefs.proxyHost.trim()
+        val port = prefs.proxyPort
+        if (host.isBlank() || port !in 1..65535) {
+            Toast.makeText(activity, R.string.proxy_invalid_host, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        Toast.makeText(activity, R.string.proxy_testing, Toast.LENGTH_SHORT).show()
+
+        activity.lifecycleScope.launch(Dispatchers.IO) {
+            val proxyType = if (prefs.proxyType == dev.xacnio.kciktv.shared.data.api.ProxyConfig.TYPE_SOCKS5) {
+                java.net.Proxy.Type.SOCKS
+            } else {
+                java.net.Proxy.Type.HTTP
+            }
+            val proxy = java.net.Proxy(proxyType, java.net.InetSocketAddress.createUnresolved(host, port))
+            val testClient = dev.xacnio.kciktv.shared.data.api.RetrofitClient.buildProxyTestClient(proxy)
+
+            val startTime = System.currentTimeMillis()
+            try {
+                val request = Request.Builder()
+                    .url("https://kick.com/")
+                    .head()
+                    .build()
+                testClient.newCall(request).execute().use { response ->
+                    val elapsedMs = System.currentTimeMillis() - startTime
+                    withContext(Dispatchers.Main) {
+                        if (response.isSuccessful || response.code in 200..499) {
+                            Toast.makeText(activity, activity.getString(R.string.proxy_test_success, elapsedMs), Toast.LENGTH_LONG).show()
+                        } else {
+                            Toast.makeText(activity, activity.getString(R.string.proxy_test_failed, "HTTP ${response.code}"), Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(activity, activity.getString(R.string.proxy_test_failed, e.message ?: e.javaClass.simpleName), Toast.LENGTH_LONG).show()
+                }
+            } finally {
+                testClient.connectionPool.evictAll()
+                testClient.dispatcher.executorService.shutdown()
+            }
+        }
+    }
+
+    private fun showProxyProtocolDialog() {
+        val options = arrayOf(
+            activity.getString(R.string.proxy_protocol_socks5),
+            activity.getString(R.string.proxy_protocol_http)
+        )
+        val values = arrayOf(
+            dev.xacnio.kciktv.shared.data.api.ProxyConfig.TYPE_SOCKS5,
+            dev.xacnio.kciktv.shared.data.api.ProxyConfig.TYPE_HTTP
+        )
+        val currentIndex = values.indexOf(prefs.proxyType).takeIf { it >= 0 } ?: 0
+
+        AlertDialog.Builder(activity)
+            .setTitle(R.string.proxy_protocol)
+            .setSingleChoiceItems(options, currentIndex) { dialog, which ->
+                prefs.proxyType = values[which]
+                dev.xacnio.kciktv.shared.data.api.RetrofitClient.refreshProxy(prefs)
+                dialog.dismiss()
+                refreshProxySheet()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun showProxyScopeDialog() {
+        val options = arrayOf(
+            activity.getString(R.string.proxy_scope_critical),
+            activity.getString(R.string.proxy_scope_all)
+        )
+        val values = arrayOf(
+            dev.xacnio.kciktv.shared.data.api.ProxyConfig.SCOPE_CRITICAL,
+            dev.xacnio.kciktv.shared.data.api.ProxyConfig.SCOPE_ALL
+        )
+        val currentIndex = values.indexOf(prefs.proxyScope).takeIf { it >= 0 } ?: 0
+
+        AlertDialog.Builder(activity)
+            .setTitle(R.string.proxy_scope)
+            .setSingleChoiceItems(options, currentIndex) { dialog, which ->
+                prefs.proxyScope = values[which]
+                dev.xacnio.kciktv.shared.data.api.RetrofitClient.refreshProxy(prefs)
+                dialog.dismiss()
+                refreshProxySheet()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun showProxyTextInputDialog(
+        title: String,
+        hint: String,
+        initialValue: String,
+        isPassword: Boolean,
+        isNumeric: Boolean = false,
+        onSave: (String) -> Unit
+    ) {
+        val inputLayout = FrameLayout(activity).apply {
+            setPadding(
+                (24 * activity.resources.displayMetrics.density).toInt(),
+                (16 * activity.resources.displayMetrics.density).toInt(),
+                (24 * activity.resources.displayMetrics.density).toInt(),
+                0
+            )
+        }
+        val editText = android.widget.EditText(activity).apply {
+            this.hint = hint
+            setText(initialValue)
+            setSingleLine(true)
+            inputType = when {
+                isPassword -> android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+                isNumeric -> android.text.InputType.TYPE_CLASS_NUMBER
+                else -> android.text.InputType.TYPE_TEXT_VARIATION_URI
+            }
+            setSelection(text.length)
+        }
+        inputLayout.addView(editText)
+
+        AlertDialog.Builder(activity)
+            .setTitle(title)
+            .setView(inputLayout)
+            .setPositiveButton(R.string.confirm) { dialog, _ ->
+                onSave(editText.text.toString())
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
     }
 
     private fun showTrustedDomainsSheet() {

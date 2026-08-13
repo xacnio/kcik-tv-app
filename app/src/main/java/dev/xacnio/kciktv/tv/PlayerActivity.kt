@@ -695,6 +695,7 @@ class PlayerActivity : FragmentActivity() {
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate(savedInstanceState: Bundle?) {
         prefs = AppPreferences(this)
+        dev.xacnio.kciktv.shared.data.api.RetrofitClient.refreshProxy(prefs)
         applyLocale()
         super.onCreate(savedInstanceState)
         binding = ActivityPlayerBinding.inflate(layoutInflater)

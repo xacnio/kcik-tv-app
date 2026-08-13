@@ -283,6 +283,37 @@
     <string name="trusted_domain_remove_confirm">%s aus vertrauenswürdigen Domains entfernen?</string>
     <string name="add">Add</string>
 
+    <!-- Proxy Settings -->
+    <string name="settings_proxy">Proxy</string>
+    <string name="proxy_status_disabled">Deaktiviert</string>
+    <string name="proxy_status_enabled">%1$s • %2$s:%3$d</string>
+    <string name="proxy_enable">Proxy aktivieren</string>
+    <string name="proxy_enable_desc">Leitet den Datenverkehr von kick.com, web.kick.com und search.kick.com über den unten angegebenen Proxy</string>
+    <string name="proxy_protocol">Protokoll</string>
+    <string name="proxy_protocol_socks5">SOCKS5 (Empfohlen)</string>
+    <string name="proxy_protocol_http">HTTP</string>
+    <string name="proxy_host">Host</string>
+    <string name="proxy_host_hint">z. B. 127.0.0.1 oder proxy.example.com</string>
+    <string name="proxy_port">Port</string>
+    <string name="proxy_port_hint">z. B. 1080</string>
+    <string name="proxy_not_set">Nicht festgelegt</string>
+    <string name="proxy_username">Benutzername</string>
+    <string name="proxy_username_desc">Optional — leer lassen, falls nicht erforderlich</string>
+    <string name="proxy_password">Passwort</string>
+    <string name="proxy_password_desc">Optional — leer lassen, falls nicht erforderlich</string>
+    <string name="proxy_password_set">Festgelegt</string>
+    <string name="proxy_invalid_host">Bitte einen gültigen Host eingeben</string>
+    <string name="proxy_invalid_port">Bitte einen gültigen Port eingeben (1-65535)</string>
+    <string name="proxy_saved">Proxy-Einstellungen gespeichert</string>
+    <string name="proxy_test">Proxy testen</string>
+    <string name="proxy_testing">Proxy-Verbindung wird getestet…</string>
+    <string name="proxy_test_success">Erfolg! Verbunden in %1$dms</string>
+    <string name="proxy_test_failed">Fehlgeschlagen: %1$s</string>
+    <string name="proxy_scope">Proxy-Umfang</string>
+    <string name="proxy_scope_desc">Im kritischen Modus werden nur Kanal- und Video-Endpunkte, die Kick geografisch sperren kann, über den Proxy geleitet; alles andere läuft direkt. „Alle" leitet jeden API-Aufruf an kick.com, web.kick.com und search.kick.com über den Proxy.</string>
+    <string name="proxy_scope_critical">Nur kritische Endpunkte (Empfohlen)</string>
+    <string name="proxy_scope_all">Gesamter Kick-API-Verkehr</string>
+
     <!-- Settings Options -->
     <string name="pip_automatic">Automatisch</string>
     <string name="pip_manual">Nur Schaltfläche</string>

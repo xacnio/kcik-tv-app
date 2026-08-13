@@ -283,6 +283,37 @@
     <string name="trusted_domain_remove_confirm">%s, güvenilir alan adlarından kaldırılsın mı?</string>
     <string name="add">Ekle</string>
 
+    <!-- Proxy Settings -->
+    <string name="settings_proxy">Proxy</string>
+    <string name="proxy_status_disabled">Kapalı</string>
+    <string name="proxy_status_enabled">%1$s • %2$s:%3$d</string>
+    <string name="proxy_enable">Proxy\'yi Etkinleştir</string>
+    <string name="proxy_enable_desc">kick.com, web.kick.com ve search.kick.com trafiğini aşağıdaki proxy üzerinden yönlendirir</string>
+    <string name="proxy_protocol">Protokol</string>
+    <string name="proxy_protocol_socks5">SOCKS5 (Önerilen)</string>
+    <string name="proxy_protocol_http">HTTP</string>
+    <string name="proxy_host">Sunucu</string>
+    <string name="proxy_host_hint">örn. 127.0.0.1 veya proxy.example.com</string>
+    <string name="proxy_port">Port</string>
+    <string name="proxy_port_hint">örn. 1080</string>
+    <string name="proxy_not_set">Ayarlanmadı</string>
+    <string name="proxy_username">Kullanıcı Adı</string>
+    <string name="proxy_username_desc">İsteğe bağlı — gerekmiyorsa boş bırakın</string>
+    <string name="proxy_password">Şifre</string>
+    <string name="proxy_password_desc">İsteğe bağlı — gerekmiyorsa boş bırakın</string>
+    <string name="proxy_password_set">Ayarlandı</string>
+    <string name="proxy_invalid_host">Lütfen geçerli bir sunucu adresi girin</string>
+    <string name="proxy_invalid_port">Lütfen geçerli bir port girin (1-65535)</string>
+    <string name="proxy_saved">Proxy ayarları kaydedildi</string>
+    <string name="proxy_test">Proxy\'yi Test Et</string>
+    <string name="proxy_testing">Proxy bağlantısı test ediliyor…</string>
+    <string name="proxy_test_success">Başarılı! %1$dms\'de bağlanıldı</string>
+    <string name="proxy_test_failed">Başarısız: %1$s</string>
+    <string name="proxy_scope">Proxy Kapsamı</string>
+    <string name="proxy_scope_desc">Kritik modda yalnızca Kick\'in ülke engeli uygulayabildiği kanal ve video uç noktaları proxy\'den geçer; diğer her şey doğrudan gider. Tümü modu kick.com, web.kick.com ve search.kick.com\'a giden her API isteğini proxy\'den geçirir.</string>
+    <string name="proxy_scope_critical">Yalnızca kritik uç noktalar (Önerilen)</string>
+    <string name="proxy_scope_all">Tüm Kick API trafiği</string>
+
     <!-- Settings Options -->
     <string name="pip_automatic">Otomatik</string>
     <string name="pip_manual">Sadece Butonla</string>
