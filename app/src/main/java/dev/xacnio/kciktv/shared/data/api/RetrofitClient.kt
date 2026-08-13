@@ -58,27 +58,11 @@ object RetrofitClient {
     @Volatile
     private var lastUnauthorizedNotifyMs = 0L
 
-    private fun getUnsafeOkHttpClientBuilder(): OkHttpClient.Builder {
-        try {
-            val trustAllCerts = arrayOf<javax.net.ssl.TrustManager>(object : javax.net.ssl.X509TrustManager {
-                override fun checkClientTrusted(chain: Array<java.security.cert.X509Certificate>, authType: String) {}
-                override fun checkServerTrusted(chain: Array<java.security.cert.X509Certificate>, authType: String) {}
-                override fun getAcceptedIssuers(): Array<java.security.cert.X509Certificate> = arrayOf()
-            })
+    // Uses the platform's default TLS trust manager (previously trust-all, an MITM risk now that
+    // requests can be routed through a user-configured proxy).
+    private fun newOkHttpClientBuilder(): OkHttpClient.Builder = OkHttpClient.Builder()
 
-            val sslContext = javax.net.ssl.SSLContext.getInstance("SSL")
-            sslContext.init(null, trustAllCerts, java.security.SecureRandom())
-            val sslSocketFactory = sslContext.socketFactory
-
-            return OkHttpClient.Builder()
-                .sslSocketFactory(sslSocketFactory, trustAllCerts[0] as javax.net.ssl.X509TrustManager)
-                .hostnameVerifier { _, _ -> true }
-        } catch (e: Exception) {
-            return OkHttpClient.Builder()
-        }
-    }
-
-    val okHttpClient = getUnsafeOkHttpClientBuilder()
+    val okHttpClient = newOkHttpClientBuilder()
         .addInterceptor(dev.xacnio.kciktv.shared.data.mock.MockInterceptor())
         .addInterceptor { chain ->
             val originalRequest = chain.request()
@@ -111,29 +95,17 @@ object RetrofitClient {
         .writeTimeout(15, TimeUnit.SECONDS)
         .build()
 
-    /**
-     * Hosts eligible for proxying at all. [checkUrl] (link-preview fetches) can hit arbitrary
-     * external domains through this same client via an absolute @Url override — those must never
-     * be routed through the user's proxy, so the host is checked in addition to the path.
-     */
+    // checkUrl (link previews) can hit arbitrary external hosts via absolute @Url — never proxy those.
     private val PROXY_ELIGIBLE_HOSTS = setOf("kick.com", "web.kick.com", "search.kick.com")
 
-    /**
-     * Path prefixes Kick is known to geo-block per channel/video. This is the default
-     * ([ProxyConfig.SCOPE_CRITICAL]) proxy scope — everything else (categories, clips feed,
-     * chatroom messages, etc.) goes direct even when the proxy is enabled.
-     */
+    // Default (SCOPE_CRITICAL) proxy scope: paths Kick is known to geo-block per channel/video.
     private val CRITICAL_PROXY_PATH_PREFIXES = listOf(
         "/api/v2/channels/",
         "/api/v1/channels/",
         "/api/v1/video/"
     )
 
-    /**
-     * Resolves the live [ProxyConfig] on every connection attempt (rather than baking a proxy
-     * into the client at build time) so toggling the proxy in Settings takes effect immediately,
-     * without rebuilding Retrofit or restarting the app.
-     */
+    // Resolves ProxyConfig live per connection so toggling the proxy applies without a restart.
     private val proxySelector = object : java.net.ProxySelector() {
         override fun select(uri: java.net.URI): List<java.net.Proxy> {
             if (!ProxyConfig.isConfigured) return listOf(java.net.Proxy.NO_PROXY)
@@ -152,9 +124,7 @@ object RetrofitClient {
     }
 
     init {
-        // The JDK's built-in SOCKS5 client asks the process-wide default Authenticator for
-        // credentials when the proxy demands username/password auth. Scoped to requests whose
-        // host/port match the configured proxy, so it never affects unrelated connections.
+        // JDK SOCKS5 asks the default Authenticator for creds; scoped to the configured proxy's host/port.
         java.net.Authenticator.setDefault(object : java.net.Authenticator() {
             override fun getPasswordAuthentication(): java.net.PasswordAuthentication? {
                 val user = ProxyConfig.username
@@ -165,11 +135,8 @@ object RetrofitClient {
         })
     }
 
-    /**
-     * Same pipeline as [okHttpClient], but every connection it opens is dialed through
-     * [ProxyConfig] (when configured). Never used directly by Retrofit — only reached through
-     * [proxiedOkHttpClient]'s routing interceptor for requests that should actually be proxied.
-     */
+    // Same pipeline as okHttpClient, but always dialed through ProxyConfig. Only reached via
+    // proxiedOkHttpClient's routing interceptor below — never used directly by Retrofit.
     private val proxyBackendClient: OkHttpClient = okHttpClient.newBuilder()
         .proxySelector(proxySelector)
         .proxyAuthenticator { _, response ->
@@ -182,18 +149,9 @@ object RetrofitClient {
         }
         .build()
 
-    /**
-     * Per-request client switch used by web/main/search Retrofit instances.
-     *
-     * OkHttp picks a proxy once per *host*, not per request: [okhttp3.Address] (the connection
-     * pool/route-selection key) only encodes scheme+host+port, and the [java.net.ProxySelector]
-     * callback is invoked with that host-only URL — it never sees the request path. A single
-     * OkHttpClient therefore cannot proxy some paths on a host and not others. Two fully separate
-     * clients ([okHttpClient] direct, [proxyBackendClient] always-proxied) with their own
-     * connection pools, plus this outer interceptor deciding per request which one actually
-     * performs the call, is what makes path-scoped proxying ([ProxyConfig.SCOPE_CRITICAL])
-     * possible at all.
-     */
+    // Per-request client switch: OkHttp selects a proxy per host (Address ignores path), so a
+    // single client can't proxy some paths and not others. This picks proxyBackendClient vs.
+    // okHttpClient per request instead, which is what makes SCOPE_CRITICAL possible.
     val proxiedOkHttpClient: OkHttpClient = OkHttpClient.Builder()
         .addInterceptor { chain ->
             val request = chain.request()
@@ -210,19 +168,9 @@ object RetrofitClient {
         return CRITICAL_PROXY_PATH_PREFIXES.any { path.startsWith(it) }
     }
 
-    /**
-     * Re-reads [ProxyConfig] from prefs and evicts pooled connections so the change takes
-     * effect on the very next request. Without this, [proxyBackendClient]'s connection pool can
-     * keep reusing an already-open socket established under the previous proxy config — OkHttp's
-     * pool matches by [okhttp3.Address], which does not encode which proxy a pooled connection
-     * was actually established through, so a stale connection stays eligible for reuse until it's
-     * naturally evicted.
-     *
-     * Callers include Activity.onCreate() and UI click listeners, i.e. the main thread.
-     * [okhttp3.ConnectionPool.evictAll] closes sockets synchronously (SSL close_notify is a
-     * network write), which throws [android.os.NetworkOnMainThreadException] there — so the
-     * actual eviction is dispatched onto OkHttp's own background executor.
-     */
+    // Re-reads ProxyConfig and evicts pooled connections so the change applies immediately
+    // (stale pooled sockets would otherwise keep reusing the old route). Eviction runs off the
+    // main thread since closing a socket is a blocking network write (NetworkOnMainThreadException).
     fun refreshProxy(prefs: dev.xacnio.kciktv.shared.data.prefs.AppPreferences) {
         ProxyConfig.syncFrom(prefs)
         proxyBackendClient.dispatcher.executorService.execute {
@@ -230,12 +178,10 @@ object RetrofitClient {
         }
     }
 
-    /**
-     * Builds a short-lived client for connectivity testing through an explicit proxy,
-     * independent of [ProxyConfig.enabled] so a proxy can be verified before turning it on.
-     */
+    // Short-lived client for connectivity testing, independent of ProxyConfig.enabled so a
+    // proxy can be verified before turning it on.
     fun buildProxyTestClient(proxy: java.net.Proxy): OkHttpClient {
-        return getUnsafeOkHttpClientBuilder()
+        return newOkHttpClientBuilder()
             .proxy(proxy)
             .connectTimeout(8, TimeUnit.SECONDS)
             .readTimeout(8, TimeUnit.SECONDS)
