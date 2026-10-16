@@ -95,6 +95,27 @@ class AccountPopupManager(private val activity: MobilePlayerActivity) {
                         shimmer.visibility = View.VISIBLE
                     }
 
+                    // Daily reward streak
+                    val streakRow = view.findViewById<View>(R.id.popupStreakRow)
+                    val streakDays = view.findViewById<TextView>(R.id.popupStreakDays)
+                    // Shown with the level card, after the shimmer is gone
+                    fun showStreak() {
+                        if (shimmer.visibility == View.VISIBLE) return
+                        val days = activity.cachedStreakDays ?: return
+                        streakDays.text = activity.getString(R.string.streak_days, days)
+                        streakRow.visibility = View.VISIBLE
+                    }
+                    showStreak()
+                    val userId = prefs.userId
+                    if (userId > 0) {
+                        activity.lifecycleScope.launch {
+                            activity.repository.getUserStreak(token, userId).onSuccess { days ->
+                                activity.cachedStreakDays = days
+                                showStreak()
+                            }
+                        }
+                    }
+
                     activity.lifecycleScope.launch {
                         val result = activity.repository.getUserLevel(token)
                         activity.runOnUiThread {
@@ -108,6 +129,7 @@ class AccountPopupManager(private val activity: MobilePlayerActivity) {
                                     animateLevelUpdate(oldData, newData, levelCard, badgeView, levelText, xpText, progressBar, progressText, watchTimeText)
                                 }
                             }
+                            showStreak()
                         }
                     }
                 }

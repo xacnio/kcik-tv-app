@@ -1371,6 +1371,10 @@
     <string name="collectibles_locked">Locked</string>
     <string name="collectibles_load_error">Couldn\'t load collectibles</string>
 
+    <!-- Daily reward streak -->
+    <string name="streak_days">x%d days</string>
+    <string name="streak_label">Streak</string>
+
     <!-- Drops -->
     <string name="drops_title">Drops</string>
     <string name="drops_tab_active">Active</string>

@@ -66,36 +66,82 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:orientation="vertical">
 
-                <View
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:background="#2A2A2A"/>
-
+                <!-- Level card placeholder -->
                 <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginStart="12dp">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
                     <View
-                        android:layout_width="72dp"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:background="#2A2A2A"/>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginStart="12dp">
+
+                        <View
+                            android:layout_width="72dp"
+                            android:layout_height="12dp"
+                            android:background="#2A2A2A"/>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="4dp"
+                            android:layout_marginTop="6dp"
+                            android:background="#2A2A2A"/>
+
+                        <View
+                            android:layout_width="120dp"
+                            android:layout_height="10dp"
+                            android:layout_marginTop="5dp"
+                            android:background="#2A2A2A"/>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Streak row placeholder: same shape as popupStreakRow -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <View
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginHorizontal="6dp"
+                        android:background="#2A2A2A"/>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginStart="12dp">
+
+                        <View
+                            android:layout_width="64dp"
+                            android:layout_height="13dp"
+                            android:background="#2A2A2A"/>
+
+                        <View
+                            android:layout_width="36dp"
+                            android:layout_height="10dp"
+                            android:layout_marginTop="4dp"
+                            android:background="#2A2A2A"/>
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="70dp"
                         android:layout_height="12dp"
-                        android:background="#2A2A2A"/>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="4dp"
-                        android:layout_marginTop="6dp"
-                        android:background="#2A2A2A"/>
-
-                    <View
-                        android:layout_width="120dp"
-                        android:layout_height="10dp"
-                        android:layout_marginTop="5dp"
                         android:background="#2A2A2A"/>
                 </LinearLayout>
             </LinearLayout>
@@ -172,6 +218,54 @@
                     android:textSize="10sp"
                     android:layout_marginTop="5dp"/>
             </LinearLayout>
+        </LinearLayout>
+
+        <!-- Daily reward streak (shown after data loads) -->
+        <LinearLayout
+            android:id="@+id/popupStreakRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="10dp"
+            android:gravity="center_vertical"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="36dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_streak"
+                app:tint="#53FC18"/>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginStart="12dp">
+
+                <TextView
+                    android:id="@+id/popupStreakDays"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:textColor="#FFFFFF"
+                    android:textSize="13sp"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/streak_label"
+                    android:textColor="#888888"
+                    android:textSize="10sp"/>
+            </LinearLayout>
+
+            <ImageView
+                android:layout_width="70dp"
+                android:layout_height="12dp"
+                android:src="@drawable/ic_streak_bars"
+                android:importantForAccessibility="no"/>
         </LinearLayout>
 
         <View

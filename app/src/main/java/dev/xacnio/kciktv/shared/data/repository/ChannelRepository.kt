@@ -2100,6 +2100,21 @@ class ChannelRepository {
         }
     }
 
+    /** Daily reward streak length in days. */
+    suspend fun getUserStreak(token: String, userId: Long): Result<Int> = withContext(Dispatchers.IO) {
+        try {
+            val response = liveStreamsService.getUserStreak(userId, "Bearer $token")
+            val days = response.body()?.data?.lengthDays
+            if (response.isSuccessful && days != null) {
+                Result.success(days)
+            } else {
+                Result.failure(Exception("API error: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun getChallenges(token: String): Result<List<dev.xacnio.kciktv.shared.data.model.DailyChallenge>> = withContext(Dispatchers.IO) {
         try {
             val response = liveStreamsService.getChallenges("Bearer $token")

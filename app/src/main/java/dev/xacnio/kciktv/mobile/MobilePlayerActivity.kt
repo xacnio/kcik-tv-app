@@ -309,6 +309,7 @@ class MobilePlayerActivity : FragmentActivity() {
     internal var isErrorStateActive = false
     internal var showFullViewerCount = false
     internal var cachedUserLevel: dev.xacnio.kciktv.shared.data.model.UserLevelData? = null
+    internal var cachedStreakDays: Int? = null
     internal val chatStateManager: dev.xacnio.kciktv.mobile.ui.chat.ChatStateManager by lazy {
         dev.xacnio.kciktv.mobile.ui.chat.ChatStateManager(this, prefs)
     }
@@ -2969,6 +2970,7 @@ class MobilePlayerActivity : FragmentActivity() {
             lastKnownLoggedIn = currentLoggedIn
             lastKnownActiveAccountId = currentAccountId
             cachedUserLevel = null
+            cachedStreakDays = null
             updateUserHeaderState()
             updateChatLoginState()
             rebindCurrentChannelSession()

@@ -103,6 +103,16 @@ data class RouletteItem(
     @SerializedName("item_url") val itemUrl: String
 )
 
+data class UserStreakResponse(
+    @SerializedName("data") val data: UserStreakData?,
+    @SerializedName("message") val message: String?
+)
+
+data class UserStreakData(
+    // Consecutive days the daily reward was claimed
+    @SerializedName("length_days") val lengthDays: Int?
+)
+
 data class CollectiblesResponse(
     @SerializedName("data") val data: List<CollectibleCard>?,
     @SerializedName("message") val message: String?

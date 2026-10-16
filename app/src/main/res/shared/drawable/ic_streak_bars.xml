@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Five slanted bars, Kick's streak decoration -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="70dp"
+    android:height="12dp"
+    android:viewportWidth="70"
+    android:viewportHeight="12">
+    <path android:fillColor="#FF53FC18" android:pathData="M4,0h9l-4,12h-9z" />
+    <path android:fillColor="#FF53FC18" android:pathData="M18,0h9l-4,12h-9z" />
+    <path android:fillColor="#FF53FC18" android:pathData="M32,0h9l-4,12h-9z" />
+    <path android:fillColor="#FF53FC18" android:pathData="M46,0h9l-4,12h-9z" />
+    <path android:fillColor="#FF53FC18" android:pathData="M60,0h9l-4,12h-9z" />
+</vector>

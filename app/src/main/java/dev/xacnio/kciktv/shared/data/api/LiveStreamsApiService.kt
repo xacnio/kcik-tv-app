@@ -91,6 +91,16 @@ interface LiveStreamsApiService {
     ): Response<UserLevelResponse>
 
     /**
+     * Daily reward streak (consecutive claimed days) for a user.
+     */
+    @retrofit2.http.Headers("Accept: application/json")
+    @GET("api/v1/gamification/users/{userId}/streak")
+    suspend fun getUserStreak(
+        @Path("userId") userId: Long,
+        @Header("Authorization") token: String
+    ): Response<dev.xacnio.kciktv.shared.data.model.UserStreakResponse>
+
+    /**
      * Returns the authenticated user's active gamification challenges (e.g. daily reward).
      */
     @retrofit2.http.Headers("Accept: application/json")

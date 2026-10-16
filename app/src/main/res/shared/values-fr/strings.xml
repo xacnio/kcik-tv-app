@@ -1371,6 +1371,10 @@
     <string name="collectibles_locked">Verrouillé</string>
     <string name="collectibles_load_error">Impossible de charger les objets de collection</string>
 
+    <!-- Daily reward streak -->
+    <string name="streak_days">x%d jours</string>
+    <string name="streak_label">Série</string>
+
     <!-- Drops -->
     <string name="drops_title">Drops</string>
     <string name="drops_tab_active">Actives</string>
