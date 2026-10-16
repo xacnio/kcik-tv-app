@@ -403,6 +403,20 @@
         app:layout_constraintTop_toTopOf="parent"
         android:elevation="10dp" />
 
+    <!-- Drops Container -->
+    <include
+        android:id="@+id/dropsContainer"
+        layout="@layout/layout_drops"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintWidth_max="@dimen/max_content_width"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:elevation="10dp" />
+
     <!-- Mini Player Container (PiP within App) -->
     <androidx.cardview.widget.CardView
         android:id="@+id/miniPlayerContainer"

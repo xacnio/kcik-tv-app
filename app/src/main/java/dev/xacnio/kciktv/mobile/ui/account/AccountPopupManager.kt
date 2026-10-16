@@ -125,6 +125,11 @@ class AccountPopupManager(private val activity: MobilePlayerActivity) {
                     activity.showCollectiblesScreen()
                 }
 
+                view.findViewById<View>(R.id.btnPopupDrops).setOnClickListener {
+                    popupWindow.dismiss()
+                    activity.showDropsScreen()
+                }
+
                 view.findViewById<View>(R.id.btnPopupSettings).setOnClickListener {
                     popupWindow.dismiss()
                     activity.showSettingsPanel()

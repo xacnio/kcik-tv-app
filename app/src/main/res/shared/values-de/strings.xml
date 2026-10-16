@@ -1371,6 +1371,30 @@
     <string name="collectibles_locked">Gesperrt</string>
     <string name="collectibles_load_error">Sammelobjekte konnten nicht geladen werden</string>
 
+    <!-- Drops -->
+    <string name="drops_title">Drops</string>
+    <string name="drops_tab_active">Aktiv</string>
+    <string name="drops_tab_ended">Abgelaufen</string>
+    <string name="drops_empty_ended">Keine abgelaufenen Kampagnen</string>
+    <string name="drops_description">Sieh teilnehmende Streams, um Belohnungen zu verdienen. Tippe auf Teilnehmen, um die Livestreams mit aktiven Drops zu sehen.</string>
+    <string name="drops_ends_in">Endet in %s</string>
+    <string name="drops_starts_in">Beginnt in %s</string>
+    <string name="drops_ended_on">Beendet am %s</string>
+    <string name="drops_any_channel">Jeder Kanal, der %s streamt</string>
+    <string name="drops_any_channel_generic">Jeder Kanal</string>
+    <string name="drops_empty">Derzeit keine Drop-Kampagnen</string>
+    <string name="drops_load_error">Drops konnten nicht geladen werden. Tippe zum Wiederholen.</string>
+    <string name="drops_category_no_streams">Keine Livestreams mit aktiven Drops in dieser Kategorie</string>
+    <string name="drops_connect">Verbinden</string>
+    <string name="drops_join">Teilnehmen</string>
+    <string name="drops_rule_watch">Zuschauen und einlösen</string>
+    <string name="drops_details">Details</string>
+    <string name="drops_reward_claimed">Eingelöst</string>
+    <string name="drops_reward_remaining">Noch %s bis zum Freischalten</string>
+    <string name="drops_claim">Einlösen</string>
+    <string name="drops_claim_success">Belohnung eingelöst</string>
+    <string name="drops_claim_error">Belohnung konnte nicht eingelöst werden</string>
+
     <!-- Active Chatters -->
     <string name="active_chatters_title">Aktive Chatter</string>
     <string name="active_chatters_search_hint">Zuschauer suchen…</string>

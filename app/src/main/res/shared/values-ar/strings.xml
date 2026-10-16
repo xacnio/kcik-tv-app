@@ -1371,6 +1371,30 @@
     <string name="collectibles_locked">مقفل</string>
     <string name="collectibles_load_error">تعذر تحميل المقتنيات</string>
 
+    <!-- Drops -->
+    <string name="drops_title">الدروبس</string>
+    <string name="drops_tab_active">النشطة</string>
+    <string name="drops_tab_ended">المنتهية</string>
+    <string name="drops_empty_ended">لا توجد حملات منتهية</string>
+    <string name="drops_description">شاهد البثوث المشاركة لتربح المكافآت. اضغط انضم لرؤية البثوث المباشرة التي فُعّلت فيها الدروبس.</string>
+    <string name="drops_ends_in">تنتهي خلال %s</string>
+    <string name="drops_starts_in">تبدأ خلال %s</string>
+    <string name="drops_ended_on">انتهت في %s</string>
+    <string name="drops_any_channel">أي قناة تبث %s</string>
+    <string name="drops_any_channel_generic">أي قناة</string>
+    <string name="drops_empty">لا توجد حملات دروبس حاليًا</string>
+    <string name="drops_load_error">تعذر تحميل الدروبس. اضغط لإعادة المحاولة.</string>
+    <string name="drops_category_no_streams">لا توجد بثوث مباشرة مفعّل فيها الدروبس في هذه الفئة</string>
+    <string name="drops_connect">ربط</string>
+    <string name="drops_join">انضم</string>
+    <string name="drops_rule_watch">شاهد لتستلم</string>
+    <string name="drops_details">التفاصيل</string>
+    <string name="drops_reward_claimed">تم الاستلام</string>
+    <string name="drops_reward_remaining">متبقي %s لفتحها</string>
+    <string name="drops_claim">استلام</string>
+    <string name="drops_claim_success">تم استلام المكافأة</string>
+    <string name="drops_claim_error">تعذر استلام المكافأة</string>
+
     <!-- Active Chatters -->
     <string name="active_chatters_title">المتفاعلون في الدردشة</string>
     <string name="active_chatters_search_hint">ابحث عن مشاهد…</string>

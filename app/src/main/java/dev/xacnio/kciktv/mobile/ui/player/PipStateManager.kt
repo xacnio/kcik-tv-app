@@ -275,6 +275,10 @@ class PipStateManager(private val activity: MobilePlayerActivity) {
                     binding.collectiblesContainer.root.visibility = View.VISIBLE
                     binding.mobileHeader.visibility = View.GONE
                 }
+                MobilePlayerActivity.AppScreen.DROPS -> {
+                    binding.dropsContainer.root.visibility = View.VISIBLE
+                    binding.mobileHeader.visibility = View.GONE
+                }
             }
         }
 

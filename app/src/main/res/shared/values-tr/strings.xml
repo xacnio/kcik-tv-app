@@ -1371,6 +1371,30 @@
     <string name="collectibles_locked">Kilitli</string>
     <string name="collectibles_load_error">Koleksiyon yüklenemedi</string>
 
+    <!-- Drops -->
+    <string name="drops_title">Drops</string>
+    <string name="drops_tab_active">Aktif</string>
+    <string name="drops_tab_ended">Süresi Dolmuş</string>
+    <string name="drops_empty_ended">Süresi dolmuş kampanya yok</string>
+    <string name="drops_description">Katılımcı yayınları izleyerek ödüller kazan. Drops açık canlı yayınları görmek için Katıl\'a dokun.</string>
+    <string name="drops_ends_in">%s sonra bitiyor</string>
+    <string name="drops_starts_in">%s sonra başlıyor</string>
+    <string name="drops_ended_on">%s tarihinde bitti</string>
+    <string name="drops_any_channel">%s yayını yapan tüm kanallar</string>
+    <string name="drops_any_channel_generic">Tüm kanallar</string>
+    <string name="drops_empty">Şu anda drop kampanyası yok</string>
+    <string name="drops_load_error">Drops yüklenemedi. Tekrar denemek için dokun.</string>
+    <string name="drops_category_no_streams">Bu kategoride Drops açık canlı yayın yok</string>
+    <string name="drops_connect">Bağlan</string>
+    <string name="drops_join">Katıl</string>
+    <string name="drops_rule_watch">İzle ve kazan</string>
+    <string name="drops_details">Ayrıntılar</string>
+    <string name="drops_reward_claimed">Alındı</string>
+    <string name="drops_reward_remaining">Kilidi açmak için %s</string>
+    <string name="drops_claim">Al</string>
+    <string name="drops_claim_success">Ödül alındı</string>
+    <string name="drops_claim_error">Ödül alınamadı</string>
+
     <!-- Active Chatters -->
     <string name="active_chatters_title">Aktif Sohbetçiler</string>
     <string name="active_chatters_search_hint">İzleyici ara…</string>

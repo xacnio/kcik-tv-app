@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="12dp"
+    android:background="@drawable/bg_drop_card"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <!-- Category art + campaign info -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/dropCategoryImage"
+            android:layout_width="48dp"
+            android:layout_height="64dp"
+            android:background="@drawable/bg_drop_reward"
+            android:scaleType="centerCrop"
+            android:importantForAccessibility="no" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/dropCampaignName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/dropCategoryName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="#CCCCCC"
+                android:textSize="13sp" />
+
+            <LinearLayout
+                android:id="@+id/dropOrganizationRow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/dropOrganizationLogo"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginEnd="6dp"
+                    android:importantForAccessibility="no" />
+
+                <TextView
+                    android:id="@+id/dropOrganizationName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="#AAAAAA"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/dropCampaignTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <!-- Earning rule pill, e.g. "Watch to redeem" -->
+            <TextView
+                android:id="@+id/dropRule"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/bg_drop_rule"
+                android:drawablePadding="4dp"
+                android:gravity="center_vertical"
+                android:maxLines="1"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="2dp"
+                android:textColor="#DDDDDD"
+                android:textSize="11sp"
+                android:visibility="gone" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Rewards -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/dropRewardsContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" />
+    </HorizontalScrollView>
+
+    <!-- Participating channels -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/dropChannelsAvatars"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" />
+
+        <TextView
+            android:id="@+id/dropChannelsText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#AAAAAA"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <!-- Actions -->
+    <LinearLayout
+        android:id="@+id/dropActions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <!-- Opens the category's Drops-enabled live streams -->
+        <TextView
+            android:id="@+id/dropWatchButton"
+            android:layout_marginEnd="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:background="@drawable/bg_drop_secondary"
+            android:gravity="center"
+            android:paddingHorizontal="16dp"
+            android:text="@string/drops_join"
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <!-- Only for campaigns that need a linked game account -->
+        <TextView
+            android:id="@+id/dropConnectButton"
+            android:layout_marginEnd="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:background="@drawable/bg_drop_connect"
+            android:gravity="center"
+            android:paddingHorizontal="16dp"
+            android:text="@string/drops_connect"
+            android:textColor="#000000"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <!-- Organizer's page about the campaign -->
+        <TextView
+            android:id="@+id/dropDetailsButton"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:background="@drawable/bg_drop_secondary"
+            android:gravity="center"
+            android:paddingHorizontal="16dp"
+            android:text="@string/drops_details"
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+</LinearLayout>

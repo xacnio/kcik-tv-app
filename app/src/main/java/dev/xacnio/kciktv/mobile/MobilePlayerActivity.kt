@@ -210,7 +210,8 @@ class MobilePlayerActivity : FragmentActivity() {
         CHANNEL_PROFILE,
         STREAM_FEED,
         CLIP_FEED,
-        COLLECTIBLES
+        COLLECTIBLES,
+        DROPS
     }
 
     internal lateinit var binding: ActivityMobilePlayerBinding
@@ -296,6 +297,7 @@ class MobilePlayerActivity : FragmentActivity() {
     internal lateinit var webViewManager: dev.xacnio.kciktv.mobile.ui.player.WebViewManager
     internal lateinit var dailyRewardManager: dev.xacnio.kciktv.mobile.ui.reward.DailyRewardManager
     internal lateinit var collectiblesManager: dev.xacnio.kciktv.mobile.ui.collectibles.CollectiblesManager
+    internal lateinit var dropsManager: dev.xacnio.kciktv.mobile.ui.drops.DropsManager
     // Tracks login state across onResume() boundaries. If this flips, the auth WebView's KPSDK
     // session was initialized for a different identity (or none) — see WebViewManager.resetForAuthStateChange.
     private var lastKnownLoggedIn: Boolean = false
@@ -1060,6 +1062,13 @@ class MobilePlayerActivity : FragmentActivity() {
             windowInsets
         }
 
+        // Drops: same as Collectibles
+        ViewCompat.setOnApplyWindowInsetsListener(binding.dropsContainer.root) { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(view.paddingLeft, insets.top, view.paddingRight, insets.bottom)
+            windowInsets
+        }
+
         // Browse & Following: Add navigation bar padding to bottom of scrollable content
         val bottomPaddingViews = listOf(
             binding.browseScreenContainer.browseCategoriesRecycler,
@@ -1274,6 +1283,7 @@ class MobilePlayerActivity : FragmentActivity() {
         webViewManager = dev.xacnio.kciktv.mobile.ui.player.WebViewManager(this, prefs)
         dailyRewardManager = dev.xacnio.kciktv.mobile.ui.reward.DailyRewardManager(this, binding, prefs, repository, lifecycleScope)
         collectiblesManager = dev.xacnio.kciktv.mobile.ui.collectibles.CollectiblesManager(this, binding, prefs, repository, lifecycleScope)
+        dropsManager = dev.xacnio.kciktv.mobile.ui.drops.DropsManager(this, binding, prefs, repository, lifecycleScope)
         mentionsManager.onReplyClick = ::prepareReply
         mentionsManager.onGoToMessageClick = { message -> scrollToRepliedMessage(message.id) }
         playerManager.resetPlayer()
@@ -2631,6 +2641,8 @@ class MobilePlayerActivity : FragmentActivity() {
 
     internal fun showCollectiblesScreen() = collectiblesManager.show()
 
+    internal fun showDropsScreen() = dropsManager.show()
+
     @SuppressLint("InflateParams")
     internal fun showChatSettingsSheet(startOnProfile: Boolean = false) {
         chatSettingsSheetManager.showChatSettingsSheet(startOnProfile)
@@ -3184,6 +3196,11 @@ class MobilePlayerActivity : FragmentActivity() {
                         collectiblesManager.close()
                         return@handleOnBackPressed
                     }
+                    dropsManager.isVisible -> {
+                        Log.d(TAG, "BACK: Branch -> dropsVisible -> close()")
+                        dropsManager.close()
+                        return@handleOnBackPressed
+                    }
                     searchUiManager.handleBack() -> {
                         Log.d(TAG, "BACK: Branch -> searchUiManager.handleBack() handled it")
                         return@handleOnBackPressed
@@ -3321,6 +3338,7 @@ class MobilePlayerActivity : FragmentActivity() {
         Log.d(TAG, "  before: returnToProfileSlug=$returnToProfileSlug, isChannelProfileVisible=${channelProfileManager.isChannelProfileVisible}")
         homeScreenManager.onHomeHidden()
         if (::collectiblesManager.isInitialized) collectiblesManager.hide()
+        if (::dropsManager.isInitialized) dropsManager.hide()
         
         // Only set returnToProfileSlug if coming from profile screen
         // For other screens (Home, Browse, etc.), we don't want to return to profile
@@ -3527,6 +3545,9 @@ class MobilePlayerActivity : FragmentActivity() {
         }
         if (::collectiblesManager.isInitialized) {
             collectiblesManager.hide()
+        }
+        if (::dropsManager.isInitialized) {
+            dropsManager.hide()
         }
 
         if (!miniPlayerManager.isMiniPlayerMode) {

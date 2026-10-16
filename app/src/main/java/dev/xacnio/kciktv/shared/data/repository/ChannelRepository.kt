@@ -15,6 +15,7 @@ import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -2133,6 +2134,100 @@ class ChannelRepository {
             } else {
                 Result.failure(Exception("API error: ${response.code()}"))
             }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // Shared by the Drops page and the category Drops tab
+    @Volatile
+    private var dropCampaignsCache: Pair<Long, List<dev.xacnio.kciktv.shared.data.model.DropCampaign>>? = null
+
+    suspend fun getDropCampaigns(token: String?, forceRefresh: Boolean = false): Result<List<dev.xacnio.kciktv.shared.data.model.DropCampaign>> = withContext(Dispatchers.IO) {
+        dropCampaignsCache?.let { (fetchedAt, cached) ->
+            if (!forceRefresh && System.currentTimeMillis() - fetchedAt < 60_000L) return@withContext Result.success(cached)
+        }
+        try {
+            val response = liveStreamsService.getDropCampaigns(token?.let { "Bearer $it" })
+            if (response.isSuccessful && response.body()?.data != null) {
+                val campaigns = response.body()!!.data!!
+                dropCampaignsCache = System.currentTimeMillis() to campaigns
+                Result.success(campaigns)
+            } else {
+                Result.failure(Exception("API error: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /** The user's Drops progress keyed by campaign id. */
+    suspend fun getDropProgress(token: String): Result<Map<String, dev.xacnio.kciktv.shared.data.model.DropCampaignProgress>> = withContext(Dispatchers.IO) {
+        try {
+            val response = liveStreamsService.getDropProgress("Bearer $token")
+            if (response.isSuccessful && response.body()?.data != null) {
+                Result.success(response.body()!!.data!!.associateBy { it.id })
+            } else {
+                Result.failure(Exception("API error: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun claimDropReward(token: String, campaignId: String, rewardId: String): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val response = liveStreamsService.claimDropReward(
+                "Bearer $token",
+                dev.xacnio.kciktv.shared.data.model.DropClaimRequest(rewardId = rewardId, campaignId = campaignId)
+            )
+            if (response.isSuccessful) Result.success(Unit) else Result.failure(Exception("API error: ${response.code()}"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /** Active Drops campaigns running in the given (sub)category. */
+    suspend fun getActiveDropCampaigns(token: String?, categoryId: Long): Result<List<dev.xacnio.kciktv.shared.data.model.DropCampaign>> =
+        getDropCampaigns(token).map { campaigns ->
+            campaigns.filter { it.status == "active" && it.category?.id == categoryId }
+        }
+
+    /** Drops-enabled live streams of a category, merged from its active campaigns. */
+    suspend fun getCategoryDropStreams(
+        token: String?,
+        categoryId: Long,
+        languages: List<String>?,
+        ascending: Boolean
+    ): Result<List<ChannelItem>> = withContext(Dispatchers.IO) {
+        try {
+            val campaigns = getActiveDropCampaigns(token, categoryId).getOrThrow()
+            if (campaigns.isEmpty()) return@withContext Result.success(emptyList())
+
+            val langCode = languages?.firstOrNull()
+                ?: java.util.Locale.getDefault().language.ifBlank { "en" }
+
+            val responses = coroutineScope {
+                campaigns.map { campaign ->
+                    async {
+                        try {
+                            liveStreamsService.getDropCampaignLivestreams(campaign.id, langCode)
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }
+                }.awaitAll()
+            }
+            val ok = responses.filter { it?.isSuccessful == true }
+            if (ok.isEmpty()) {
+                return@withContext Result.failure(Exception("API error: ${responses.firstOrNull()?.code()}"))
+            }
+
+            val streams = ok.flatMap { it?.body()?.data.orEmpty() }
+                .filter { languages.isNullOrEmpty() || it.language in languages }
+                .distinctBy { it.channel?.id ?: it.id }
+            val sorted = if (ascending) streams.sortedBy { it.viewerCount } else streams.sortedByDescending { it.viewerCount }
+            Result.success(sorted.map { ChannelItem.fromLiveStreamItem(it) })
         } catch (e: Exception) {
             Result.failure(e)
         }

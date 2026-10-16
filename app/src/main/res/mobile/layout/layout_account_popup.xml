@@ -226,6 +226,28 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/btnPopupDrops"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:gravity="center_vertical"
+            android:background="?attr/selectableItemBackground">
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_gift"
+                app:tint="#FFFFFF"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/drops_title"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"/>
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/btnPopupSettings"
             android:layout_width="match_parent"
             android:layout_height="48dp"

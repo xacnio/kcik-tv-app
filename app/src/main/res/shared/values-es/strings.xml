@@ -1371,6 +1371,30 @@
     <string name="collectibles_locked">Bloqueado</string>
     <string name="collectibles_load_error">No se pudieron cargar los coleccionables</string>
 
+    <!-- Drops -->
+    <string name="drops_title">Drops</string>
+    <string name="drops_tab_active">Activas</string>
+    <string name="drops_tab_ended">Caducadas</string>
+    <string name="drops_empty_ended">No hay campañas caducadas</string>
+    <string name="drops_description">Mira los streams participantes para ganar recompensas. Toca Unirse para ver los directos con Drops activados.</string>
+    <string name="drops_ends_in">Termina en %s</string>
+    <string name="drops_starts_in">Empieza en %s</string>
+    <string name="drops_ended_on">Finalizó el %s</string>
+    <string name="drops_any_channel">Cualquier canal que transmita %s</string>
+    <string name="drops_any_channel_generic">Cualquier canal</string>
+    <string name="drops_empty">No hay campañas de drops en este momento</string>
+    <string name="drops_load_error">No se pudieron cargar los drops. Toca para reintentar.</string>
+    <string name="drops_category_no_streams">No hay directos con Drops activados en esta categoría</string>
+    <string name="drops_connect">Conectar</string>
+    <string name="drops_join">Unirse</string>
+    <string name="drops_rule_watch">Mira para canjear</string>
+    <string name="drops_details">Detalles</string>
+    <string name="drops_reward_claimed">Reclamada</string>
+    <string name="drops_reward_remaining">Faltan %s para desbloquear</string>
+    <string name="drops_claim">Reclamar</string>
+    <string name="drops_claim_success">Recompensa reclamada</string>
+    <string name="drops_claim_error">No se pudo reclamar la recompensa</string>
+
     <!-- Active Chatters -->
     <string name="active_chatters_title">Participantes activos</string>
     <string name="active_chatters_search_hint">Buscar espectador…</string>

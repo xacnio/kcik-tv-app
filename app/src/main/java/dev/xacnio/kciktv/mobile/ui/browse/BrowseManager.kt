@@ -70,6 +70,13 @@ class BrowseManager(private val activity: MobilePlayerActivity) {
     private var nextCategoryCursor: String? = null
     private var hasMoreCategoryStreams = true
     private var isCategoryStreamsLoading = false
+    // Drops tab: only live streams with Drops enabled
+    private var categoryDropsOnly = false
+    private var categoryHasDrops = false
+    // Ignores results of stream loads superseded by a newer one
+    private var categoryStreamsRequestId = 0
+    // Return to the Drops page when the category is closed
+    private var returnToDropsOnClose = false
     private val categoryCache = mutableMapOf<String, TopCategory>()
 
     var isBrowseGridMode = activity.resources.getBoolean(R.bool.is_tablet) || (activity.prefs.mobileLayoutMode == "grid")
@@ -82,7 +89,16 @@ class BrowseManager(private val activity: MobilePlayerActivity) {
     private var categoryClipsAdapter: dev.xacnio.kciktv.shared.ui.adapter.ChannelClipAdapter? = null
     private var categoryClipsList = mutableListOf<dev.xacnio.kciktv.shared.data.model.ChannelClip>()
     private var isClipsLoaded = false
-    private var currentCategoryTab = 0 // 0: Live, 1: Clips
+    private var currentCategoryTab = CATEGORY_TAB_LIVE
+
+    private companion object {
+        const val CATEGORY_TAB_LIVE = 0
+        const val CATEGORY_TAB_CLIPS = 1
+        const val CATEGORY_TAB_DROPS = 2
+    }
+
+    /** Live and Drops both show the streams list; only Clips differs. */
+    private val isCategoryStreamsTab get() = currentCategoryTab != CATEGORY_TAB_CLIPS
     private var currentCategoryClipsSort = "view" // date, view
     private var currentCategoryClipsTime = "day"  // day, week, month, all
     private var nextCategoryClipsCursor: String? = null
@@ -319,10 +335,14 @@ class BrowseManager(private val activity: MobilePlayerActivity) {
     private fun loadCategoryStreams(isLoadMore: Boolean = false) {
         val category = openedCategory ?: return
         if (prefs.isCategoryBlocked(category.name)) return
-        if (isCategoryStreamsLoading) return
+        // A fresh load replaces one in flight; load-more waits
+        if (isCategoryStreamsLoading && isLoadMore) return
         if (isLoadMore && !hasMoreCategoryStreams) return
-        
+
         isCategoryStreamsLoading = true
+        if (!isLoadMore) categoryStreamsRequestId++
+        val requestId = categoryStreamsRequestId
+        val dropsOnly = categoryDropsOnly
         
         if (!isLoadMore) {
              nextCategoryCursor = null
@@ -344,19 +364,30 @@ class BrowseManager(private val activity: MobilePlayerActivity) {
         activity.lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val langs = prefs.streamLanguages.toList()
-                // Use sorted by and 'after' cursor
-                val result = repository.getFilteredLiveStreams(
-                     categoryId = category.id, 
-                     languages = if (langs.isNotEmpty()) langs else null,
-                     sort = currentCategorySort,
-                     after = if (isLoadMore) nextCategoryCursor else null
-                )
+                val result = if (dropsOnly) {
+                    // Single page merged from all active campaigns
+                    repository.getCategoryDropStreams(
+                        token = prefs.authToken,
+                        categoryId = category.id,
+                        languages = if (langs.isNotEmpty()) langs else null,
+                        ascending = currentCategorySort == "viewer_count_asc"
+                    ).map { dev.xacnio.kciktv.shared.data.repository.ChannelListData(it, null) }
+                } else {
+                    // Use sorted by and 'after' cursor
+                    repository.getFilteredLiveStreams(
+                         categoryId = category.id,
+                         languages = if (langs.isNotEmpty()) langs else null,
+                         sort = currentCategorySort,
+                         after = if (isLoadMore) nextCategoryCursor else null
+                    )
+                }
                 
                 val response = result.getOrNull()
                 val channels = response?.channels ?: emptyList()
                 val nextCursor = response?.nextCursor // Assuming cursor field name
                 
                 withContext(Dispatchers.Main) {
+                    if (requestId != categoryStreamsRequestId) return@withContext
                     binding.categoryDetailsContainer.categoryDetailsShimmer.root.visibility = View.GONE
                     if (binding.categoryDetailsContainer.categoryDetailsContent.visibility != View.VISIBLE) {
                         binding.categoryDetailsContainer.categoryDetailsContent.alpha = 0f
@@ -369,7 +400,9 @@ class BrowseManager(private val activity: MobilePlayerActivity) {
                         currentCategoryChannels = channels
                         if (channels.isEmpty()) {
                             binding.categoryDetailsContainer.categoryEmptyState.visibility = View.VISIBLE
-                            binding.categoryDetailsContainer.emptyStateText.text = activity.getString(R.string.category_no_streams)
+                            binding.categoryDetailsContainer.emptyStateText.text = activity.getString(
+                                if (dropsOnly) R.string.drops_category_no_streams else R.string.category_no_streams
+                            )
                             binding.categoryDetailsContainer.emptyStateIcon.setImageResource(R.drawable.ic_no_channels)
                         } else {
                             binding.categoryDetailsContainer.categoryEmptyState.visibility = View.GONE
@@ -409,6 +442,7 @@ class BrowseManager(private val activity: MobilePlayerActivity) {
                 }
             } catch (e: Exception) {
                  withContext(Dispatchers.Main) {
+                     if (requestId != categoryStreamsRequestId) return@withContext
                      isCategoryStreamsLoading = false
                      binding.categoryDetailsContainer.categoryStreamsLoadingMore.visibility = View.GONE
                      binding.categoryDetailsContainer.categoryDetailsSwipeRefresh.isRefreshing = false
@@ -456,7 +490,7 @@ class BrowseManager(private val activity: MobilePlayerActivity) {
 
         binding.categoryDetailsContainer.categoryDetailsSwipeRefresh.setOnRefreshListener {
             val slug = openedCategory?.slug ?: return@setOnRefreshListener
-            if (currentCategoryTab == 0) {
+            if (isCategoryStreamsTab) {
                 loadCategoryStreams()
             } else {
                 loadCategoryClips(slug)
@@ -1180,7 +1214,14 @@ class BrowseManager(private val activity: MobilePlayerActivity) {
 
     private var previousContainerId: Int = R.id.browseScreenContainer
 
-    fun openCategoryDetails(category: TopCategory, fromHome: Boolean = false) {
+    fun openCategoryDetails(
+        category: TopCategory,
+        fromHome: Boolean = false,
+        dropsOnly: Boolean = false,
+        returnToDrops: Boolean = false
+    ) {
+        returnToDropsOnClose = returnToDrops
+
         // Capture previous screen state if fresh open
         if (!isCategoryDetailsVisible) {
             val isHomeVisible = binding.homeScreenContainer.root.visibility == View.VISIBLE
@@ -1231,6 +1272,10 @@ class BrowseManager(private val activity: MobilePlayerActivity) {
         
         openedCategory = workingCategory
         currentCategorySort = "featured" // Reset sort on fresh open
+        // setupCategoryTabs() selects the Drops tab when set
+        categoryDropsOnly = dropsOnly
+        categoryHasDrops = dropsOnly
+        checkCategoryDrops(workingCategory.id)
 
         // loadCategoryStreams() is handled by the block check below
         
@@ -1334,13 +1379,49 @@ class BrowseManager(private val activity: MobilePlayerActivity) {
         }
     }
 
-    fun openCategoryBySlug(slug: String) {
+    /** Shows the Drops tab once we know the category has an active campaign. */
+    private fun checkCategoryDrops(categoryId: Long) {
+        activity.lifecycleScope.launch {
+            val active = repository.getActiveDropCampaigns(prefs.authToken, categoryId).getOrNull().orEmpty()
+            if (openedCategory?.id != categoryId) return@launch
+            categoryHasDrops = active.isNotEmpty() || categoryDropsOnly
+            styleCategoryTabs()
+        }
+    }
+
+    /** Highlights the selected tab and shows the Drops tab only when it applies. */
+    private fun styleCategoryTabs() {
+        val container = binding.categoryDetailsContainer
+        container.tabDrops.visibility = if (categoryHasDrops) View.VISIBLE else View.GONE
+        listOf(
+            CATEGORY_TAB_LIVE to container.tabLive,
+            CATEGORY_TAB_CLIPS to container.tabClips,
+            CATEGORY_TAB_DROPS to container.tabDrops
+        ).forEach { (index, tab) ->
+            if (index == currentCategoryTab) {
+                tab.setTextColor(Color.parseColor("#53FC18"))
+                tab.setBackgroundResource(R.drawable.bg_item_ripple)
+            } else {
+                tab.setTextColor(Color.parseColor("#888888"))
+                tab.background = null
+            }
+        }
+    }
+
+    /** Opens a category by slug; [onOpened] runs after the category screen is shown. */
+    fun openCategoryBySlug(
+        slug: String,
+        dropsOnly: Boolean = false,
+        returnToDrops: Boolean = false,
+        onOpened: (() -> Unit)? = null
+    ) {
         activity.lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val result = repository.getSubcategoryDetails(slug)
                 result.onSuccess { category ->
                     withContext(Dispatchers.Main) {
-                        openCategoryDetails(category)
+                        openCategoryDetails(category, dropsOnly = dropsOnly, returnToDrops = returnToDrops)
+                        onOpened?.invoke()
                     }
                 }.onFailure {
                     withContext(Dispatchers.Main) {
@@ -1384,6 +1465,11 @@ class BrowseManager(private val activity: MobilePlayerActivity) {
             }
         }
         categoryDetailsOpenedFromHome = false
+
+        if (returnToDropsOnClose) {
+            returnToDropsOnClose = false
+            activity.dropsManager.show()
+        }
     }
 
     fun handleBack(): Boolean {
@@ -1421,7 +1507,7 @@ class BrowseManager(private val activity: MobilePlayerActivity) {
         
         // Also update Category Details if visible
         if (isCategoryDetailsVisible && binding.categoryDetailsContainer.root.visibility == View.VISIBLE) {
-            if (currentCategoryTab == 0 && currentCategoryChannels.isNotEmpty()) {
+            if (isCategoryStreamsTab && currentCategoryChannels.isNotEmpty()) {
                 val recycler = binding.categoryDetailsContainer.categoryStreamsRecycler
                 val catName = openedCategory?.let { CategoryUtils.getLocalizedCategoryName(activity, it.name, it.slug) }
                 setupBrowseChannelAdapter(recycler, currentCategoryChannels, isCategoryGridMode, currentCategorySort, openedCategory?.id, catName, { nextCategoryCursor }, config)
@@ -1598,7 +1684,7 @@ class BrowseManager(private val activity: MobilePlayerActivity) {
             container.emptyStateText.text = ""
             
             // Visibility of recyclers handled by tab switch logic
-            if (currentCategoryTab == 0) {
+            if (isCategoryStreamsTab) {
                 container.categoryStreamsRecycler.visibility = View.VISIBLE
                 container.categoryClipsRecycler.visibility = View.GONE
             } else {
@@ -1687,11 +1773,9 @@ class BrowseManager(private val activity: MobilePlayerActivity) {
 
     private fun setupCategoryTabs(slug: String) {
         val container = binding.categoryDetailsContainer
-        currentCategoryTab = 0
-        container.tabLive.setTextColor(Color.parseColor("#53FC18"))
-        container.tabLive.setBackgroundResource(R.drawable.bg_item_ripple)
-        container.tabClips.setTextColor(Color.parseColor("#888888"))
-        container.tabClips.background = null
+        // Start on the Drops tab when opened from the Drops page
+        currentCategoryTab = if (categoryDropsOnly) CATEGORY_TAB_DROPS else CATEGORY_TAB_LIVE
+        styleCategoryTabs()
 
         container.categoryStreamsRecycler.visibility = View.VISIBLE
         container.categoryClipsRecycler.visibility = View.GONE
@@ -1705,44 +1789,47 @@ class BrowseManager(private val activity: MobilePlayerActivity) {
         }
 
         container.tabLive.setOnClickListener {
-            switchCategoryTab(0, slug)
+            switchCategoryTab(CATEGORY_TAB_LIVE, slug)
         }
-        
+
         container.tabClips.setOnClickListener {
-            switchCategoryTab(1, slug)
+            switchCategoryTab(CATEGORY_TAB_CLIPS, slug)
+        }
+
+        container.tabDrops.setOnClickListener {
+            switchCategoryTab(CATEGORY_TAB_DROPS, slug)
         }
     }
 
     private fun switchCategoryTab(index: Int, slug: String) {
         if (currentCategoryTab == index) return
         currentCategoryTab = index
+        styleCategoryTabs()
         val container = binding.categoryDetailsContainer
-        
-        if (index == 0) {
-            // Live
-            container.tabLive.setTextColor(Color.parseColor("#53FC18"))
-            container.tabLive.setBackgroundResource(R.drawable.bg_item_ripple)
-            container.tabClips.setTextColor(Color.parseColor("#888888"))
-            container.tabClips.background = null
-            
+
+        if (index != CATEGORY_TAB_CLIPS) {
+            // Live or Drops: same streams list, different source
             container.categoryStreamsRecycler.visibility = View.VISIBLE
             container.categoryClipsRecycler.visibility = View.GONE
-            
-            if (browseLiveChannelsList.isEmpty() && !isCategoryStreamsLoading) {
-                 // Actually relying on loadCategoryStreams to existing list
-                 // If streams list is empty? We don't track it here directly but via existing logic
-                 // But we can check empty state visibility logic from existing code
-                 // Existing code doesn't explicitly toggle empty state in openCategoryDetails except what loadCategoryStreams does
-                 // Let's assume loading streams handles empty state for itself.
-                 container.categoryEmptyState.visibility = View.GONE // Reset default
+            container.categoryClipsShimmer.root.visibility = View.GONE
+
+            val dropsOnly = index == CATEGORY_TAB_DROPS
+            if (dropsOnly != categoryDropsOnly) {
+                categoryDropsOnly = dropsOnly
+                container.categoryEmptyState.visibility = View.GONE
+                loadCategoryStreams()
+            } else if (!isCategoryStreamsLoading && currentCategoryChannels.isEmpty()) {
+                // Restore the empty message after coming back from Clips
+                container.categoryEmptyState.visibility = View.VISIBLE
+                container.emptyStateText.text = activity.getString(
+                    if (dropsOnly) R.string.drops_category_no_streams else R.string.category_no_streams
+                )
+                container.emptyStateIcon.setImageResource(R.drawable.ic_no_channels)
+            } else {
+                container.categoryEmptyState.visibility = View.GONE
             }
         } else {
             // Clips
-            container.tabClips.setTextColor(Color.parseColor("#53FC18"))
-            container.tabClips.setBackgroundResource(R.drawable.bg_item_ripple)
-            container.tabLive.setTextColor(Color.parseColor("#888888"))
-            container.tabLive.background = null
-            
             container.categoryStreamsRecycler.visibility = View.GONE
             
             // Check layout preference (Grid vs List)

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="88dp"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="8dp"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_width="88dp"
+        android:layout_height="88dp"
+        android:background="@drawable/bg_drop_reward">
+
+        <ImageView
+            android:id="@+id/dropRewardImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="8dp"
+            android:scaleType="fitCenter"
+            android:importantForAccessibility="no" />
+
+        <!-- Watch progress toward this reward (signed-in users only) -->
+        <ProgressBar
+            android:id="@+id/dropRewardProgress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:layout_gravity="bottom"
+            android:max="100"
+            android:progressTint="#53FC18"
+            android:progressBackgroundTint="#444444"
+            android:visibility="gone" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/dropRewardName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textColor="@color/white"
+        android:textSize="11sp" />
+
+    <TextView
+        android:id="@+id/dropRewardRequirement"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:textColor="#888888"
+        android:textSize="10sp" />
+
+    <!-- Fully watched, not yet claimed (signed-in users only) -->
+    <TextView
+        android:id="@+id/dropRewardClaimButton"
+        android:layout_width="match_parent"
+        android:layout_height="28dp"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/bg_drop_connect"
+        android:gravity="center"
+        android:text="@string/drops_claim"
+        android:textColor="#000000"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
+</LinearLayout>

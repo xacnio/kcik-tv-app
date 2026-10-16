@@ -1371,6 +1371,30 @@
     <string name="collectibles_locked">Verrouillé</string>
     <string name="collectibles_load_error">Impossible de charger les objets de collection</string>
 
+    <!-- Drops -->
+    <string name="drops_title">Drops</string>
+    <string name="drops_tab_active">Actives</string>
+    <string name="drops_tab_ended">Expirées</string>
+    <string name="drops_empty_ended">Aucune campagne expirée</string>
+    <string name="drops_description">Regarde les streams participants pour gagner des récompenses. Touche Participer pour voir les lives où les Drops sont activés.</string>
+    <string name="drops_ends_in">Se termine dans %s</string>
+    <string name="drops_starts_in">Commence dans %s</string>
+    <string name="drops_ended_on">Terminée le %s</string>
+    <string name="drops_any_channel">Toute chaîne qui diffuse %s</string>
+    <string name="drops_any_channel_generic">Toutes les chaînes</string>
+    <string name="drops_empty">Aucune campagne de drops pour le moment</string>
+    <string name="drops_load_error">Impossible de charger les drops. Touche pour réessayer.</string>
+    <string name="drops_category_no_streams">Aucun live avec Drops activés dans cette catégorie</string>
+    <string name="drops_connect">Connecter</string>
+    <string name="drops_join">Participer</string>
+    <string name="drops_rule_watch">Regarder pour obtenir</string>
+    <string name="drops_details">Détails</string>
+    <string name="drops_reward_claimed">Récupérée</string>
+    <string name="drops_reward_remaining">Encore %s pour débloquer</string>
+    <string name="drops_claim">Récupérer</string>
+    <string name="drops_claim_success">Récompense récupérée</string>
+    <string name="drops_claim_error">Impossible de récupérer la récompense</string>
+
     <!-- Active Chatters -->
     <string name="active_chatters_title">Participants actifs</string>
     <string name="active_chatters_search_hint">Rechercher un spectateur…</string>

@@ -120,4 +120,42 @@ interface LiveStreamsApiService {
         @Header("Authorization") token: String
     ): Response<CollectiblesResponse>
 
+    /**
+     * Returns every Drops campaign (active and expired). Works without login.
+     */
+    @retrofit2.http.Headers("Accept: application/json")
+    @GET("api/v1/drops/campaigns")
+    suspend fun getDropCampaigns(
+        @Header("Authorization") token: String?
+    ): Response<dev.xacnio.kciktv.shared.data.model.DropCampaignsResponse>
+
+    /**
+     * The signed-in user's Drops progress (only campaigns they have watched).
+     */
+    @retrofit2.http.Headers("Accept: application/json")
+    @GET("api/v1/drops/progress")
+    suspend fun getDropProgress(
+        @Header("Authorization") token: String
+    ): Response<dev.xacnio.kciktv.shared.data.model.DropProgressResponse>
+
+    /**
+     * Claims a fully watched Drops reward.
+     */
+    @retrofit2.http.Headers("Accept: application/json", "Content-Type: application/json")
+    @POST("api/v1/drops/claim")
+    suspend fun claimDropReward(
+        @Header("Authorization") token: String,
+        @retrofit2.http.Body request: dev.xacnio.kciktv.shared.data.model.DropClaimRequest
+    ): Response<okhttp3.ResponseBody>
+
+    /**
+     * Drops-enabled live streams of a campaign. lang_code is required.
+     */
+    @retrofit2.http.Headers("Accept: application/json")
+    @GET("api/v1/drops/campaigns/{campaignId}/livestreams")
+    suspend fun getDropCampaignLivestreams(
+        @Path("campaignId") campaignId: String,
+        @Query("lang_code") langCode: String
+    ): Response<dev.xacnio.kciktv.shared.data.model.DropLivestreamsResponse>
+
 }

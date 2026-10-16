@@ -1371,6 +1371,30 @@
     <string name="collectibles_locked">Locked</string>
     <string name="collectibles_load_error">Couldn\'t load collectibles</string>
 
+    <!-- Drops -->
+    <string name="drops_title">Drops</string>
+    <string name="drops_tab_active">Active</string>
+    <string name="drops_tab_ended">Expired</string>
+    <string name="drops_empty_ended">No expired campaigns</string>
+    <string name="drops_description">Watch participating streams to earn rewards. Tap Join to see the live streams where a campaign\'s Drops are enabled.</string>
+    <string name="drops_ends_in">Ends in %s</string>
+    <string name="drops_starts_in">Starts in %s</string>
+    <string name="drops_ended_on">Ended %s</string>
+    <string name="drops_any_channel">Any channel streaming %s</string>
+    <string name="drops_any_channel_generic">Any channel</string>
+    <string name="drops_empty">No drop campaigns right now</string>
+    <string name="drops_load_error">Couldn\'t load drops. Tap to retry.</string>
+    <string name="drops_category_no_streams">No live streams with Drops enabled in this category</string>
+    <string name="drops_connect">Connect</string>
+    <string name="drops_join">Join</string>
+    <string name="drops_rule_watch">Watch to redeem</string>
+    <string name="drops_details">Details</string>
+    <string name="drops_reward_claimed">Claimed</string>
+    <string name="drops_reward_remaining">%s left to unlock</string>
+    <string name="drops_claim">Claim</string>
+    <string name="drops_claim_success">Reward claimed</string>
+    <string name="drops_claim_error">Couldn\'t claim the reward</string>
+
     <!-- Active Chatters -->
     <string name="active_chatters_title">Active Chatters</string>
     <string name="active_chatters_search_hint">Search viewer…</string>
