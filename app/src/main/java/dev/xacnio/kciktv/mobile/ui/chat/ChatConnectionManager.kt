@@ -2,7 +2,7 @@
  * File: ChatConnectionManager.kt
  *
  * Description: Manages the WebSocket connection lifecycle for the chat system.
- * It handles connecting to Pusher/WebSocket, managing subscriptions to public and private channels,
+ * It handles connecting to Kick's realtime (Centrifugo) WebSocket, managing subscriptions to public and private channels,
  * and implementing auto-reconnect logic to ensure persistent chat connectivity.
  *
  * Author: Xacnio
@@ -15,12 +15,10 @@ import android.view.View
 import androidx.lifecycle.lifecycleScope
 import dev.xacnio.kciktv.mobile.MobilePlayerActivity
 import dev.xacnio.kciktv.R
-import dev.xacnio.kciktv.shared.data.api.RetrofitClient
 import dev.xacnio.kciktv.shared.data.chat.KcikChatWebSocket
 import dev.xacnio.kciktv.shared.data.mock.MockChatSource
 import dev.xacnio.kciktv.shared.data.mock.MockConfig
 import dev.xacnio.kciktv.shared.data.model.ChatMessage
-import kotlinx.coroutines.launch
 
 class ChatConnectionManager(private val activity: MobilePlayerActivity) {
     private val TAG = "ChatConnectionManager"
@@ -97,54 +95,6 @@ class ChatConnectionManager(private val activity: MobilePlayerActivity) {
                          }
                      }
                  },
-                 onSocketIdReceived = { socketId ->
-                     if (prefs.isLoggedIn && prefs.authToken != null) {
-                         activity.lifecycleScope.launch {
-                             try {
-                                 val channelName = "private-chatroom_${chatroomId}"
-                                 val authRes = dev.xacnio.kciktv.shared.data.api.RetrofitClient.authService.getPusherAuth(
-                                     "Bearer ${prefs.authToken}",
-                                     socketId,
-                                     channelName
-                                 )
-                                 if (authRes.isSuccessful && authRes.body() != null) {
-                                     val auth = authRes.body()!!.auth
-                                     chatWebSocket?.subscribeToPrivateChatroom(socketId, chatroomId, auth)
-                                 }
-
-                                 val userId = prefs.userId
-                                 if (userId > 0) {
-                                     val pointsChannelName = "private-channelpoints-$userId"
-                                     val pointsAuthRes = dev.xacnio.kciktv.shared.data.api.RetrofitClient.authService.getPusherAuth(
-                                         "Bearer ${prefs.authToken}",
-                                         socketId,
-                                         pointsChannelName
-                                     )
-                                     if (pointsAuthRes.isSuccessful && pointsAuthRes.body() != null) {
-                                         val auth = pointsAuthRes.body()!!.auth
-                                         chatWebSocket?.subscribeToChannelPoints(socketId, userId, auth)
-                                     }
-                                 }
-
-                                 val lsId = currentLivestreamId
-                                 if (lsId != null) {
-                                     val lsChannelName = "private-livestream.$lsId"
-                                     val lsAuthRes = dev.xacnio.kciktv.shared.data.api.RetrofitClient.authService.getPusherAuth(
-                                         "Bearer ${prefs.authToken}",
-                                         socketId,
-                                         lsChannelName
-                                     )
-                                     if (lsAuthRes.isSuccessful && lsAuthRes.body() != null) {
-                                         val auth = lsAuthRes.body()!!.auth
-                                         chatWebSocket?.subscribeToLivestream(socketId, lsId, auth)
-                                     }
-                                 }
-                             } catch (e: Exception) {
-                                 Log.e(TAG, "Failed to authenticate private channels", e)
-                             }
-                         }
-                     }
-                 },
                  onReconnecting = { _, _ ->
                      activity.runOnUiThread {
                          activity.binding.chatConnectionContainer.visibility = View.VISIBLE
@@ -172,6 +122,13 @@ class ChatConnectionManager(private val activity: MobilePlayerActivity) {
              chatWebSocket?.subscribeToChat(chatroomId)
              chatWebSocket?.subscribeToChannelEvents(channelId)
              chatWebSocket?.subscribeToPredictions(channelId)
+
+             // Private channels; the socket fetches their tokens
+             if (prefs.isLoggedIn) {
+                 chatWebSocket?.subscribeToPrivateChatroom(chatroomId)
+                 prefs.userId.takeIf { it > 0 }?.let { chatWebSocket?.subscribeToChannelPoints(it) }
+                 livestreamId?.let { chatWebSocket?.subscribeToLivestream(it) }
+             }
         }
     }
     
@@ -203,15 +160,5 @@ class ChatConnectionManager(private val activity: MobilePlayerActivity) {
             }
         }
         chatWebSocket?.subscribeToOnlyChat()
-    }
-
-    /**
-     * Adjust WebSocket ping interval based on Low Battery setting.
-     * Low Battery ON: 5 min (300 s) — Pusher server-side heartbeat is sufficient.
-     * Low Battery OFF: 2 min (120 s) — restore default.
-     */
-    fun applyLowBatteryPingInterval() {
-        val intervalMs = if (prefs.lowBatteryModeEnabled && prefs.batterySaverSlowTimers) 300_000L else 120_000L
-        chatWebSocket?.setPingInterval(intervalMs)
     }
 }

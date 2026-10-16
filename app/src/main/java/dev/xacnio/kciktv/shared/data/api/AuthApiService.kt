@@ -128,15 +128,34 @@ interface AuthApiService {
     ): Response<okhttp3.ResponseBody>
 
     /**
-     * Authenticates Pusher private channels
+     * Resolves which realtime server (Centrifugo) the client should connect to
      */
-    @retrofit2.http.FormUrlEncoded
-    @POST("broadcasting/auth")
-    suspend fun getPusherAuth(
+    @retrofit2.http.Headers("Accept: application/json", "Content-Type: application/json")
+    @POST("https://web.kick.com/api/v1/realtime/connection")
+    suspend fun getRealtimeConnection(
+        @Header("Authorization") token: String?,
+        @Body request: RealtimeConnectionRequest
+    ): Response<RealtimeConnectionResponse>
+
+    /**
+     * Gets a realtime connection token. Works for guests too (client_id = random UUID).
+     */
+    @retrofit2.http.Headers("Accept: application/json", "Content-Type: application/json")
+    @POST("https://web.kick.com/api/v1/realtime/auth/connection")
+    suspend fun getRealtimeConnectionToken(
+        @Header("Authorization") token: String?,
+        @Body request: RealtimeConnectionAuthRequest
+    ): Response<RealtimeTokenResponse>
+
+    /**
+     * Gets a subscription token for a private realtime channel
+     */
+    @retrofit2.http.Headers("Accept: application/json", "Content-Type: application/json")
+    @POST("https://web.kick.com/api/v1/realtime/auth/channel")
+    suspend fun getRealtimeChannelToken(
         @Header("Authorization") token: String,
-        @retrofit2.http.Field("socket_id") socketId: String,
-        @retrofit2.http.Field("channel_name") channelName: String
-    ): Response<PusherAuthResponse>
+        @Body request: RealtimeChannelAuthRequest
+    ): Response<RealtimeTokenResponse>
 
     /**
      * Gets user kicks balance
@@ -169,10 +188,63 @@ interface AuthApiService {
 }
 
 /**
- * Pusher auth response
+ * Realtime (Centrifugo) connection discovery models
  */
-data class PusherAuthResponse(
-    @SerializedName("auth") val auth: String
+data class RealtimeConnectionRequest(
+    @SerializedName("client") val client: RealtimeClient,
+    @SerializedName("capabilities") val capabilities: RealtimeCapabilities
+)
+
+data class RealtimeClient(
+    @SerializedName("id") val id: String,
+    @SerializedName("type") val type: String = "web"
+)
+
+data class RealtimeCapabilities(
+    @SerializedName("accepted_providers") val acceptedProviders: List<RealtimeProvider>
+)
+
+data class RealtimeProvider(
+    @SerializedName("provider") val provider: String
+)
+
+data class RealtimeConnectionResponse(
+    @SerializedName("data") val data: RealtimeConnectionData?,
+    @SerializedName("message") val message: String?
+)
+
+data class RealtimeConnectionData(
+    @SerializedName("connections") val connections: List<RealtimeConnectionOption>?,
+    @SerializedName("mode") val mode: String?
+)
+
+data class RealtimeConnectionOption(
+    @SerializedName("provider") val provider: String?,
+    @SerializedName("credentials") val credentials: RealtimeCredentials?
+)
+
+data class RealtimeCredentials(
+    @SerializedName("url") val url: String?
+)
+
+/**
+ * Realtime (Centrifugo) token models
+ */
+data class RealtimeConnectionAuthRequest(
+    @SerializedName("client_id") val clientId: String
+)
+
+data class RealtimeChannelAuthRequest(
+    @SerializedName("channel") val channel: String
+)
+
+data class RealtimeTokenResponse(
+    @SerializedName("data") val data: RealtimeTokenData?,
+    @SerializedName("message") val message: String?
+)
+
+data class RealtimeTokenData(
+    @SerializedName("token") val token: String?
 )
 
 /**

@@ -1245,7 +1245,6 @@ class ChatSettingsSheetManager(
             prefs.batterySaverSlowTimers = isChecked
             chatUiManager.stopFlushing()
             chatUiManager.startFlushing()
-            activity.chatConnectionManager.applyLowBatteryPingInterval()
         }
 
         switchShimmer.setOnCheckedChangeListener { _, isChecked ->
@@ -1264,7 +1263,6 @@ class ChatSettingsSheetManager(
             prefs.lowBatteryModeEnabled = isChecked
             chatUiManager.stopFlushing()
             chatUiManager.startFlushing()
-            activity.chatConnectionManager.applyLowBatteryPingInterval()
             activity.playerManager.checkAndApplyQualityLimit()
             dev.xacnio.kciktv.shared.ui.utils.EmoteManager.applyBatterySettings(
                 masterEnabled = isChecked,
