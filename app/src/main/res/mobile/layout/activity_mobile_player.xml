@@ -2821,6 +2821,8 @@
                         android:layout_height="wrap_content"
                         android:text="@string/nav_home"
                         android:textSize="10sp"
+                        android:maxLines="1"
+                        android:ellipsize="end"
                         android:layout_marginTop="2dp"
                         android:textColor="#808080" />
                 </LinearLayout>
@@ -2861,6 +2863,8 @@
                         android:layout_height="wrap_content"
                         android:text="@string/nav_browse"
                         android:textSize="10sp"
+                        android:maxLines="1"
+                        android:ellipsize="end"
                         android:layout_marginTop="2dp"
                         android:textColor="#808080" />
                 </LinearLayout>
@@ -2901,6 +2905,8 @@
                         android:layout_height="wrap_content"
                         android:text="@string/nav_following"
                         android:textSize="10sp"
+                        android:maxLines="1"
+                        android:ellipsize="end"
                         android:layout_marginTop="2dp"
                         android:textColor="#808080" />
                 </LinearLayout>
@@ -2941,6 +2947,8 @@
                         android:layout_height="wrap_content"
                         android:text="@string/nav_search"
                         android:textSize="10sp"
+                        android:maxLines="1"
+                        android:ellipsize="end"
                         android:layout_marginTop="2dp"
                         android:textColor="#808080" />
                 </LinearLayout>
