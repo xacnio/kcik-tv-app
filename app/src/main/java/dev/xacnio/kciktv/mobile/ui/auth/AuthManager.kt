@@ -21,6 +21,7 @@ import com.bumptech.glide.Glide
 import dev.xacnio.kciktv.mobile.LoginActivity
 import dev.xacnio.kciktv.mobile.MobilePlayerActivity
 import dev.xacnio.kciktv.R
+import dev.xacnio.kciktv.shared.data.api.RetrofitClient
 import dev.xacnio.kciktv.shared.data.prefs.AppPreferences
 import dev.xacnio.kciktv.databinding.ActivityMobilePlayerBinding
 import kotlinx.coroutines.Dispatchers
@@ -213,11 +214,26 @@ class AuthManager(
      * [deadAuthHeader] is the Authorization header of the failed request; we only act if it
      * still matches the active token, so a late stale 401 cannot sign out an account the user
      * just switched into.
+     *
+     * A 401 from any other endpoint than the session check ([url]) may be endpoint-specific,
+     * so the token is verified with kick.com/api/v1/user first; its 401 comes back here.
      */
-    fun handleUnauthorized(deadAuthHeader: String?) {
+    fun handleUnauthorized(deadAuthHeader: String?, url: okhttp3.HttpUrl) {
         val token = prefs.authToken
         if (token.isNullOrEmpty()) return
         if (deadAuthHeader != null && deadAuthHeader != "Bearer $token") return
+
+        if (!RetrofitClient.isSessionCheck(url)) {
+            Log.w(TAG, "401 from ${url.host}${url.encodedPath}, verifying session")
+            lifecycleScope.launch(Dispatchers.IO) {
+                try {
+                    RetrofitClient.authService.getUser("Bearer $token")
+                } catch (e: Exception) {
+                    Log.w(TAG, "Session check failed: ${e.message}")
+                }
+            }
+            return
+        }
 
         val deadUserId = prefs.userId
         val cookieManager = CookieManager.getInstance()

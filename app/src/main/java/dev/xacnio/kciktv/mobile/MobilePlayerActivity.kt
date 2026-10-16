@@ -1296,8 +1296,8 @@ class MobilePlayerActivity : FragmentActivity() {
         lastKnownActiveAccountId = prefs.activeAccountId
 
         // Auto sign-out the active account when the API rejects its token with 401.
-        dev.xacnio.kciktv.shared.data.api.RetrofitClient.onUnauthorized = { authHeader ->
-            runOnUiThread { authManager.handleUnauthorized(authHeader) }
+        dev.xacnio.kciktv.shared.data.api.RetrofitClient.onUnauthorized = { authHeader, url ->
+            runOnUiThread { authManager.handleUnauthorized(authHeader, url) }
         }
         setupNotifications()
         quickEmoteBarManager.setupQuickEmoteBar()

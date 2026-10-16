@@ -47,13 +47,15 @@ object RetrofitClient {
 
     /**
      * Invoked (off the main thread) when an authenticated kick.com request returns 401
-     * Unauthenticated. The argument is the request's Authorization header so the handler can
-     * confirm the 401 belongs to the currently active token before signing the user out.
-     * Debounced to fire at most once every few seconds, so a burst of parallel 401s (home,
-     * following, /me, ...) does not trigger repeated logouts.
+     * Unauthenticated, with the request's Authorization header and URL. Debounced so a burst of
+     * parallel 401s is reported once; the session check ([isSessionCheck]) is always reported.
      */
     @Volatile
-    var onUnauthorized: ((authHeader: String?) -> Unit)? = null
+    var onUnauthorized: ((authHeader: String?, url: okhttp3.HttpUrl) -> Unit)? = null
+
+    /** The request that tells whether the token itself is still valid (kick.com/api/v1/user). */
+    fun isSessionCheck(url: okhttp3.HttpUrl): Boolean =
+        url.host == "kick.com" && url.encodedPath == "/api/v1/user"
 
     @Volatile
     private var lastUnauthorizedNotifyMs = 0L
@@ -80,10 +82,11 @@ object RetrofitClient {
                 val authHeader = request.header("Authorization")
                 val host = request.url.host
                 if (!authHeader.isNullOrBlank() && (host == "kick.com" || host == "web.kick.com")) {
+                    android.util.Log.w("RetrofitClient", "401 from ${request.method} ${request.url.host}${request.url.encodedPath}")
                     val now = System.currentTimeMillis()
-                    if (now - lastUnauthorizedNotifyMs > 3000L) {
+                    if (isSessionCheck(request.url) || now - lastUnauthorizedNotifyMs > 3000L) {
                         lastUnauthorizedNotifyMs = now
-                        onUnauthorized?.invoke(authHeader)
+                        onUnauthorized?.invoke(authHeader, request.url)
                     }
                 }
             }
