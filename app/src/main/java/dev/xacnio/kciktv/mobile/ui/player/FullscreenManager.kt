@@ -51,7 +51,7 @@ class FullscreenManager(private val activity: MobilePlayerActivity) {
         val isTablet = activity.resources.getBoolean(dev.xacnio.kciktv.R.bool.is_tablet)
         // Respect system rotation setting when exiting fullscreen
         activity.requestedOrientation = when {
-            activity.isRotationAllowed() -> ActivityInfo.SCREEN_ORIENTATION_SENSOR
+            activity.isRotationAllowed() -> ActivityInfo.SCREEN_ORIENTATION_USER
             isTablet -> ActivityInfo.SCREEN_ORIENTATION_USER
             else -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }

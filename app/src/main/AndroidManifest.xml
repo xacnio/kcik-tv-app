@@ -96,7 +96,7 @@
         <activity
             android:name=".mobile.MobilePlayerActivity"
             android:exported="false"
-            android:screenOrientation="sensor"
+            android:screenOrientation="user"
             android:theme="@style/Theme.KCIKTV.Mobile"
             android:configChanges="keyboard|keyboardHidden|navigation|screenSize|smallestScreenSize|screenLayout|orientation"
             android:supportsPictureInPicture="true"

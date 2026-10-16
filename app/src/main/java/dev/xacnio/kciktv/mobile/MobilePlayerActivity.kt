@@ -563,7 +563,7 @@ class MobilePlayerActivity : FragmentActivity() {
      */
     internal fun setAllowedOrientation() {
         if (isRotationAllowed()) {
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_USER
         } else {
             // Rotation lock is on - use portrait for phones, keep current for tablets
             if (!isTabletOrLargeWindow()) {
@@ -915,7 +915,8 @@ class MobilePlayerActivity : FragmentActivity() {
         }
         
         java.util.Locale.setDefault(locale)
-        val config = newBase.resources.configuration
+        // Only override the locale; copying the full config would freeze orientation and size
+        val config = android.content.res.Configuration()
         config.setLocale(locale)
         
         val localizedContext = newBase.createConfigurationContext(config)
@@ -977,8 +978,6 @@ class MobilePlayerActivity : FragmentActivity() {
         // stream bitrate/resolution stay untouched.
         dev.xacnio.kciktv.shared.util.ThermalMonitor.start(this)
 
-        // Apply language settings
-        applySavedLanguage()
 
         binding = ActivityMobilePlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -1522,28 +1521,6 @@ class MobilePlayerActivity : FragmentActivity() {
     internal fun showNotification(overrideIsPlaying: Boolean? = null, forceService: Boolean = false) =
         mediaSessionManager.showNotification(overrideIsPlaying, forceService = forceService)
 
-    private fun applySavedLanguage() {
-        val savedLang = prefs.language
-        val locale = if (savedLang == "system") {
-            // Get original system locale properly
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                @Suppress("NewApi")
-                android.content.res.Resources.getSystem().configuration.locales.get(0)
-            } else {
-                @Suppress("DEPRECATION")
-                android.content.res.Resources.getSystem().configuration.locale
-            }
-        } else {
-            java.util.Locale(savedLang)
-        }
-        
-        java.util.Locale.setDefault(locale)
-        val config = resources.configuration
-        config.setLocale(locale)
-        
-        @Suppress("DEPRECATION")
-        resources.updateConfiguration(config, resources.displayMetrics)
-    }
 
     private fun setupPlayer() {
         playerManager.externalListener = playerListener

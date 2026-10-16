@@ -95,7 +95,8 @@ class LoginActivity : ComponentActivity() {
             java.util.Locale(savedLang)
         }
         java.util.Locale.setDefault(locale)
-        val config = newBase.resources.configuration
+        // Only override the locale
+        val config = android.content.res.Configuration()
         config.setLocale(locale)
         super.attachBaseContext(newBase.createConfigurationContext(config))
     }

@@ -1047,10 +1047,10 @@ class FullscreenToggleManager(private val activity: MobilePlayerActivity) {
         // in landscape (SENSOR would leave the window in landscape, breaking the layout).
         activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
-        // After layout settles, restore SENSOR so the user can freely rotate again.
+        // After layout settles, restore USER so the user can freely rotate again.
         binding.root.postDelayed({
             if (activity.isRotationAllowed()) {
-                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
+                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_USER
             } else {
                 activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             }
@@ -1626,7 +1626,7 @@ class FullscreenToggleManager(private val activity: MobilePlayerActivity) {
 
             if (activity.isRotationAllowed()) {
                 binding.root.postDelayed({
-                    activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
+                    activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_USER
                 }, 2000)
             }
             return // EARLY RETURN: Let onConfigurationChanged trigger the second pass for layout!
