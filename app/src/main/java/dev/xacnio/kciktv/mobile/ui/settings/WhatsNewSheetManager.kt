@@ -38,6 +38,11 @@ class WhatsNewSheetManager(
     private val activity: MobilePlayerActivity,
     private val repository: UpdateRepository
 ) {
+    private companion object {
+        // Assumed last seen when nothing usable is stored (older builds didn't track it reliably)
+        const val DEFAULT_LAST_SEEN_VERSION = "2.4.4-beta-66f66fc"
+    }
+
     private var activeDialog: Dialog? = null
 
     fun show(isAutoPopup: Boolean = false) {
@@ -49,26 +54,17 @@ class WhatsNewSheetManager(
                 val result = repository.getAllReleases()
                 withContext(Dispatchers.Main) {
                     if (result.isSuccess) {
-                        val releases = result.getOrNull() ?: emptyList()
                         val currentVer = dev.xacnio.kciktv.BuildConfig.VERSION_NAME
-                        
-                        val match = releases.firstOrNull { 
-                            it.tagName.equals("v$currentVer", ignoreCase = true) || 
-                            it.tagName.equals(currentVer, ignoreCase = true) 
+                        val unseen = unseenReleases(result.getOrNull().orEmpty(), currentVer)
+                            ?: return@withContext // No release for this build
+
+                        if (unseen.isEmpty()) {
+                            // Nothing worth showing; mark as seen silently
+                            activity.prefs.lastSeenWhatsNewVersion = currentVer
+                            return@withContext
                         }
-                        
-                        if (match != null) {
-                            val body = match.body.trim()
-                            // Skip if content is just an auto-generated changelog link
-                            if (body.startsWith("**Full Changelog**", ignoreCase = true) || body.isEmpty()) {
-                                // Mark as seen silently
-                                activity.prefs.lastSeenWhatsNewVersion = currentVer
-                                return@withContext
-                            }
-                            
-                            createAndShowDialog(listOf(match), true)
-                        }
-                        // If no match found, don't show anything for auto-popup
+
+                        createAndShowDialog(unseen, true)
                     }
                 }
             }
@@ -76,6 +72,36 @@ class WhatsNewSheetManager(
             // Manual open: show immediately and fetch
             createAndShowDialog(null, false)
         }
+    }
+
+    private fun matchesVersion(release: GithubRelease, version: String): Boolean =
+        version.isNotBlank() &&
+            (release.tagName.equals("v$version", ignoreCase = true) || release.tagName.equals(version, ignoreCase = true))
+
+    /** False for empty notes or GitHub's auto-generated "Full Changelog" link. */
+    private fun hasNotes(release: GithubRelease): Boolean {
+        val body = release.body.trim()
+        return body.isNotEmpty() && !body.startsWith("**Full Changelog**", ignoreCase = true)
+    }
+
+    /**
+     * Releases from the current version back to (not including) the last seen one, newest
+     * first, so updates that skip versions show every change. Null if the current build has
+     * no release.
+     */
+    private fun unseenReleases(releases: List<GithubRelease>, currentVer: String): List<GithubRelease>? {
+        val sorted = releases.sortedByDescending { it.publishedAt }
+        val currentIdx = sorted.indexOfFirst { matchesVersion(it, currentVer) }
+        if (currentIdx == -1) return null
+
+        fun olderIndexOf(version: String): Int? =
+            sorted.indexOfFirst { matchesVersion(it, version) }.takeIf { it > currentIdx }
+
+        val lastSeenIdx = olderIndexOf(activity.prefs.lastSeenWhatsNewVersion)
+            ?: olderIndexOf(DEFAULT_LAST_SEEN_VERSION)
+            ?: (currentIdx + 1)
+
+        return sorted.subList(currentIdx, lastSeenIdx).filter { hasNotes(it) }
     }
 
     private fun createAndShowDialog(preloadedReleases: List<GithubRelease>?, isAutoPopup: Boolean) {
