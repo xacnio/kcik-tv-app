@@ -13,7 +13,8 @@
     <string name="tv_quick_chat_style" translatable="false">Chat Overlay</string>
     <string name="tv_quick_back_to_live" translatable="false">Live</string>
     <string name="tv_drawer_channel_vods" translatable="false">Channel VODs</string>
-    <string name="tv_vod_controls_hint" translatable="false">OK Play/Pause   •   ◀ ▶ Rewind/Fwd   •   ▼ Options   •   Back Channels</string>
+    <string name="tv_vod_controls_hint" translatable="false">OK Play/Pause   •   ◀ ▶ Rewind/Fwd   •   ▼ Options   •   Back Main Menu</string>
+    <string name="tv_hud_main_menu" translatable="false">Main Menu</string>
     <string name="tv_hud_rewind_10" translatable="false">-10s</string>
     <string name="tv_hud_forward_10" translatable="false">+10s</string>
     <string name="tv_hud_pause" translatable="false">Pause</string>

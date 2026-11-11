@@ -206,6 +206,8 @@ class PlayerActivity : FragmentActivity() {
     private var livePausedAtEpochMs: Long = 0L
     private var currentPlaybackSpeed: Float = 1.0f
     private var lastSidebarBackCloseMs: Long = 0L
+    private var lastHandledBackUptimeMs: Long = 0L
+    private var leftViaHomeOnTv: Boolean = false
     private val liveDvrCommitRunnable = Runnable { commitPendingLiveDvrScrub() }
     private val hudTickerRunnable = object : Runnable {
         override fun run() {
@@ -798,6 +800,14 @@ class PlayerActivity : FragmentActivity() {
         setupSearch()
         setupMatureWarning()
         updateLanguageFilterButtonText()
+
+        // Ensure Google TV / Android TV 12-14 Back presses ALWAYS route through our Main Menu handler
+        // instead of triggering Android's default root-activity backgrounding exit.
+        onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                handleUnifiedBackPress()
+            }
+        })
         
         loadInitialChannels()
         
@@ -843,12 +853,24 @@ class PlayerActivity : FragmentActivity() {
     
     override fun onUserLeaveHint() {
         super.onUserLeaveHint()
+        if (isTvDevice() && !isPipMode) {
+            leftViaHomeOnTv = true
+        }
         // On mobile: Enter PIP when user presses home button IF auto-pip is enabled
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O && !isTvDevice() && prefs.autoPipEnabled) {
             val isPlaying = ivsPlayer?.state == Player.State.PLAYING
             if (isPlaying) {
                 enterPipMode()
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        if (intent?.getBooleanExtra("from_launcher_reopen", false) == true) {
+            intent.removeExtra("from_launcher_reopen")
+            leftViaHomeOnTv = true
         }
     }
 
@@ -1330,13 +1352,20 @@ class PlayerActivity : FragmentActivity() {
     }
 
     private fun switchListMode(mode: ListMode) {
-        if (currentListMode == mode && allChannels.isNotEmpty()) {
-            hideDrawer()
-            return
-        }
-        
         if (mode == ListMode.FOLLOWING && !prefs.isLoggedIn) {
             Toast.makeText(this, getString(R.string.not_logged_in), Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val wasInVod = tvVodManager.isVodMode
+        if (wasInVod) {
+            currentPlaybackSpeed = 1.0f
+            tvVodManager.stopVodPlayback(restoreLiveFlags = true)
+            binding.vodTransportContainer.visibility = View.VISIBLE
+        }
+
+        if (!wasInVod && currentListMode == mode && allChannels.isNotEmpty()) {
+            openMainMenuAndChannels(focusDrawer = false)
             return
         }
         
@@ -1347,13 +1376,20 @@ class PlayerActivity : FragmentActivity() {
         currentChannelIndex = 0
         channelSidebarAdapter?.replaceChannels(allChannels, 0, nextCursor != null)
         
-        hideDrawer()
+        showChannelSidebar(requestFocus = false)
         loadInitialChannels()
     }
 
     private fun switchGlobalSortMode(sortMode: String) {
-        if (currentListMode == ListMode.GLOBAL && prefs.globalSortMode == sortMode && allChannels.isNotEmpty()) {
-            hideDrawer()
+        val wasInVod = tvVodManager.isVodMode
+        if (wasInVod) {
+            currentPlaybackSpeed = 1.0f
+            tvVodManager.stopVodPlayback(restoreLiveFlags = true)
+            binding.vodTransportContainer.visibility = View.VISIBLE
+        }
+
+        if (!wasInVod && currentListMode == ListMode.GLOBAL && prefs.globalSortMode == sortMode && allChannels.isNotEmpty()) {
+            openMainMenuAndChannels(focusDrawer = false)
             return
         }
 
@@ -1366,7 +1402,7 @@ class PlayerActivity : FragmentActivity() {
         currentChannelIndex = 0
         channelSidebarAdapter?.replaceChannels(allChannels, 0, nextCursor != null)
         
-        hideDrawer()
+        showChannelSidebar(requestFocus = false)
         loadInitialChannels()
     }
 
@@ -2373,6 +2409,7 @@ class PlayerActivity : FragmentActivity() {
 
     private fun getAllHudPillButtons(): List<LinearLayout> {
         return listOf(
+            binding.btnHudMainMenu,
             binding.btnHudRewind,
             binding.btnHudPlayPause,
             binding.btnHudForward,
@@ -2449,6 +2486,9 @@ class PlayerActivity : FragmentActivity() {
         binding.btnStatsQuick.setOnClickListener { toggleStats() }
 
         // Unified Smart-TV Bottom HUD Pill Listeners
+        binding.btnHudMainMenu.setOnClickListener {
+            openMainMenuAndChannels()
+        }
         binding.btnHudRewind.setOnClickListener {
             scrubUnifiedBy(-1, 0)
             resetHideTimer()
@@ -2762,9 +2802,9 @@ class PlayerActivity : FragmentActivity() {
                             playCurrentChannel(useZapDelay = false)
                             showInfoOverlay()
                         } else {
-                            // All channels in Following are currently offline: update background info and open Following sidebar
+                            // All channels in Following are currently offline: update background info and open full Main Menu + Following list
                             playCurrentChannel(useZapDelay = false, showInfo = false)
-                            showChannelSidebar()
+                            openMainMenuAndChannels()
                         }
                     }
                 } else if (nextCursor != null && currentListMode == ListMode.GLOBAL) {
@@ -3187,6 +3227,21 @@ class PlayerActivity : FragmentActivity() {
         }
 
         resetHideTimer()
+    }
+
+    /**
+     * Opens the full two-column TV Home / Main Menu:
+     * - Left column (`drawerPanel`): Following, Most Viewed, Featured, Search, VODs, Settings, Account
+     * - Right column (`sidebarMenu`): Live & offline channels in the selected list
+     */
+    internal fun openMainMenuAndChannels(focusDrawer: Boolean = allChannels.isEmpty()) {
+        updateDrawerUserInfo()
+        binding.drawerPanel.visibility = View.VISIBLE
+        binding.drawerPanel.translationX = 0f
+        showChannelSidebar(requestFocus = !focusDrawer)
+        if (focusDrawer) {
+            showDrawer()
+        }
     }
 
     private fun showChannelSidebar(requestFocus: Boolean = true) {
@@ -4037,10 +4092,8 @@ class PlayerActivity : FragmentActivity() {
                 KeyEvent.KEYCODE_DPAD_RIGHT -> {
                     if (currentState == MenuState.DRAWER || currentState == MenuState.QUALITY || currentState == MenuState.SEARCH) {
                         if (currentState == MenuState.DRAWER) {
-                            if (binding.sidebarMenu.visibility == View.VISIBLE) {
-                                hideDrawer()
-                            } else {
-                                showChannelSidebar()
+                            if (allChannels.isNotEmpty() || binding.sidebarMenu.visibility != View.VISIBLE) {
+                                showChannelSidebar(requestFocus = true)
                             }
                         }
                         return true
@@ -4075,26 +4128,7 @@ class PlayerActivity : FragmentActivity() {
                     super.onKeyDown(keyCode, event)
                 }
                 KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_ESCAPE -> {
-                    if (binding.drawerLanguageContent.visibility == View.VISIBLE) {
-                        hideLanguageFilter()
-                    }
-                    else if (currentState == MenuState.DRAWER) hideDrawer()
-                    else if (currentState == MenuState.LOGIN) hideLoginPanel()
-                    else if (currentState == MenuState.SEARCH) hideSearchPanel()
-                    else if (currentState == MenuState.MATURE_WARNING) hideAllOverlays()
-                    else if (currentState == MenuState.QUALITY) {
-                        // Close quality popup and return focus to Quality pill in HUD
-                        if (prefs.animationsEnabled) {
-                            binding.qualityPopup.animate().alpha(0f).translationY(20f).setDuration(200).withEndAction { 
-                                binding.qualityPopup.visibility = View.GONE 
-                            }.start()
-                        } else {
-                            binding.qualityPopup.visibility = View.GONE
-                        }
-                        currentState = MenuState.QUICK_MENU
-                        binding.btnHudQuality.requestFocus()
-                        resetHideTimer()
-                    }
+                    handleUnifiedBackPress()
                     return true
                 }
                 // Block all other keys (Channel switch, numbers, volume etc)
@@ -4341,78 +4375,114 @@ class PlayerActivity : FragmentActivity() {
                 return true
             }
             KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_ESCAPE -> {
-                when (currentState) {
-                    MenuState.SIDEBAR -> { 
-                        if (sidebarContext == "settings_vod_sub") {
-                            showVodAndOverlaySettings()
-                        } else if (sidebarContext == "settings_sub" || sidebarContext == "settings_theme" || 
-                            sidebarContext == "settings_engine" || sidebarContext == "settings_background" || 
-                            sidebarContext == "settings_auto_pip") {
-                            
-                            if (sidebarContext == "settings_theme") {
-                                prefs.themeColor = originalThemeColor
-                                applySettings()
-                                showAppearanceSettings()
-                            } else if (sidebarContext == "settings_engine" || sidebarContext == "settings_background" || 
-                                     sidebarContext == "settings_auto_pip") {
-                                showPlayerSettings()
-                            } else {
-                                showSettingsSidebar()
-                            }
-                        } else if (sidebarContext == "settings") {
-                            showChannelSidebar(requestFocus = false)
-                            showDrawer(focusType = "settings")
-                        } else if (sidebarContext == "vods") {
-                            showChannelSidebar()
-                        } else {
-                            // Closing Channels sidebar via Back: return to video, or exit if pressed again within 2.5s
-                            lastSidebarBackCloseMs = System.currentTimeMillis()
-                            Toast.makeText(this, getString(R.string.press_again_to_exit), Toast.LENGTH_SHORT).show()
-                            hideAllOverlays()
-                        }
-                        return true 
-                    }
-                    MenuState.QUICK_MENU -> {
-                        hideAllOverlays()
-                        return true
-                    }
-                    MenuState.INFO, MenuState.NONE -> {
-                        if (pendingLiveDvrScrubTargetMs != null) {
-                            hideHandler.removeCallbacks(liveDvrCommitRunnable)
-                            pendingLiveDvrScrubTargetMs = null
-                            refreshHudStateAndTimeline()
-                            return true
-                        }
-                        val now = System.currentTimeMillis()
-                        if (now - lastSidebarBackCloseMs < 2500L) {
-                            finishAffinity()
-                        } else {
-                            // Press Back while watching -> immediately show other channels (Following / Channels sidebar)
-                            showChannelSidebar()
-                        }
-                        return true
-                    }
-                    MenuState.LOGIN -> {
-                        hideLoginPanel()
-                        return true
-                    }
-                    MenuState.SEARCH -> {
-                        showChannelSidebar(requestFocus = false)
-                        showDrawer()
-                        return true
-                    }
-                    MenuState.QUALITY -> {
-                        binding.qualityPopup.visibility = View.GONE
-                        currentState = MenuState.QUICK_MENU
-                        binding.btnHudQuality.requestFocus()
-                        resetHideTimer()
-                        return true
-                    }
-                    else -> { hideAllOverlays(); return true }
-                }
+                handleUnifiedBackPress()
+                return true
             }
         }
         return super.onKeyDown(keyCode, event)
+    }
+
+    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE) {
+            return true
+        }
+        return super.onKeyUp(keyCode, event)
+    }
+
+    private fun handleUnifiedBackPress() {
+        val nowUptime = android.os.SystemClock.uptimeMillis()
+        if (nowUptime - lastHandledBackUptimeMs < 150L) {
+            return
+        }
+        lastHandledBackUptimeMs = nowUptime
+
+        if (binding.drawerLanguageContent.visibility == View.VISIBLE) {
+            hideLanguageFilter()
+            return
+        }
+
+        when (currentState) {
+            MenuState.DRAWER -> {
+                if (binding.sidebarMenu.visibility == View.VISIBLE && sidebarContext == "channels") {
+                    lastSidebarBackCloseMs = System.currentTimeMillis()
+                    Toast.makeText(this, getString(R.string.press_again_to_exit), Toast.LENGTH_SHORT).show()
+                    hideAllOverlays()
+                } else {
+                    hideDrawer()
+                }
+            }
+            MenuState.LOGIN -> {
+                hideLoginPanel()
+            }
+            MenuState.SEARCH -> {
+                hideSearchPanel()
+                openMainMenuAndChannels(focusDrawer = true)
+            }
+            MenuState.MATURE_WARNING -> {
+                hideAllOverlays()
+            }
+            MenuState.QUALITY -> {
+                if (prefs.animationsEnabled) {
+                    binding.qualityPopup.animate().alpha(0f).translationY(20f).setDuration(200).withEndAction {
+                        binding.qualityPopup.visibility = View.GONE
+                    }.start()
+                } else {
+                    binding.qualityPopup.visibility = View.GONE
+                }
+                currentState = MenuState.QUICK_MENU
+                binding.btnHudQuality.requestFocus()
+                resetHideTimer()
+            }
+            MenuState.SIDEBAR -> {
+                if (sidebarContext == "settings_vod_sub") {
+                    showVodAndOverlaySettings()
+                } else if (sidebarContext == "settings_sub" || sidebarContext == "settings_theme" ||
+                    sidebarContext == "settings_engine" || sidebarContext == "settings_background" ||
+                    sidebarContext == "settings_auto_pip") {
+                    if (sidebarContext == "settings_theme") {
+                        prefs.themeColor = originalThemeColor
+                        applySettings()
+                        showAppearanceSettings()
+                    } else if (sidebarContext == "settings_engine" || sidebarContext == "settings_background" ||
+                        sidebarContext == "settings_auto_pip") {
+                        showPlayerSettings()
+                    } else {
+                        showSettingsSidebar()
+                    }
+                } else if (sidebarContext == "settings") {
+                    showChannelSidebar(requestFocus = false)
+                    showDrawer(focusType = "settings")
+                } else if (sidebarContext == "vods") {
+                    openMainMenuAndChannels()
+                } else {
+                    // Closing Main Menu + Channels via Back: return to video, or exit if pressed again within 2.5s
+                    lastSidebarBackCloseMs = System.currentTimeMillis()
+                    Toast.makeText(this, getString(R.string.press_again_to_exit), Toast.LENGTH_SHORT).show()
+                    hideAllOverlays()
+                }
+            }
+            MenuState.QUICK_MENU -> {
+                hideAllOverlays()
+            }
+            MenuState.INFO, MenuState.NONE -> {
+                if (pendingLiveDvrScrubTargetMs != null) {
+                    hideHandler.removeCallbacks(liveDvrCommitRunnable)
+                    pendingLiveDvrScrubTargetMs = null
+                    refreshHudStateAndTimeline()
+                    return
+                }
+                val now = System.currentTimeMillis()
+                if (now - lastSidebarBackCloseMs < 2500L) {
+                    if (tvVodManager.isVodMode) {
+                        tvVodManager.stopVodPlayback(restoreLiveFlags = false)
+                    }
+                    finishAndRemoveTask()
+                } else {
+                    // Press Back while watching -> immediately open full Main Menu + Channels browser
+                    openMainMenuAndChannels()
+                }
+            }
+        }
     }
 
     override fun onGenericMotionEvent(event: android.view.MotionEvent): Boolean {
@@ -5070,6 +5140,17 @@ class PlayerActivity : FragmentActivity() {
         if (isPipMode) {
             return
         }
+        if (leftViaHomeOnTv) {
+            leftViaHomeOnTv = false
+            if (tvVodManager.isVodMode) {
+                exitVodToLive(openMenuIfOffline = true)
+                openMainMenuAndChannels()
+                return
+            } else if (allChannels.isEmpty() || allChannels.getOrNull(currentChannelIndex)?.isLive != true) {
+                openMainMenuAndChannels()
+                return
+            }
+        }
         ivsPlayer?.play()
         if (!tvVodManager.isVodMode && !isInLiveDvrMode) {
             startRefreshTimer()
@@ -5379,6 +5460,10 @@ class PlayerActivity : FragmentActivity() {
         
         // On TV: Always stop playback when going to background (no background audio on TV)
         if (isTvDevice()) {
+            val pm = getSystemService(Context.POWER_SERVICE) as? android.os.PowerManager
+            if (!isChangingConfigurations && !isPipMode && !isFinishing && pm?.isInteractive != false) {
+                leftViaHomeOnTv = true
+            }
             Log.d("PlayerActivity", "onStop: TV device - stopping playback")
             ivsPlayer?.pause()
 
@@ -5605,14 +5690,18 @@ class PlayerActivity : FragmentActivity() {
         }
     }
 
-    internal fun exitVodToLive() {
+    internal fun exitVodToLive(openMenuIfOffline: Boolean = true) {
         currentPlaybackSpeed = 1.0f
         tvVodManager.stopVodPlayback(restoreLiveFlags = true)
         binding.vodTransportContainer.visibility = View.VISIBLE
         updateDrawerUserInfo()
         startRefreshTimer()
         if (allChannels.isNotEmpty()) {
-            playCurrentChannel(useZapDelay = false, showInfo = true)
+            val targetLive = allChannels.getOrNull(currentChannelIndex)?.isLive == true
+            playCurrentChannel(useZapDelay = false, showInfo = targetLive)
+            if (!targetLive && openMenuIfOffline) {
+                openMainMenuAndChannels()
+            }
         } else {
             loadInitialChannels()
         }
