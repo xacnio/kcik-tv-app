@@ -171,210 +171,653 @@
 
     <!-- UI Overlays (Outside playerContainer to ensure full width) -->
     
-    <!-- 1. Premium Info Overlay (Bottom Panel) -->
+    <!-- 1. Unified Smart-TV Player HUD (Metadata + Red Live/VOD Seekbar + Action Pills) -->
     <LinearLayout
         android:id="@+id/channelInfoOverlay"
         android:layout_width="match_parent"
-        android:layout_height="160dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:background="@drawable/gradient_bottom_overlay"
-        android:orientation="horizontal"
+        android:background="@drawable/tv_hud_gradient"
+        android:orientation="vertical"
         android:gravity="bottom"
-        android:paddingStart="64dp"
-        android:paddingEnd="64dp"
-        android:paddingBottom="36dp"
-        android:elevation="5dp"
+        android:paddingStart="56dp"
+        android:paddingEnd="56dp"
+        android:paddingTop="56dp"
+        android:paddingBottom="26dp"
+        android:elevation="10dp"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:focusable="false"
         android:focusableInTouchMode="false"
         android:descendantFocusability="blocksDescendants"
         android:visibility="gone">
 
-        <!-- Profile Image (Slightly Smaller) -->
+        <!-- Legacy hidden profile image / channel number kept for ViewBinding & MediaSession -->
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/profileImage"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="1dp"
+            android:layout_height="1dp"
             android:scaleType="centerCrop"
             app:shapeAppearanceOverlay="@style/CircleImage"
-            android:background="@color/surface_dark"
-            android:layout_marginEnd="20dp" />
+            android:visibility="gone" />
 
-        <!-- Text Info Section -->
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:id="@+id/channelName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/channel_name"
-                    android:textColor="@color/text_primary"
-                    android:textSize="26sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="-0.02" />
-
-                <TextView
-                    android:id="@+id/channelNumber"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    tools:text="01"
-                    android:textColor="@color/brand_green"
-                    android:textSize="18sp"
-                    android:layout_marginStart="14dp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/streamTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/stream_title"
-                android:textColor="@color/text_primary"
-                android:textSize="14sp"
-                android:layout_marginTop="1dp"
-                android:alpha="0.85"
-                android:singleLine="true"
-                android:ellipsize="marquee"
-                android:marqueeRepeatLimit="marquee_forever"
-                android:scrollHorizontally="true" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="6dp"
-                android:gravity="center_vertical">
-
-                <ImageView
-                    android:id="@+id/viewerIcon"
-                    android:layout_width="12dp"
-                    android:layout_height="12dp"
-                    android:src="@drawable/ic_viewers"
-                    android:tint="@color/brand_green" />
-
-                <TextView
-                    android:id="@+id/viewerCount"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    tools:text="0"
-                    android:textColor="@color/text_primary"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:layout_marginStart="5dp" />
-
-                <TextView
-                    android:id="@+id/categoryName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/category"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp"
-                    android:layout_marginStart="16dp" />
-
-                <!-- Tag Container -->
-                <!-- Tag Scroll Panel (Marquee-like behavior for tags) -->
-                <HorizontalScrollView
-                    android:id="@+id/tagScrollView"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="14dp"
-                    android:scrollbars="none"
-                    android:background="@null"
-                    android:overScrollMode="never"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:clickable="false"
-                    android:longClickable="false"
-                    android:stateListAnimator="@null"
-                    android:descendantFocusability="blocksDescendants">
-                    
-                    <LinearLayout
-                        android:id="@+id/tagContainer"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:background="@null"
-                        android:gravity="center_vertical"
-                        android:focusable="false"
-                        android:focusableInTouchMode="false"
-                        android:clickable="false" />
-                </HorizontalScrollView>
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- Status Badges (Resolution, FPS) -->
-        <LinearLayout
+        <TextView
+            android:id="@+id/channelNumber"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <!-- Top Metadata Row: Green Channel Name + Red LIVE Pill on Left, Subtle Category/Viewers/Quality on Right -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginStart="24dp"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="2dp">
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/channelName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/channel_name"
+                android:textColor="@color/brand_green"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:shadowColor="#DD000000"
+                android:shadowDx="0"
+                android:shadowDy="1.5"
+                android:shadowRadius="4" />
+
+            <TextView
+                android:id="@+id/hudStatusBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:background="@drawable/tv_hud_live_badge_bg"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="2dp"
+                android:text="@string/tv_hud_live_pill"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/categoryName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/category"
+                android:textColor="#CCFFFFFF"
+                android:textSize="12sp"
+                android:maxWidth="240dp"
+                android:singleLine="true"
+                android:ellipsize="end" />
+
+            <ImageView
+                android:id="@+id/viewerIcon"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_marginStart="14dp"
+                android:src="@drawable/ic_viewers"
+                android:tint="@color/brand_green" />
+
+            <TextView
+                android:id="@+id/viewerCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="1.2K"
+                android:textColor="#EEFFFFFF"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_marginStart="5dp" />
 
             <TextView
                 android:id="@+id/qualityBadge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="qualityBadge"
+                android:text="AUTO"
                 android:textColor="@color/white"
-                android:textSize="11sp"
+                android:textSize="10sp"
                 android:textStyle="bold"
                 android:background="@drawable/hint_background"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="3dp" />
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="2dp"
+                android:layout_marginStart="12dp" />
 
             <TextView
                 android:id="@+id/fpsBadge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="fpsBadge"
+                android:text="60 FPS"
                 android:textColor="@color/white"
-                android:textSize="11sp"
+                android:textSize="10sp"
                 android:textStyle="bold"
                 android:background="@drawable/hint_background"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="3dp"
-                android:layout_marginStart="8dp" />
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="2dp"
+                android:layout_marginStart="6dp"
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/streamTimeBadge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="00:00:00"
-                android:textColor="@color/white"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:background="@drawable/hint_background"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="3dp"
-                android:layout_marginStart="8dp"
                 android:visibility="gone" />
         </LinearLayout>
 
+        <!-- Hidden legacy tag scroll container preserved for ViewBinding -->
+        <HorizontalScrollView
+            android:id="@+id/tagScrollView"
+            android:layout_width="1dp"
+            android:layout_height="1dp"
+            android:visibility="gone">
+            <LinearLayout
+                android:id="@+id/tagContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
+
+        <!-- Stream / VOD Title -->
+        <TextView
+            android:id="@+id/streamTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/stream_title"
+            android:textColor="@color/white"
+            android:textSize="21sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:shadowColor="#DD000000"
+            android:shadowDx="0"
+            android:shadowDy="1.5"
+            android:shadowRadius="4" />
+
+        <!-- Unified Timeline Seekbar (Active in BOTH Live DVR & VOD) -->
+        <LinearLayout
+            android:id="@+id/vodTransportContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="14dp"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:visibility="visible">
+
+            <TextView
+                android:id="@+id/vodStateBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
+            <ProgressBar
+                android:id="@+id/vodSeekProgressBar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:max="1000"
+                android:visibility="gone" />
+
+            <SeekBar
+                android:id="@+id/hudTimelineSeekBar"
+                android:layout_width="match_parent"
+                android:layout_height="14dp"
+                android:max="1000"
+                android:progress="1000"
+                android:secondaryProgress="1000"
+                android:progressDrawable="@drawable/tv_hud_seekbar_track"
+                android:thumb="@drawable/tv_hud_seekbar_thumb"
+                android:splitTrack="false"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:minHeight="5dp"
+                android:maxHeight="5dp"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:clickable="false" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="6dp">
+
+                <TextView
+                    android:id="@+id/vodPositionText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="00:00"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:shadowColor="#CC000000"
+                    android:shadowDx="0"
+                    android:shadowDy="1"
+                    android:shadowRadius="3" />
+
+                <TextView
+                    android:id="@+id/vodScrubDeltaBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="-00:20"
+                    android:textColor="@color/brand_green"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:fontFamily="monospace"
+                    android:layout_marginStart="10dp"
+                    android:visibility="gone" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/vodControlsHint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/tv_vod_controls_hint"
+                    android:textColor="#8AFFFFFF"
+                    android:textSize="11sp" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/vodDurationText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="LIVE"
+                    android:textColor="#EF4444"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:shadowColor="#CC000000"
+                    android:shadowDx="0"
+                    android:shadowDy="1"
+                    android:shadowRadius="3" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Centered Pill Action Row (Press ▼ Down to Focus) -->
+        <HorizontalScrollView
+            android:id="@+id/hudActionScrollView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:fillViewport="true"
+            android:scrollbars="none"
+            android:overScrollMode="never"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false">
+
+            <LinearLayout
+                android:id="@+id/hudActionRow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:paddingVertical="4dp"
+                android:paddingHorizontal="8dp"
+                android:clipChildren="false"
+                android:clipToPadding="false">
+
+                <!-- Main Menu / Channels Browser Pill -->
+                <LinearLayout
+                    android:id="@+id/btnHudMainMenu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_marginHorizontal="5dp"
+                    android:paddingHorizontal="16dp"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:background="@drawable/tv_hud_pill_bg"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:clickable="true"
+                    android:defaultFocusHighlightEnabled="false">
+
+                    <ImageView
+                        android:id="@+id/imgHudMainMenu"
+                        android:layout_width="17dp"
+                        android:layout_height="17dp"
+                        android:src="@drawable/ic_home"
+                        android:tint="@color/white" />
+
+                    <TextView
+                        android:id="@+id/txtHudMainMenu"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="7dp"
+                        android:text="@string/tv_hud_main_menu"
+                        android:textColor="@color/white"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- -10s Rewind Pill -->
+                <LinearLayout
+                    android:id="@+id/btnHudRewind"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_marginHorizontal="5dp"
+                    android:paddingHorizontal="16dp"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:background="@drawable/tv_hud_pill_bg"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:clickable="true"
+                    android:defaultFocusHighlightEnabled="false">
+
+                    <ImageView
+                        android:id="@+id/imgHudRewind"
+                        android:layout_width="17dp"
+                        android:layout_height="17dp"
+                        android:src="@drawable/ic_replay_10"
+                        android:tint="@color/white" />
+
+                    <TextView
+                        android:id="@+id/txtHudRewind"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="7dp"
+                        android:text="@string/tv_hud_rewind_10"
+                        android:textColor="@color/white"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Play / Pause Pill (Default Focus on ▼ Down — Highlighted Neon Green) -->
+                <LinearLayout
+                    android:id="@+id/btnHudPlayPause"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_marginHorizontal="5dp"
+                    android:paddingHorizontal="18dp"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:background="@drawable/tv_hud_pill_bg"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:clickable="true"
+                    android:defaultFocusHighlightEnabled="false">
+
+                    <ImageView
+                        android:id="@+id/imgHudPlayPause"
+                        android:layout_width="17dp"
+                        android:layout_height="17dp"
+                        android:src="@drawable/ic_pause"
+                        android:tint="@color/white" />
+
+                    <TextView
+                        android:id="@+id/txtHudPlayPause"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="7dp"
+                        android:text="@string/tv_hud_pause"
+                        android:textColor="@color/white"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- +10s Forward Pill -->
+                <LinearLayout
+                    android:id="@+id/btnHudForward"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_marginHorizontal="5dp"
+                    android:paddingHorizontal="16dp"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:background="@drawable/tv_hud_pill_bg"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:clickable="true"
+                    android:defaultFocusHighlightEnabled="false">
+
+                    <ImageView
+                        android:id="@+id/imgHudForward"
+                        android:layout_width="17dp"
+                        android:layout_height="17dp"
+                        android:src="@drawable/ic_forward_10"
+                        android:tint="@color/white" />
+
+                    <TextView
+                        android:id="@+id/txtHudForward"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="7dp"
+                        android:text="@string/tv_hud_forward_10"
+                        android:textColor="@color/white"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Chat: On / Chat: Off Pill -->
+                <LinearLayout
+                    android:id="@+id/btnHudChatToggle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_marginHorizontal="5dp"
+                    android:paddingHorizontal="16dp"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:background="@drawable/tv_hud_pill_bg"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:clickable="true"
+                    android:defaultFocusHighlightEnabled="false">
+
+                    <ImageView
+                        android:id="@+id/imgHudChatToggle"
+                        android:layout_width="17dp"
+                        android:layout_height="17dp"
+                        android:src="@drawable/ic_chat"
+                        android:tint="@color/white" />
+
+                    <TextView
+                        android:id="@+id/txtHudChatToggle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="7dp"
+                        android:text="@string/tv_hud_chat_on"
+                        android:textColor="@color/white"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Go Live Pill (Shown in VOD Mode or Live DVR Rewind) -->
+                <LinearLayout
+                    android:id="@+id/btnHudGoLive"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_marginHorizontal="5dp"
+                    android:paddingHorizontal="16dp"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:background="@drawable/tv_hud_pill_bg"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:clickable="true"
+                    android:defaultFocusHighlightEnabled="false"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:id="@+id/imgHudGoLive"
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        android:src="@drawable/ic_live"
+                        android:tint="#EF4444" />
+
+                    <TextView
+                        android:id="@+id/txtHudGoLive"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="7dp"
+                        android:text="@string/tv_hud_go_live"
+                        android:textColor="@color/white"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- VODs Archive Pill -->
+                <LinearLayout
+                    android:id="@+id/btnHudVods"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_marginHorizontal="5dp"
+                    android:paddingHorizontal="16dp"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:background="@drawable/tv_hud_pill_bg"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:clickable="true"
+                    android:defaultFocusHighlightEnabled="false">
+
+                    <ImageView
+                        android:id="@+id/imgHudVods"
+                        android:layout_width="17dp"
+                        android:layout_height="17dp"
+                        android:src="@drawable/ic_history"
+                        android:tint="@color/white" />
+
+                    <TextView
+                        android:id="@+id/txtHudVods"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="7dp"
+                        android:text="@string/tv_quick_vods"
+                        android:textColor="@color/white"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- 1.0x Speed Pill -->
+                <LinearLayout
+                    android:id="@+id/btnHudSpeed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_marginHorizontal="5dp"
+                    android:paddingHorizontal="16dp"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:background="@drawable/tv_hud_pill_bg"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:clickable="true"
+                    android:defaultFocusHighlightEnabled="false">
+
+                    <ImageView
+                        android:id="@+id/imgHudSpeed"
+                        android:layout_width="17dp"
+                        android:layout_height="17dp"
+                        android:src="@drawable/ic_speed_gauge"
+                        android:tint="@color/white" />
+
+                    <TextView
+                        android:id="@+id/txtHudSpeed"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="7dp"
+                        android:text="@string/tv_hud_speed_default"
+                        android:textColor="@color/white"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- HD Quality Pill -->
+                <LinearLayout
+                    android:id="@+id/btnHudQuality"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_marginHorizontal="5dp"
+                    android:paddingHorizontal="16dp"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:background="@drawable/tv_hud_pill_bg"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:clickable="true"
+                    android:defaultFocusHighlightEnabled="false">
+
+                    <ImageView
+                        android:id="@+id/imgHudQuality"
+                        android:layout_width="17dp"
+                        android:layout_height="17dp"
+                        android:src="@drawable/ic_hd"
+                        android:tint="@color/white" />
+
+                    <TextView
+                        android:id="@+id/txtHudQuality"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="7dp"
+                        android:text="@string/tv_hud_quality"
+                        android:textColor="@color/white"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Chat Side / Style Pill -->
+                <LinearLayout
+                    android:id="@+id/btnHudChatStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_marginHorizontal="5dp"
+                    android:paddingHorizontal="16dp"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:background="@drawable/tv_hud_pill_bg"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:clickable="true"
+                    android:defaultFocusHighlightEnabled="false">
+
+                    <ImageView
+                        android:id="@+id/imgHudChatStyle"
+                        android:layout_width="17dp"
+                        android:layout_height="17dp"
+                        android:src="@drawable/ic_theatre_mode"
+                        android:tint="@color/white" />
+
+                    <TextView
+                        android:id="@+id/txtHudChatStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="7dp"
+                        android:text="@string/tv_quick_chat_style"
+                        android:textColor="@color/white"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </HorizontalScrollView>
+
     </LinearLayout>
 
-    <!-- Quality Selection Popup (Context Menu style) -->
+    <!-- Quality Selection Popup (Context Menu right above HUD) -->
     <LinearLayout
         android:id="@+id/qualityPopup"
-        android:layout_width="200dp"
+        android:layout_width="220dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|start"
-        android:layout_marginStart="40dp"
-        android:layout_marginBottom="140dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="92dp"
         android:background="@drawable/sidebar_background"
         android:orientation="vertical"
         android:padding="8dp"
-        android:elevation="12dp"
+        android:elevation="18dp"
         android:visibility="gone">
 
         <androidx.recyclerview.widget.RecyclerView
@@ -398,11 +841,130 @@
         android:elevation="10dp"
         android:visibility="gone">
 
+        <!-- VODs Button -->
+        <LinearLayout
+            android:id="@+id/btnVodsQuick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:paddingHorizontal="16dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:clickable="true"
+            android:background="@android:color/transparent"
+            android:defaultFocusHighlightEnabled="false">
+
+            <FrameLayout
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="@drawable/quick_menu_selection_bg"
+                android:duplicateParentState="true">
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_history"
+                    android:tint="@color/white" />
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tv_quick_vods"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"
+                android:alpha="0.9" />
+        </LinearLayout>
+
+        <!-- Chat Overlay Style Button -->
+        <LinearLayout
+            android:id="@+id/btnChatOverlayQuick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:paddingHorizontal="16dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:clickable="true"
+            android:background="@android:color/transparent"
+            android:defaultFocusHighlightEnabled="false">
+
+            <FrameLayout
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="@drawable/quick_menu_selection_bg"
+                android:duplicateParentState="true">
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_chat"
+                    android:tint="@color/white" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/txtChatOverlayQuick"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tv_quick_chat_style"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"
+                android:alpha="0.9" />
+        </LinearLayout>
+
+        <!-- Back to Live Button (Visible in VOD mode) -->
+        <LinearLayout
+            android:id="@+id/btnReturnLiveQuick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:paddingHorizontal="16dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:clickable="true"
+            android:background="@android:color/transparent"
+            android:defaultFocusHighlightEnabled="false"
+            android:visibility="gone">
+
+            <FrameLayout
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="@drawable/quick_menu_selection_bg"
+                android:duplicateParentState="true">
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_play_circle"
+                    android:tint="@color/white" />
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tv_quick_back_to_live"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"
+                android:alpha="0.9" />
+        </LinearLayout>
+
         <!-- Quality (Resolution) Button -->
         <LinearLayout
             android:id="@+id/btnQualityQuick"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
             android:orientation="vertical"
             android:gravity="center"
             android:paddingHorizontal="16dp"
@@ -625,6 +1187,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#88000000"
+        android:elevation="12dp"
         android:visibility="gone" />
 
 
@@ -737,7 +1300,7 @@
                     android:focusableInTouchMode="true"
                     android:clickable="true"
                     android:nextFocusUp="@+id/drawerUserContainer"
-                    android:nextFocusDown="@+id/btnDrawerLanguageFilter">
+                    android:nextFocusDown="@+id/btnDrawerChannelVods">
  
                     <ImageView
                         android:layout_width="18dp"
@@ -748,6 +1311,37 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/app_settings"
+                        android:textColor="@color/text_primary"
+                        android:textSize="12sp"
+                        android:layout_marginStart="16dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/btnDrawerChannelVods"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="32dp"
+                    android:paddingVertical="16dp"
+                    android:layout_marginHorizontal="12dp"
+                    android:layout_marginVertical="3dp"
+                    android:background="@drawable/selectable_item_background"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:clickable="true"
+                    android:nextFocusUp="@+id/btnDrawerSettings"
+                    android:nextFocusDown="@+id/btnDrawerLanguageFilter">
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_history" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/tv_drawer_channel_vods"
                         android:textColor="@color/text_primary"
                         android:textSize="12sp"
                         android:layout_marginStart="16dp" />
@@ -1405,15 +1999,17 @@
         </LinearLayout>
     </FrameLayout>
 
-    <!-- Chat Panel (slides from right, overlays content) -->
+    <!-- Chat Panel (slides from right or left, overlays fullscreen video in Overlay Mode) -->
     <LinearLayout
         android:id="@+id/chatPanel"
-        android:layout_width="300dp"
+        android:layout_width="320dp"
         android:layout_height="match_parent"
         android:layout_gravity="end"
         android:background="@drawable/chat_panel_background"
         android:orientation="vertical"
-        android:elevation="8dp"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="12dp"
+        android:elevation="4dp"
         android:visibility="gone">
 
         <!-- Chat Messages -->
@@ -1423,12 +2019,12 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:clipToPadding="false"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp"
             android:scrollbars="none"
             android:overScrollMode="never"
             android:fadingEdge="vertical"
-            android:fadingEdgeLength="24dp"
+            android:fadingEdgeLength="36dp"
             android:requiresFadingEdge="vertical" />
 
     </LinearLayout>

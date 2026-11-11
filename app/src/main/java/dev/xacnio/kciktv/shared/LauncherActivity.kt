@@ -56,6 +56,7 @@ class LauncherActivity : FragmentActivity() {
             }
             
             val newIntent = Intent(this, targetActivity)
+            newIntent.putExtra("from_launcher_reopen", true)
             newIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NO_ANIMATION)
             
             startActivity(newIntent)

@@ -29,8 +29,9 @@ object DateParseUtils {
     fun parseIsoDate(isoString: String?): Long {
         if (isoString.isNullOrEmpty() || isoString.startsWith("0001")) return 0
         return try {
-            // Handle +00:00 or other offsets by normalizing to Z (UTC)
-            var cleaned = isoString.replace(Regex("[+-][0-9]{2}:?[0-9]{2}$"), "Z")
+            // Normalize Kick space-separated timestamps ("2026-11-10 19:23:03") and timezone offsets
+            var cleaned = isoString.trim().replace(" ", "T")
+                .replace(Regex("[+-][0-9]{2}:?[0-9]{2}$"), "Z")
             
             // Handle microseconds/milliseconds if present
             if (cleaned.contains(".")) {
@@ -59,7 +60,8 @@ object DateParseUtils {
     fun parseIsoDateWithMs(isoString: String?): Long {
         if (isoString.isNullOrEmpty() || isoString.startsWith("0001")) return 0
         return try {
-            var cleaned = isoString.replace(Regex("[+-][0-9]{2}:?[0-9]{2}$"), "Z")
+            var cleaned = isoString.trim().replace(" ", "T")
+                .replace(Regex("[+-][0-9]{2}:?[0-9]{2}$"), "Z")
             
             val format = if (cleaned.contains(".")) {
                 // Extract milliseconds part
@@ -78,6 +80,21 @@ object DateParseUtils {
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse date with ms: $isoString", e)
             0
+        }
+    }
+
+    /**
+     * Extracts embedded Unix millisecond timestamp from a UUIDv7 string (if version 7).
+     */
+    fun extractUuidV7TimestampMs(uuid: String?): Long {
+        if (uuid.isNullOrBlank()) return 0L
+        val hex = uuid.trim().replace("-", "")
+        if (hex.length != 32 || hex[12] != '7') return 0L
+        return try {
+            val ms = hex.substring(0, 12).toLong(16)
+            if (ms in 1_600_000_000_000L..2_500_000_000_000L) ms else 0L
+        } catch (e: Exception) {
+            0L
         }
     }
     
