@@ -4,7 +4,9 @@ import re
 import sys
 
 # Configuration
-RES_DIR = r"d:\Coding\Github\Xacnio\kick-tv\app\src\main\res\shared"
+_DEFAULT_WIN_DIR = r"d:\Coding\Github\Xacnio\kick-tv\app\src\main\res\shared"
+_REPO_RES_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "app", "src", "main", "res", "shared")
+RES_DIR = _DEFAULT_WIN_DIR if os.path.exists(_DEFAULT_WIN_DIR) else _REPO_RES_DIR
 BASE_FILE = os.path.join(RES_DIR, "values", "strings.xml")
 
 def parse_line_structure(line):

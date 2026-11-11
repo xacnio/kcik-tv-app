@@ -77,7 +77,13 @@ class ChannelRepository {
         try {
             val response = channelService.getChannelVideos(slug)
             if (response.isSuccessful && response.body() != null) {
-                Result.success(response.body()!!)
+                val sorted = response.body()!!.sortedByDescending { v ->
+                    val ts = dev.xacnio.kciktv.shared.util.DateParseUtils.parseIsoDateWithMs(
+                        v.startTime ?: v.createdAt ?: v.video?.createdAt
+                    )
+                    if (ts > 0L) ts else (v.id)
+                }
+                Result.success(sorted)
             } else {
                 Result.failure(Exception("API error: ${response.code()}"))
             }
@@ -406,6 +412,18 @@ class ChannelRepository {
 
     private fun parseMessage(historyMsg: ChatHistoryMessage): dev.xacnio.kciktv.shared.data.model.ChatMessage? {
         if (historyMsg.sender == null || historyMsg.content == null) return null
+        val parsedRef = try {
+            historyMsg.metadata?.let { metaStr ->
+                val obj = org.json.JSONObject(metaStr)
+                if (obj.has("message_ref")) obj.optString("message_ref", "").takeIf { it.isNotBlank() && it != "null" } else null
+            }
+        } catch (e: Exception) { null }
+        val baseCreatedMs = parseIsoDate(historyMsg.createdAt)
+        val preciseCreatedMs = parsedRef?.toLongOrNull()?.takeIf { refMs ->
+            refMs in 1_600_000_000_000L..2_500_000_000_000L &&
+                (baseCreatedMs == 0L || kotlin.math.abs(refMs - baseCreatedMs) < 10_000L)
+        } ?: baseCreatedMs
+
         return dev.xacnio.kciktv.shared.data.model.ChatMessage(
             id = historyMsg.id ?: "h_${historyMsg.createdAt}_${historyMsg.sender.id}",
             content = historyMsg.content.replace(Regex("[\\r\\n]+"), " "),
@@ -423,13 +441,8 @@ class ChannelRepository {
                 badgesV2 = historyMsg.sender.identity?.badgesV2,
                 profilePicture = historyMsg.sender.profilePicture
             ),
-            createdAt = parseIsoDate(historyMsg.createdAt),
-            messageRef = try {
-                historyMsg.metadata?.let { metaStr ->
-                    val obj = org.json.JSONObject(metaStr)
-                    if (obj.has("message_ref")) obj.getString("message_ref") else null
-                }
-            } catch (e: Exception) { null },
+            createdAt = preciseCreatedMs,
+            messageRef = parsedRef,
             metadata = try {
                 historyMsg.metadata?.let { metaStr ->
                     val pusherMeta = Gson().fromJson(metaStr, dev.xacnio.kciktv.shared.data.model.PusherMetadata::class.java)
@@ -1248,7 +1261,14 @@ class ChannelRepository {
      */
     suspend fun getChatHistoryForVod(channelId: Long, startTime: String): Result<ChatHistoryResult> = withContext(Dispatchers.IO) {
         try {
-            val response = liveStreamsService.getChatHistory(channelId, startTime = startTime)
+            var response = try {
+                channelService.getChannelMessagesFromTime(channelId, startTime)
+            } catch (_: Exception) {
+                null
+            }
+            if (response == null || !response.isSuccessful || response.body() == null) {
+                response = liveStreamsService.getChatHistory(channelId, startTime = startTime)
+            }
             if (response.isSuccessful && response.body() != null) {
                 val body = response.body()!!
                 val historyData = body.data
@@ -1261,6 +1281,38 @@ class ChannelRepository {
                 Result.success(ChatHistoryResult(messages, null, nextCursor))
             } else {
                 Result.failure(Exception("API error: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Fetches instant backwards chat context immediately prior to [atTimeMs] (epoch ms)
+     * so seeking into the middle of a VOD shows the preceding 25 messages right away.
+     */
+    suspend fun getVodChatBackfill(
+        channelId: Long,
+        atTimeMs: Long,
+        vodStartMs: Long
+    ): Result<List<dev.xacnio.kciktv.shared.data.model.ChatMessage>> = withContext(Dispatchers.IO) {
+        try {
+            val cursorMicros = ((atTimeMs + 500L) * 1000L).toString()
+            var response = liveStreamsService.getChatHistory(channelId, cursor = cursorMicros)
+            if (!response.isSuccessful || response.body() == null) {
+                response = channelService.getChannelMessagesByCursor(channelId, cursorMicros)
+            }
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                val messageList = body.data?.messages ?: body.messages ?: emptyList()
+                val minAllowedMs = (vodStartMs - 10_000L).coerceAtLeast(0L)
+                val messages = messageList
+                    .mapNotNull { parseMessage(it) }
+                    .filter { it.createdAt in minAllowedMs..(atTimeMs + 1000L) }
+                    .sortedBy { it.createdAt }
+                Result.success(messages)
+            } else {
+                Result.failure(Exception("Backfill API error: ${response.code()}"))
             }
         } catch (e: Exception) {
             Result.failure(e)

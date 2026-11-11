@@ -85,12 +85,12 @@ class ChannelSidebarAdapter(
             
             // Check offline status
             if (!channel.isLive) {
-                // Offline channel view
-                holder.streamTitle.text = holder.itemView.context.getString(R.string.stream_ended)
+                // Offline channel view (especially helpful in Following list to browse VODs)
+                holder.streamTitle.text = holder.itemView.context.getString(R.string.tv_offline_tap_vods)
                 holder.viewerCount.visibility = View.GONE
                 holder.categoryName.visibility = View.GONE
                 holder.liveBadge.visibility = View.GONE
-                holder.itemView.alpha = 0.5f
+                holder.itemView.alpha = 0.72f
             } else {
                 // Normal live channel view
                 holder.streamTitle.text = channel.title
@@ -171,15 +171,8 @@ class ChannelSidebarAdapter(
             }
 
             holder.itemView.setOnClickListener { 
-                if (position == currentIndex) {
-                    // Close sidebar if same channel is selected
-                    (holder.itemView.context as? PlayerActivity)?.hideAllOverlays()
-                } else {
-                    // Update selection immediately for visual feedback
-                    setCurrentIndex(position)
-                    // Then change channel
-                    onChannelSelected(position)
-                }
+                setCurrentIndex(position)
+                onChannelSelected(position)
             }
         } else if (holder is LoadMoreViewHolder) {
             holder.txtLoadMore.text = holder.itemView.context.getString(R.string.load_more)

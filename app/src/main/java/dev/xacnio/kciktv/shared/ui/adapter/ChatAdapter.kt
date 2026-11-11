@@ -229,6 +229,8 @@ class ChatAdapter(
     }
     var isLoggedIn: Boolean = false
     var isVodMode: Boolean = false // New flag for VOD
+    private var vodStartTimeMillis: Long = 0L // Base epoch ms for relative VOD timestamps
+    private var overlayShadowEnabled: Boolean = false // Crisp black text drop-shadow for translucent TV overlays
     var isAutoScrollEnabled: Boolean = true // When false, don't trim old messages
     private var themeColor: Int = 0xFF53FC18.toInt()
     private var subscriberBadges: Map<Int, String> = emptyMap() // months -> badge URL
@@ -313,6 +315,22 @@ class ChatAdapter(
         val old = this.showTimestamps
         this.showTimestamps = show
         if (old != show) {
+            notifyDataSetChanged()
+        }
+    }
+
+    fun setOverlayShadowEnabled(enabled: Boolean) {
+        val old = this.overlayShadowEnabled
+        this.overlayShadowEnabled = enabled
+        if (old != enabled) {
+            notifyDataSetChanged()
+        }
+    }
+
+    fun setVodStartTimeMillis(startMs: Long) {
+        val old = this.vodStartTimeMillis
+        this.vodStartTimeMillis = startMs
+        if (old != startMs && isVodMode && showTimestamps) {
             notifyDataSetChanged()
         }
     }
@@ -1431,6 +1449,11 @@ class ChatAdapter(
         // lingering drawing operations before we clear the Glide targets.
         holder.messageText.text = null
         holder.messageText.textSize = textSize 
+        if (overlayShadowEnabled) {
+            holder.messageText.setShadowLayer(5.5f, 0f, 1.8f, Color.BLACK)
+        } else {
+            holder.messageText.setShadowLayer(0f, 0f, 0f, Color.TRANSPARENT)
+        }
         
         // Ensure TextView can receive clicks and long clicks
         holder.messageText.isClickable = true
@@ -1644,15 +1667,24 @@ class ChatAdapter(
         
         // Add timestamp if enabled
         if (showTimestamps) {
-            val pattern = if (showSeconds) "HH:mm:ss" else "HH:mm"
-            val sdf = java.text.SimpleDateFormat(pattern, java.util.Locale.getDefault())
-            val timeStr = "${sdf.format(java.util.Date(message.createdAt))} "
+            val timeStr = if (isVodMode && vodStartTimeMillis > 0L && message.createdAt > 0L) {
+                val offsetSec = ((message.createdAt - vodStartTimeMillis).coerceAtLeast(0L)) / 1000L
+                val h = offsetSec / 3600L
+                val m = (offsetSec % 3600L) / 60L
+                val s = offsetSec % 60L
+                if (h > 0L) String.format(java.util.Locale.US, "%d:%02d:%02d ", h, m, s)
+                else String.format(java.util.Locale.US, "%02d:%02d ", m, s)
+            } else {
+                val pattern = if (showSeconds) "HH:mm:ss" else "HH:mm"
+                val sdf = java.text.SimpleDateFormat(pattern, java.util.Locale.getDefault())
+                "${sdf.format(java.util.Date(message.createdAt))} "
+            }
             val start = builder.length
             builder.append(timeStr)
             
             // Apply multiple spans for look and feel
             builder.setSpan(
-                ForegroundColorSpan(0xFF999999.toInt()), // Slightly lighter gray
+                ForegroundColorSpan(if (overlayShadowEnabled) 0xFFCBD5E1.toInt() else 0xFF999999.toInt()),
                 start,
                 builder.length,
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
